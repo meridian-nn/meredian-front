@@ -1,5 +1,27 @@
 <template>
-  <div class="mark-table">
+  <v-container
+    class="py-6 px-6"
+    fluid
+  >
+    <v-layout>
+      <v-flex xs3>
+        <v-text-field
+          v-model="newLeadsSearch"
+          append-icon="mdi-magnify"
+          label="Поиск"
+        />
+      </v-flex>
+
+      <v-flex offset-7>
+        <v-btn
+          color="blue white--text"
+          @click="saveExelFIle"
+        >
+          Сохранить таблицу в файл
+        </v-btn>
+      </v-flex>
+    </v-layout>
+
     <v-data-table
       :headers="headers"
       :items="desserts"
@@ -108,55 +130,54 @@
           </v-menu>
         </div>
       </template>
+
+      <template #[`item.code`]="{ item }">
+        <span class="dialog-code-btn" @click="openBarCodeDialog(item.code)">{{ item.code }}</span>
+      </template>
     </v-data-table>
-  </div>
+
+    <v-dialog
+      v-model="showDialogBarCode"
+      max-width="266px"
+    >
+      <div class="dialog-code-wrapp">
+        <img alt='Barcode Generator'
+             :src='`https://barcode.tec-it.com/barcode.ashx?data=${this.barCodeData}&code=DataMatrix&multiplebarcodes=false&translate-esc=false&unit=Fit&dpi=96&imagetype=Jpeg&rotation=0&color=%23000000&bgcolor=%23ffffff&codepage=Default&qunit=Mm&quiet=0&dmsize=300px`'/>
+      </div>
+    </v-dialog>
+  </v-container>
 </template>
 
 <script>
 import omit from 'lodash/omit'
+import VueBarcode from 'vue-barcode'
+import { json2excel } from 'js2excel'
+import { DATAMatrix } from '~/plugins/datamatrix'
+import InlineSvg from 'vue-inline-svg'
 export default {
   name: 'MarkTable',
+
+  components: {
+    VueBarcode,
+    InlineSvg
+  },
 
   props: {
     value: {
       required: true,
       validator: () => true
-    },
-
-    search: {
-      type: String,
-      default: ''
     }
   },
 
   data() {
     return {
+      showDialogBarCode: false,
+      barCodeData: '',
       newLeadsSearch: '',
       fullDesserts: [],
       desserts: [],
       activeFilters: {},
-      filters: { 'prodName': [], 'color': [], 'order_id': [], 'sizeValue': [], 'sizeName': [], 'model': [], 'brand': [], 'packType': [], 'packMaterial': [] },
-      defaultItem: {
-        prodName: '',
-        brand: '',
-        packType: '',
-        packMaterial: '',
-        quantity: '',
-        types: '',
-        sizeName: '',
-        sizeValue: '',
-        color: '',
-        model: '',
-        gender: '',
-        standartNumber: '',
-        rawMaterial: '',
-        companyName: '',
-        manufacturerCode: '4650067329994',
-        tnved: '6201990000',
-        trademark: '',
-        apiExtension: 'lp',
-        status: ''
-      }
+      filters: { 'prodName': [], 'color': [], 'order_id': [], 'sizeValue': [], 'sizeName': [], 'model': [], 'brand': [], 'packType': [], 'packMaterial': [] }
     }
   },
 
@@ -203,7 +224,7 @@ export default {
           value: 'prodName',
           width: '200px',
           filter: (value) => {
-            if ((value + '').toLowerCase().includes(this.search.toLowerCase())) {
+            if ((value + '').toLowerCase().includes(this.newLeadsSearch.toLowerCase())) {
               return this.activeFilters.prodName ? this.activeFilters.prodName.includes(value) : true
             }
           }
@@ -299,6 +320,26 @@ export default {
   },
 
   methods: {
+    openBarCodeDialog(code) {
+      this.barCodeData = code
+
+      this.showDialogBarCode = true
+    },
+
+    saveExelFIle() {
+      const data = this.desserts
+
+      try {
+        json2excel({
+          data,
+          name: 'user-data',
+          formateDate: 'yyyy/mm/dd'
+        })
+      } catch (e) {
+        console.error('export error')
+      }
+    },
+
     initFilters() {
       for (const col in this.filters) {
         this.filters[col] = this.desserts.map((d) => { return d[col] }).filter(
@@ -324,6 +365,21 @@ export default {
 </script>
 
 <style lang="scss">
+.dialog-code {
+  &-wrapp {
+    background-color: #fff;
+    width: 265px;
+
+    img {
+      width: 100%;
+    }
+  }
+
+  &-btn {
+    cursor: pointer;
+    color: cornflowerblue;
+  }
+}
 .v-data-table {
   &__wrapper {
     tbody {

@@ -3,280 +3,14 @@
     class="py-6 px-6"
     fluid
   >
-    <v-layout>
-      <v-flex xs3>
-        <v-text-field
-          v-model="newLeadsSearch"
-          append-icon="mdi-magnify"
-          label="Поиск"
-        />
-      </v-flex>
-    </v-layout>
-
-    <v-tabs v-model="activeTab">
-      <v-tab>Список gtin</v-tab>
-      <v-tab>Список маркировок</v-tab>
-
-      <v-tab-item>
-        <v-data-table
-          :headers="headers"
-          :items="desserts"
-          sort-by="calories"
-          calculate-widths
-        >
-          <template
-            v-for="(col, i) in filters"
-            #[`header.${i}`]="{ header }"
-          >
-            <div
-              :key="i"
-              style="display: inline-block; padding: 16px 0;"
-            >
-              {{ header.text }}
-            </div>
-            <div
-              :key="i"
-              style="float: right; margin-top: 8px"
-            >
-              <v-menu
-                :close-on-content-click="false"
-                :nudge-width="200"
-                offset-y
-                transition="slide-y-transition"
-                left
-                fixed
-                style="position: absolute; right: 0"
-              >
-                <template #activator="{ on, attrs }">
-                  <v-btn
-                    color="indigo"
-                    icon
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    <v-icon
-                      small
-                      :color="activeFilters[header.value] && activeFilters[header.value].length < filters[header.value].length ? 'red' : 'default'"
-                    >
-                      mdi-filter
-                    </v-icon>
-                  </v-btn>
-                </template>
-                <v-list
-                  flat
-                  dense
-                  class="pa-0"
-                >
-                  <v-list-item-group
-                    v-model="activeFilters[header.value]"
-                    multiple
-                    class="py-2"
-                  >
-                    <template v-for="(item, i) in filters[header.value]">
-                      <v-list-item
-                        :key="i"
-                        :value="item"
-                        :ripple="false"
-                      >
-                        <template #default="{ active, toggle }">
-                          <v-list-item-action>
-                            <v-checkbox
-                              :input-value="active"
-                              :true-value="item"
-                              color="primary"
-                              :ripple="false"
-                              dense
-                              @click="toggle"
-                            />
-                          </v-list-item-action>
-                          <v-list-item-content>
-                            <v-list-item-title v-text="item" />
-                          </v-list-item-content>
-                        </template>
-                      </v-list-item>
-                    </template>
-                  </v-list-item-group>
-
-                  <v-divider />
-
-                  <v-row no-gutters>
-                    <v-col cols="6">
-                      <v-btn
-                        text
-                        block
-                        color="success"
-                        @click="toggleAll(header.value)"
-                      >
-                        Выбрать всё
-                      </v-btn>
-                    </v-col>
-
-                    <v-col cols="6">
-                      <v-btn
-                        text
-                        block
-                        color="warning"
-                        @click="clearAll(header.value)"
-                      >
-                        Очистить
-                      </v-btn>
-                    </v-col>
-                  </v-row>
-                </v-list>
-              </v-menu>
-            </div>
-          </template>
-
-          <template #item="{ item, index }">
-            <tr>
-              <td
-                v-for="(field, i) in item"
-                :key="i"
-                class="text-wrap"
-              >
-                {{ field }}
-              </td>
-
-              <td class="text-right">
-                <v-icon
-                  small
-                  class="mr-2"
-                  @click="openMark(index)"
-                >
-                  mdi-plus
-                </v-icon>
-
-                <!-- <v-icon
-                  small
-                  class="mr-2"
-                  @click="editItem(item)"
-                >
-                  mdi-pencil
-                </v-icon>
-
-                <v-icon
-                  small
-                  @click="deleteItem(item)"
-                >
-                  mdi-delete
-                </v-icon> -->
-              </td>
-            </tr>
-          </template>
-        </v-data-table>
-      </v-tab-item>
-
-      <v-tab-item>
-        <mark-table
-          v-model="activeTab"
-          :search="newLeadsSearch"
-        />
-      </v-tab-item>
-    </v-tabs>
-
-    <v-dialog
-      v-model="dialogDelete"
-      max-width="500px"
-    >
-      <v-card>
-        <v-card-title class="headline">
-          Вы действительно хотите удалить?
-        </v-card-title>
-
-        <v-card-actions>
-          <v-spacer />
-          <v-btn
-            color="blue darken-1"
-            text
-            @click="closeDelete"
-          >
-            Отмена
-          </v-btn>
-
-          <v-btn
-            color="blue darken-1"
-            text
-            @click="deleteItemConfirm"
-          >
-            OK
-          </v-btn>
-
-          <v-spacer />
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog
-      v-model="dialogMark"
-      max-width="500px"
-    >
-      <v-card>
-        <v-card-title class="headline">
-          Заказ кодов маркировки
-        </v-card-title>
-
-        <v-card-text>
-          <v-container>
-            <v-row>
-              <v-col cols="6">
-                <v-text-field
-                  v-model="mark.markCodeQuantity"
-                  label="Количество"
-                />
-              </v-col>
-
-              <v-col cols="6">
-                <v-text-field
-                  v-model="mark.productionOrderId"
-                  label="Номер заказа"
-                />
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-card-text>
-
-        <v-card-actions>
-          <v-spacer />
-
-          <v-btn
-            color="blue darken-1"
-            text
-            @click="dialogMark = false"
-          >
-            Отмена
-          </v-btn>
-
-          <v-btn
-            color="blue darken-1"
-            text
-            :loading="loading"
-            @click="addMarkCode"
-          >
-            Сохранить
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <element-add
-      show="dialog"
-      @close="close"
-      @save="save"
-    />
+    <router-view />
   </v-container>
 </template>
 
 <script>
 import omit from 'lodash/omit'
-import ElementAdd from '@/views/vcrm/Dashboard/Modals/ElementAdd'
-import MarkTable from './Mark'
 export default {
   name: 'DashboardPage',
-
-  components: {
-    MarkTable,
-    ElementAdd
-  },
 
   data: () => ({
     activeTab: '',
@@ -632,7 +366,63 @@ export default {
       markCodeQuantity: ''
     },
 
-    markItem: {}
+    markItem: {},
+
+    editedItem: {
+      categoryId: '31326',
+      prodName: '',
+      brand: '',
+      packType: '',
+      packMaterial: '',
+      quantity: '',
+      types: '',
+      sizeName: '',
+      sizeValue: '',
+      color: '',
+      country: 'RU',
+      kind: '',
+      gcpclBrick: '',
+      measure: '',
+      inn: '5259003336 (Меридиан)',
+      model: '',
+      gender: '',
+      standartNumber: '',
+      rawMaterial: '',
+      companyName: 'meridian',
+      manufacturerCode: '4650067329994',
+      tnved: '',
+      trademark: 'Меридиан',
+      apiExtension: 'lp',
+      status: 'NOT_PROCESSED'
+    },
+
+    defaultItem: {
+      categoryId: '31326',
+      prodName: '',
+      brand: '',
+      packType: '',
+      packMaterial: '',
+      quantity: '',
+      types: '',
+      sizeName: '',
+      sizeValue: '',
+      color: '',
+      country: 'RU',
+      kind: '',
+      gcpclBrick: '',
+      measure: '',
+      inn: '5259003336 (Меридиан)',
+      model: '',
+      gender: '',
+      standartNumber: '',
+      rawMaterial: '',
+      companyName: 'meridian',
+      manufacturerCode: '4650067329994',
+      tnved: '',
+      trademark: 'Меридиан',
+      apiExtension: 'lp',
+      status: 'NOT_PROCESSED'
+    }
   }),
 
   async fetch() {
@@ -823,6 +613,7 @@ export default {
     close() {
       this.dialog = false
       this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem)
         this.editedIndex = -1
       })
     },
@@ -830,15 +621,22 @@ export default {
     closeDelete() {
       this.dialogDelete = false
       this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem)
         this.editedIndex = -1
       })
     },
 
-    async save(data) {
+    async save() {
+      // if (this.editedIndex > -1) {
+      //   Object.assign(this.desserts[this.editedIndex], this.editedItem)
+      // } else {
+      //   this.desserts.push(this.editedItem)
+      // }
+
       this.loading = true
 
       try {
-        await this.$axios.$post(`http://192.168.1.70:9037/gtinRequest/saveGtinRequest?${new URLSearchParams(this.editedIndex > -1 ? Object.assign(this.fullDesserts[this.editedIndex], data) : data).toString()}`)
+        await this.$axios.$post(`http://192.168.1.70:9037/gtinRequest/saveGtinRequest?${new URLSearchParams(this.editedIndex > -1 ? Object.assign(this.fullDesserts[this.editedIndex], this.editedItem) : this.editedItem).toString()}`)
 
         await this.$fetch()
 

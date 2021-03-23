@@ -21,7 +21,7 @@
       <v-list @click.native.stop="mini = mini">
         <v-list-item
           link
-          :to="{ name: 'Dashboard' }"
+          :to="{ name: 'GtinPage' }"
         >
           <v-list-item-action class="pr-1 pl-2 mr-1">
             <v-icon class="blue--text">
@@ -31,12 +31,15 @@
 
           <v-list-item-content>
             <v-list-item-title class="font-weight-medium">
-              Маркировка
+              Журнал GTIN
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
 
-        <v-list-item link>
+        <v-list-item
+          link
+          :to="{ name: 'MarkPage' }"
+        >
           <v-list-item-action class="pr-1 pl-2 mr-1">
             <v-icon class="blue--text">
               mdi-brightness-5
@@ -45,7 +48,7 @@
 
           <v-list-item-content>
             <v-list-item-title class="font-weight-medium">
-              Справочник
+              Журнал Кодов Маркировки
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
@@ -120,9 +123,22 @@ export default {
     keepOpen() { return this.onClickOutside }
   },
 
+  watch: {
+    $route: {
+      immediate: true,
+      handler() {
+        this.hasBreadcrumbs()
+      }
+    }
+  },
+
   methods: {
     clickToggleDrawer() {
       this.mini = !this.mini
+    },
+
+    hasBreadcrumbs() {
+      this.breadcrumbs = this.$route.meta.breadcrumb
     },
 
     onClickOutside() { return true }

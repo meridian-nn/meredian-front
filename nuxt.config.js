@@ -24,7 +24,8 @@ export default {
   ],
 
   buildModules: [
-    '@nuxtjs/eslint-module',
+    // '@nuxtjs/eslint-module',
+    "@nuxtjs/svg",
     '@nuxtjs/stylelint-module',
     '@nuxtjs/vuetify',
     '@nuxtjs/router'
@@ -34,8 +35,8 @@ export default {
     '@nuxtjs/axios'
   ],
   // server: {
-  //   host: '0.0.0.0',
-  //   port: 8000 // default: 3000
+  //    host: '0.0.0.0',
+  //    port: 8000 // default: 3000
   // },
 
   axios: {},

@@ -23,6 +23,8 @@ const AuthPage = dynamicPage(() => import('~/views/auth/AuthPage'))
 const AuthLogin = dynamicPage(() => import('~/views/auth/Form/FormLogin'))
 const VcrmPage = dynamicPage(() => import('~/views/vcrm/VcrmPage'))
 const DashboardPage = dynamicPage(() => import('~/views/vcrm/Dashboard'))
+const GtinPage = dynamicPage(() => import('~/views/vcrm/Dashboard/Gtin'))
+const MarkPage = dynamicPage(() => import('~/views/vcrm/Dashboard/Mark'))
 
 Vue.use(Router)
 
@@ -37,9 +39,33 @@ const createRouterConst = new Router({
       component: VcrmPage,
       children: [
         {
-          path: '',
+          path: '/dashboard',
           name: 'Dashboard',
-          component: DashboardPage
+          component: DashboardPage,
+          children: [
+            {
+              path: 'gtin',
+              name: 'GtinPage',
+              component: GtinPage,
+              meta: {
+                breadcrumb: [
+                  { text: 'Профиль', disabled: false, href: 'Dashboard' },
+                  { text: 'Журнал GTIN', disabled: true, href: 'GtinPage' }
+                ]
+              }
+            },
+            {
+              path: 'mark',
+              name: 'MarkPage',
+              component: MarkPage,
+              meta: {
+                breadcrumb: [
+                  { text: 'Профиль', disabled: false, href: 'Dashboard' },
+                  { text: 'Журнал Кодов Маркировки', disabled: true, href: 'MarkPage' }
+                ]
+              }
+            }
+          ]
         }
       ]
     },
