@@ -23,6 +23,7 @@ const AuthPage = dynamicPage(() => import('~/views/auth/AuthPage'))
 const AuthLogin = dynamicPage(() => import('~/views/auth/Form/FormLogin'))
 const VcrmPage = dynamicPage(() => import('~/views/vcrm/VcrmPage'))
 const DashboardPage = dynamicPage(() => import('~/views/vcrm/Dashboard'))
+const PaymentDocumentPage = dynamicPage(() => import('~/views/payment/PaymentDocument'))
 
 Vue.use(Router)
 
@@ -40,6 +41,17 @@ const createRouterConst = new Router({
           path: '',
           name: 'Dashboard',
           component: DashboardPage
+        }
+      ]
+    },
+    {
+      path: '/',
+      component: VcrmPage,
+      children: [
+        {
+          path: '',
+          name: 'PaymentDocument',
+          component: PaymentDocumentPage
         }
       ]
     },

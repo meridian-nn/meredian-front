@@ -42,13 +42,53 @@
               mdi-brightness-5
             </v-icon>
           </v-list-item-action>
-
           <v-list-item-content>
             <v-list-item-title class="font-weight-medium">
               Справочник
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-group no-action>
+          <template v-slot:activator>
+            <v-list-item-title>Платежи</v-list-item-title>
+          </template>
+          <MenuItemButton
+            title="Документ на оплату"
+            link="PaymentDocument"
+            icon="mdi-brightness-5"
+          >
+          </MenuItemButton>
+          <MenuItemButton
+            title="Сумма бюджета"
+            link="PaymentDocument"
+            icon="mdi-brightness-5"
+          >
+          </MenuItemButton>
+          <MenuItemButton
+            title="Документы"
+            link="PaymentDocument"
+            icon="mdi-brightness-5"
+          >
+          </MenuItemButton>
+          <MenuItemButton
+            title="Реестр"
+            link="PaymentDocument"
+            icon="mdi-brightness-5"
+          >
+          </MenuItemButton>
+          <MenuItemButton
+            title="Журнал документов"
+            link="PaymentDocument"
+            icon="mdi-brightness-5"
+          >
+          </MenuItemButton>
+          <MenuItemButton
+            title="История"
+            link="PaymentDocument"
+            icon="mdi-brightness-5"
+          >
+          </MenuItemButton>
+        </v-list-group>
       </v-list>
 
       <template #append>

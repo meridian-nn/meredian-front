@@ -27,7 +27,8 @@ export default {
     '@nuxtjs/eslint-module',
     '@nuxtjs/stylelint-module',
     '@nuxtjs/vuetify',
-    '@nuxtjs/router'
+    '@nuxtjs/router',
+    '@nuxt/components'
   ],
 
   modules: [
