@@ -32,14 +32,24 @@ export default {
   ],
 
   modules: [
-    '@nuxtjs/axios'
+    '@nuxtjs/axios',
+    '@nuxtjs/proxy'
   ],
+  proxy: {
+    '/oper': {
+      target: 'http://localhost:9037'
+    }
+  },
   // server: {
   //   host: '0.0.0.0',
   //   port: 8000 // default: 3000
   // },
 
-  axios: {},
+  axios: {
+    proxy: true,
+    credentials: false,
+    mode: 'no-cors'
+  },
 
   vuetify: {
     customVariables: ['~/assets/variables.scss'],

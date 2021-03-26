@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
+Vue.prototype.$hostName = 'http://localhost:9037';
+
 const dynamicPage = importer => () => {
   return importer().then(mod => mod.default || mod)
 }
