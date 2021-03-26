@@ -1,5 +1,15 @@
+import path from 'path'
+require('dotenv').config({
+  path: path.resolve(__dirname, 'config', '.env')
+})
+
 export default {
   ssr: false,
+
+  env: {
+    API_HOST: process.env.API_HOST,
+    YM_ENV: process.env.YM_ENV
+  },
 
   head: {
     titleTemplate: '%s - foxPro',

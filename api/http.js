@@ -1,23 +1,62 @@
-const rpcUrl = process.env.RPC_URL || 'https://qvm2e.mocklab.io'
-
-async function call(method, params, headers = {}) {
-  const axios = require('axios')
-
-  const config = {
-    auth: {
-      username: 'vrum123',
-      password: 'avadon123'
-    },
-    headers
+export default class HttpClient {
+  constructor({ url }) {
+    this.url = url
   }
 
-  try {
-    const response = await axios.post(rpcUrl, config)
-    return response.data.result
-  } catch (error) {
-    console.log('error:', error)
-    return error
+  authorize(token) {
+    this._token = token
+  }
+
+  fetch = async(method, methodUrl, params = {}) => {
+    const url = new URL(this.url + methodUrl)
+
+    if (method === 'GET' && size(params) > 0) {
+      url.search = new URLSearchParams(params).toString()
+    }
+
+    const config = this.config(method, params)
+
+    return await this.call(url, config)
+  }
+
+  config(method, params = {}) {
+    return {
+      method,
+      ...(method === 'POST' && {
+        body: JSON.stringify(params)
+      }),
+      headers: this.headers
+    }
+  }
+
+  async call(url, config) {
+    const response = await fetch(url, config)
+      .then(async(res) => {
+        const json = res.json()
+
+        if (res.ok) {
+          return json
+        } else if (res.status === 401) {
+          Cookies.remove('JWT')
+        } else {
+          return json.then((err) => { throw err })
+        }
+      }).catch((error) => {
+        throw error
+      })
+
+    return response
+  }
+
+  get headers() {
+    const headers = {
+      'Content-Type': 'application/json'
+    }
+
+    if (this._token) {
+      headers.Authorization = `Bearer ${this._token}`
+    }
+
+    return headers
   }
 }
-
-export default call

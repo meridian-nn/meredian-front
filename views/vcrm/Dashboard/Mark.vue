@@ -27,6 +27,7 @@
       :items="desserts"
       sort-by="calories"
       calculate-widths
+      @current-items="getFilteredItem"
     >
       <template
         v-for="(col, i) in filters"
@@ -150,17 +151,9 @@
 
 <script>
 import omit from 'lodash/omit'
-import VueBarcode from 'vue-barcode'
 import { json2excel } from 'js2excel'
-import { DATAMatrix } from '~/plugins/datamatrix'
-import InlineSvg from 'vue-inline-svg'
 export default {
   name: 'MarkTable',
-
-  components: {
-    VueBarcode,
-    InlineSvg
-  },
 
   props: {
     value: {
@@ -176,6 +169,7 @@ export default {
       newLeadsSearch: '',
       fullDesserts: [],
       desserts: [],
+      filterDesserts: [],
       activeFilters: {},
       filters: { 'prodName': [], 'color': [], 'order_id': [], 'sizeValue': [], 'sizeName': [], 'model': [], 'brand': [], 'packType': [], 'packMaterial': [] }
     }
@@ -327,7 +321,7 @@ export default {
     },
 
     saveExelFIle() {
-      const data = this.desserts
+      const data = this.filterDesserts
 
       try {
         json2excel({
@@ -338,6 +332,10 @@ export default {
       } catch (e) {
         console.error('export error')
       }
+    },
+
+    getFilteredItem(e) {
+      this.filterDesserts = e
     },
 
     initFilters() {
