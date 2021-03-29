@@ -10,10 +10,6 @@ export default class HttpClient {
   fetch = async(method, methodUrl, params = {}) => {
     const url = new URL(this.url + methodUrl)
 
-    if (method === 'GET' && size(params) > 0) {
-      url.search = new URLSearchParams(params).toString()
-    }
-
     const config = this.config(method, params)
 
     return await this.call(url, config)
@@ -51,6 +47,10 @@ export default class HttpClient {
   get headers() {
     const headers = {
       'Content-Type': 'application/json'
+    }
+
+    if (process.env.USER) {
+      headers.Authorization = 'Basic ' + base64.encode(`${process.env.USER}:${process.env.PASSWORD}`)
     }
 
     if (this._token) {

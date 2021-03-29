@@ -30,7 +30,7 @@ export default {
   components: true,
 
   plugins: [
-    // { src: '~/plugins/bootstrap', mode: 'client' }
+    { src: '~/plugins/api', mode: 'client' }
   ],
 
   buildModules: [

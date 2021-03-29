@@ -7,7 +7,7 @@ export const factory = send => ({
 
   code: {
     markCodeList(params) {
-      return send('POST', '/findAll?page=0&size=200', { ...params })
+      return send('GET', '/markCode/findAll?page=0&size=9999')
     },
 
     markCodeSave(params) {
@@ -15,11 +15,11 @@ export const factory = send => ({
     },
 
     gtinCodeList(params) {
-      return send('POST', '/gtin/findAll?page=0&size=99999999', { ...params })
+      return send('GET', `/gtin/findAll?page=0&size=99999999&${new URLSearchParams(params).toString()}`)
     },
 
     gtinCodeSave(params) {
-      return send('POST', '/gtinRequest/saveGtinRequest', { ...params })
+      return send('POST', `/gtinRequest/saveGtinRequest&${new URLSearchParams(params).toString()}`)
     },
   }
 })

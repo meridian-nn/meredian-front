@@ -916,7 +916,7 @@ export default {
   },
 
   async fetch() {
-    const { content } = await this.$axios.$get('http://192.168.1.70:9037/gtin/findAll?page=0&size=99999999')
+    const { content } = await this.$api.code.gtinCodeList()
 
     this.fullDesserts = content
 
@@ -1045,9 +1045,9 @@ export default {
 
   watch: {
     activeTab(val) {
-      this.defaultItem.apiExtension = val === 1 ? 'lp' : 'lg'
+      this.defaultItem.apiExtension = val === 1 ? 'LP' : 'SHOES'
 
-      this.editedItem.apiExtension = val === 1 ? 'lp' : 'lg'
+      this.editedItem.apiExtension = val === 1 ? 'LP' : 'SHOES'
     },
 
     dialog(val) {
@@ -1126,7 +1126,7 @@ export default {
       this.loading = true
 
       try {
-        await this.$axios.$post(`http://192.168.1.70:9037/gtinRequest/saveGtinRequest?${new URLSearchParams(this.editedIndex > -1 ? Object.assign(this.fullDesserts[this.editedIndex], this.editedItem) : this.editedItem).toString()}`)
+        await this.$api.code.gtinCodeList(this.editedIndex > -1 ? Object.assign(this.fullDesserts[this.editedIndex], this.editedItem) : this.editedItem)
 
         await this.$fetch()
 
