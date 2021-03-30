@@ -71,7 +71,6 @@
                 :items="documentTypes"
                 item-value="id"
                 item-text="nameViddoc"
-                @change="findSuppliers"
               />
             </v-col>
           </v-row>
@@ -115,6 +114,59 @@
                 v-model="editedItem.sumDoc"
                 type="number"
                 label="Сумма оплаты"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="6">
+              <v-autocomplete
+                label="Плательшик"
+                :loading="loadingType.payers"
+                :items="payers"
+                item-value="id"
+                item-text="clName"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="6">
+              <v-autocomplete
+                v-model="editedItem.consumerId"
+                label="Клиент, для кого поставка"
+                :loading="loadingType.suppliers"
+                :items="suppliers"
+                item-value="id"
+                item-text="clName"
+              />
+            </v-col>
+            <v-col cols="6">
+              <v-autocomplete
+                v-model="editedItem.documentKindId"
+                label="Вид документа"
+                :loading="loadingType.documentKinds"
+                :items="documentKinds"
+                item-value="id"
+                item-text="nameViddoc"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="6">
+              <v-autocomplete
+                v-model="editedItem.paymentStatus"
+                label="Статус платежа"
+                :loading="loadingType.paymentStatuses"
+                :items="paymentStatuses"
+                item-value="name"
+                item-text="label"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="10">
+              <v-text-field
+                v-model="editedItem.descr"
+                label="Примечание"
               />
             </v-col>
           </v-row>
@@ -170,6 +222,9 @@ export default {
       paymentStatuses: [],
       executors: [],
       contracts: [],
+      payers: [],
+      suppliers: [],
+      documentKinds: [],
       search: null,
       select: null,
       dialog: false,
@@ -187,6 +242,9 @@ export default {
     init() {
       this.findDepartments()
       this.findDocumentType()
+      this.findPayers()
+      this.findPaymentStatuses()
+      this.findDocumentKinds()
     },
     async findDepartments() {
       if (!this.departments.length) {
@@ -225,6 +283,20 @@ export default {
       this.suppliers = await this.$axios.$get('/oper/dict/spOrg/findByDogId?dogId=' + dogId, this.axiosConfig)
       this.loadingType.suppliers = null
     },
+    async findPayers() {
+      if (!this.payers.length) {
+        this.loadingType.payers = true
+        this.payers = await this.$axios.$get('/oper/dict/spOrg/findPayers', this.axiosConfig)
+        this.loadingType.payers = null
+      }
+    },
+    async findDocumentKinds() {
+      if (!this.documentKinds.length) {
+        this.loadingType.documentKinds = true
+        this.documentKinds = await this.$axios.$get('/oper/dict/spViddoc/findAll', this.axiosConfig)
+        this.loadingType.documentKinds = null
+      }
+    },
     async findContracts(executorId) {
       this.loadingType.contracts = true
       this.contracts = await this.$axios.$get('/oper/dogSelDogSpisSpec/findByMyDescr?myDescr=' + executorId, this.axiosConfig)
@@ -236,7 +308,7 @@ export default {
     },
     async save() {
       let errorMessage = null
-      await this.$axios.$post('/oper/spDocopl/findPaymentStatuses', this.editedItem, this.axiosConfig).catch((error) => {
+      await this.$axios.$post('/oper/spDocopl/save', this.editedItem, this.axiosConfig).catch((error) => {
         errorMessage = error
         alert(errorMessage)
       })
@@ -244,14 +316,18 @@ export default {
         this.dialog = false
       }
     },
+    cancel() {
+      this.reset()
+      this.dialog = false
+    },
     reset() {
       this.loadingType = {}
       this.editedItem = {}
       this.departments = []
       this.documentTypes = []
-      this.paymentStatuses = []
       this.contracts = []
       this.executors = []
+      this.suppliers = []
     },
     newDocument() {
       this.reset()

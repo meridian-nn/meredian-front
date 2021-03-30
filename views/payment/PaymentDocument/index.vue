@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import EditPaymentDocument from '@/views/vcrm/Payment/Modals/EditPaymentDocument'
+import EditPaymentDocument from '@/views/payment/PaymentDocument/Modals/EditPaymentDocument'
 export default {
   name: 'PaymentDocument',
   components: {
@@ -26,6 +26,18 @@ export default {
   methods: {
     newDocument() {
       this.$refs.editPaymentDocument.newDocument()
+    }
+  },
+  computed: {
+    headers() {
+      return [
+        {
+          text: 'Gtin',
+          value: 'code',
+          width: '150px',
+          sortable: false
+        }
+      ]
     }
   }
 
