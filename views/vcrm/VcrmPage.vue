@@ -83,11 +83,47 @@
 
         <v-spacer />
 
-        <v-btn icon>
-          <v-icon color="white">
-            mdi-dots-vertical
-          </v-icon>
-        </v-btn>
+        <v-menu offset-y>
+          <template v-slot:activator="{ attrs, on }">
+            <v-btn
+              text
+              v-bind="attrs"
+              v-on="on"
+              class="white--text"
+            >
+              Иван Иваныч
+              <v-icon color="white">
+                mdi-chevron-down
+              </v-icon>
+
+              <v-avatar class="mr-2" size="36">
+                <img src="http://i.pravatar.cc/150?img=53" alt="avatar">
+              </v-avatar>
+            </v-btn>
+          </template>
+
+          <v-list>
+            <v-list-item>
+              <v-icon class="mr-2">
+                mdi-account-settings
+              </v-icon>
+
+              <v-list-item-title>
+                Настройки
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item href="#" @click="logout">
+              <v-icon class="mr-2">
+                mdi-exit-to-app
+              </v-icon>
+
+              <v-list-item-title>
+                Выйти
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-toolbar>
       <router-view />
     </v-main>
@@ -98,7 +134,7 @@
 export default {
   name: 'VcrmPage',
 
-  middleware: 'auth-redirect',
+  middleware: 'auth-not-authorized',
 
   data() {
     return {
@@ -135,6 +171,10 @@ export default {
   methods: {
     clickToggleDrawer() {
       this.mini = !this.mini
+    },
+
+    logout() {
+      this.$store.dispatch('auth/logout')
     },
 
     hasBreadcrumbs() {

@@ -70,6 +70,7 @@
           <v-btn
             elevation="4"
             block
+            :loading="loading"
             type="submit"
           >
             Войти
@@ -108,6 +109,9 @@ export default {
         password: ''
       },
 
+      error: false,
+      loading: false,
+
       passwordRules: [
         text => !!text || 'Пароль обязателен',
         text => text.length > 2 || 'Пароль  должен быть больше 2 символов'
@@ -124,11 +128,9 @@ export default {
     async submit() {
       this.loading = true
       try {
-        await this.$store.dispatch('auth/login', {
-          login: this.login,
-          password: this.password
-        })
-        this.$emit('handler')
+        await this.$store.dispatch('auth/login', this.form)
+
+        this.$router.push({ name: 'GtinPage' })
       } catch (err) {
         this.error = true
       } finally {
