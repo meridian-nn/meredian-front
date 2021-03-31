@@ -36,7 +36,7 @@ export default {
     '@nuxtjs/proxy'
   ],
   proxy: {
-    '/oper': {
+    '/meridian': {
       target: 'http://localhost:9037'
     }
   },
