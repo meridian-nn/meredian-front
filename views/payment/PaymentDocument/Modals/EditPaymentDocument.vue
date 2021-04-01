@@ -150,7 +150,7 @@
             <v-col cols="6">
               <v-checkbox
                 label="Без НДС"
-                :input-value="editedItem.bnds"
+                v-model="editedItem.bnds"
                 color="primary"
                 :ripple="false"
                 dense
@@ -194,7 +194,7 @@
           <v-row>
             <v-col cols="10">
               <v-text-field
-                v-model="editedItem.descr"
+                v-model="editedItem.prim"
                 label="Примечание"
               />
             </v-col>
