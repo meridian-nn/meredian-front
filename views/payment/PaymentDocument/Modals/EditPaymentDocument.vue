@@ -46,7 +46,7 @@
             </v-col>
             <v-col cols="4">
               <v-autocomplete
-                v-model="editedItem.myorgId"
+                v-model="editedItem.departmentId"
                 label="Подразделение"
                 :loading="loadingType.departments"
                 :items="departments"
@@ -86,7 +86,17 @@
                 @change="findContracts"
               />
             </v-col>
-            <v-col cols="12">
+            <v-col cols="2">
+              <v-text-field
+                v-model="editedItem.sumDoc"
+                type="number"
+                label="Сумма по договору"
+                @input="calcSum"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="10">
               <v-autocomplete
                 v-model="editedItem.contractId"
                 label="Договор"
@@ -95,6 +105,14 @@
                 item-value="id"
                 item-text="numDogInt"
                 @change="findSuppliers"
+              />
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                readonly="true"
+                v-model="editedItem.sumPaid"
+                type="number"
+                label="Оплачено"
               />
             </v-col>
           </v-row>
@@ -111,9 +129,10 @@
             </v-col>
             <v-col cols="2">
               <v-text-field
-                v-model="editedItem.sumDoc"
+                readonly="true"
+                v-model="editedItem.toPay"
                 type="number"
-                label="Сумма оплаты"
+                label="К оплате"
               />
             </v-col>
           </v-row>
@@ -121,10 +140,20 @@
             <v-col cols="6">
               <v-autocomplete
                 label="Плательшик"
+                v-model="editedItem.myorgId"
                 :loading="loadingType.payers"
                 :items="payers"
                 item-value="id"
                 item-text="clName"
+              />
+            </v-col>
+            <v-col cols="6">
+              <v-checkbox
+                label="Без НДС"
+                :input-value="editedItem.bnds"
+                color="primary"
+                :ripple="false"
+                dense
               />
             </v-col>
           </v-row>
@@ -301,6 +330,9 @@ export default {
       this.loadingType.contracts = true
       this.contracts = await this.$axios.$get('/meridian/oper/dogSelDogSpisSpec/findByMyDescr?myDescr=' + executorId, this.axiosConfig)
       this.loadingType.contracts = null
+    },
+    calcSum(val) {
+      this.editedItem.toPay = (val || 0) - (this.editedItem.sumPaid || 0)
     },
     departmentChange(val) {
       this.findDocumentType(val)
