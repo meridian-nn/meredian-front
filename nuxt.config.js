@@ -7,6 +7,8 @@ export default {
   ssr: false,
 
   env: {
+    USER: process.env.USER,
+    PASSWORD: process.env.PASSWORD,
     API_HOST: process.env.API_HOST,
     YM_ENV: process.env.YM_ENV
   },
@@ -44,10 +46,11 @@ export default {
   modules: [
     '@nuxtjs/axios'
   ],
-  // server: {
-  //    host: '0.0.0.0',
-  //    port: 8000 // default: 3000
-  // },
+
+   server: {
+      host: '0.0.0.0',
+      port: 8000 // default: 3000
+  },
 
   axios: {},
 

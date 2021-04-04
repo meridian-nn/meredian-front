@@ -30,12 +30,12 @@
             md8
           >
             <v-text-field
-              v-model="form.email"
+              v-model="form.username"
               :rules="loginRules"
               class="input-group--focused mr-2"
+              :error-messages="error ? ['Не верный логин или пароль'] : null"
               name="email"
               label="email"
-              value="Input text"
             />
           </v-flex>
         </v-layout>
@@ -61,7 +61,6 @@
               name="password"
               type="password"
               label="password"
-              value="Input text"
             />
           </v-flex>
         </v-layout>
@@ -76,23 +75,6 @@
             Войти
           </v-btn>
         </v-card-actions>
-
-        <v-snackbar
-          v-if="error"
-          v-model="error"
-          :timeout="timeout"
-          :top="true"
-          :multi-line="mode === 'multi-line'"
-          :vertical="mode === 'vertical'"
-        >
-          {{ text }}
-          <v-btn
-            class="pink--text"
-            text
-          >
-            Закрыть
-          </v-btn>
-        </v-snackbar>
       </form>
     </v-card-text>
   </v-card>
@@ -105,7 +87,7 @@ export default {
   data() {
     return {
       form: {
-        email: '',
+        username: '',
         password: ''
       },
 
@@ -130,7 +112,7 @@ export default {
       try {
         await this.$store.dispatch('auth/login', this.form)
 
-        this.$router.push({ name: 'GtinPage' })
+        window.location.reload()
       } catch (err) {
         this.error = true
       } finally {

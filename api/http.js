@@ -1,3 +1,5 @@
+import { btoa } from 'isomorphic-base64'
+
 export default class HttpClient {
   constructor({ url }) {
     this.url = url
@@ -16,6 +18,7 @@ export default class HttpClient {
   }
 
   config(method, params = {}) {
+    console.log(this.headers)
     return {
       method,
       ...(method === 'POST' && {
@@ -50,7 +53,7 @@ export default class HttpClient {
     }
 
     if (process.env.USER) {
-      headers.Authorization = 'Basic ' + base64.encode(`${process.env.USER}:${process.env.PASSWORD}`)
+      headers.Authorization = 'Basic ' + btoa(`${process.env.USER}:${process.env.PASSWORD}`)
     }
 
     if (this._token) {
