@@ -32,27 +32,35 @@ export default {
   components: true,
 
   plugins: [
-    { src: '~/plugins/api', mode: 'client' }
+    // { src: '~/plugins/bootstrap', mode: 'client' }
   ],
 
   buildModules: [
-    // '@nuxtjs/eslint-module',
-    "@nuxtjs/svg",
+    '@nuxtjs/eslint-module',
     '@nuxtjs/stylelint-module',
     '@nuxtjs/vuetify',
     '@nuxtjs/router'
   ],
 
   modules: [
-    '@nuxtjs/axios'
+    '@nuxtjs/axios',
+    '@nuxtjs/proxy'
   ],
-
-   server: {
-      host: '0.0.0.0',
-      port: 8000 // default: 3000
+  proxy: {
+    '/meridian': {
+      target: 'http://localhost:9037'
+    }
   },
+  // server: {
+  //   host: '0.0.0.0',
+  //   port: 8000 // default: 3000
+  // },
 
-  axios: {},
+  axios: {
+    proxy: true,
+    credentials: false,
+    mode: 'no-cors'
+  },
 
   vuetify: {
     customVariables: ['~/assets/variables.scss'],

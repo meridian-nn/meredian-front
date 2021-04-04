@@ -23,6 +23,7 @@ const AuthPage = dynamicPage(() => import('~/views/auth/AuthPage'))
 const AuthLogin = dynamicPage(() => import('~/views/auth/Form/FormLogin'))
 const VcrmPage = dynamicPage(() => import('~/views/vcrm/VcrmPage'))
 const DashboardPage = dynamicPage(() => import('~/views/vcrm/Dashboard'))
+const PaymentDocumentPage = dynamicPage(() => import('~/views/payment/PaymentDocument'))
 const GtinPage = dynamicPage(() => import('~/views/vcrm/Dashboard/Gtin'))
 const MarkPage = dynamicPage(() => import('~/views/vcrm/Dashboard/Mark'))
 
@@ -64,6 +65,11 @@ const createRouterConst = new Router({
                   { text: 'Журнал Кодов Маркировки', disabled: true, href: 'MarkPage' }
                 ]
               }
+            },
+            {
+              path: '',
+              name: 'PaymentDocument',
+              component: PaymentDocumentPage
             }
           ]
         }
