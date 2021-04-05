@@ -4,6 +4,7 @@
     :value="show"
     max-width="1000px"
     @input="$emit('close')"
+    class="edit-payment-document-modal"
   >
     <template #activator="{ on, attrs }">
       <v-fab-transition>
@@ -31,20 +32,66 @@
       </v-card-title>
       <v-card-text>
         <v-container>
-          <v-row>
-            <v-col cols="2">
-              <v-text-field
-                v-model="editedItem.dataDoc"
-                label="Дата документа"
-              />
+          <v-row class="border-bottom">
+            <v-col cols="3">
+              <v-subheader class="font-weight-medium text-subtitle-1">Дата документа: </v-subheader>
             </v-col>
-            <v-col cols="2">
+
+            <v-col cols="3">
+              <v-menu
+                ref="menu"
+                v-model="menu"
+                :close-on-content-click="false"
+                :return-value.sync="date"
+                transition="scale-transition"
+                offset-y
+                min-width="auto"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="editedItem.dataDoc"
+                    label="Дата документа"
+                    prepend-icon="mdi-calendar"
+                    readonly
+                    v-bind="attrs"
+                    outlined
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="editedItem.dataDoc"
+                  no-title
+                  scrollable
+                  locale="ru-ru"
+                >
+                  <v-spacer></v-spacer>
+                  <v-btn
+                    text
+                    color="primary"
+                    @click="menu = false"
+                  >
+                    Cancel
+                  </v-btn>
+                  <v-btn
+                    text
+                    color="primary"
+                    @click="$refs.menu.save(date)"
+                  >
+                    OK
+                  </v-btn>
+                </v-date-picker>
+              </v-menu>
+            </v-col>
+
+            <v-col cols="3">
               <v-text-field
                 v-model="editedItem.nameDoc"
                 label="Номер документа"
+                outlined
               />
             </v-col>
-            <v-col cols="4">
+
+            <v-col cols="3">
               <v-autocomplete
                 v-model="editedItem.departmentId"
                 label="Подразделение"
@@ -52,16 +99,61 @@
                 :items="departments"
                 item-value="id"
                 item-text="nameViddoc"
+                outlined
                 @change="departmentChange"
               />
             </v-col>
           </v-row>
-          <v-row>
-            <v-col cols="2">
-              <v-text-field
-                v-model="editedItem.dataOplat"
-                label="Оплатить до"
-              />
+
+          <v-row class="border-bottom">
+            <v-col cols="3">
+              <v-subheader class="font-weight-medium text-subtitle-1">Оплатить до: </v-subheader>
+            </v-col>
+
+            <v-col cols="3">
+              <v-menu
+                ref="menu"
+                v-model="menuDataOplat"
+                :close-on-content-click="false"
+                :return-value.sync="date"
+                transition="scale-transition"
+                offset-y
+                min-width="auto"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="editedItem.dataOplat"
+                    label="Оплатить до"
+                    prepend-icon="mdi-calendar"
+                    readonly
+                    outlined
+                    v-bind="attrs"
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="editedItem.dataOplat"
+                  no-title
+                  scrollable
+                  locale="ru-ru"
+                >
+                  <v-spacer></v-spacer>
+                  <v-btn
+                    text
+                    color="primary"
+                    @click="menu = false"
+                  >
+                    Cancel
+                  </v-btn>
+                  <v-btn
+                    text
+                    color="primary"
+                    @click="$refs.menu.save(date)"
+                  >
+                    OK
+                  </v-btn>
+                </v-date-picker>
+              </v-menu>
             </v-col>
             <v-col cols="4">
               <v-autocomplete
@@ -70,33 +162,47 @@
                 :loading="loadingType.documentTypes"
                 :items="documentTypes"
                 item-value="id"
+                outlined
                 item-text="nameViddoc"
               />
             </v-col>
           </v-row>
-          <v-row>
+
+          <v-row class="border-bottom">
+            <v-col cols="3">
+              <v-subheader class="font-weight-medium text-subtitle-1">Поставщик</v-subheader>
+            </v-col>
+
             <v-col cols="4">
               <v-autocomplete
                 v-model="editedItem.ispId"
-                label="Исполнитель"
+                label="Поставщик"
                 :loading="loadingType.executors"
                 :items="executors"
+                outlined
                 item-value="id"
                 item-text="fio"
                 @change="findContracts"
               />
             </v-col>
-            <v-col cols="2">
+
+            <v-col cols="3">
               <v-text-field
                 v-model="editedItem.sumDoc"
                 type="number"
                 label="Сумма по договору"
+                outlined
                 @input="calcSum"
               />
             </v-col>
           </v-row>
+
           <v-row>
-            <v-col cols="10">
+            <v-col cols="3">
+              <v-subheader class="font-weight-medium text-subtitle-1">Плательщик</v-subheader>
+            </v-col>
+
+            <v-col cols="7">
               <v-autocomplete
                 v-model="editedItem.contractId"
                 label="Договор"
@@ -105,25 +211,32 @@
                 item-value="id"
                 item-text="numDogInt"
                 @change="findSuppliers"
+                outlined
               />
             </v-col>
+
             <v-col cols="2">
               <v-text-field
                 readonly="true"
                 v-model="editedItem.sumPaid"
                 type="number"
+                outlined
                 label="Оплачено"
               />
             </v-col>
           </v-row>
+
           <v-row>
-            <v-col cols="4">
+            <v-col cols="3" />
+
+            <v-col cols="7">
               <v-autocomplete
                 v-model="editedItem.supplierId"
-                label="Поставщик"
+                label="Плательщик"
                 :loading="loadingType.suppliers"
                 :items="suppliers"
                 item-value="id"
+                outlined
                 item-text="clName"
               />
             </v-col>
@@ -132,22 +245,73 @@
                 readonly="true"
                 v-model="editedItem.toPay"
                 type="number"
+                outlined
                 label="К оплате"
               />
             </v-col>
           </v-row>
-          <v-row>
-            <v-col cols="6">
+
+          <v-row class="border-bottom">
+            <v-col cols="3" />
+
+            <v-col cols="8">
               <v-autocomplete
                 label="Плательшик"
                 v-model="editedItem.myorgId"
                 :loading="loadingType.payers"
                 :items="payers"
                 item-value="id"
+                outlined
                 item-text="clName"
               />
             </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="3">
+              <v-subheader class="font-weight-medium text-subtitle-1">Клиент, для кого поставка</v-subheader>
+            </v-col>
+
             <v-col cols="6">
+              <v-autocomplete
+                v-model="editedItem.consumerId"
+                label="Клиент, для кого поставка"
+                :loading="loadingType.suppliers"
+                :items="suppliers"
+                item-value="id"
+                outlined
+                item-text="clName"
+              />
+            </v-col>
+
+            <v-col cols="3">
+              <v-autocomplete
+                v-model="editedItem.documentKindId"
+                label="Вид документа"
+                :loading="loadingType.documentKinds"
+                :items="documentKinds"
+                item-value="id"
+                outlined
+                item-text="nameViddoc"
+              />
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="3" />
+
+            <v-col cols="6">
+              <v-autocomplete
+                v-model="editedItem.paymentStatus"
+                label="Статус платежа"
+                :loading="loadingType.paymentStatuses"
+                :items="paymentStatuses"
+                item-value="name"
+                item-text="label"
+                outlined
+              />
+            </v-col>
+            <v-col cols="3">
               <v-checkbox
                 label="Без НДС"
                 v-model="editedItem.bnds"
@@ -157,45 +321,16 @@
               />
             </v-col>
           </v-row>
+
           <v-row>
-            <v-col cols="6">
-              <v-autocomplete
-                v-model="editedItem.consumerId"
-                label="Клиент, для кого поставка"
-                :loading="loadingType.suppliers"
-                :items="suppliers"
-                item-value="id"
-                item-text="clName"
-              />
-            </v-col>
-            <v-col cols="6">
-              <v-autocomplete
-                v-model="editedItem.documentKindId"
-                label="Вид документа"
-                :loading="loadingType.documentKinds"
-                :items="documentKinds"
-                item-value="id"
-                item-text="nameViddoc"
-              />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="6">
-              <v-autocomplete
-                v-model="editedItem.paymentStatus"
-                label="Статус платежа"
-                :loading="loadingType.paymentStatuses"
-                :items="paymentStatuses"
-                item-value="name"
-                item-text="label"
-              />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="10">
-              <v-text-field
+            <v-col cols="3" />
+
+            <v-col cols="9">
+              <v-textarea
                 v-model="editedItem.prim"
                 label="Примечание"
+                auto-grow
+                outlined
               />
             </v-col>
           </v-row>
@@ -245,6 +380,8 @@ export default {
   },
   data() {
     return {
+      menu: false,
+      menuDataOplat: false,
       loadingType: {},
       departments: [],
       documentTypes: [],
@@ -275,6 +412,7 @@ export default {
       this.findPaymentStatuses()
       this.findDocumentKinds()
     },
+
     async findDepartments() {
       if (!this.departments.length) {
         this.loadingType.departments = true
@@ -342,7 +480,6 @@ export default {
       let errorMessage = null
       await this.$axios.$post('/meridian/oper/spDocopl/save', this.editedItem, this.axiosConfig).catch((error) => {
         errorMessage = error
-        alert(errorMessage)
       })
       if (errorMessage == null) {
         this.dialog = false
@@ -372,3 +509,23 @@ export default {
   }
 }
 </script>
+<style type="scss" scoped>
+.col {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+.border-bottom {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.border-bottom::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 30px;
+  right: 10px;
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+</style>

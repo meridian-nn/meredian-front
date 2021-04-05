@@ -36,7 +36,6 @@ export default {
   ],
 
   buildModules: [
-    '@nuxtjs/eslint-module',
     '@nuxtjs/stylelint-module',
     '@nuxtjs/vuetify',
     '@nuxtjs/router'
@@ -48,7 +47,7 @@ export default {
   ],
   proxy: {
     '/meridian': {
-      target: 'http://localhost:9037'
+      target: 'http://192.168.1.70:9037'
     }
   },
   // server: {

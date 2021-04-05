@@ -67,9 +67,15 @@ const createRouterConst = new Router({
               }
             },
             {
-              path: '',
-              name: 'PaymentDocument',
-              component: PaymentDocumentPage
+              path: 'payment-document',
+              name: 'PaymentDocumentPage',
+              component: PaymentDocumentPage,
+              meta: {
+                breadcrumb: [
+                  { text: 'Профиль', disabled: false, href: 'Dashboard' },
+                  { text: 'Реестр оплат', disabled: true, href: 'PaymentDocumentPage' }
+                ]
+              }
             }
           ]
         }
