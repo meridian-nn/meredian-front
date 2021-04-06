@@ -74,9 +74,7 @@
       <template #append>
         <v-list>
           <v-list-item>
-            <v-list-item-action
-              class="pr-1 pl-2 mr-1"
-            >
+            <v-list-item-action class="pr-1 pl-2 mr-1">
               <v-btn
                 icon
                 @click.native.stop="mini = !mini"

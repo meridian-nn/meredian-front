@@ -2,6 +2,6 @@ export default function(context) {
   const hasSession = context.store.getters['auth/hasSession']
 
   if (hasSession) {
-    return context.redirect('/dashboard/gtin')
+    return context.redirect('/meridian/dashboard/gtin')
   }
 }

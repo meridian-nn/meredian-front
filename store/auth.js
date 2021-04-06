@@ -13,17 +13,13 @@ export default {
   actions: {
     async login({ dispatch, commit }, credentials) {
       try {
-        // await this.$axios.$get('http://192.168.1.70:9037/gtin/findAll?page=0&size=200',{ auth: credentials })
+        await this.$axios.$get('http://192.168.1.70:9037/meridian/gtin/findAll?page=0&size=200',{ auth: credentials })
 
         await timeout(500)
 
         const response = { ...credentials }
 
         dispatch('saveAuthToken', response)
-
-        dispatch('authorize', response)
-
-        commit('SET_TOKEN', response)
       } catch (e) {
         throw e
       }

@@ -36,11 +36,11 @@ const createRouterConst = new Router({
 
   routes: [
     {
-      path: '/',
+      path: '/meridian',
       component: VcrmPage,
       children: [
         {
-          path: '/dashboard',
+          path: 'dashboard',
           name: 'Dashboard',
           component: DashboardPage,
           children: [
@@ -82,7 +82,7 @@ const createRouterConst = new Router({
       ]
     },
     {
-      path: '/auth',
+      path: '/meridian/auth',
       name: 'Auth',
       component: AuthPage,
       children: [

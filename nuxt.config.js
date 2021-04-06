@@ -32,6 +32,7 @@ export default {
   components: true,
 
   plugins: [
+    { src: '~/plugins/api', mode: 'client' }
     // { src: '~/plugins/bootstrap', mode: 'client' }
   ],
 
@@ -46,14 +47,14 @@ export default {
     '@nuxtjs/proxy'
   ],
   proxy: {
-    '/meridian': {
-      target: 'http://192.168.1.70:9037'
-    }
+    // '/meridian': {
+    //   target: 'http://192.168.1.70:9037'
+    // }
   },
-  // server: {
-  //   host: '0.0.0.0',
-  //   port: 8000 // default: 3000
-  // },
+  server: {
+     host: '0.0.0.0',
+     port: 8000 // default: 3000
+  },
 
   axios: {
     proxy: true,
