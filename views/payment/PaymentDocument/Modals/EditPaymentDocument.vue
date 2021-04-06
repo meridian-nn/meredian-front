@@ -257,7 +257,8 @@ export default {
       search: null,
       select: null,
       dialog: false,
-      editedItem: {}
+      editedItem: {},
+      id: null
     }
   },
   watch: {
@@ -274,6 +275,11 @@ export default {
       this.findPayers()
       this.findPaymentStatuses()
       this.findDocumentKinds()
+    },
+    async findEditedItem() {
+      if (this.id) {
+        this.editedItem = await this.$axios.$get('/meridian/oper/spDocopl/findById/' + this.id, this.axiosConfig)
+      }
     },
     async findDepartments() {
       if (!this.departments.length) {
@@ -360,13 +366,15 @@ export default {
       this.contracts = []
       this.executors = []
       this.suppliers = []
+      this.id = null
     },
     newDocument() {
       this.reset()
       this.dialog = true
     },
-    editDocument(editedItem) {
+    editDocument(id) {
       this.reset()
+      this.id = id
       this.dialog = true
     }
   }
