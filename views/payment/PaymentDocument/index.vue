@@ -3,16 +3,9 @@
     Распределение платежей
     <edit-payment-document
       ref="editPaymentDocument"
-      @close="close"
-      @save="save"
+      @close="closePaymentDocument"
+      @save="savePaymentDocument"
     />
-    <v-btn
-      color="blue"
-      class="mr-2 mb-2"
-      @click="newDocument"
-    >
-      <v-icon>mdi-plus</v-icon>
-    </v-btn>
     <v-card>
       <v-card-text>
         <v-container>
@@ -22,14 +15,14 @@
                 align="center"
                 class="headline"
               >
-               Журнал документов на оплату
+                Журнал документов на оплату
               </div>
             </v-col>
             <v-col cols="2">
               <div
                 align="center"
               >
-                {{date}}
+                {{ date }}
               </div>
             </v-col>
           </v-row>
@@ -41,6 +34,7 @@
                 :items="organizations"
                 item-value="id"
                 item-text="clName"
+                @change="organizationChange"
               />
             </v-col>
           </v-row>
@@ -51,11 +45,11 @@
                 :loading="loadingType.paymentAccounts"
                 :items="paymentAccounts"
                 item-value="id"
-                item-text="clName"
+                item-text="shortName"
               />
             </v-col>
             <v-col cols="5">
-              <span class="headline">{{paymentAccountInfo}}</span>
+              <span class="headline">{{ paymentAccountInfo }}</span>
             </v-col>
           </v-row>
           <v-row>
@@ -65,16 +59,31 @@
                 :items="payData"
                 :items-per-page="50"
                 class="elevation-1"
-              ></v-data-table>
+                @contextmenu:row="showPayMenu"
+              >
+                <v-menu
+                  v-model="payMenu"
+                  :position-x="x"
+                  :position-y="y"
+                  absolute
+                  offset-y
+                >
+                  <v-list>
+                    <v-list-item>
+                      <v-list-item-title>test</v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+              </v-data-table>
             </v-col>
             <v-col cols="6">
               <v-data-table
+                v-model="docSelectedRows"
                 :headers="docHeaders"
                 :items="docData"
                 :show-select="true"
                 :single-select="true"
                 :items-per-page="50"
-                v-model="docSelectedRows"
                 class="elevation-1"
               >
                 <template slot="body.append">
@@ -101,7 +110,7 @@
               <v-btn
                 color="blue"
                 class="mr-2 mb-2"
-                @click="newDocument"
+                @click="editDocument"
               >
                 <v-icon>mdi-plus</v-icon>
               </v-btn>
@@ -120,13 +129,13 @@ export default {
   components: {
     EditPaymentDocument
   },
-  mounted() {
-    this.init()
-  },
   data() {
     return {
       date: '01.01.2021',
       loadingType: {},
+      payMenu: false,
+      x: 0,
+      y: 0,
       organizations: [],
       paymentAccounts: [],
       paymentAccountInfo: 'Сумма Р/С 500 000.00',
@@ -144,7 +153,7 @@ export default {
           value: 'payer'
         },
         {
-          text: 'К оплату',
+          text: 'К оплате',
           value: 'toPay'
         }
       ],
@@ -187,7 +196,25 @@ export default {
       docSelectedRows: []
     }
   },
+  mounted() {
+    this.init()
+  },
   methods: {
+    closePaymentDocument() {
+      console.log('close')
+    },
+    savePaymentDocument() {
+      console.log('open')
+    },
+    showPayMenu(e) {
+      e.preventDefault()
+      this.showMenu = false
+      this.x = e.clientX
+      this.y = e.clientY
+      this.$nextTick(() => {
+        this.payMenu = true
+      })
+    },
     newDocument() {
       this.$refs.editPaymentDocument.newDocument()
     },
@@ -200,25 +227,25 @@ export default {
       this.loadingType = {}
       this.docSelectedRows = []
       this.findOrganizatios()
-      this.findPaymentAccounts()
       this.findDocData()
     },
     async findOrganizatios() {
       if (!this.organizations.length) {
         this.loadingType.organizations = true
-        this.organizations = await this.$axios.$get('/meridian/oper/dict/spViddocopl/findDepartments', this.axiosConfig)
+        this.organizations = await this.$axios.$get('/meridian/oper/dict/spOrg/findInternalOrg', this.axiosConfig)
         this.loadingType.organizations = null
       }
     },
-    async findPaymentAccounts() {
-      if (!this.paymentAccounts.length) {
-        this.loadingType.paymentAccounts = true
-        this.paymentAccounts = await this.$axios.$get('/meridian/oper/dict/spViddocopl/findDepartments', this.axiosConfig)
-        this.loadingType.paymentAccounts = null
-      }
+    async findPaymentAccounts(val) {
+      this.loadingType.paymentAccounts = true
+      this.paymentAccounts = await this.$axios.$get('/meridian/oper/spAcc/findByOrgId?orgId=' + val, this.axiosConfig)
+      this.loadingType.paymentAccounts = null
     },
     async findDocData() {
       this.docData = await this.$axios.$get('/meridian/oper/spDocoplJornal/find', this.axiosConfig)
+    },
+    organizationChange(val) {
+      this.findPaymentAccounts(val)
     }
   }
 

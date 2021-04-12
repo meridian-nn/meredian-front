@@ -3,27 +3,7 @@
     v-model="dialog"
     :value="show"
     max-width="1000px"
-    @input="$emit('close')"
   >
-    <template #activator="{ on, attrs }">
-      <v-fab-transition>
-        <v-btn
-          color="blue"
-          class="mr-2 mb-2"
-          fab
-          dark
-          small
-          fixed
-          bottom
-          right
-          v-bind="attrs"
-          v-on="on"
-          @click="dialog = true"
-        >
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
-      </v-fab-transition>
-    </template>
 
     <v-card>
       <v-card-title>
@@ -207,11 +187,10 @@
         <v-btn
           color="blue darken-1"
           text
-          @click="$emit('close')"
+          @click="cancel"
         >
           Отмена
         </v-btn>
-
         <v-btn
           color="blue darken-1"
           text
@@ -278,7 +257,13 @@ export default {
     },
     async findEditedItem() {
       if (this.id) {
-        this.editedItem = await this.$axios.$get('/meridian/oper/spDocopl/findById/' + this.id, this.axiosConfig)
+        const editedItem = await this.$axios.$get('/meridian/oper/spDocopl/findById/' + this.id, this.axiosConfig)
+        this.findDocumentType(editedItem.departmentId)
+        this.findExecutors(editedItem.departmentId)
+        this.findSuppliers(editedItem.contractId)
+        this.findContracts(editedItem.ispId)
+        this.editedItem = editedItem
+        this.calcSum(editedItem.sumDoc)
       }
     },
     async findDepartments() {
@@ -361,7 +346,6 @@ export default {
     reset() {
       this.loadingType = {}
       this.editedItem = {}
-      this.departments = []
       this.documentTypes = []
       this.contracts = []
       this.executors = []
@@ -376,6 +360,7 @@ export default {
       this.reset()
       this.id = id
       this.dialog = true
+      this.findEditedItem()
     }
   }
 }

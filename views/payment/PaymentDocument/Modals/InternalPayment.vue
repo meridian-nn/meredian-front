@@ -1,0 +1,174 @@
+<template>
+  <v-dialog
+    v-model="dialog"
+    :value="show"
+    max-width="1000px"
+  >
+    <v-card>
+      <v-card-title>
+        <span class="headline">Внутренний платёж</span>
+      </v-card-title>
+      <v-card-text>
+        <v-container>
+          <v-row>
+            <v-col cols="10">
+              <div
+                align="center"
+                class="headline"
+              >
+                Внутренний платёж
+              </div>
+            </v-col>
+            <v-col cols="2">
+              <div
+                align="center"
+              >
+                {{ date }}
+              </div>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="10">
+              <v-autocomplete
+                v-model="editedItem.myorgId"
+                label="Плательшик"
+                :loading="loadingType.payers"
+                :items="payers"
+                item-value="id"
+                item-text="clName"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="5">
+              <v-text-field
+                v-model="editedItem.sumDoc"
+                type="number"
+                label="Сумма"
+                @input="calcSum"
+              />
+            </v-col>
+            <v-col cols="5">
+              <v-autocomplete
+                v-model="editedItem.viddocId"
+                label="Группа"
+                :loading="loadingType.groups"
+                :items="groups"
+                item-value="id"
+                item-text="nameViddoc"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="10">
+              <v-text-field
+                v-model="editedItem.prim"
+                label="Примечание"
+              />
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn
+          color="blue darken-1"
+          text
+          @click="cancel"
+        >
+          Отмена
+        </v-btn>
+        <v-btn
+          color="blue darken-1"
+          text
+          @click="save"
+        >
+          Сохранить
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+</template>
+
+<script>
+export default {
+  axiosConfig: {
+    auth: {
+      username: 'admin',
+      password: 'Wtrkop45'
+    }
+  },
+  data() {
+    return {
+      date: '01.01.2021',
+      dialog: false,
+      loadingType: {},
+      id: null,
+      editedItem: {},
+      payers: [],
+      groups: []
+    }
+  },
+  watch: {
+    dialog(val) {
+      if (val) {
+        this.init()
+      }
+    }
+  },
+  methods: {
+    init() {
+      this.findPayers()
+    },
+    async findPayers() {
+      if (!this.payers.length) {
+        this.loadingType.payers = true
+        this.payers = await this.$axios.$get('/meridian/oper/dict/spOrg/findPayers', this.axiosConfig)
+        this.loadingType.payers = null
+      }
+    },
+    async findGroups() {
+      if (!this.groups.length) {
+        this.loadingType.groups = true
+        this.groups = await this.$axios.$get('/meridian/oper/dict/spViddocopl/findDepartments', this.axiosConfig)
+        this.loadingType.groups = null
+      }
+    },
+    async findEditedItem() {
+      if (this.id) {
+        const editedItem = await this.$axios.$get('/meridian/oper/spDocopl/findById/' + this.id, this.axiosConfig)
+        this.editedItem = editedItem
+      }
+    },
+    async save() {
+      let errorMessage = null
+      await this.$axios.$post('/meridian/oper/spDocopl/save', this.editedItem, this.axiosConfig).catch((error) => {
+        errorMessage = error
+        alert(errorMessage)
+      })
+      if (errorMessage == null) {
+        this.dialog = false
+      }
+    },
+    cancel() {
+      this.reset()
+      this.dialog = false
+    },
+    reset() {
+      this.loadingType = {}
+      this.editedItem = {}
+      this.id = null
+    },
+    newDocument() {
+      this.reset()
+      this.dialog = true
+    },
+    editDocument(id) {
+      this.reset()
+      this.id = id
+      this.dialog = true
+      this.findEditedItem()
+    }
+  }
+}
+</script>
