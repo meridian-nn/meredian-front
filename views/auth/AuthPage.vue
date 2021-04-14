@@ -21,6 +21,31 @@ export default {
 
   layout: 'auth',
 
-  middleware: 'auth-redirect'
+  middleware: 'auth-redirect',
+  methods: {
+    async submit() {
+      this.loading = true
+      try {
+        /* await this.$store.dispatch('/meridian/auth/findByCurrentLogin', {
+          login: this.form.email,
+          password: this.form.password
+        })
+        this.$emit('handler') */
+
+        await this.$auth.loginWith('local').then(() => {
+          console.log('auth success!')
+        }).catch(() => {
+          console.log('auth error')
+        })
+      } catch (err) {
+        console.log('auth error')
+      } finally {
+        console.log('auth success!')
+      }
+    }
+  },
+  mounted() {
+    this.submit()
+  }
 }
 </script>

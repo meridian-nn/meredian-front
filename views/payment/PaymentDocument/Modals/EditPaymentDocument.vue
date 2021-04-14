@@ -251,7 +251,7 @@ export default {
     },
     async findEditedItem() {
       if (this.id) {
-        const editedItem = await this.$axios.$get('/meridian/oper/spDocopl/findById/' + this.id, this.axiosConfig)
+        const editedItem = await this.$axios.$get('/meridian/oper/spDocopl/findById/' + this.id)
         this.findDocumentType(editedItem.departmentId)
         this.findExecutors(editedItem.departmentId)
         this.findSuppliers(editedItem.contractId)
@@ -263,21 +263,21 @@ export default {
     async findDepartments() {
       if (!this.departments.length) {
         this.loadingType.departments = true
-        this.departments = await this.$axios.$get('/meridian/oper/dict/spViddocopl/findDepartments', this.axiosConfig)
+        this.departments = await this.$axios.$get('/meridian/oper/dict/spViddocopl/findDepartments')
         this.loadingType.departments = null
       }
     },
     async findPaymentStatuses() {
       if (!this.paymentStatuses.length) {
         this.loadingType.paymentStatuses = true
-        this.paymentStatuses = await this.$axios.$get('/meridian/oper/spDocopl/findPaymentStatuses', this.axiosConfig)
+        this.paymentStatuses = await this.$axios.$get('/meridian/oper/spDocopl/findPaymentStatuses')
         this.loadingType.paymentStatuses = null
       }
     },
     async findDocumentType(parentId) {
       if (parentId) {
         this.loadingType.documentTypes = true
-        this.documentTypes = await this.$axios.$get('/meridian/oper/dict/spViddocopl/findByParentId?parentId=' + parentId, this.axiosConfig)
+        this.documentTypes = await this.$axios.$get('/meridian/oper/dict/spViddocopl/findByParentId?parentId=' + parentId)
         this.loadingType.documentTypes = null
       } else {
         this.documentTypes = []
@@ -286,7 +286,7 @@ export default {
     async findExecutors(viddocoplId) {
       if (viddocoplId) {
         this.loadingType.executors = true
-        this.executors = await this.$axios.$get('/meridian/oper/dict/spIsp/findByViddocopl?viddocoplId=' + viddocoplId, this.axiosConfig)
+        this.executors = await this.$axios.$get('/meridian/oper/dict/spIsp/findByViddocopl?viddocoplId=' + viddocoplId)
         this.loadingType.executors = null
       } else {
         this.executors = []
@@ -294,26 +294,26 @@ export default {
     },
     async findSuppliers(dogId) {
       this.loadingType.suppliers = true
-      this.suppliers = await this.$axios.$get('/meridian/oper/dict/spOrg/findByDogId?dogId=' + dogId, this.axiosConfig)
+      this.suppliers = await this.$axios.$get('/meridian/oper/dict/spOrg/findByDogId?dogId=' + dogId)
       this.loadingType.suppliers = null
     },
     async findPayers() {
       if (!this.payers.length) {
         this.loadingType.payers = true
-        this.payers = await this.$axios.$get('/meridian/oper/dict/spOrg/findPayers', this.axiosConfig)
+        this.payers = await this.$axios.$get('/meridian/oper/dict/spOrg/findPayers')
         this.loadingType.payers = null
       }
     },
     async findDocumentKinds() {
       if (!this.documentKinds.length) {
         this.loadingType.documentKinds = true
-        this.documentKinds = await this.$axios.$get('/meridian/oper/dict/spViddoc/findAll', this.axiosConfig)
+        this.documentKinds = await this.$axios.$get('/meridian/oper/dict/spViddoc/findAll')
         this.loadingType.documentKinds = null
       }
     },
     async findContracts(executorId) {
       this.loadingType.contracts = true
-      this.contracts = await this.$axios.$get('/meridian/oper/dogSelDogSpisSpec/findByMyDescr?myDescr=' + executorId, this.axiosConfig)
+      this.contracts = await this.$axios.$get('/meridian/oper/dogSelDogSpisSpec/findByMyDescr?myDescr=' + executorId)
       this.loadingType.contracts = null
     },
     calcSum(val) {
