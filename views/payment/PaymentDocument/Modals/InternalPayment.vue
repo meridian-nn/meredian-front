@@ -92,12 +92,6 @@
 
 <script>
 export default {
-  axiosConfig: {
-    auth: {
-      username: 'admin',
-      password: 'Wtrkop45'
-    }
-  },
   data() {
     return {
       date: '01.01.2021',

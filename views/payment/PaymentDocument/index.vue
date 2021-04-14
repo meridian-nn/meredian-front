@@ -45,6 +45,7 @@
                 :items="paymentAccounts"
                 item-value="id"
                 item-text="shortName"
+                @change="paymentAccountChange"
               />
             </v-col>
             <v-col cols="5">
@@ -55,7 +56,7 @@
             <v-col cols="5">
               <v-data-table
                 :headers="toPayHeaders"
-                :items="payData"
+                :items="toPayData"
                 :items-per-page="50"
                 class="elevation-1"
                 caption="Документы к оплате"
@@ -126,6 +127,10 @@
 <script>
 import EditPaymentDocument from '@/views/payment/PaymentDocument/Modals/EditPaymentDocument'
 export default {
+  axiosConfig: {
+    auth: {
+    }
+  },
   name: 'PaymentDocument',
   components: {
     EditPaymentDocument
@@ -174,7 +179,7 @@ export default {
           value: 'accId'
         }
       ],
-      payData: [],
+      toPayData: [],
       fromPayHeaders: [
         {
           text: 'Подразделение',
@@ -265,8 +270,17 @@ export default {
     async findDocData() {
       this.fromPayData = await this.$axios.$get('/meridian/oper/spDocopl/findSpDocoplForPay', this.axiosConfig)
     },
+    async findToPay(val) {
+      const data = {
+        accId: val
+      }
+      this.fromPayData = await this.$axios.$get('/meridian/oper/spDocopl/findSpDocoplToPay', { params: data }, this.axiosConfig)
+    },
     organizationChange(val) {
       this.findPaymentAccounts(val)
+    },
+    paymentAccountChange(val) {
+      this.findToPay(val)
     }
   }
 

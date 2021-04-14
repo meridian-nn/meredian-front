@@ -205,12 +205,6 @@
 
 <script>
 export default {
-  axiosConfig: {
-    auth: {
-      username: 'admin',
-      password: 'Wtrkop45'
-    }
-  },
   name: 'EditPaymentDocument',
   props: {
     title: {
