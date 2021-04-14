@@ -1,6 +1,5 @@
 <template>
   <div>
-    Распределение платежей
     <edit-payment-document
       ref="editPaymentDocument"
       @close="closePaymentDocument"
@@ -55,10 +54,11 @@
           <v-row>
             <v-col cols="5">
               <v-data-table
-                :headers="payHeaders"
+                :headers="toPayHeaders"
                 :items="payData"
                 :items-per-page="50"
                 class="elevation-1"
+                caption="Документы к оплате"
                 @contextmenu:row="showPayMenu"
               >
                 <v-menu
@@ -79,11 +79,12 @@
             <v-col cols="6">
               <v-data-table
                 v-model="docSelectedRows"
-                :headers="docHeaders"
-                :items="docData"
+                :headers="fromPayHeaders"
+                :items="fromPayData"
                 :show-select="true"
                 :single-select="true"
                 :items-per-page="50"
+                caption="Документы на оплату"
                 class="elevation-1"
               >
                 <template slot="body.append">
@@ -139,36 +140,60 @@ export default {
       organizations: [],
       paymentAccounts: [],
       paymentAccountInfo: 'Сумма Р/С 500 000.00',
-      payHeaders: [
+      toPayHeaders: [
         {
-          text: 'Счет',
-          value: 'account'
+          text: 'Подразделение',
+          value: 'nameViddoc'
         },
-        {
-          text: 'Контрагент',
-          value: 'client'
-        },
-        {
-          text: 'Плательщик',
-          value: 'payer'
-        },
-        {
-          text: 'К оплате',
-          value: 'toPay'
-        }
-      ],
-      payData: [],
-      docHeaders: [
         {
           text: 'Дата',
           value: 'dataDoc'
         },
         {
-          text: '№ счета',
-          value: 'accountNumber'
+          text: 'Номер',
+          value: 'nameDoc'
         },
         {
-          text: 'Срок',
+          text: 'Плательщик',
+          value: 'namePlat'
+        },
+        {
+          text: 'namePlat1',
+          value: 'namePlat1'
+        },
+        {
+          text: 'Кредит',
+          value: 'prCredit'
+        },
+        {
+          text: 'Оплата',
+          value: 'sumOplat'
+        },
+        {
+          text: 'Счёт',
+          value: 'accId'
+        }
+      ],
+      payData: [],
+      fromPayHeaders: [
+        {
+          text: 'Подразделение',
+          value: 'nameViddoc'
+        },
+        {
+          text: 'Дата',
+          value: 'dataDoc'
+        },
+        {
+          text: 'Номер',
+          value: 'nameDoc'
+        },
+        {
+          text: 'Плательщик',
+          value: 'namePlat'
+        },
+        {
+          text: 'Дата оплаты',
           value: 'dataOplat'
         },
         {
@@ -176,23 +201,19 @@ export default {
           value: 'sumDoc'
         },
         {
+          text: 'Оплачено',
+          value: 'sumOplach'
+        },
+        {
           text: 'К оплате',
-          value: 'paySum'
+          value: 'sumOplat'
         },
         {
-          text: 'Исполнитель',
-          value: 'executor'
-        },
-        {
-          text: 'Подразделение',
-          value: 'department'
-        },
-        {
-          text: 'Плательщик',
-          value: 'payer'
+          text: 'Примечание',
+          value: 'prim'
         }
       ],
-      docData: [],
+      fromPayData: [],
       docSelectedRows: []
     }
   },
@@ -242,7 +263,7 @@ export default {
       this.loadingType.paymentAccounts = null
     },
     async findDocData() {
-      this.docData = await this.$axios.$get('/meridian/oper/spDocoplJornal/find', this.axiosConfig)
+      this.fromPayData = await this.$axios.$get('/meridian/oper/spDocopl/findSpDocoplForPay', this.axiosConfig)
     },
     organizationChange(val) {
       this.findPaymentAccounts(val)
