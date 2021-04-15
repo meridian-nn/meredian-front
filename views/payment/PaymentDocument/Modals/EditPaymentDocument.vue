@@ -559,6 +559,14 @@ export default {
       this.id = id
       this.dialog = true
       this.findEditedItem()
+    },
+    copyDocument(id) {
+      this.reset()
+      this.id = id
+      this.dialog = true
+      this.findEditedItem()
+      this.id = null
+      this.editedItem.id = null
     }
   }
 }
