@@ -59,8 +59,8 @@
           >
           </MenuItemButton>
           <MenuItemButton
-            title="Сумма бюджета"
-            link="PaymentDocument"
+            title="Распределение ДС"
+            link="MoneyDistribution"
             icon="mdi-brightness-5"
           >
           </MenuItemButton>
