@@ -2,7 +2,13 @@ export const factory = send => ({
   auth: {
     login(credentials) {
       return send('POST', '', { ...credentials })
-    }
+    },
+
+    user: {
+      get() {
+        return send('GET', '/auth/findByCurrentLogin',)
+      }
+    },
   },
 
   code: {

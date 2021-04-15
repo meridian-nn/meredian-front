@@ -2,7 +2,7 @@
   <v-dialog
     v-model="dialog"
     :value="show"
-    max-width="1000px"
+    max-width="860px"
     @input="$emit('close')"
     class="edit-payment-document-modal"
   >
@@ -39,10 +39,10 @@
 
             <v-col cols="3">
               <v-menu
-                ref="menu"
+                ref="menu1"
                 v-model="menu"
                 :close-on-content-click="false"
-                :return-value.sync="date"
+                :return-value.sync="menu"
                 transition="scale-transition"
                 offset-y
                 min-width="auto"
@@ -75,7 +75,7 @@
                   <v-btn
                     text
                     color="primary"
-                    @click="$refs.menu.save(date)"
+                    @click="$refs.menu1.save(date)"
                   >
                     OK
                   </v-btn>
@@ -115,7 +115,7 @@
                 ref="menu"
                 v-model="menuDataOplat"
                 :close-on-content-click="false"
-                :return-value.sync="date"
+                :return-value.sync="menuDataOplat"
                 transition="scale-transition"
                 offset-y
                 min-width="auto"
@@ -217,7 +217,6 @@
 
             <v-col cols="2">
               <v-text-field
-                readonly="true"
                 v-model="editedItem.sumPaid"
                 type="number"
                 outlined
@@ -240,13 +239,14 @@
                 item-text="clName"
               />
             </v-col>
+
             <v-col cols="2">
               <v-text-field
-                readonly="true"
                 v-model="editedItem.toPay"
                 type="number"
                 outlined
                 label="К оплате"
+                readonly
               />
             </v-col>
           </v-row>
@@ -342,7 +342,7 @@
         <v-btn
           color="blue darken-1"
           text
-          @click="$emit('close')"
+          @click="dialog = false"
         >
           Отмена
         </v-btn>
@@ -361,12 +361,6 @@
 
 <script>
 export default {
-  axiosConfig: {
-    auth: {
-      username: 'admin',
-      password: 'Wtrkop45'
-    }
-  },
   name: 'EditPaymentDocument',
   props: {
     title: {
@@ -378,11 +372,13 @@ export default {
       default: false
     }
   },
+
   data() {
     return {
       menu: false,
       menuDataOplat: false,
       loadingType: {},
+      dataDoc: "",
       departments: [],
       documentTypes: [],
       paymentStatuses: [],
@@ -394,7 +390,42 @@ export default {
       search: null,
       select: null,
       dialog: false,
-      editedItem: {}
+      editedItem: {
+        bnds: true,
+        consumerId: 0,
+        contractId: 0,
+        dataCreate: "",
+        dataDoc: "",
+        dataEdit: "",
+        dataOplat: "",
+        departmentId: 0,
+        descr: "",
+        documentKindId: 0,
+        flagDel: 0,
+        id: 0,
+        ispId: 0,
+        myorgId: 0,
+        nameDoc: "",
+        paymentStatus: "CACHE",
+        podpis: 0,
+        prim: "string",
+        prior: 0,
+        stepId: 0,
+        sumDoc: 0,
+        supplierId: 0,
+        tipDoc: 0,
+        viddocId: 0
+      },
+      axiosConfig: {
+        auth: {
+          username: 'admin',
+          password: 'Wtrkop45'
+        },
+        baseURL: 'http://192.168.1.70:9037/meridian',
+        proxy: true,
+        credentials: false,
+        mode: 'no-cors'
+      }
     }
   },
   watch: {
@@ -405,32 +436,39 @@ export default {
     }
   },
   methods: {
+    formatDate (date) {
+      if (!date) return null
+
+      const [year, month, day] = date.split('-')
+      return `${month}.${day}.${year}`
+    },
     init() {
       this.findDepartments()
       this.findDocumentType()
       this.findPayers()
       this.findPaymentStatuses()
       this.findDocumentKinds()
+      this.findContracts(1)
     },
 
     async findDepartments() {
       if (!this.departments.length) {
         this.loadingType.departments = true
-        this.departments = await this.$axios.$get('/meridian/oper/dict/spViddocopl/findDepartments', this.axiosConfig)
+        this.departments = await this.$axios.$get('http://192.168.1.70:9037/meridian/oper/dict/spViddocopl/findDepartments')
         this.loadingType.departments = null
       }
     },
     async findPaymentStatuses() {
       if (!this.paymentStatuses.length) {
         this.loadingType.paymentStatuses = true
-        this.paymentStatuses = await this.$axios.$get('/meridian/oper/spDocopl/findPaymentStatuses', this.axiosConfig)
+        this.paymentStatuses = await this.$axios.$get('http://192.168.1.70:9037/meridian/oper/spDocopl/findPaymentStatuses')
         this.loadingType.paymentStatuses = null
       }
     },
     async findDocumentType(parentId) {
       if (parentId) {
         this.loadingType.documentTypes = true
-        this.documentTypes = await this.$axios.$get('/meridian/oper/dict/spViddocopl/findByParentId?parentId=' + parentId, this.axiosConfig)
+        this.documentTypes = await this.$axios.$get('http://192.168.1.70:9037/meridian/oper/dict/spViddocopl/findByParentId?parentId=' + parentId)
         this.loadingType.documentTypes = null
       } else {
         this.documentTypes = []
@@ -439,7 +477,7 @@ export default {
     async findExecutors(viddocoplId) {
       if (viddocoplId) {
         this.loadingType.executors = true
-        this.executors = await this.$axios.$get('/meridian/oper/dict/spIsp/findByViddocopl?viddocoplId=' + viddocoplId, this.axiosConfig)
+        this.executors = await this.$axios.$get('http://192.168.1.70:9037/meridian/oper/dict/spIsp/findByViddocopl?viddocoplId=' + viddocoplId)
         this.loadingType.executors = null
       } else {
         this.executors = []
@@ -447,26 +485,26 @@ export default {
     },
     async findSuppliers(dogId) {
       this.loadingType.suppliers = true
-      this.suppliers = await this.$axios.$get('/meridian/oper/dict/spOrg/findByDogId?dogId=' + dogId, this.axiosConfig)
+      this.suppliers = await this.$axios.$get('http://192.168.1.70:9037/meridian/oper/dict/spOrg/findByDogId?dogId=' + dogId)
       this.loadingType.suppliers = null
     },
     async findPayers() {
       if (!this.payers.length) {
         this.loadingType.payers = true
-        this.payers = await this.$axios.$get('/meridian/oper/dict/spOrg/findPayers', this.axiosConfig)
+        this.payers = await this.$axios.$get('http://192.168.1.70:9037/meridian/oper/dict/spOrg/findPayers')
         this.loadingType.payers = null
       }
     },
     async findDocumentKinds() {
       if (!this.documentKinds.length) {
         this.loadingType.documentKinds = true
-        this.documentKinds = await this.$axios.$get('/meridian/oper/dict/spViddoc/findAll', this.axiosConfig)
+        this.documentKinds = await this.$axios.$get('http://192.168.1.70:9037/meridian/oper/dict/spViddoc/findAll')
         this.loadingType.documentKinds = null
       }
     },
     async findContracts(executorId) {
       this.loadingType.contracts = true
-      this.contracts = await this.$axios.$get('/meridian/oper/dogSelDogSpisSpec/findByMyDescr?myDescr=' + executorId, this.axiosConfig)
+      this.contracts = await this.$axios.$get('http://192.168.1.70:9037/meridian/oper/dogSelDogSpisSpec/findByMyDescr?myDescr=' + executorId)
       this.loadingType.contracts = null
     },
     calcSum(val) {
@@ -478,10 +516,16 @@ export default {
     },
     async save() {
       let errorMessage = null
-      await this.$axios.$post('/meridian/oper/spDocopl/save', this.editedItem, this.axiosConfig).catch((error) => {
+      await this.$axios.$post('http://192.168.1.70:9037/meridian/oper/spDocopl/save', {
+        ...this.editedItem,
+        dataCreate: this.formatDate(this.editedItem.dataCreate),
+        dataDoc: this.formatDate(this.editedItem.dataDoc),
+        dataEdit: this.formatDate(this.editedItem.dataEdit),
+        dataOplat: this.formatDate(this.editedItem.dataOplat)
+      }).catch((error) => {
         errorMessage = error
       })
-      if (errorMessage == null) {
+      if (errorMessage === null) {
         this.dialog = false
       }
     },
@@ -491,7 +535,32 @@ export default {
     },
     reset() {
       this.loadingType = {}
-      this.editedItem = {}
+      this.editedItem = {
+        bnds: true,
+          consumerId: 0,
+          contractId: 0,
+          dataCreate: "",
+          dataDoc: "",
+          dataEdit: "",
+          dataOplat: "",
+          departmentId: 0,
+          descr: "",
+          documentKindId: 0,
+          flagDel: 0,
+          id: 0,
+          ispId: 0,
+          myorgId: 0,
+          nameDoc: "",
+          paymentStatus: "",
+          podpis: 0,
+          prim: "",
+          prior: 0,
+          stepId: 0,
+          sumDoc: 0,
+          supplierId: 0,
+          tipDoc: 0,
+          viddocId: 0
+      }
       this.departments = []
       this.documentTypes = []
       this.contracts = []

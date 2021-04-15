@@ -11,8 +11,8 @@ export default {
       commit('SET_USERS', users)
     },
 
-    async fetch({ commit }, id) {
-      const user = await this.$http.$get(`/users/${id}`)
+    async fetch({ commit }) {
+      const user = await this.$api.auth.user.get()
 
       commit('SET_USER', user)
     }

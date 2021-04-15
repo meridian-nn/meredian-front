@@ -106,7 +106,7 @@
               v-on="on"
               class="white--text"
             >
-              Иван Иваныч
+              {{ user.email }}
               <v-icon color="white">
                 mdi-chevron-down
               </v-icon>
@@ -171,7 +171,15 @@ export default {
   },
 
   computed: {
-    keepOpen() { return this.onClickOutside }
+    keepOpen() { return this.onClickOutside },
+
+    user() {
+      return this.$store.state.profile.user
+    }
+  },
+
+  async asyncData({ store }) {
+    await store.dispatch('profile/fetch')
   },
 
   watch: {

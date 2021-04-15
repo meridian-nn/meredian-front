@@ -1,8 +1,9 @@
 import Cookies from 'js-cookie'
 import { timeout } from '~/utils/helpers'
+import { btoa } from 'isomorphic-base64'
 export default {
   state: () => ({
-    token: Cookies.get('JWT'),
+    token: Cookies.get('JWTmeredian'),
     email: null,
     registerParams: {
       email: '',
@@ -17,7 +18,7 @@ export default {
 
         await timeout(500)
 
-        const response = { ...credentials }
+        const response = btoa(`${credentials.username}:${credentials.password}`)
 
         dispatch('saveAuthToken', response)
       } catch (e) {
@@ -26,13 +27,14 @@ export default {
     },
 
     logout() {
-      Cookies.remove('JWT')
+      Cookies.remove('JWTmeredian')
 
       window.location.reload()
     },
 
     saveAuthToken(_, token) {
-      Cookies.set('JWT', token)
+      console.log('test')
+      Cookies.set('JWTmeredian', token)
     },
 
     authorize({ state, getters }, token) {

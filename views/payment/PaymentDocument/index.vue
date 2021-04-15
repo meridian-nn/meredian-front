@@ -1,34 +1,14 @@
 <template>
   <div class="payment-document-page">
-    <v-tabs>
-      <v-tab>Реестр оплат</v-tab>
-
-      <v-tab>Платежи</v-tab>
-    </v-tabs>
-
-    <v-tabs-items>
-      <v-tab-item>
-        Реестр оплат
-      </v-tab-item>
-
-      <v-tab-item>
-        Платежи
-      </v-tab-item>
-    </v-tabs-items>
-
-    <edit-payment-document
-      ref="editPaymentDocument"
-      @close="close"
-      @save="save"
-    />
-
-    <v-btn
-      color="blue"
-      class="mr-2 mb-2"
-      @click="newDocument"
+    <v-data-table
+      :headers="headers"
+      :items="documentList"
+      sort-by="calories"
+      calculate-widths
     >
-      <v-icon>mdi-plus</v-icon>
-    </v-btn>
+    </v-data-table>
+
+    <edit-payment-document ref="editPaymentDocument" />
   </div>
 </template>
 
@@ -39,6 +19,26 @@ export default {
   components: {
     EditPaymentDocument
   },
+
+  async fetch() {
+    this.documentList = await this.$axios.$get('http://192.168.1.70:9037/meridian/oper/dict/spViddocopl/findDepartments')
+  },
+  data() {
+    return {
+      axiosConfig: {
+        auth: {
+          username: 'admin',
+          password: 'Wtrkop45'
+        },
+        baseURL: 'http://192.168.1.70:9037/meridian',
+        proxy: true,
+        credentials: false,
+        mode: 'no-cors'
+      },
+      documentList: []
+    }
+  },
+
   methods: {
     newDocument() {
       this.$refs.editPaymentDocument.newDocument()

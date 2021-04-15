@@ -1,5 +1,5 @@
 import { btoa } from 'isomorphic-base64'
-
+import Cookies from 'js-cookie'
 export default class HttpClient {
   constructor({ url }) {
     this.url = url
@@ -18,12 +18,14 @@ export default class HttpClient {
   }
 
   config(method, params = {}) {
+    console.log(this.headers)
     return {
       method,
       ...(method === 'POST' && {
         body: JSON.stringify(params)
       }),
-      headers: this.headers
+      headers: this.headers,
+      mode: 'no-cors'
     }
   }
 
