@@ -7,7 +7,7 @@
     class="edit-payment-document-modal"
     @input="$emit('close')"
   >
-    <template #activator="{ on, attrs }">
+    <!--template #activator="{ on, attrs }">
       <v-fab-transition>
         <v-btn
           color="blue"
@@ -25,7 +25,7 @@
           <v-icon>mdi-plus</v-icon>
         </v-btn>
       </v-fab-transition>
-    </template>
+    </template-->
 
     <v-card class="modal-card">
       <v-card-title>
@@ -42,44 +42,11 @@
             </v-col>
 
             <v-col cols="2">
-              <v-menu
-                ref="menu"
-                v-model="menu"
-                :close-on-content-click="false"
-                :return-value.sync="date"
-                transition="scale-transition"
-                offset-y
-                min-width="auto"
-              >
-                <template #activator="{ on, attrs }">
-                  <v-text-field
-                    v-model="editedItem.dataDoc"
-                    prepend-icon="mdi-calendar"
-                    readonly
-                    v-bind="attrs"
-                    outlined
-                    v-on="on"
-                  />
-                </template>
-                <v-date-picker
-                  v-model="editedItem.dataDoc"
-                  no-title
-                  scrollable
-                  locale="ru-ru"
-                >
-                  <v-spacer />
-                  <!--v-btn text color="primary" @click="menu = false">
-                    Отмена
-                  </v-btn-->
-                  <v-btn
-                    text
-                    color="primary"
-                    @click="$refs.menu.save(date)"
-                  >
-                    OK
-                  </v-btn>
-                </v-date-picker>
-              </v-menu>
+              <v-text-field
+                v-model="editedItem.dataDoc"
+                type="date"
+                outlined
+              />
             </v-col>
 
             <v-col cols="3">
@@ -114,44 +81,11 @@
             </v-col>
 
             <v-col cols="2">
-              <v-menu
-                ref="menu"
-                v-model="menuDataOplat"
-                :close-on-content-click="false"
-                :return-value.sync="date"
-                transition="scale-transition"
-                offset-y
-                min-width="auto"
-              >
-                <template #activator="{ on, attrs }">
-                  <v-text-field
-                    v-model="editedItem.dataOplat"
-                    prepend-icon="mdi-calendar"
-                    readonly
-                    v-bind="attrs"
-                    outlined
-                    v-on="on"
-                  />
-                </template>
-                <v-date-picker
-                  v-model="editedItem.dataOplat"
-                  no-title
-                  scrollable
-                  locale="ru-ru"
-                >
-                  <v-spacer />
-                  <!--v-btn text color="primary" @click="menu = false">
-                    Отмена
-                  </v-btn-->
-                  <v-btn
-                    text
-                    color="primary"
-                    @click="$refs.menu.save(date)"
-                  >
-                    OK
-                  </v-btn>
-                </v-date-picker>
-              </v-menu>
+              <v-text-field
+                v-model="editedItem.dataOplat"
+                type="date"
+                outlined
+              />
             </v-col>
 
             <v-col cols="3" />

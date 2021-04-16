@@ -6,10 +6,12 @@
       @save="savePaymentDocument"
     />
     <v-card>
-      <v-card-text>
-        <v-container>
+      <v-card-text class="journal-of-payment-docs-card-text">
+        <v-container
+          class="journal-of-payment-docs-container"
+        >
           <v-row>
-            <v-col cols="10">
+            <v-col cols="11">
               <div
                 align="center"
                 class="headline"
@@ -17,16 +19,20 @@
                 Журнал документов на оплату
               </div>
             </v-col>
-            <v-col cols="2">
+
+            <v-col cols="1">
               <div
-                align="center"
+                align="right"
               >
                 {{ date }}
               </div>
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="10">
+            <v-col
+              cols="10"
+              class="journal-of-payment-docs-table-of-accounts-statistics"
+            >
               <v-data-table
                 :headers="orgAccInfoHeaders"
                 :items="orgAccInfoData"
@@ -34,12 +40,20 @@
                 class="elevation-1"
               />
             </v-col>
-            <v-col cols="1">
-              <v-btn
-                @click="restAccountClick"
+
+            <v-col
+              cols="2"
+              class="journal-of-payment-docs-table-of-accounts-statistics-enter-balances"
+            >
+              <div
+                align="right"
               >
-                Ввод остатков по Р/С
-              </v-btn>
+                <v-btn
+                  @click="restAccountClick"
+                >
+                  Ввод остатков по Р/С
+                </v-btn>
+              </div>
             </v-col>
           </v-row>
           <v-row>
@@ -53,12 +67,13 @@
                 @change="organizationChange"
               />
             </v-col>
+            <v-col cols="7" />
           </v-row>
           <v-row>
             <v-col cols="5">
               <v-autocomplete
                 v-model="accId"
-                label="расч. счет"
+                label="Расч. счёт"
                 :loading="loadingType.paymentAccounts"
                 :items="paymentAccounts"
                 item-value="id"
@@ -66,12 +81,21 @@
                 @change="paymentAccountChange"
               />
             </v-col>
-            <v-col cols="5">
+
+            <v-col cols="7">
               <span class="headline">{{ paymentAccountInfo }}</span>
             </v-col>
           </v-row>
+
           <v-row>
-            <v-col cols="5">
+            <v-col
+              cols="5"
+              class="docs-to-pay-col"
+            >
+              <v-subheader class="font-weight-medium text-subtitle-1">
+                Документы к оплате
+              </v-subheader>
+
               <v-data-table
                 v-model="toPaySelectedRows"
                 :headers="toPayHeaders"
@@ -79,8 +103,7 @@
                 :items-per-page="50"
                 :show-select="true"
                 :single-select="false"
-                class="elevation-1"
-                caption="Документы к оплате"
+                class="elevation-1 docs-to-pay-table"
                 @contextmenu:row="showPayMenu"
               >
                 <template slot="body.append">
@@ -109,22 +132,45 @@
                 </v-menu>
               </v-data-table>
             </v-col>
-            <v-col cols="1">
-              <v-btn
-                width="10"
-                @click="addPaymentsClick"
-              >
-                &#x2190;
-              </v-btn>
-              <br>
-              <v-btn
-                width="10"
-                @click="deleteSelectedPayments"
-              >
-                &#x2192;
-              </v-btn>
+
+            <v-col
+              cols="1"
+              class="arrows"
+            >
+              <div align="center">
+                <v-subheader class="font-weight-medium text-subtitle-1" />
+                <v-btn
+                  color="blue"
+                  class="mr-2 mb-2"
+                  fab
+                  dark
+                  small
+
+                  @click="addPaymentsClick"
+                >
+                  <v-icon>mdi-arrow-left</v-icon>
+                </v-btn>
+                <br>
+                <v-btn
+                  color="blue"
+                  class="mr-2 mb-2"
+                  fab
+                  dark
+                  small
+                  @click="deleteSelectedPayments"
+                >
+                  <v-icon>mdi-arrow-right</v-icon>
+                </v-btn>
+              </div>
             </v-col>
-            <v-col cols="5">
+
+            <v-col
+              cols="5"
+              class="docs-from-pay-col"
+            >
+              <v-subheader class="font-weight-medium text-subtitle-1">
+                Документы на оплату
+              </v-subheader>
               <v-data-table
                 v-model="fromPaySelectedRows"
                 :headers="fromPayHeaders"
@@ -132,10 +178,11 @@
                 :show-select="true"
                 :single-select="false"
                 :items-per-page="50"
-                caption="Документы на оплату"
-                class="elevation-1"
+                class="elevation-1 docs-from-pay-table"
               >
-                <template slot="body.append">
+                <template
+                  slot="body.append"
+                >
                   <tr>
                     <th>Итого</th>
                     <th />
@@ -150,43 +197,68 @@
                 </template>
               </v-data-table>
             </v-col>
-            <v-col cols="1">
-              <v-btn
-                color="blue"
-                class="mr-2 mb-2"
-                @click="newDocument"
-              >
-                Н
-              </v-btn>
-              <br>
-              <v-btn
-                color="blue"
-                class="mr-2 mb-2"
-                @click="editDocument"
-              >
-                Р
-              </v-btn>
-              <v-btn
-                color="blue"
-                class="mr-2 mb-2"
-                @click="deleteDocument"
-              >
-                У
-              </v-btn>
-              <v-btn
-                color="blue"
-                class="mr-2 mb-2"
-                @click="copyDocument"
-              >
-                К
-              </v-btn>
+
+            <v-col
+              cols="1"
+              class="buttons-of-payment-docs-table"
+            >
+              <v-subheader class="font-weight-medium text-subtitle-1" />
+              <div align="center">
+                <v-btn
+                  color="blue"
+                  class="mr-2 mb-2"
+                  fab
+                  dark
+                  small
+                  @click="newDocument"
+                >
+                  <v-icon>mdi-plus</v-icon>
+                </v-btn>
+
+                <br>
+                <v-btn
+                  color="blue"
+                  class="mr-2 mb-2"
+                  fab
+                  dark
+                  small
+                  @click="editDocument"
+                >
+                  <v-icon>mdi-file-edit</v-icon>
+                </v-btn>
+
+                <br>
+                <v-btn
+                  color="blue"
+                  class="mr-2 mb-2"
+                  fab
+                  dark
+                  small
+                  @click="copyDocument"
+                >
+                  <v-icon>mdi-content-copy</v-icon>
+                </v-btn>
+
+                <br>
+                <v-btn
+                  color="blue"
+                  class="mr-2 mb-2"
+                  fab
+                  dark
+                  small
+                  @click="deleteDocument"
+                >
+                  <v-icon>mdi-delete-forever</v-icon>
+                </v-btn>
+              </div>
             </v-col>
           </v-row>
           <v-row>
             <v-col cols="5">
               {{ restPaymentAccountInfo }}
             </v-col>
-            <v-col cols="5">
+            <v-col cols="1" />
+            <v-col cols="6">
               <v-text-field
                 label="Комментарий (необходимо описание)"
               />
@@ -212,7 +284,7 @@ export default {
   },
   data() {
     return {
-      date: '01.01.2021',
+      date: '',
       loadingType: {},
       payMenu: false,
       x: 0,
@@ -386,6 +458,7 @@ export default {
       this.findOrganizatios()
       this.findSpDocoplForPay()
       this.findOrgAccInfo()
+      this.updateTime()
     },
     async findOrganizatios() {
       if (!this.organizations.length) {
@@ -456,8 +529,61 @@ export default {
     },
     restAccountClick() {
       alert('необходимо описание')
+    },
+    updateTime() {
+      const today = new Date()
+      let day = today.getDate()
+      let month = today.getUTCMonth() + 1
+      const year = today.getFullYear()
+
+      if (day.toString().length === 1) {
+        day = '0' + day
+      }
+
+      if (month.toString().length === 1) {
+        month = '0' + month
+      }
+
+      this.date = day + '.' + month + '.' + year
     }
   }
-
 }
 </script>
+
+<style lang="scss">
+.journal-of-payment-docs-container{
+  max-width: none;
+}
+.journal-of-payment-docs-card-text{
+  padding: 0px;
+  max-height: 900px;
+}
+.journal-of-payment-docs-table-of-accounts-statistics{
+  padding-right: 0px;
+}
+.journal-of-payment-docs-table-of-accounts-statistics-enter-balances{
+  padding-left: 0px;
+  padding-right: 5px;
+}
+.docs-to-pay-col{
+  padding-right: 0px;
+}
+.docs-from-pay-col{
+  padding-left: 0px;
+  padding-right: 0px;
+}
+.docs-to-pay-table{
+  min-height: 250px;
+}
+.docs-from-pay-table{
+  min-height: 250px;
+}
+.buttons-of-payment-docs-table{
+  padding-left: 0px;
+  padding-right: 0px;
+}
+.arrows{
+  padding-left: 0px;
+  padding-right: 0px;
+}
+</style>
