@@ -65,8 +65,8 @@
           >
           </MenuItemButton>
           <MenuItemButton
-            title="Документы"
-            link="PaymentDocument"
+            title="Ввод остатков"
+            link="InputOfBalances"
             icon="mdi-brightness-5"
           >
           </MenuItemButton>

@@ -20,6 +20,9 @@ export default {
     components: true,
 
     plugins: [
+      '~/plugins/axios',
+      '~/plugins/utils',
+      { src: '~plugins/vue-tables-2.js', ssr: false }
         // { src: '~/plugins/bootstrap', mode: 'client' }
     ],
 
@@ -91,5 +94,7 @@ export default {
         }
     },
 
-    build: {}
+    build: {
+      vendor: ['vue-tables-2']
+    }
 }

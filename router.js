@@ -33,6 +33,8 @@ const PaymentDocumentPage = dynamicPage(() =>
   import('~/views/payment/PaymentDocument'))
 const MoneyDistributionPage = dynamicPage(() =>
   import('~/views/payment/MoneyDistribution'))
+const InputOfBalancesPage = dynamicPage(() =>
+  import('~/views/payment/InputOfBalances'))
 
 Vue.use(Router)
 
@@ -66,6 +68,15 @@ const createRouterConst = new Router({
       path: '',
       name: 'MoneyDistribution',
       component: MoneyDistributionPage
+    }]
+  },
+  {
+    path: '/',
+    component: VcrmPage,
+    children: [{
+      path: '',
+      name: 'InputOfBalances',
+      component: InputOfBalancesPage
     }]
   },
   {

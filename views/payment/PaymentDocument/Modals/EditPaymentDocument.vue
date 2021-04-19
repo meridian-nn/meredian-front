@@ -2,29 +2,96 @@
   <v-dialog
     v-model="dialog"
     :value="show"
-    max-width="1000px"
+    max-width="1200px"
+    padding="0px"
+    class="edit-payment-document-modal"
+    @input="$emit('close')"
   >
+    <template #activator="{ on, attrs }">
+      <v-fab-transition>
+        <v-btn
+          color="blue"
+          class="mr-2 mb-2"
+          fab
+          dark
+          small
+          fixed
+          bottom
+          right
+          v-bind="attrs"
+          v-on="on"
+          @click="dialog = true"
+        >
+          <v-icon>mdi-plus</v-icon>
+        </v-btn>
+      </v-fab-transition>
+    </template>
 
-    <v-card>
+    <v-card class="modal-card">
       <v-card-title>
         <span class="headline">Распределение платежей</span>
       </v-card-title>
+
       <v-card-text>
-        <v-container>
-          <v-row>
+        <v-container class="container-data">
+          <v-row class="border-bottom">
             <v-col cols="2">
-              <v-text-field
-                v-model="editedItem.dataDoc"
-                label="Дата документа"
-              />
+              <v-subheader class="font-weight-medium text-subtitle-1">
+                Дата документа
+              </v-subheader>
             </v-col>
+
             <v-col cols="2">
+              <v-menu
+                ref="menu"
+                v-model="menu"
+                :close-on-content-click="false"
+                :return-value.sync="date"
+                transition="scale-transition"
+                offset-y
+                min-width="auto"
+              >
+                <template #activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="editedItem.dataDoc"
+                    prepend-icon="mdi-calendar"
+                    readonly
+                    v-bind="attrs"
+                    outlined
+                    v-on="on"
+                  />
+                </template>
+                <v-date-picker
+                  v-model="editedItem.dataDoc"
+                  no-title
+                  scrollable
+                  locale="ru-ru"
+                >
+                  <v-spacer />
+                  <!--v-btn text color="primary" @click="menu = false">
+                    Отмена
+                  </v-btn-->
+                  <v-btn
+                    text
+                    color="primary"
+                    @click="$refs.menu.save(date)"
+                  >
+                    OK
+                  </v-btn>
+                </v-date-picker>
+              </v-menu>
+            </v-col>
+
+            <v-col cols="3">
               <v-text-field
                 v-model="editedItem.nameDoc"
                 label="Номер документа"
+                outlined
+                hide-details="auto"
               />
             </v-col>
-            <v-col cols="4">
+
+            <v-col cols="5">
               <v-autocomplete
                 v-model="editedItem.departmentId"
                 label="Подразделение"
@@ -32,18 +99,64 @@
                 :items="departments"
                 item-value="id"
                 item-text="nameViddoc"
+                outlined
+                hide-details="auto"
                 @change="departmentChange"
               />
             </v-col>
           </v-row>
-          <v-row>
+
+          <v-row class="border-bottom">
             <v-col cols="2">
-              <v-text-field
-                v-model="editedItem.dataOplat"
-                label="Оплатить до"
-              />
+              <v-subheader class="font-weight-medium text-subtitle-1">
+                Оплатить до
+              </v-subheader>
             </v-col>
-            <v-col cols="4">
+
+            <v-col cols="2">
+              <v-menu
+                ref="menu"
+                v-model="menuDataOplat"
+                :close-on-content-click="false"
+                :return-value.sync="date"
+                transition="scale-transition"
+                offset-y
+                min-width="auto"
+              >
+                <template #activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="editedItem.dataOplat"
+                    prepend-icon="mdi-calendar"
+                    readonly
+                    v-bind="attrs"
+                    outlined
+                    v-on="on"
+                  />
+                </template>
+                <v-date-picker
+                  v-model="editedItem.dataOplat"
+                  no-title
+                  scrollable
+                  locale="ru-ru"
+                >
+                  <v-spacer />
+                  <!--v-btn text color="primary" @click="menu = false">
+                    Отмена
+                  </v-btn-->
+                  <v-btn
+                    text
+                    color="primary"
+                    @click="$refs.menu.save(date)"
+                  >
+                    OK
+                  </v-btn>
+                </v-date-picker>
+              </v-menu>
+            </v-col>
+
+            <v-col cols="3" />
+
+            <v-col cols="5">
               <v-autocomplete
                 v-model="editedItem.viddocId"
                 label="Тип документа"
@@ -51,132 +164,199 @@
                 :items="documentTypes"
                 item-value="id"
                 item-text="nameViddoc"
+                outlined
               />
             </v-col>
           </v-row>
+
           <v-row>
-            <v-col cols="4">
+            <v-col cols="2">
+              <v-subheader class="font-weight-medium text-subtitle-1">
+                Поставщик
+              </v-subheader>
+            </v-col>
+
+            <v-col cols="5">
               <v-autocomplete
                 v-model="editedItem.ispId"
-                label="Исполнитель"
+                label="Поставщик"
                 :loading="loadingType.executors"
                 :items="executors"
                 item-value="id"
                 item-text="fio"
+                outlined
+                hide-details="auto"
                 @change="findContracts"
               />
             </v-col>
-            <v-col cols="2">
+            <v-col cols="5">
               <v-text-field
                 v-model="editedItem.sumDoc"
                 type="number"
                 label="Сумма по договору"
+                outlined
+                hide-details="auto"
                 @input="calcSum"
               />
             </v-col>
           </v-row>
-          <v-row>
-            <v-col cols="10">
-              <v-autocomplete
-                v-model="editedItem.contractId"
-                label="Договор"
-                :loading="loadingType.contracts"
-                :items="contracts"
-                item-value="id"
-                item-text="numDogInt"
-                @change="findSuppliers"
-              />
-            </v-col>
-            <v-col cols="2">
-              <v-text-field
-                readonly="true"
-                v-model="editedItem.sumPaid"
-                type="number"
-                label="Оплачено"
-              />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="4">
-              <v-autocomplete
-                v-model="editedItem.supplierId"
-                label="Поставщик"
-                :loading="loadingType.suppliers"
-                :items="suppliers"
-                item-value="id"
-                item-text="clName"
-              />
-            </v-col>
-            <v-col cols="2">
-              <v-text-field
-                readonly="true"
-                v-model="editedItem.toPay"
-                type="number"
-                label="К оплате"
-              />
-            </v-col>
-          </v-row>
+        </v-container>
+      </v-card-text>
+
+      <v-card-text>
+        <v-container class="container-data">
           <v-row>
             <v-col cols="6">
-              <v-autocomplete
-                label="Плательшик"
-                v-model="editedItem.myorgId"
-                :loading="loadingType.payers"
-                :items="payers"
-                item-value="id"
-                item-text="clName"
-              />
+              <v-row>
+                <v-col cols="3">
+                  <v-subheader class="font-weight-medium text-subtitle-1">
+                    Плательщик
+                  </v-subheader>
+                </v-col>
+
+                <v-col cols="6">
+                  <v-autocomplete
+                    v-model="editedItem.contractId"
+                    label="Договор"
+                    :loading="loadingType.contracts"
+                    :items="contracts"
+                    item-value="id"
+                    item-text="numDogInt"
+                    outlined
+                    hide-details="auto"
+                    @change="findSuppliers"
+                  />
+                </v-col>
+                <v-col cols="3">
+                  <v-text-field
+                    v-model="editedItem.sumPaid"
+                    readonly="true"
+                    type="number"
+                    label="Оплачено"
+                    hide-details="auto"
+                    outlined
+                  />
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-col cols="3" />
+
+                <v-col cols="6">
+                  <v-autocomplete
+                    v-model="editedItem.supplierId"
+                    label="Поставщик"
+                    :loading="loadingType.suppliers"
+                    :items="suppliers"
+                    item-value="id"
+                    item-text="clName"
+                    hide-details="auto"
+                    outlined
+                  />
+                </v-col>
+                <v-col cols="3">
+                  <v-text-field
+                    v-model="editedItem.toPay"
+                    readonly="true"
+                    type="number"
+                    label="К оплате"
+                    hide-details="auto"
+                    outlined
+                  />
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-col cols="3" />
+
+                <v-col cols="9">
+                  <v-autocomplete
+                    v-model="editedItem.myorgId"
+                    label="Плательшик"
+                    :loading="loadingType.payers"
+                    :items="payers"
+                    item-value="id"
+                    item-text="clName"
+                    hide-details="auto"
+                    outlined
+                  />
+                </v-col>
+              </v-row>
             </v-col>
+
             <v-col cols="6">
-              <v-checkbox
-                label="Без НДС"
-                v-model="editedItem.bnds"
-                color="primary"
-                :ripple="false"
-                dense
-              />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="6">
-              <v-autocomplete
-                v-model="editedItem.consumerId"
-                label="Клиент, для кого поставка"
-                :loading="loadingType.suppliers"
-                :items="suppliers"
-                item-value="id"
-                item-text="clName"
-              />
-            </v-col>
-            <v-col cols="6">
-              <v-autocomplete
-                v-model="editedItem.documentKindId"
-                label="Вид документа"
-                :loading="loadingType.documentKinds"
-                :items="documentKinds"
-                item-value="id"
-                item-text="nameViddoc"
-              />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="6">
-              <v-autocomplete
-                v-model="editedItem.paymentStatus"
-                label="Статус платежа"
-                :loading="loadingType.paymentStatuses"
-                :items="paymentStatuses"
-                item-value="name"
-                item-text="label"
-              />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="10">
-              <v-text-field
-                v-model="editedItem.prim"
-                label="Примечание"
-              />
+              <v-row>
+                <v-col cols="3">
+                  <v-subheader class="font-weight-medium text-subtitle-1">
+                    Клиент, для кого поставка
+                  </v-subheader>
+                </v-col>
+
+                <v-col cols="6">
+                  <v-autocomplete
+                    v-model="editedItem.consumerId"
+                    label="Клиент, для кого поставка"
+                    :loading="loadingType.suppliers"
+                    :items="suppliers"
+                    item-value="id"
+                    item-text="clName"
+                    hide-details="auto"
+                    outlined
+                  />
+                </v-col>
+                <v-col cols="3">
+                  <v-autocomplete
+                    v-model="editedItem.documentKindId"
+                    label="Вид документа"
+                    :loading="loadingType.documentKinds"
+                    :items="documentKinds"
+                    item-value="id"
+                    item-text="nameViddoc"
+                    hide-details="auto"
+                    outlined
+                  />
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-col cols="3" />
+
+                <v-col cols="6">
+                  <v-autocomplete
+                    v-model="editedItem.paymentStatus"
+                    label="Статус платежа"
+                    :loading="loadingType.paymentStatuses"
+                    :items="paymentStatuses"
+                    item-value="name"
+                    item-text="label"
+                    hide-details="auto"
+                    outlined
+                  />
+                </v-col>
+                <v-col cols="3">
+                  <v-checkbox
+                    v-model="editedItem.bnds"
+                    label="Без НДС"
+                    color="primary"
+                    :ripple="false"
+                    dense
+                    hide-details="auto"
+                    outlined
+                  />
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="3" />
+                <v-col cols="9">
+                  <v-text-field
+                    v-model="editedItem.prim"
+                    label="Примечание"
+                    auto-grow
+                    hide-details="auto"
+                    outlined
+                  />
+                </v-col>
+              </v-row>
             </v-col>
           </v-row>
         </v-container>
@@ -251,7 +431,9 @@ export default {
     },
     async findEditedItem() {
       if (this.id) {
-        const editedItem = await this.$axios.$get('/meridian/oper/spDocopl/findById/' + this.id)
+        const editedItem = await this.$axios.$get(
+          '/meridian/oper/spDocopl/findById/' + this.id
+        )
         this.findDocumentType(editedItem.departmentId)
         this.findExecutors(editedItem.departmentId)
         this.findSuppliers(editedItem.contractId)
@@ -263,21 +445,27 @@ export default {
     async findDepartments() {
       if (!this.departments.length) {
         this.loadingType.departments = true
-        this.departments = await this.$axios.$get('/meridian/oper/dict/spViddocopl/findDepartments')
+        this.departments = await this.$axios.$get(
+          '/meridian/oper/dict/spViddocopl/findDepartments'
+        )
         this.loadingType.departments = null
       }
     },
     async findPaymentStatuses() {
       if (!this.paymentStatuses.length) {
         this.loadingType.paymentStatuses = true
-        this.paymentStatuses = await this.$axios.$get('/meridian/oper/spDocopl/findPaymentStatuses')
+        this.paymentStatuses = await this.$axios.$get(
+          '/meridian/oper/spDocopl/findPaymentStatuses'
+        )
         this.loadingType.paymentStatuses = null
       }
     },
     async findDocumentType(parentId) {
       if (parentId) {
         this.loadingType.documentTypes = true
-        this.documentTypes = await this.$axios.$get('/meridian/oper/dict/spViddocopl/findByParentId?parentId=' + parentId)
+        this.documentTypes = await this.$axios.$get(
+          '/meridian/oper/dict/spViddocopl/findByParentId?parentId=' + parentId
+        )
         this.loadingType.documentTypes = null
       } else {
         this.documentTypes = []
@@ -286,7 +474,9 @@ export default {
     async findExecutors(viddocoplId) {
       if (viddocoplId) {
         this.loadingType.executors = true
-        this.executors = await this.$axios.$get('/meridian/oper/dict/spIsp/findByViddocopl?viddocoplId=' + viddocoplId)
+        this.executors = await this.$axios.$get(
+          '/meridian/oper/dict/spIsp/findByViddocopl?viddocoplId=' + viddocoplId
+        )
         this.loadingType.executors = null
       } else {
         this.executors = []
@@ -294,26 +484,34 @@ export default {
     },
     async findSuppliers(dogId) {
       this.loadingType.suppliers = true
-      this.suppliers = await this.$axios.$get('/meridian/oper/dict/spOrg/findByDogId?dogId=' + dogId)
+      this.suppliers = await this.$axios.$get(
+        '/meridian/oper/dict/spOrg/findByDogId?dogId=' + dogId
+      )
       this.loadingType.suppliers = null
     },
     async findPayers() {
       if (!this.payers.length) {
         this.loadingType.payers = true
-        this.payers = await this.$axios.$get('/meridian/oper/dict/spOrg/findPayers')
+        this.payers = await this.$axios.$get(
+          '/meridian/oper/dict/spOrg/findPayers'
+        )
         this.loadingType.payers = null
       }
     },
     async findDocumentKinds() {
       if (!this.documentKinds.length) {
         this.loadingType.documentKinds = true
-        this.documentKinds = await this.$axios.$get('/meridian/oper/dict/spViddoc/findAll')
+        this.documentKinds = await this.$axios.$get(
+          '/meridian/oper/dict/spViddoc/findAll'
+        )
         this.loadingType.documentKinds = null
       }
     },
     async findContracts(executorId) {
       this.loadingType.contracts = true
-      this.contracts = await this.$axios.$get('/meridian/oper/dogSelDogSpisSpec/findByMyDescr?myDescr=' + executorId)
+      this.contracts = await this.$axios.$get(
+        '/meridian/oper/dogSelDogSpisSpec/findByMyDescr?myDescr=' + executorId
+      )
       this.loadingType.contracts = null
     },
     calcSum(val) {
@@ -325,10 +523,16 @@ export default {
     },
     async save() {
       let errorMessage = null
-      await this.$axios.$post('/meridian/oper/spDocopl/save', this.editedItem, this.axiosConfig).catch((error) => {
-        errorMessage = error
-        alert(errorMessage)
-      })
+      await this.$axios
+        .$post(
+          '/meridian/oper/spDocopl/save',
+          this.editedItem,
+          this.axiosConfig
+        )
+        .catch((error) => {
+          errorMessage = error
+          alert(errorMessage)
+        })
       if (errorMessage == null) {
         this.dialog = false
       }
@@ -367,3 +571,34 @@ export default {
   }
 }
 </script>
+<style lang="scss">
+  .container-data {
+    margin-left: 0px;
+    max-width: none;
+  }
+  .modal-card {
+    max-width: 1200px;
+  }
+  .border-bottom {
+    position: relative;
+    flex-wrap: nowrap;
+  }
+  .border-bottom::after {
+    content: '';
+    position: absolute;
+    bottom: 8px;
+    left: 30px;
+    right: 10px;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+  .v-card-text{
+    padding: 0px;
+  }
+  .col{
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 0px;
+  }
+</style>
