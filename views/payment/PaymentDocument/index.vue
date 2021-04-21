@@ -11,7 +11,7 @@
           class="journal-of-payment-docs-container"
         >
           <v-row>
-            <v-col cols="11">
+            <v-col cols="10">
               <div
                 align="center"
                 class="headline"
@@ -20,12 +20,12 @@
               </div>
             </v-col>
 
-            <v-col cols="1">
-              <div
-                align="right"
-              >
-                {{ date }}
-              </div>
+            <v-col cols="2">
+              <v-text-field
+                v-model="date"
+                type="date"
+                @input="updateAllInfo()"
+              />
             </v-col>
           </v-row>
           <v-row>
@@ -87,10 +87,9 @@
             </v-col>
           </v-row>
 
-          <v-row>
+          <v-row class="journal-of-payment-docs-tables-row">
             <v-col
-              cols="5"
-              class="docs-to-pay-col"
+              class="journal-of-payment-docs-docs-to-pay-col journal-of-payment-docs-col-5"
             >
               <v-subheader class="font-weight-medium text-subtitle-1">
                 Документы к оплате
@@ -100,10 +99,10 @@
                 v-model="toPaySelectedRows"
                 :headers="toPayHeaders"
                 :items="toPayData"
-                :items-per-page="50"
+                :items-per-page="5"
                 :show-select="true"
                 :single-select="false"
-                class="elevation-1 docs-to-pay-table"
+                class="elevation-1 journal-of-payment-docs-docs-to-pay-table"
                 @contextmenu:row="showPayMenu"
               >
                 <template slot="body.append">
@@ -134,8 +133,7 @@
             </v-col>
 
             <v-col
-              cols="1"
-              class="arrows"
+              class="journal-of-payment-docs-arrows journal-of-payment-docs-col-1"
             >
               <div align="center">
                 <v-subheader class="font-weight-medium text-subtitle-1" />
@@ -165,8 +163,7 @@
             </v-col>
 
             <v-col
-              cols="5"
-              class="docs-from-pay-col"
+              class="journal-of-payment-docs-docs-from-pay-col journal-of-payment-docs-col-5"
             >
               <v-subheader class="font-weight-medium text-subtitle-1">
                 Документы на оплату
@@ -177,8 +174,8 @@
                 :items="fromPayData"
                 :show-select="true"
                 :single-select="false"
-                :items-per-page="50"
-                class="elevation-1 docs-from-pay-table"
+                :items-per-page="5"
+                class="elevation-1 journal-of-payment-docs-docs-from-pay-table"
               >
                 <template
                   slot="body.append"
@@ -199,8 +196,7 @@
             </v-col>
 
             <v-col
-              cols="1"
-              class="buttons-of-payment-docs-table"
+              class="journal-of-payment-docs-buttons-of-payment-docs-table journal-of-payment-docs-col-1"
             >
               <v-subheader class="font-weight-medium text-subtitle-1" />
               <div align="center">
@@ -284,7 +280,7 @@ export default {
   },
   data() {
     return {
-      date: '',
+      date: new Date().toISOString().substr(0, 10),
       loadingType: {},
       payMenu: false,
       x: 0,
@@ -406,6 +402,18 @@ export default {
     this.init()
   },
   methods: {
+    init() {
+      this.selOplat()
+      this.loadingType = {}
+      this.fromPaySelectedRows = []
+      this.toPaySelectedRows = []
+      this.findOrganizatios()
+      this.findSpDocoplForPay()
+      this.findOrgAccInfo()
+    },
+    updateAllInfo() {
+      this.findSpDocoplForPay()
+    },
     async selOplat() {
       await this.$axios.$post('/meridian/oper/spDocopl/selOplat', this.axiosConfig)
     },
@@ -450,16 +458,6 @@ export default {
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
     },
-    init() {
-      this.selOplat()
-      this.loadingType = {}
-      this.fromPaySelectedRows = []
-      this.toPaySelectedRows = []
-      this.findOrganizatios()
-      this.findSpDocoplForPay()
-      this.findOrgAccInfo()
-      this.updateTime()
-    },
     async findOrganizatios() {
       if (!this.organizations.length) {
         this.loadingType.organizations = true
@@ -478,7 +476,10 @@ export default {
       this.loadingType.paymentAccounts = null
     },
     async findSpDocoplForPay() {
-      this.fromPayData = await this.$axios.$get('/meridian/oper/spDocopl/findSpDocoplForPay', this.axiosConfig)
+      const data = {
+        dateDoc: new Date(this.date).toLocaleDateString()
+      }
+      this.fromPayData = await this.$axios.$get('/meridian/oper/spDocopl/findSpDocoplForPay', { params: data })
       let totalSumDoc = 0
       let totalSumOplat = 0
       this.fromPayData.forEach((value) => {
@@ -551,12 +552,19 @@ export default {
 </script>
 
 <style lang="scss">
+
+.journal-of-payment-docs-tables-row{
+  margin-top: 0px;
+}
 .journal-of-payment-docs-container{
+  padding-top: 0px;
+  padding-right: 0px;
+  padding-bottom: 0px;
   max-width: none;
 }
 .journal-of-payment-docs-card-text{
   padding: 0px;
-  max-height: 900px;
+  max-height: 1000px;
 }
 .journal-of-payment-docs-table-of-accounts-statistics{
   padding-right: 0px;
@@ -565,25 +573,44 @@ export default {
   padding-left: 0px;
   padding-right: 5px;
 }
-.docs-to-pay-col{
+.journal-of-payment-docs-docs-to-pay-col{
+  padding-top: 0px;
   padding-right: 0px;
 }
-.docs-from-pay-col{
+.journal-of-payment-docs-docs-from-pay-col{
+  padding-top: 0px;
   padding-left: 0px;
   padding-right: 0px;
 }
-.docs-to-pay-table{
+.journal-of-payment-docs-docs-to-pay-table{
   min-height: 250px;
 }
-.docs-from-pay-table{
+.journal-of-payment-docs-docs-from-pay-table{
   min-height: 250px;
+  max-height: 1000px;
 }
-.buttons-of-payment-docs-table{
+.journal-of-payment-docs-buttons-of-payment-docs-table{
+  padding-top: 0px;
   padding-left: 0px;
   padding-right: 0px;
 }
-.arrows{
+.journal-of-payment-docs-arrows{
+  padding-top: 0px;
   padding-left: 0px;
   padding-right: 0px;
+}
+.journal-of-payment-docs-col-1 {
+    flex: 0 0 8.3333333333%;
+    max-width: 3.5%;
+}
+.journal-of-payment-docs-col-5 {
+    flex: 0 0 41.6666666667%;
+    max-width: 46%;
+}
+.journal-of-payment-docs-row {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+    margin: -12px;
 }
 </style>

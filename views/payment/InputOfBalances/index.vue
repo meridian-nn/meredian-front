@@ -13,8 +13,8 @@
           </v-col>
           <v-col cols="2">
             <v-text-field
-              type="date"
               v-model="date"
+              type="date"
               @input="init"
             />
           </v-col>
@@ -22,11 +22,10 @@
         <v-row>
           <v-col cols="8">
             <v-client-table
+              v-model="groupByOrgData"
               :columns="groupByOrgColumns"
               :options="groupByOrgOptions"
-              v-model="groupByOrgData"
-            >
-            </v-client-table>
+            />
           </v-col>
         </v-row>
         <v-row>
@@ -45,50 +44,50 @@
         <v-row>
           <v-col cols="8">
             <v-client-table
+              v-model="oplatData"
               :columns="oplatDataColumns"
               :options="oplatDataOptions"
-              v-model="oplatData"
             >
               <input
-                type="number"
                 slot="saldo"
-                slot-scope="{row, update}"
                 v-model="row.saldo"
+                slot-scope="{row, update}"
+                type="number"
                 @input="update(row.saldo)"
               >
               <input
-                type="number"
                 slot="nalich"
-                slot-scope="{row, update}"
                 v-model="row.nalich"
+                slot-scope="{row, update}"
+                type="number"
                 @input="update(row.nalich)"
               >
               <input
-                type="number"
                 slot="vnpl"
-                slot-scope="{row, update}"
                 v-model="row.vnpl"
+                slot-scope="{row, update}"
+                type="number"
                 @input="update(row.vnpl)"
               >
               <input
-                type="number"
                 slot="credit"
-                slot-scope="{row, update}"
                 v-model="row.credit"
+                slot-scope="{row, update}"
+                type="number"
                 @input="update(row.credit)"
               >
               <input
-                type="number"
                 slot="endBalance"
-                slot-scope="{row, update}"
                 v-model="row.endBalance"
+                slot-scope="{row, update}"
+                type="number"
                 @input="update(row.endBalance)"
               >
               <input
-                type="number"
                 slot="overdraft"
-                slot-scope="{row, update}"
                 v-model="row.overdraft"
+                slot-scope="{row, update}"
+                type="number"
                 @input="update(row.overdraft)"
               >
             </v-client-table>

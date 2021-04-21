@@ -1,9 +1,13 @@
 <template>
   <v-card>
-    <v-card-text>
-      <v-container>
+    <v-card-text class="money-distribution-card-text">
+      <v-container
+        class="money-distribution-container"
+      >
         <v-row>
-          <v-col cols="10">
+          <v-col
+            cols="10"
+          >
             <div
               align="center"
               class="headline"
@@ -11,110 +15,216 @@
               Распределение ДС по подразделениям
             </div>
           </v-col>
-          <v-col cols="2">
-              <v-text-field
-                type="date"
-                v-model="date"
-              />
-          </v-col>
-        </v-row>
-        <v-row class="border-bottom">
-          <v-col cols="3">
-            <v-subheader class="font-weight-medium text-subtitle-1">
-              Бюджет для распределения
-            </v-subheader>
-          </v-col>
-          <v-col cols="3">
-            <div>
-              <v-text-field
-                type="number"
-                v-model="budget.distributionSum"
-              />
-            </div>
-          </v-col>
-          <v-col cols="3">
-            <v-subheader class="font-weight-medium text-subtitle-1">
-              Не распределено
-            </v-subheader>
-          </v-col>
-          <v-col cols="3">
-            <div>
-              {{ budgetRestDistributionSum }}
-            </div>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="3">
-            <v-autocomplete
-              label="Отдел"
-              :loading="loadingType.departments"
-              :items="departments"
-              item-value="id"
-              item-text="nameViddoc"
-              outlined
-              hide-details="auto"
-              @change="departmentChange"
-            />
-          </v-col>
-          <v-col cols="2">
-            <v-subheader class="font-weight-medium text-subtitle-1">
-              Выделено
-            </v-subheader>
-          </v-col>
+
           <v-col cols="2">
             <v-text-field
-              type="number"
-              v-model="department.distributionSum"
+              v-model="date"
+              type="date"
+              @input="updateAllInfo()"
             />
           </v-col>
-          <v-col cols="2">
-            <v-subheader class="font-weight-medium text-subtitle-1">
-              Не распределно
-            </v-subheader>
-          </v-col>
-          <v-col cols="3">
-            {{ depurtmentRestDistributionSum }}
+        </v-row>
+
+        <v-row class="budget-for-distribution-border-bottom">
+          <v-col cols="3" />
+
+          <v-col
+            cols="9"
+          >
+            <v-row
+              align="center"
+              justify="center"
+            >
+              <v-col
+                cols="3"
+                class="budget-for-distribution-text"
+              >
+                <div
+                  align="left"
+                >
+                  Бюджет для распределения
+                </div>
+              </v-col>
+
+              <v-col
+                cols="3"
+                class="budget-for-distribution-sum"
+              >
+                <v-text-field
+                  v-model.number="budget.distributionSum"
+                  type="number"
+                  min="0"
+                />
+              </v-col>
+
+              <v-col
+                cols="2"
+                class="not-allocated-text"
+              >
+                <div
+                  align="right"
+                >
+                  Не распределено
+                </div>
+              </v-col>
+
+              <v-col
+                cols="4"
+                class="not-allocated-sum"
+              >
+                <v-subheader class="font-weight-medium text-subtitle-1">
+                  {{ budgetRestDistributionSum }}
+                </v-subheader>
+              </v-col>
+            </v-row>
           </v-col>
         </v-row>
+
         <v-row>
+          <v-col cols="2" />
+
           <v-col cols="8">
-            <v-client-table
-              :columns="columns"
-              :options="options"
-              v-model="moneyDistributionData"
+            <v-row
+              align="center"
+              justify="center"
             >
-              <input
-                type="number"
-                slot="distributionSum"
-                slot-scope="{row, update}"
-                v-model="row.distributionSum"
-                @input="update(row.distributionSum)"
+              <v-col
+                class="dep-col"
+                cols="3"
               >
-              <input
-                type="text"
-                slot="note"
-                slot-scope="{row, update}"
-                v-model="row.note"
-                @input="update(row.note)"
+                <v-autocomplete
+                  v-model="selectedDep"
+                  label="Отдел"
+                  :loading="loadingType.departments"
+                  :items="departments"
+                  item-value="id"
+                  item-text="nameViddoc"
+                  outlined
+                  hide-details="auto"
+                  @change="departmentChange"
+                />
+              </v-col>
+
+              <v-col
+                cols="2"
+                class="dep-for-distribution-text"
               >
-            </v-client-table>
+                <div
+                  align="right"
+                >
+                  Выделено
+                </div>
+              </v-col>
+
+              <v-col
+                cols="3"
+                class="dep-for-distribution-sum"
+              >
+                <v-text-field
+                  v-model.number="department.distributionSum"
+                  type="number"
+                  min="0"
+                />
+              </v-col>
+
+              <v-col
+                cols="2"
+                class="not-allocated-dep-text"
+              >
+                <div
+                  align="right"
+                >
+                  Не распределено
+                </div>
+              </v-col>
+
+              <v-col
+                cols="2"
+                class="not-allocated-dep-sum"
+              >
+                <v-subheader class="font-weight-medium text-subtitle-1">
+                  {{ departmentRestDistributionSum }}
+                </v-subheader>
+              </v-col>
+            </v-row>
           </v-col>
+
+          <v-col cols="2" />
         </v-row>
+
         <v-row>
-          <v-col cols="3">
-            <v-btn
-              @click="cancel"
+          <v-col cols="2" />
+
+          <v-col cols="8">
+            <div
+              align="center"
+              class="headline"
             >
-              Отмена
-            </v-btn>
+              <v-client-table
+                v-model="moneyDistributionData"
+                :columns="columns"
+                :options="options"
+              >
+                <input
+                  slot="distributionSum"
+                  v-model="row.distributionSum"
+                  slot-scope="{row, update}"
+                  type="number"
+                  min="0"
+                  @input="update(row.distributionSum)"
+                >
+                <input
+                  slot="note"
+                  v-model="row.note"
+                  slot-scope="{row, update}"
+                  type="text"
+                  @input="update(row.note)"
+                >
+              </v-client-table>
+            </div>
           </v-col>
-          <v-col cols="3">
-            <v-btn
-              @click="save"
+
+          <v-col cols="2" />
+        </v-row>
+
+        <v-row>
+          <v-col cols="3" />
+
+          <v-col
+            cols="3"
+            class="money-distribution-save-button"
+          >
+            <div
+              align="center"
+              class="headline"
             >
-              Сохранить
-            </v-btn>
+              <v-btn
+                @click="save"
+              >
+                Сохранить
+              </v-btn>
+            </div>
           </v-col>
+
+          <v-col
+            cols="3"
+            class="money-distribution-cancel-button"
+          >
+            <div
+              align="center"
+              class="headline"
+            >
+              <v-btn
+                @click="cancel"
+              >
+                Отмена
+              </v-btn>
+            </div>
+          </v-col>
+
+          <v-col cols="3" />
+        </v-row>
+
         </v-row>
       </v-container>
     </v-card-text>
@@ -130,6 +240,7 @@ export default {
       departments: [],
       loadingType: {},
       department: {},
+      selectedDep: {},
       depDistributedSum: 0,
       budget: {},
       columns: ['department.nameViddoc', 'distributionSum', 'note'],
@@ -150,6 +261,38 @@ export default {
       }
     }
   },
+  computed: {
+    budgetRestDistributionSum() {
+      const budgetDistributedSum = this.budget.restSum < 0 ? Math.abs(this.budget.restSum) - 1 : this.budget.restSum
+
+      const budgetRestDistributionSum = parseInt(this.budget.distributionSum
+        ? this.budget.distributionSum
+        : 0) - budgetDistributedSum
+
+      this.budget.distributedSum = budgetRestDistributionSum
+      return budgetRestDistributionSum
+    },
+
+    departmentRestDistributionSum() {
+      let distributedSum = 0
+      for (let i = 0; i < this.moneyDistributionData.length; i++) {
+        let rowDistSum = parseInt(this.moneyDistributionData[i].distributionSum)
+        rowDistSum = isNaN(rowDistSum) ? 0 : rowDistSum
+        distributedSum = distributedSum + rowDistSum
+      }
+      /* this.department.getDistributedSum = this.moneyDistributionData.length === 0
+        ? 0
+        : this.moneyDistributionData.reduce((a, b) => this.$numOr0(a.distributionSum) + this.$numOr0(b.distributionSum)) */
+
+      this.department.getDistributedSum = distributedSum
+
+      this.department.distributedSum = (this.department.getDistributedSum - this.department.distributedSum)
+      const departmentRestDistributionSum = parseInt(this.department.distributionSum
+        ? this.department.distributionSum
+        : 0) - parseInt(this.department.distributedSum ? this.department.distributedSum : 0)
+      return departmentRestDistributionSum >= 0 ? departmentRestDistributionSum : 0
+    }
+  },
   mounted() {
     this.init()
   },
@@ -158,6 +301,11 @@ export default {
       this.findDepartments()
       this.department = {}
       this.findBudgetByDate()
+    },
+    updateAllInfo() {
+      this.init()
+      this.findBudgetByDate()
+      this.departmentChange(this.selectedDep)
     },
     async loadMoneyDistribution(val) {
       const data = {
@@ -171,6 +319,7 @@ export default {
       const data = {
         distributionDate: new Date(this.date).toLocaleDateString()
       }
+      console.log(new Date(this.date).toLocaleDateString())
       this.budget = await this.$axios.$get('/meridian/oper/depMoneyDistribution/findBudgetByDate', { params: data })
     },
     async findDepartments(val) {
@@ -192,13 +341,13 @@ export default {
     departmentChange(val) {
       this.loadMoneyDistribution(val)
       this.findByDepartmentId(val)
-      this.depDistributedSum = this.department.getDistributedSum
+      this.depDistributedSum = this.department.distributedSum
     },
     getDateForSave() {
       return new Date(this.date).toLocaleDateString()
     },
     cancel() {
-      this.init()
+      this.updateAllInfo()
     },
     async save() {
       this.budget.distributionDate = this.getDateForSave()
@@ -209,25 +358,137 @@ export default {
       await this.$axios.$post('/meridian/oper/depMoneyDistribution/save', this.moneyDistributionData)
       this.loadMoneyDistribution(this.department.department.id)
     }
-  },
-  computed: {
-    budgetRestDistributionSum() {
-      this.department.getDistributedSum = this.moneyDistributionData.length === 0
-        ? 0
-        : this.moneyDistributionData.reduce((a, b) => this.$numOr0(a.distributionSum) + this.$numOr0(b.distributionSum))
-      this.budget.distributedSum += (this.department.getDistributedSum - this.depDistributedSum)
-      return this.budget.distributionSum
-        ? this.budget.distributionSum
-        : 0 - this.budget.distributedSum ? this.budget.distributedSum : 0
-    },
-    depurtmentRestDistributionSum() {
-      this.department.getDistributedSum = this.moneyDistributionData.length === 0
-        ? 0
-        : this.moneyDistributionData.reduce((a, b) => this.$numOr0(a.distributionSum) + this.$numOr0(b.distributionSum))
-      return this.department.distributionSum
-        ? this.department.distributionSum
-        : 0 - this.department.distributedSum ? this.department.distributedSum : 0
-    }
   }
 }
 </script>
+
+<style lang="scss">
+.money-distribution-save-button{
+  padding-left: 0px;
+}
+.money-distribution-cancel-button{
+  padding-left: 0px;
+}
+.money-distribution-container{
+  max-width: none;
+}
+.money-distribution-table{
+  min-width: 1200px;
+}
+.budget-for-distribution-text{
+  padding-left: 0px;
+  padding-right: 8px;
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+}
+.budget-for-distribution-sum{
+  padding-left: 0px;
+  padding-right: 0px;
+}
+.budget-for-distribution-border-bottom {
+  padding-bottom: 15px;
+  position: relative;
+  flex-wrap: nowrap;
+}
+.budget-for-distribution-border-bottom::after {
+    content: '';
+    position: absolute;
+    bottom: 8px;
+    left: 30px;
+    right: 10px;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+.dep-for-distribution-text{
+  padding-left: 0px;
+  padding-right: 16px;
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+}
+.dep-for-distribution-sum{
+  padding-left: 0px;
+  padding-right: 0px;
+}
+.not-allocated-text{
+  padding-left: 0px;
+  padding-right: 0px;
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+}
+.not-allocated-sum{
+  padding-left: 0px;
+  padding-right: 0px;
+}
+.not-allocated-dep-text{
+  padding-left: 0px;
+  padding-right: 0px;
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+}
+.not-allocated-dep-sum{
+  padding-left: 0px;
+  padding-right: 0px;
+}
+.money-distribution-card-text{
+  min-height: 750px;
+  padding: 0px;
+}
+
+.dep-tree-col{
+  padding-top:0px;
+}
+.dep-col{
+  padding-left:0px;
+  padding-top:0px;
+}
+.zero-padding{
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+th,
+td {
+  text-align: left;
+}
+
+th:nth-child(n+2),
+td:nth-child(n+2) {
+  text-align: center;
+}
+
+thead tr:nth-child(2) th {
+  font-weight: normal;
+}
+
+.VueTables__sort-icon {
+  margin-left: 10px;
+}
+
+.VueTables__dropdown-pagination {
+  margin-left: 10px;
+}
+
+.VueTables__highlight {
+  background: yellow;
+  font-weight: normal;
+}
+
+.VueTables__sortable {
+  cursor: pointer;
+}
+
+.VueTables__date-filter {
+  border: 1px solid #ccc;
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.VueTables__filter-placeholder {
+  color: #aaa;
+}
+
+.VueTables__list-filter {
+  width: 120px;
+}
+</style>

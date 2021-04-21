@@ -22,6 +22,9 @@ export default {
   layout: 'auth',
 
   middleware: 'auth-redirect',
+  mounted() {
+    this.submit()
+  },
   methods: {
     async submit() {
       this.loading = true
@@ -43,9 +46,6 @@ export default {
         console.log('auth success!')
       }
     }
-  },
-  mounted() {
-    this.submit()
   }
 }
 </script>

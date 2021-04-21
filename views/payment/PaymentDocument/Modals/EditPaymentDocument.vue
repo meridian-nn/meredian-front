@@ -501,6 +501,11 @@ export default {
       this.findEditedItem()
       this.id = null
       this.editedItem.id = null
+    },
+    formatDate(date) {
+      if (!date) { return null }
+      const [year, month, day] = date.split('-')
+      this.editedItem.dataDoc = `${day}.${month}.${year}`
     }
   }
 }

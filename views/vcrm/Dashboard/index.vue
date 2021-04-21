@@ -636,7 +636,7 @@ export default {
   }),
 
   async fetch() {
-    const { content } = await this.$axios.$get('http://192.168.1.70:9037/gtin/findAll?page=0&size=200')
+    const { content } = await this.$axios.$get('http://192.168.1.70:9037/meridian/gtin/findAll?page=0&size=200')
 
     this.fullDesserts = content
 
@@ -838,7 +838,8 @@ export default {
       this.loading = true
 
       try {
-        await this.$axios.$post(`http://192.168.1.70:9037/gtinRequest/saveGtinRequest?${new URLSearchParams(this.editedIndex > -1 ? Object.assign(this.fullDesserts[this.editedIndex], data) : data).toString()}`)
+        // gtin/findByGtinRequestId
+        await this.$axios.$post(`http://192.168.1.70:9037/meridian/gtinRequest/saveGtinRequest?${new URLSearchParams(this.editedIndex > -1 ? Object.assign(this.fullDesserts[this.editedIndex], data) : data).toString()}`)
 
         await this.$fetch()
 
@@ -887,7 +888,7 @@ export default {
       }
 
       try {
-        await this.$axios.$post(`http://192.168.1.70:9037/markCodeRequest/saveMarkCodeRequest?${new URLSearchParams(request).toString()}`)
+        await this.$axios.$post(`http://192.168.1.70:9037/meridian/markCodeRequest/saveMarkCodeRequest?${new URLSearchParams(request).toString()}`)
 
         this.dialogMark = false
       } catch (err) {
