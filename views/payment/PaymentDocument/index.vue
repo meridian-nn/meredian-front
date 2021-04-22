@@ -3,6 +3,7 @@
     <edit-payment-document
       ref="editPaymentDocument"
       @close="closePaymentDocument"
+      @cancel="closePaymentDocument"
       @save="savePaymentDocument"
     />
     <v-card>
@@ -10,7 +11,7 @@
         <v-container
           class="journal-of-payment-docs-container"
         >
-          <v-row>
+          <div class="journal-of-payment-main-row">
             <v-col cols="10">
               <div
                 align="center"
@@ -27,7 +28,7 @@
                 @input="updateAllInfo()"
               />
             </v-col>
-          </v-row>
+          </div>
           <v-row>
             <v-col
               cols="10"
@@ -49,7 +50,7 @@
                 align="right"
               >
                 <v-btn
-                  @click="restAccountClick"
+                  @click="$router.push({name: 'InputOfBalances'})"
                 >
                   Ввод остатков по Р/С
                 </v-btn>
@@ -114,7 +115,33 @@
                     <th />
                     <th />
                     <th>{{ totalToSumOplat }}</th>
+                    <th />
                   </tr>
+                </template>
+                <template #[`item.sumOplat`]="props">
+                  <v-edit-dialog
+                    :return-value.sync="props.item.sumOplat"
+                    large
+                    cancel-text="Закрыть"
+                    save-text="Сохранить"
+                    @save="saveSumOplat"
+                    @cancel="cancelSumOplat"
+                  >
+                    <div>{{ props.item.sumOplat }}</div>
+                    <template #input>
+                      <div class="mt-4 title">
+                        Сумма оплаты
+                      </div>
+                      <v-text-field
+                        v-model="props.item.sumOplat"
+                        :rules="[max25chars]"
+                        label="Сумма"
+                        single-line
+                        counter
+                        autofocus
+                      />
+                    </template>
+                  </v-edit-dialog>
                 </template>
                 <v-menu
                   v-model="payMenu"
@@ -130,6 +157,24 @@
                   </v-list>
                 </v-menu>
               </v-data-table>
+
+              <v-snackbar
+                v-model="snackSumOplat"
+                :timeout="3000"
+                :color="snackColorSumOplat"
+              >
+                {{ snackTextSumOplat }}
+
+                <template #action="{ attrs }">
+                  <v-btn
+                    v-bind="attrs"
+                    text
+                    @click="snackSumOplat = false"
+                  >
+                    Закрыть
+                  </v-btn>
+                </template>
+              </v-snackbar>
             </v-col>
 
             <v-col
@@ -256,7 +301,7 @@
             <v-col cols="1" />
             <v-col cols="6">
               <v-text-field
-                label="Комментарий (необходимо описание)"
+                label="Комментарий"
               />
             </v-col>
           </v-row>
@@ -285,10 +330,14 @@ export default {
       payMenu: false,
       x: 0,
       y: 0,
+      snackSumOplat: false,
+      snackColorSumOplat: '',
+      snackTextSumOplat: '',
       organizations: [],
+      selectedOrganization: null,
       paymentAccounts: [],
-      paymentAccountInfo: 'Сумма Р/С: Необходимо описание',
-      restPaymentAccountInfo: 'Остаток Р/С: Необходимо описание',
+      paymentAccountInfo: 'Сумма Р/С:',
+      restPaymentAccountInfo: 'Остаток Р/С:',
       toPayHeaders: [
         {
           text: 'Подразделение',
@@ -305,10 +354,6 @@ export default {
         {
           text: 'Плательщик',
           value: 'namePlat'
-        },
-        {
-          text: 'namePlat1',
-          value: 'namePlat1'
         },
         {
           text: 'Кредит',
@@ -394,6 +439,10 @@ export default {
         {
           text: 'Голяткино',
           value: 'org5Value'
+        },
+        {
+          text: 'Н шов. б. (Меридиан)',
+          value: 'org6Value'
         }
       ]
     }
@@ -408,20 +457,76 @@ export default {
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
       this.findOrganizatios()
-      this.findSpDocoplForPay()
+      // this.findSpDocoplForPay()
+      // this.findOrgAccInfo()
       this.findOrgAccInfo()
     },
     updateAllInfo() {
-      this.findSpDocoplForPay()
+      if (this.selectedOrganization) {
+        this.findSpDocoplForPay()
+      }
+      this.findOrgAccInfo()
+      this.fromPaySelectedRows = []
+      this.toPaySelectedRows = []
     },
     async selOplat() {
       await this.$axios.$post('/meridian/oper/spDocopl/selOplat', this.axiosConfig)
     },
+    async findOrgAccInfo() {
+      const data = {
+        dateOplat: new Date(this.date).toLocaleDateString()
+      }
+      await this.$axios.$get('/meridian/oper/spOplat/groupByOrg', { params: data }).then((value) => {
+        this.orgAccInfoData = []
+        let brigBalance = 0
+        let meridianBalance = 0
+        let goldenThread = 0
+        let bofBalance = 0
+        let golyatkinoBalance = 0
+        let nShovBalance = 0
+        value.forEach((element) => {
+          if (element.myOrg.id === 123) {
+            brigBalance = element.saldo
+          } else if (element.myOrg.id === 159) {
+            meridianBalance = element.saldo
+          } else if (element.myOrg.id === 19469) {
+            goldenThread = element.saldo
+          } else if (element.myOrg.id === 22110) {
+            bofBalance = element.saldo
+          } else if (element.myOrg.id === 31699) {
+            golyatkinoBalance = element.saldo
+          } else if (element.myOrg.id === 36315) {
+            nShovBalance = element.saldo
+          }
+        })
+        this.orgAccInfoData.push({
+          name: 'Расч. счёт',
+          org1Value: meridianBalance,
+          org2Value: goldenThread,
+          org3Value: brigBalance,
+          org4Value: bofBalance,
+          org5Value: golyatkinoBalance,
+          org6Value: nShovBalance
+        })
+        this.orgAccInfoData.push({
+          name: 'Касса',
+          org1Value: null,
+          org2Value: null,
+          org3Value: null,
+          org4Value: null,
+          org5Value: null,
+          org6Value: null
+        })
+      })
+    },
     closePaymentDocument() {
       console.log('close')
+      this.findSpDocoplForPay()
     },
     savePaymentDocument() {
       console.log('open')
+      this.findSpDocoplForPay()
+      this.fromPaySelectedRows = []
     },
     showPayMenu(e) {
       e.preventDefault()
@@ -444,7 +549,7 @@ export default {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
         const ids = this.fromPaySelectedRows.map(value => value.id)
         await this.$axios.$post('/meridian/oper/spDocopl/deletePayment', ids, this.axiosConfig)
-        this.refreshTables()
+        this.findSpDocoplForPay()
       }
     },
     copyDocument() {
@@ -465,11 +570,11 @@ export default {
         this.loadingType.organizations = null
       }
     },
-    async findOrgAccInfo() {
+    /* async findOrgAccInfo() {
       if (!this.orgAccInfoData.length) {
         this.orgAccInfoData = await this.$axios.$get('/meridian/oper/spDocopl/getOrgAccInfo', this.axiosConfig)
       }
-    },
+    }, */
     async findPaymentAccounts(val) {
       this.loadingType.paymentAccounts = true
       this.paymentAccounts = await this.$axios.$get('/meridian/oper/spAcc/findByOrgId?orgId=' + val, this.axiosConfig)
@@ -477,14 +582,15 @@ export default {
     },
     async findSpDocoplForPay() {
       const data = {
-        dateDoc: new Date(this.date).toLocaleDateString()
+        dateDoc: new Date(this.date).toLocaleDateString(),
+        orgId: this.selectedOrganization
       }
       this.fromPayData = await this.$axios.$get('/meridian/oper/spDocopl/findSpDocoplForPay', { params: data })
       let totalSumDoc = 0
       let totalSumOplat = 0
       this.fromPayData.forEach((value) => {
         totalSumDoc += value.sumDoc
-        totalSumOplat += value.sumDoc
+        totalSumOplat += value.sumOplat
       })
       this.totalSumDoc = totalSumDoc
       this.totalSumOplat = totalSumOplat
@@ -501,14 +607,20 @@ export default {
       this.totalToSumOplat = totalToSumOplat
     },
     organizationChange(val) {
+      this.selectedOrganization = val
+      this.toPayData = []
       this.findPaymentAccounts(val)
+      this.findSpDocoplForPay()
+      this.updateResPaymentAccountInfo()
     },
     paymentAccountChange(val) {
       this.findToPay(val)
+      this.updatePaymentAccountInfo(val)
     },
     async addPayments() {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
         const ids = this.fromPaySelectedRows.map(value => value.id)
+        console.log(ids)
         const data = { ids, accId: this.accId }
         await this.$axios.$post('/meridian/oper/spDocopl/payDocument', data, this.axiosConfig)
         this.refreshTables()
@@ -524,29 +636,54 @@ export default {
     async deleteSelectedPayments() {
       if (this.toPaySelectedRows && this.toPaySelectedRows.length) {
         const ids = this.toPaySelectedRows.map(value => value.id)
+        console.log(ids)
         await this.$axios.$post('/meridian/oper/spDocopl/deleteSelectedPayments', ids, this.axiosConfig)
         this.refreshTables()
       }
     },
-    restAccountClick() {
-      alert('необходимо описание')
+    async updateResPaymentAccountInfo() {
+      const data = {
+        dateOplat: new Date(this.date).toLocaleDateString()
+      }
+      await this.$axios.$get('/meridian/oper/spOplat/groupByOrg', { params: data }).then((value) => {
+        value.forEach((element) => {
+          if (element.myOrg.id === this.selectedOrganization) {
+            this.restPaymentAccountInfo = 'Остаток Р/С: ' + element.saldo
+          }
+        })
+      })
     },
-    updateTime() {
-      const today = new Date()
-      let day = today.getDate()
-      let month = today.getUTCMonth() + 1
-      const year = today.getFullYear()
-
-      if (day.toString().length === 1) {
-        day = '0' + day
+    async updatePaymentAccountInfo(accId) {
+      const data = {
+        dateOplat: new Date(this.date).toLocaleDateString(),
+        orgId: this.selectedOrganization
       }
+      await this.$axios.$get('/meridian/oper/spOplat/findByDataOplatAndMyOrgId', { params: data }).then((value) => {
+        value.forEach((element) => {
+          if (element.acc.id === accId) {
+            this.paymentAccountInfo = 'Сумма Р/С: ' + element.saldo
+            console.log(this.paymentAccountInfo)
+          }
+        })
+      })
+    },
+    saveSumOplat() {
+      this.snackSumOplat = true
+      this.snackColorSumOplat = 'success'
+      this.snackTextSumOplat = 'Сумма оплаты сохранена'
 
-      if (month.toString().length === 1) {
-        month = '0' + month
-      }
-
-      this.date = day + '.' + month + '.' + year
+      /* await this.$axios.$post('/meridian/oper/spDocopl/payDocument', data, this.axiosConfig)
+      this.refreshTables() */
+    },
+    cancelSumOplat() {
+      this.snackSumOplat = true
+      this.snackColorSumOplat = 'error'
+      this.snackTextSumOplat = 'Сумма оплаты не была изменена'
     }
+    /* restAccountClick() {
+      this.$router.push('InputOfBalances')
+      // alert('необходимо описание')
+    }, */
   }
 }
 </script>
@@ -612,5 +749,13 @@ export default {
     flex-wrap: wrap;
     flex: 1 1 auto;
     margin: -12px;
+}
+.journal-of-payment-main-row {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+    margin-left: -12px;
+    margin-right:  -12px;
+    margin-bottom:  -12px;
 }
 </style>

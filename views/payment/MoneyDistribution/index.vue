@@ -51,7 +51,7 @@
                 class="budget-for-distribution-sum"
               >
                 <v-text-field
-                  v-model.number="budget.distributionSum"
+                  v-model.number="budgetDistributionSum"
                   type="number"
                   min="0"
                 />
@@ -72,8 +72,10 @@
                 cols="4"
                 class="not-allocated-sum"
               >
-                <v-subheader class="font-weight-medium text-subtitle-1">
-                  {{ budgetRestDistributionSum }}
+                <v-subheader
+                  class="font-weight-medium text-subtitle-1"
+                >
+                  {{ budgetDistributedSum }}
                 </v-subheader>
               </v-col>
             </v-row>
@@ -121,7 +123,7 @@
                 class="dep-for-distribution-sum"
               >
                 <v-text-field
-                  v-model.number="department.distributionSum"
+                  v-model.number="depDistributionSum"
                   type="number"
                   min="0"
                 />
@@ -167,7 +169,7 @@
               >
                 <input
                   slot="distributionSum"
-                  v-model="row.distributionSum"
+                  v-model.number="row.distributionSum"
                   slot-scope="{row, update}"
                   type="number"
                   min="0"
@@ -240,8 +242,11 @@ export default {
       departments: [],
       loadingType: {},
       department: {},
+      depDistributedSum: null,
+      depDistributionSum: null,
+      budgetDistributionSum: null,
+      budgetDistributedSum: null,
       selectedDep: {},
-      depDistributedSum: 0,
       budget: {},
       columns: ['department.nameViddoc', 'distributionSum', 'note'],
       options: {
@@ -274,29 +279,35 @@ export default {
     },
 
     departmentRestDistributionSum() {
-      let distributedSum = 0
-      for (let i = 0; i < this.moneyDistributionData.length; i++) {
-        let rowDistSum = parseInt(this.moneyDistributionData[i].distributionSum)
-        rowDistSum = isNaN(rowDistSum) ? 0 : rowDistSum
-        distributedSum = distributedSum + rowDistSum
-      }
-      /* this.department.getDistributedSum = this.moneyDistributionData.length === 0
-        ? 0
-        : this.moneyDistributionData.reduce((a, b) => this.$numOr0(a.distributionSum) + this.$numOr0(b.distributionSum)) */
-
-      this.department.getDistributedSum = distributedSum
-
-      this.department.distributedSum = (this.department.getDistributedSum - this.department.distributedSum)
-      const departmentRestDistributionSum = parseInt(this.department.distributionSum
-        ? this.department.distributionSum
-        : 0) - parseInt(this.department.distributedSum ? this.department.distributedSum : 0)
-      return departmentRestDistributionSum >= 0 ? departmentRestDistributionSum : 0
+      return (this.depDistributionSum - this.depDistributedSum)
     }
+  },
+  watch: {
+    moneyDistributionData: {
+      handler() {
+        this.calcDepDistributedSum()
+      },
+      deep: true
+    }
+    /* depDistributionSum: {
+      handler() {
+        this.calcBudgetDistributedSum()
+      },
+      deep: true
+    } */
   },
   mounted() {
     this.init()
   },
   methods: {
+    calcDepDistributedSum() {
+      this.depDistributedSum = this.moneyDistributionData.length === 0
+        ? 0
+        : this.moneyDistributionData.reduce((acc, item) => { return acc + item.distributionSum || 0 }, 0)
+    },
+    /* calcBudgetDistributedSum() {
+      this.budgetDistributedSum = this.budgetDistributedSum - this.depDistributionSum
+    }, */
     init() {
       this.findDepartments()
       this.department = {}
@@ -319,8 +330,9 @@ export default {
       const data = {
         distributionDate: new Date(this.date).toLocaleDateString()
       }
-      console.log(new Date(this.date).toLocaleDateString())
       this.budget = await this.$axios.$get('/meridian/oper/depMoneyDistribution/findBudgetByDate', { params: data })
+      this.budgetDistributionSum = this.budget.distributionSum
+      this.budgetDistributedSum = this.budget.distributionSum - this.budget.distributedSum
     },
     async findDepartments(val) {
       if (!this.departments.length) {
@@ -338,10 +350,11 @@ export default {
       }
       this.department = await this.$axios.$get('/meridian/oper/depMoneyDistribution/findByDepartmentId', { params: data })
     },
-    departmentChange(val) {
-      this.loadMoneyDistribution(val)
-      this.findByDepartmentId(val)
+    async departmentChange(val) {
+      await this.loadMoneyDistribution(val)
+      await this.findByDepartmentId(val)
       this.depDistributedSum = this.department.distributedSum
+      this.depDistributionSum = this.department.distributionSum
     },
     getDateForSave() {
       return new Date(this.date).toLocaleDateString()
@@ -353,6 +366,10 @@ export default {
       this.budget.distributionDate = this.getDateForSave()
       await this.$axios.$post('/meridian/oper/depMoneyDistribution/save', [this.budget])
       this.findBudgetByDate()
+      this.department.distributionSum = this.depDistributionSum || 0
+      this.department.distributedSum = this.depDistributedSum || 0
+      this.budget.distributionSum = this.budgetDistributionSum
+      this.budget.distributedSum = this.budgetDistributedSum
       await this.$axios.$post('/meridian/oper/depMoneyDistribution/save', [this.department])
       this.findByDepartmentId(this.department.department.id)
       await this.$axios.$post('/meridian/oper/depMoneyDistribution/save', this.moneyDistributionData)
@@ -444,20 +461,6 @@ export default {
 .zero-padding{
   padding-left: 0px;
   padding-right: 0px;
-}
-
-th,
-td {
-  text-align: left;
-}
-
-th:nth-child(n+2),
-td:nth-child(n+2) {
-  text-align: center;
-}
-
-thead tr:nth-child(2) th {
-  font-weight: normal;
 }
 
 .VueTables__sort-icon {

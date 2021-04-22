@@ -101,6 +101,7 @@
                 outlined
               />
             </v-col>
+            </v-col>
           </v-row>
 
           <v-row>
@@ -125,7 +126,7 @@
             </v-col>
             <v-col cols="5">
               <v-text-field
-                v-model="editedItem.sumDoc"
+                v-model.number="editedItem.sumDoc"
                 type="number"
                 label="Сумма по договору"
                 outlined
@@ -163,7 +164,7 @@
                 </v-col>
                 <v-col cols="3">
                   <v-text-field
-                    v-model="editedItem.sumPaid"
+                    v-model.number="editedItem.sumPaid"
                     readonly="true"
                     type="number"
                     label="Оплачено"
@@ -363,7 +364,7 @@ export default {
       this.findPaymentStatuses()
       this.findDocumentKinds()
     },
-    async findEditedItem() {
+    async findEditedItem(copyDoc = false) {
       if (this.id) {
         const editedItem = await this.$axios.$get(
           '/meridian/oper/spDocopl/findById/' + this.id
@@ -373,6 +374,11 @@ export default {
         this.findSuppliers(editedItem.contractId)
         this.findContracts(editedItem.ispId)
         this.editedItem = editedItem
+        if (copyDoc) {
+          this.id = null
+          this.editedItem.id = null
+        }
+        this.fillDatesEditedItem()
         this.calcSum(editedItem.sumDoc)
       }
     },
@@ -456,7 +462,13 @@ export default {
       this.findExecutors(val)
     },
     async save() {
+      if (!this.editedItem.dataOplat || !this.editedItem.dataDoc) {
+        alert('Укажите дату документа и крайнюю дату оплаты документа!')
+        return
+      }
       let errorMessage = null
+      this.editedItem.dataOplat = new Date(this.editedItem.dataOplat).toLocaleDateString()
+      this.editedItem.dataDoc = new Date(this.editedItem.dataDoc).toLocaleDateString()
       await this.$axios
         .$post(
           '/meridian/oper/spDocopl/save',
@@ -470,10 +482,12 @@ export default {
       if (errorMessage == null) {
         this.dialog = false
       }
+      this.$emit('save')
     },
     cancel() {
       this.reset()
       this.dialog = false
+      this.$emit('cancel')
     },
     reset() {
       this.loadingType = {}
@@ -498,18 +512,25 @@ export default {
       this.reset()
       this.id = id
       this.dialog = true
-      this.findEditedItem()
-      this.id = null
-      this.editedItem.id = null
+      this.findEditedItem(true)
     },
-    formatDate(date) {
-      if (!date) { return null }
-      const [year, month, day] = date.split('-')
-      this.editedItem.dataDoc = `${day}.${month}.${year}`
+    fillDatesEditedItem() {
+      if (!this.editedItem) {
+        return
+      }
+      this.editedItem.dataDoc = new Date(this.parseDate(this.editedItem.dataDoc)).toISOString().substr(0, 10)
+      this.editedItem.dataOplat = new Date(this.parseDate(this.editedItem.dataOplat)).toISOString().substr(0, 10)
+    },
+    parseDate(date) {
+      if (!date) { return '' }
+      const [day, month, year] = date.split('.')
+      return `${year}-${month}-${day}`
     }
   }
 }
+
 </script>
+
 <style lang="scss">
   .container-data {
     margin-left: 0px;

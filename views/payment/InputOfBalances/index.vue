@@ -49,6 +49,12 @@
               :options="oplatDataOptions"
             >
               <input
+                slot="name"
+                v-model="row.name"
+                slot-scope="{row, update}"
+                @input="update(row.name)"
+              >
+              <input
                 slot="saldo"
                 v-model="row.saldo"
                 slot-scope="{row, update}"
@@ -96,16 +102,16 @@
         <v-row>
           <v-col cols="3">
             <v-btn
-              @click="cancel"
+              @click="save"
             >
-              Отмена
+              Сохранить
             </v-btn>
           </v-col>
           <v-col cols="3">
             <v-btn
-              @click="save"
+              @click="cancel"
             >
-              Сохранить
+              Отмена
             </v-btn>
           </v-col>
         </v-row>
@@ -124,12 +130,12 @@ export default {
       groupByOrgData: [],
       oplatData: [],
       organizations: [],
-      groupByOrgColumns: ['saldo', 'nalich', 'vnpl', 'credit', 'endBalance', 'overdraft'],
+      groupByOrgColumns: ['name', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance', 'overdraft'],
       oplatDataColumns: ['acc.shortName', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance', 'overdraft'],
       groupByOrgOptions: {
         filterByColumn: false,
         headings: {
-          'myOrg.shortName': 'Наименование',
+          name: 'Наименование',
           saldo: 'Остаток на р/с',
           nalich: 'Прочее',
           vnpl: 'ВнПл',
@@ -172,6 +178,9 @@ export default {
         dateOplat: new Date(this.date).toLocaleDateString()
       }
       this.$axios.$get('/meridian/oper/spOplat/groupByOrg', { params: data }).then((value) => {
+        value.forEach((element) => {
+          element.name = element.myOrg.shortName
+        })
         this.groupByOrgData = value
       })
     },
@@ -194,6 +203,7 @@ export default {
     },
     async save() {
       await this.$axios.$post('/meridian/oper/spOplat/saveAll', this.oplatData)
+      this.init()
     }
   }
 
