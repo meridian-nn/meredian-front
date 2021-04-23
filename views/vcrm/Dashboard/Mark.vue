@@ -161,7 +161,7 @@ export default {
   },
 
   async fetch() {
-    const { content } = await this.$axios.$get('http://192.168.1.70:9037/meridian/markCode/findAll?page=0&size=200')
+    const { content } = await this.$axios.$get('/meridian/markCode/findAll?page=0&size=200')
 
     this.fullDesserts = content
 

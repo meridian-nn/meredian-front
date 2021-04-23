@@ -49,45 +49,39 @@
           </v-list-item-content>
         </v-list-item>
         <v-list-group no-action>
-          <template v-slot:activator>
+          <template #activator>
             <v-list-item-title>Платежи</v-list-item-title>
           </template>
           <MenuItemButton
             title="Документ на оплату"
             link="PaymentDocument"
             icon="mdi-brightness-5"
-          >
-          </MenuItemButton>
+          />
           <MenuItemButton
             title="Распределение ДС"
             link="MoneyDistribution"
             icon="mdi-brightness-5"
-          >
-          </MenuItemButton>
+          />
           <MenuItemButton
             title="Ввод остатков"
             link="InputOfBalances"
             icon="mdi-brightness-5"
-          >
-          </MenuItemButton>
+          />
           <MenuItemButton
             title="Реестр"
-            link="PaymentDocument"
+            link="ContextMenu"
             icon="mdi-brightness-5"
-          >
-          </MenuItemButton>
+          />
           <MenuItemButton
             title="Журнал документов"
             link="PaymentDocument"
             icon="mdi-brightness-5"
-          >
-          </MenuItemButton>
+          />
           <MenuItemButton
             title="История"
             link="PaymentDocument"
             icon="mdi-brightness-5"
-          >
-          </MenuItemButton>
+          />
         </v-list-group>
       </v-list>
 

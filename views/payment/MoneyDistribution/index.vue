@@ -159,6 +159,7 @@
 
           <v-col cols="8">
             <div
+              id="moneyDistributionData"
               align="center"
               class="headline"
             >
@@ -250,12 +251,16 @@ export default {
       budget: {},
       columns: ['department.nameViddoc', 'distributionSum', 'note'],
       options: {
+        filterable: false,
+        pagination: { show: false },
+        texts: { noResults: '' },
+        caption: false,
         filterByColumn: false,
-        perPage: 100,
+        perPage: 15,
         dateFormat: 'YYYY-MM-DD',
         editableColumns: ['distributionSum', 'note'],
         headings: {
-          'department.nameViddoc': 'Отдел',
+          'department.nameViddoc': 'Подразделение',
           distributionSum: 'Сумма',
           note: 'Примечание'
         },
@@ -463,35 +468,27 @@ export default {
   padding-right: 0px;
 }
 
-.VueTables__sort-icon {
-  margin-left: 10px;
+#moneyDistributionData {
+  border-collapse: collapse;
+  width: 100%;
+}
+#moneyDistributionData table{
+  width: 100%
+}
+#moneyDistributionData td, #moneyDistributionData th {
+  border: 1px solid #ddd;
+  padding: 8px;
 }
 
-.VueTables__dropdown-pagination {
-  margin-left: 10px;
-}
+#moneyDistributionData tr:nth-child(even){background-color: #f2f2f2;}
 
-.VueTables__highlight {
-  background: yellow;
-  font-weight: normal;
-}
+#moneyDistributionData tr:hover {background-color: #ddd;}
 
-.VueTables__sortable {
-  cursor: pointer;
-}
-
-.VueTables__date-filter {
-  border: 1px solid #ccc;
-  padding: 6px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.VueTables__filter-placeholder {
-  color: #aaa;
-}
-
-.VueTables__list-filter {
-  width: 120px;
+#moneyDistributionData th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #639db1 !important;
+  color: white;
 }
 </style>

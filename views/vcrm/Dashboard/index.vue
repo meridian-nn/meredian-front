@@ -1,3 +1,4 @@
+/* eslint-disable vue/max-len */
 <template>
   <v-container
     class="py-6 px-6"
@@ -636,7 +637,7 @@ export default {
   }),
 
   async fetch() {
-    const { content } = await this.$axios.$get('http://192.168.1.70:9037/meridian/gtin/findAll?page=0&size=200')
+    const { content } = await this.$axios.$get('/meridian/gtin/findAll?page=0&size=200')
 
     this.fullDesserts = content
 
@@ -839,7 +840,9 @@ export default {
 
       try {
         // gtin/findByGtinRequestId
-        await this.$axios.$post(`http://192.168.1.70:9037/meridian/gtinRequest/saveGtinRequest?${new URLSearchParams(this.editedIndex > -1 ? Object.assign(this.fullDesserts[this.editedIndex], data) : data).toString()}`)
+        // eslint-disable-next-line vue/max-len
+        const params = new URLSearchParams(this.editedIndex > -1 ? Object.assign(this.fullDesserts[this.editedIndex], data) : data).toString()
+        await this.$axios.$post(`/meridian/gtinRequest/saveGtinRequest?${params}`)
 
         await this.$fetch()
 
@@ -888,7 +891,8 @@ export default {
       }
 
       try {
-        await this.$axios.$post(`http://192.168.1.70:9037/meridian/markCodeRequest/saveMarkCodeRequest?${new URLSearchParams(request).toString()}`)
+        const params = new URLSearchParams(request).toString()
+        await this.$axios.$post(`/meridian/markCodeRequest/saveMarkCodeRequest?${params}`)
 
         this.dialogMark = false
       } catch (err) {

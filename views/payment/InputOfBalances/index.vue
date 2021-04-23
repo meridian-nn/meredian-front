@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-text>
-      <v-container>
+      <v-container class="input-of-balances-container">
         <v-row>
           <v-col cols="10">
             <div
@@ -20,12 +20,14 @@
           </v-col>
         </v-row>
         <v-row>
-          <v-col cols="8">
-            <v-client-table
-              v-model="groupByOrgData"
-              :columns="groupByOrgColumns"
-              :options="groupByOrgOptions"
-            />
+          <v-col cols="12">
+            <div id="groupByOrg">
+              <v-client-table
+                v-model="groupByOrgData"
+                :columns="groupByOrgColumns"
+                :options="groupByOrgOptions"
+              />
+            </div>
           </v-col>
         </v-row>
         <v-row>
@@ -42,61 +44,63 @@
           </v-col>
         </v-row>
         <v-row>
-          <v-col cols="8">
-            <v-client-table
-              v-model="oplatData"
-              :columns="oplatDataColumns"
-              :options="oplatDataOptions"
-            >
-              <input
-                slot="name"
-                v-model="row.name"
-                slot-scope="{row, update}"
-                @input="update(row.name)"
+          <v-col cols="12">
+            <div id="oplatData">
+              <v-client-table
+                v-model="oplatData"
+                :columns="oplatDataColumns"
+                :options="oplatDataOptions"
               >
-              <input
-                slot="saldo"
-                v-model="row.saldo"
-                slot-scope="{row, update}"
-                type="number"
-                @input="update(row.saldo)"
-              >
-              <input
-                slot="nalich"
-                v-model="row.nalich"
-                slot-scope="{row, update}"
-                type="number"
-                @input="update(row.nalich)"
-              >
-              <input
-                slot="vnpl"
-                v-model="row.vnpl"
-                slot-scope="{row, update}"
-                type="number"
-                @input="update(row.vnpl)"
-              >
-              <input
-                slot="credit"
-                v-model="row.credit"
-                slot-scope="{row, update}"
-                type="number"
-                @input="update(row.credit)"
-              >
-              <input
-                slot="endBalance"
-                v-model="row.endBalance"
-                slot-scope="{row, update}"
-                type="number"
-                @input="update(row.endBalance)"
-              >
-              <input
-                slot="overdraft"
-                v-model="row.overdraft"
-                slot-scope="{row, update}"
-                type="number"
-                @input="update(row.overdraft)"
-              >
-            </v-client-table>
+                <input
+                  slot="name"
+                  v-model="row.name"
+                  slot-scope="{row, update}"
+                  @input="update(row.name)"
+                >
+                <input
+                  slot="saldo"
+                  v-model="row.saldo"
+                  slot-scope="{row, update}"
+                  type="number"
+                  @input="update(row.saldo)"
+                >
+                <input
+                  slot="nalich"
+                  v-model="row.nalich"
+                  slot-scope="{row, update}"
+                  type="number"
+                  @input="update(row.nalich)"
+                >
+                <input
+                  slot="vnpl"
+                  v-model="row.vnpl"
+                  slot-scope="{row, update}"
+                  type="number"
+                  @input="update(row.vnpl)"
+                >
+                <input
+                  slot="credit"
+                  v-model="row.credit"
+                  slot-scope="{row, update}"
+                  type="number"
+                  @input="update(row.credit)"
+                >
+                <input
+                  slot="endBalance"
+                  v-model="row.endBalance"
+                  slot-scope="{row, update}"
+                  type="number"
+                  @input="update(row.endBalance)"
+                >
+                <input
+                  slot="overdraft"
+                  v-model="row.overdraft"
+                  slot-scope="{row, update}"
+                  type="number"
+                  @input="update(row.overdraft)"
+                >
+              </v-client-table>
+            </div>
           </v-col>
         </v-row>
         <v-row>
@@ -133,6 +137,9 @@ export default {
       groupByOrgColumns: ['name', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance', 'overdraft'],
       oplatDataColumns: ['acc.shortName', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance', 'overdraft'],
       groupByOrgOptions: {
+        filterable: false,
+        pagination: { show: false },
+        texts: { noResults: '' },
         filterByColumn: false,
         headings: {
           name: 'Наименование',
@@ -145,6 +152,11 @@ export default {
         }
       },
       oplatDataOptions: {
+        filterable: false,
+        pagination: { show: false },
+        texts: { noResults: '' },
+        perPage: 100,
+        perPageValues: [100],
         filterByColumn: false,
         editableColumns: ['distributionSum', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance', 'overdraft'],
         headings: {
@@ -209,3 +221,57 @@ export default {
 
 }
 </script>
+
+<style lang="scss">
+.input-of-balances-container{
+  max-width: none;
+}
+
+#groupByOrg {
+  border-collapse: collapse;
+  width: 100%;
+}
+#groupByOrg table{
+  width: 100%
+}
+#groupByOrg td, #groupByOrg th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#groupByOrg tr:nth-child(even){background-color: #f2f2f2;}
+
+#groupByOrg tr:hover {background-color: #ddd;}
+
+#groupByOrg th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #639db1 !important;
+  color: white;
+}
+
+#oplatData {
+  border-collapse: collapse;
+  width: 100%;
+}
+#oplatData table{
+  width: 100%
+}
+#oplatData td, #oplatData th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#oplatData tr:nth-child(even){background-color: #f2f2f2;}
+
+#oplatData tr:hover {background-color: #ddd;}
+
+#oplatData th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #639db1 !important;
+  color: white;
+}
+</style>
