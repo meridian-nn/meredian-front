@@ -247,7 +247,7 @@ export default {
       depDistributionSum: null,
       budgetDistributionSum: null,
       budgetDistributedSum: null,
-      selectedDep: {},
+      selectedDep: null,
       budget: {},
       columns: ['department.nameViddoc', 'distributionSum', 'note'],
       options: {
@@ -321,7 +321,10 @@ export default {
     updateAllInfo() {
       this.init()
       this.findBudgetByDate()
-      this.departmentChange(this.selectedDep)
+      console.log(this.selectedDep)
+      if (this.selectedDep) {
+        this.departmentChange(this.selectedDep)
+      }
     },
     async loadMoneyDistribution(val) {
       const data = {

@@ -29,6 +29,7 @@
               />
             </v-col>
           </div>
+
           <v-row>
             <v-col
               cols="10"
@@ -57,6 +58,7 @@
               </div>
             </v-col>
           </v-row>
+
           <v-row>
             <v-col cols="5">
               <v-autocomplete
@@ -70,6 +72,7 @@
             </v-col>
             <v-col cols="7" />
           </v-row>
+
           <v-row>
             <v-col cols="5">
               <v-autocomplete
@@ -84,7 +87,9 @@
             </v-col>
 
             <v-col cols="7">
-              <span class="headline">{{ paymentAccountInfo }}</span>
+              <div>
+                <span class="headline">{{ paymentAccountInfo }}</span>
+              </div>
             </v-col>
           </v-row>
 
@@ -118,6 +123,7 @@
                     <th />
                   </tr>
                 </template>
+
                 <template #[`item.sumOplat`]="props">
                   <v-edit-dialog
                     :return-value.sync="props.item.sumOplat"
@@ -142,41 +148,56 @@
                     </template>
                   </v-edit-dialog>
                 </template>
-                <v-menu
-                  v-model="payMenu"
-                  :position-x="x"
-                  :position-y="y"
-                  absolute
-                  offset-y
-                  @blur="closePayMenu"
-                >
-                  <v-list>
-                    <v-list-item>
-                      <v-list-item-title>
-                        test
-                      </v-list-item-title>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
               </v-data-table>
+
               <v-snackbar
-                v-model="snackSumOplat"
+                v-model="snackbarUserNotification"
                 :timeout="3000"
-                :color="snackColorSumOplat"
+                :color="snackbarUserNotificationColor"
               >
-                {{ snackTextSumOplat }}
+                {{ snackbarUserNotificationText }}
 
                 <template #action="{ attrs }">
                   <v-btn
                     v-bind="attrs"
                     text
-                    @click="snackSumOplat = false"
+                    @click="snackbarUserNotification = false"
                   >
                     Закрыть
                   </v-btn>
                 </template>
               </v-snackbar>
-              </v-data-table>
+
+              <v-menu
+                v-model="payMenu"
+                :position-x="x"
+                :position-y="y"
+                absolute
+                offset-y
+              >
+                <v-list>
+                  <v-list-item @click="payedByCashboxForContextMenuOnly">
+                    <v-list-item-title>
+                      Оплата по кассе
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-list-item @click="internalMovementForContextMenuOnly">
+                    <v-list-item-title>
+                      Вн. перемещение
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-list-item @click="historyOfPaymentForContextMenuOnly">
+                    <v-list-item-title>
+                      История оплат
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-list-item @click="deleteFromToPayForContextMenuOnly">
+                    <v-list-item-title>
+                      Удалить из "к оплате"
+                    </v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
             </v-col>
 
             <v-col
@@ -191,7 +212,7 @@
                   dark
                   small
 
-                  @click="addPaymentsClick"
+                  @click="addPaymentDocument"
                 >
                   <v-icon>mdi-arrow-left</v-icon>
                 </v-btn>
@@ -333,13 +354,15 @@ export default {
       payMenu: false,
       x: 0,
       y: 0,
-      snackSumOplat: false,
-      snackColorSumOplat: '',
-      snackTextSumOplat: '',
+      snackbarUserNotification: false,
+      snackbarUserNotificationColor: '',
+      snackbarUserNotificationText: '',
       organizations: [],
       selectedOrganization: null,
+      currentRowForContextMenu: null,
       paymentAccounts: [],
       paymentAccountInfo: 'Сумма Р/С:',
+      currentPaymentAccountBalance: 0,
       restPaymentAccountInfo: 'Остаток Р/С:',
       toPayHeaders: [
         {
@@ -453,7 +476,6 @@ export default {
   },
   mounted() {
     this.init()
-    console.log(this.$refs)
   },
   methods: {
     init() {
@@ -467,15 +489,28 @@ export default {
     updateAllInfo() {
       if (this.selectedOrganization) {
         this.findSpDocoplForPay()
-        this.updateResPaymentAccountInfo()
         if (this.accId) {
-          this.updatePaymentAccountInfo(this.accId)
           this.findToPay(this.accId)
         }
+        this.updateResPaymentAccountInfo()
       }
       this.findOrgAccInfo()
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
+    },
+    payedByCashboxForContextMenuOnly() {
+      console.log('payed by cashbox')
+    },
+    internalMovementForContextMenuOnly() {
+      console.log('internal movement')
+    },
+    historyOfPaymentForContextMenuOnly() {
+      console.log('hisoty of payment')
+    },
+    deleteFromToPayForContextMenuOnly() {
+      this.toPaySelectedRows = []
+      this.toPaySelectedRows.push(this.currentRowForContextMenu)
+      this.deleteSelectedPayments()
     },
     async selOplat() {
       await this.$axios.$post('/meridian/oper/spDocopl/selOplat', this.axiosConfig)
@@ -536,19 +571,16 @@ export default {
       this.findSpDocoplForPay()
       this.fromPaySelectedRows = []
     },
-    showPayMenu(e) {
-      this.payMenu = true
-      this.$nextTick(() => {
-        this.x = e.clientX
-        this.y = e.clientY
-        this.$el.focus()
-      })
-      e.preventDefault()
-      console.log(this.payMenu)
-    },
-    closePayMenu() {
+    showPayMenu(event, item) {
+      event.preventDefault()
       this.payMenu = false
-      console.log(this.payMenu)
+      this.currentRowForContextMenu = null
+      this.x = event.clientX
+      this.y = event.clientY
+      this.$nextTick(() => {
+        this.payMenu = true
+        this.currentRowForContextMenu = item.item
+      })
     },
     newDocument() {
       this.$refs.editPaymentDocument.newDocument()
@@ -623,30 +655,47 @@ export default {
         totalToSumOplat += value.sumOplat
       })
       this.totalToSumOplat = totalToSumOplat
+      this.updateResPaymentAccountInfo()
+      this.updatePaymentAccountInfo(val)
     },
     organizationChange(val) {
       this.selectedOrganization = val
+      this.accId = null
+      this.updatePaymentAccountInfo(this.accId)
       this.toPayData = []
+      this.totalToSumOplat = 0
       this.findPaymentAccounts(val)
       this.findSpDocoplForPay()
       this.updateResPaymentAccountInfo()
     },
     paymentAccountChange(val) {
       this.findToPay(val)
-      this.updatePaymentAccountInfo(val)
     },
     async addPayments() {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
+        const sumDocs = this.countSumOfArrayElements(this.fromPaySelectedRows.map(value => value.sumDoc))
+
+        if (sumDocs > this.currentPaymentAccountBalance) {
+          this.showUserNotification('error', 'Сумма выбранных документов на оплату превышает сумму остатка по выбранному р/с!')
+          return
+        }
+
         const ids = this.fromPaySelectedRows.map(value => value.id)
-        console.log(ids)
         const data = { ids, accId: this.accId }
         await this.$axios.$post('/meridian/oper/spDocopl/payDocument', data)
         this.refreshTables()
       }
     },
-    addPaymentsClick() {
+    countSumOfArrayElements(array) {
+      let sum = 0
+      for (let i = 0; i < array.length; i++) {
+        sum += array[i]
+      }
+      return sum
+    },
+    addPaymentDocument() {
       if (!this.accId) {
-        alert('Выберите расчётный счёт!')
+        this.showUserNotification('error', 'Выберите расчётный счёт!')
         return
       }
       this.addPayments()
@@ -663,44 +712,52 @@ export default {
       const data = {
         dateOplat: new Date(this.date).toLocaleDateString()
       }
-      await this.$axios.$get('/meridian/oper/spOplat/groupByOrg', { params: data }).then((response) => {
-        response.forEach((element) => {
-          if (element.myOrg.id === this.selectedOrganization) {
-            this.restPaymentAccountInfo = 'Остаток Р/С: ' + element.saldo
-          }
-        })
+      const response = await this.$axios.$get('/meridian/oper/spOplat/groupByOrg', { params: data })
+      response.forEach((element) => {
+        if (element.myOrg.id === this.selectedOrganization) {
+          this.restPaymentAccountInfo = 'Остаток Р/С: ' + (element.saldo - this.totalToSumOplat)
+        }
       })
     },
     async updatePaymentAccountInfo(accId) {
+      if (!accId) {
+        this.paymentAccountInfo = 'Сумма Р/С: '
+        this.currentPaymentAccountBalance = 0
+        return
+      }
+
       const data = {
         dateOplat: new Date(this.date).toLocaleDateString(),
         orgId: this.selectedOrganization
       }
-      await this.$axios.$get('/meridian/oper/spOplat/findByDataOplatAndMyOrgId', { params: data }).then((response) => {
-        response.forEach((element) => {
-          if (element.acc.id === accId) {
-            this.paymentAccountInfo = 'Сумма Р/С: ' + element.saldo
-            console.log(this.paymentAccountInfo)
-          }
-        })
+      const response = await this.$axios.$get('/meridian/oper/spOplat/findByDataOplatAndMyOrgId', { params: data })
+      response.forEach((element) => {
+        if (element.acc.id === accId) {
+          this.currentPaymentAccountBalance = (element.saldo - this.totalToSumOplat)
+          this.paymentAccountInfo = 'Сумма Р/С: ' + this.currentPaymentAccountBalance
+        }
       })
     },
     async saveSumOplat(selectedDoc) {
       this.toPaySelectedRows = []
       this.toPaySelectedRows.push(selectedDoc)
 
-      await this.$axios.$post('/meridian/oper/spDocopl/saveSpDocoplToPay', this.toPaySelectedRows).then(
-        this.toPaySelectedRows = [],
-        this.refreshTables(),
-        this.snackSumOplat = true,
-        this.snackColorSumOplat = 'success',
-        this.snackTextSumOplat = 'Сумма оплаты сохранена'
-      )
+      await this.$axios.$post('/meridian/oper/spDocopl/saveSpDocoplToPay', this.toPaySelectedRows)
+      this.toPaySelectedRows = []
+      this.refreshTables()
+      this.showUserNotification('success', 'Сумма оплаты сохранена')
     },
     cancelSumOplat() {
-      this.snackSumOplat = true
-      this.snackColorSumOplat = 'error'
-      this.snackTextSumOplat = 'Сумма оплаты не была изменена'
+      this.showUserNotification('error', 'Сумма оплаты не была изменена')
+    },
+    showUserNotification(color, text) {
+      if (!color ||
+      !text) {
+        return
+      }
+      this.snackbarUserNotification = true
+      this.snackbarUserNotificationColor = color
+      this.snackbarUserNotificationText = text
     }
   }
 }
