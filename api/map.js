@@ -6,9 +6,15 @@ export const factory = send => ({
 
     user: {
       get() {
-        return send('GET', '/auth/findByCurrentLogin',)
+        return send('GET', '/auth/findByCurrentLogin')
       }
     },
+
+    users: {
+      get() {
+        return send('GET', '/auth/findUsers')
+      }
+    }
   },
 
   code: {

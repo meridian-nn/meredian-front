@@ -26,6 +26,7 @@ const DashboardPage = dynamicPage(() => import('~/views/vcrm/Dashboard'))
 const PaymentDocumentPage = dynamicPage(() => import('~/views/payment/PaymentDocument'))
 const GtinPage = dynamicPage(() => import('~/views/vcrm/Dashboard/Gtin'))
 const MarkPage = dynamicPage(() => import('~/views/vcrm/Dashboard/Mark'))
+const ChatPage = dynamicPage(() => import('~/views/vcrm/Dashboard/Chat/ChatPage'))
 
 Vue.use(Router)
 
@@ -74,6 +75,18 @@ const createRouterConst = new Router({
                 breadcrumb: [
                   { text: 'Профиль', disabled: false, href: 'Dashboard' },
                   { text: 'Реестр оплат', disabled: true, href: 'PaymentDocumentPage' }
+                ]
+              }
+            },
+
+            {
+              path: 'chat',
+              name: 'ChatPage',
+              component: ChatPage,
+              meta: {
+                breadcrumb: [
+                  { text: 'Профиль', disabled: false, href: 'Dashboard' },
+                  { text: 'Чат', disabled: true, href: 'ChatPage' }
                 ]
               }
             }

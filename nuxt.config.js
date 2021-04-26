@@ -9,6 +9,7 @@ export default {
   env: {
     USER: process.env.USER,
     PASSWORD: process.env.PASSWORD,
+    API_HOST_SOCKET: process.env.API_HOST_SOCKET,
     API_HOST: process.env.API_HOST,
     YM_ENV: process.env.YM_ENV
   },
@@ -32,7 +33,8 @@ export default {
   components: true,
 
   plugins: [
-    { src: '~/plugins/api', mode: 'client' }
+    { src: '~/plugins/api', mode: 'client' },
+    { src: '~/plugins/format-date' }
     // { src: '~/plugins/bootstrap', mode: 'client' }
   ],
 
@@ -51,10 +53,10 @@ export default {
     //   target: 'http://192.168.1.70:9037'
     // }
   },
-  // server: {
-  //    host: '0.0.0.0',
-  //    port: 8000 // default: 3000
-  // },
+  server: {
+    host: '0.0.0.0',
+    port: 8000 // default: 3000
+  },
 
   axios: {
     baseURL: 'http://192.168.1.70:9037/meridian',

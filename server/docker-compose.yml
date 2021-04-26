@@ -1,0 +1,27 @@
+version: "3.7"
+
+services:
+  node:
+    build:
+      context: ./
+      dockerfile: docker/node/node.dockerfile
+    environment:
+      DB_HOST: 'mongodb'
+      DB_USER: ${MONGO_INITDB_ROOT_USERNAME}
+      DB_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      DB_PORT: ${MONGO_INITDB_PORT}
+      DB_NAME: ${MONGO_INITDB_DATABASE}
+    ports:
+      - "${NODE_PORT}:3001"
+    entrypoint: ["wait-for-it", "-s" , "-t", "20", "mongodb:27017", "--"]
+    command: [ "npm", "run", "start:server" ]
+    restart: always
+
+  mongodb:
+    image: mongo:4.2.12-bionic
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    volumes:
+      - "${DATA_PATH_HOST}/mongo:/data/db"
