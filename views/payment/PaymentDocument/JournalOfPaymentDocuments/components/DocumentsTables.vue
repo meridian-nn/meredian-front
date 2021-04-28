@@ -509,7 +509,13 @@ export default {
     // Функция поиска расчетных счетов выбранной организации
     async findPaymentAccounts(val) {
       this.loadingType.paymentAccounts = true
-      this.paymentAccounts = await this.$axios.$get('/meridian/oper/spAcc/findByOrgId?orgId=' + val)
+
+      const paymentAccounts = await this.$axios.$get('/meridian/oper/spAcc/findByOrgId?orgId=' + val)
+      paymentAccounts.forEach((account) => {
+        account.shortName = account.shortName + ' - ' + account.numAcc.slice(account.numAcc.length - 4)
+      })
+      this.paymentAccounts = paymentAccounts
+
       this.loadingType.paymentAccounts = null
       this.updateResPaymentAccountInfo()
     },
@@ -714,6 +720,8 @@ export default {
         dateDoc: new Date(this.date).toLocaleDateString(),
         orgId: this.selectedOrganization
       }
+
+      // TODO поменять на /oper/spDocopl/findSpDocoplForPayBetweenDates
       this.fromPayData = await this.$axios.$get('/meridian/oper/spDocopl/findSpDocoplForPay', { params: data })
       let totalSumDoc = 0
       let totalSumOplat = 0

@@ -92,13 +92,6 @@
                   type="number"
                   @input="update(row.endBalance)"
                 >
-                <input
-                  slot="overdraft"
-                  v-model="row.overdraft"
-                  slot-scope="{row, update}"
-                  type="number"
-                  @input="update(row.overdraft)"
-                >
               </v-client-table>
             </div>
           </v-col>
@@ -135,7 +128,6 @@ export default {
       oplatData: [],
       organizations: [],
       groupByOrgColumns: ['name', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
-      oplatDataColumns: ['acc.shortName', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
       groupByOrgOptions: {
         filterable: false,
         pagination: { show: false },
@@ -150,13 +142,15 @@ export default {
           endBalance: 'Остаток на конец'
         }
       },
+
+      oplatDataColumns: ['acc.shortName', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
       oplatDataOptions: {
-        filterable: false,
+        filterable: ['acc.shortName'],
         pagination: { show: false },
-        texts: { noResults: '' },
+        texts: { noResults: '', filter: 'Фильтр по наим. счета:', filterPlaceholder: '' },
         perPage: 100,
         perPageValues: [100],
-        filterByColumn: false,
+        /* filterByColumn: true, */
         editableColumns: ['distributionSum', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
         headings: {
           'acc.shortName': 'Наименование',
@@ -184,22 +178,27 @@ export default {
       await this.$axios.$post('/meridian/oper/spDocopl/selOplat', this.axiosConfig)
     },
     async groupByOrg() {
+      this.groupByOrgData = await this.getInfoAboutOrgs()
+    },
+
+    // Метод получения итоговой суммы документов к оплате по организации
+    async getInfoAboutOrgs() {
       const data = {
         dateOplat: new Date(this.date).toLocaleDateString()
       }
+
       const response = await this.$axios.$get('/meridian/oper/spOplat/groupByOrg', { params: data })
       response.forEach(async(element) => {
         element.name = element.myOrg.shortName
         element.credit = await this.getSumOfDocumentsToPayByOrgId(element.myOrg.id)
         element.endBalance = element.saldo - element.credit
       })
-      this.groupByOrgData = response
+      return response
     },
-
-    // Метод получения итоговой суммы документов к оплате по организации
     async getSumOfDocumentsToPayByOrgId(orgId) {
       const paymentAccounts = await this.$axios.$get('/meridian/oper/spAcc/findByOrgId?orgId=' + orgId)
-      return this.getBalanceOfOtherAccounts(paymentAccounts)
+      const balance = await this.getBalanceOfOtherAccounts(paymentAccounts)
+      return balance
     },
     async getBalanceOfOtherAccounts(paymentAccounts) {
       let totalToSumOplat = 0
@@ -210,7 +209,6 @@ export default {
       })
       await Promise.all(arrayOfPromises).then((results) => {
         results.forEach((result) => {
-          console.log(result)
           totalToSumOplat += result
         })
       })

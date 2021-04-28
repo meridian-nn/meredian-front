@@ -85,6 +85,7 @@
                 v-model="editedItem.dataOplat"
                 type="date"
                 outlined
+                @input="dataOplatChange"
               />
             </v-col>
 
@@ -461,9 +462,19 @@ export default {
       this.findDocumentType(val)
       this.findExecutors(val)
     },
+    dataOplatChange(val) {
+      if (!this.editedItem.dataDoc) {
+        alert('Сначало укажите дату документа!')
+        this.editedItem.dataOplat = null
+        return
+      }
+      if (val < this.editedItem.dataDoc) {
+        alert('Дата оплаты не может быть меньше даты документа!')
+        this.editedItem.dataOplat = null
+      }
+    },
     async save() {
-      if (!this.editedItem.dataOplat || !this.editedItem.dataDoc) {
-        alert('Укажите дату документа и крайнюю дату оплаты документа!')
+      if (!this.checkParamsOfEditedItem()) {
         return
       }
       let errorMessage = null
@@ -483,6 +494,14 @@ export default {
         this.dialog = false
       }
       this.$emit('save')
+    },
+    checkParamsOfEditedItem() {
+      let verificationPassed = true
+      if (!this.editedItem.dataOplat || !this.editedItem.dataDoc) {
+        alert('Укажите дату документа и дату оплаты документа!')
+        verificationPassed = false
+      }
+      return verificationPassed
     },
     cancel() {
       this.reset()

@@ -370,28 +370,39 @@ export default {
         this.loadingType.departments = null
       }
       const departments = this.departments
-      this.departmentsDataTable = this.findInfoForDepDataTable(departments)
+      this.departmentsDataTable = await this.findInfoForDepDataTable(departments)
     },
 
     // Поиск информации о бюджетах всех отделов для демонстрации в таблице departmentsDataTable
-    findInfoForDepDataTable(departments) {
+    async findInfoForDepDataTable(departments) {
       const departmentsDataTable = []
-      departments.forEach(async(dep) => {
-        const data = {
-          distributionDate: new Date(this.date).toLocaleDateString(),
-          departmentId: dep.id
-        }
-        const response = await this.$axios.$get('/meridian/oper/depMoneyDistribution/findByDepartmentId', { params: data })
-        const distSum = !response.distributionSum ? 0 : response.distributionSum
-        const distributedSum = !response.distributedSum ? 0 : response.distributedSum
-        const notDistSum = distSum - distributedSum
-        departmentsDataTable.push({
-          name: response.department.nameViddoc,
-          distributionSum: distSum,
-          notDistributedSum: notDistSum
+      const arrayOfPromises = []
+      departments.forEach((dep) => {
+        const response = this.getInfoAboutDepById(dep.id)
+        arrayOfPromises.push(response)
+      })
+      await Promise.all(arrayOfPromises).then((results) => {
+        results.forEach((result) => {
+          const distSum = !result.distributionSum ? 0 : result.distributionSum
+          const distributedSum = !result.distributedSum ? 0 : result.distributedSum
+          const notDistSum = distSum - distributedSum
+          departmentsDataTable.push({
+            name: result.department.nameViddoc,
+            distributionSum: distSum,
+            notDistributedSum: notDistSum
+          })
         })
       })
       return departmentsDataTable
+    },
+    async getInfoAboutDepById(id) {
+      if (id) {
+        const data = {
+          distributionDate: new Date(this.date).toLocaleDateString(),
+          departmentId: id
+        }
+        return await this.$axios.$get('/meridian/oper/depMoneyDistribution/findByDepartmentId', { params: data })
+      }
     },
 
     // Обработка события "Выбор отдела пользователем на форме"
