@@ -73,6 +73,7 @@
           :items-per-page="5"
           :show-select="true"
           :single-select="false"
+          :footer-props="{ itemsPerPageText: 'Количество строк на странице:' }"
           class="elevation-1 journal-of-payment-docs-docs-to-pay-table"
           @contextmenu:row="showPayMenu"
         >
@@ -230,6 +231,7 @@
           :show-select="true"
           :single-select="false"
           :items-per-page="5"
+          :footer-props="{ itemsPerPageText: 'Количество строк на странице:' }"
           class="elevation-1 journal-of-payment-docs-docs-from-pay-table"
         >
           <template
@@ -390,7 +392,7 @@ export default {
         },
         {
           text: 'Дата',
-          value: 'dataDoc'
+          value: 'dataCreate'
         },
         {
           text: 'Номер',
@@ -489,7 +491,12 @@ export default {
     async findOrganizatios() {
       if (!this.organizations.length) {
         this.loadingType.organizations = true
-        this.organizations = await this.$axios.$get('/meridian/oper/dict/spOrg/findInternalOrg')
+
+        const data = {
+          typeCode: 1
+        }
+        this.organizations = await this.$axios.$get('/meridian/oper/dict/spOrg/findByOrgTypeCode', { params: data })
+
         this.loadingType.organizations = null
       }
     },

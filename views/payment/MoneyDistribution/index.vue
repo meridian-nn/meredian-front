@@ -157,8 +157,12 @@
                 cols="2"
                 class="not-allocated-dep-sum"
               >
-                <v-subheader class="font-weight-medium text-subtitle-1">
-                  {{ departmentRestDistributionSum }}
+                <v-subheader
+                  class="font-weight-medium text-subtitle-1"
+                >
+                  <div :class=" {'text-danger': notDistributedLessThenZero}">
+                    {{ departmentRestDistributionSum }}
+                  </div>
                 </v-subheader>
               </v-col>
             </v-row>
@@ -288,7 +292,8 @@ export default {
           showDropdowns: true,
           autoUpdateInput: true
         }
-      }
+      },
+      notDistributedLessThenZero: false
     }
   },
   computed: {
@@ -305,7 +310,8 @@ export default {
 
     departmentRestDistributionSum() {
       const notDistributed = (this.depDistributionSum - this.depDistributedSum)
-      return (notDistributed < 0 ? 0 : notDistributed)
+      this.notDistributedLessThenZero = (notDistributed < 0)
+      return notDistributed
     }
   },
   watch: {
@@ -599,5 +605,8 @@ export default {
   text-align: left;
   background-color: #639db1 !important;
   color: white;
+}
+.text-danger {
+  color: red;
 }
 </style>

@@ -208,7 +208,7 @@
                 <v-col cols="9">
                   <v-autocomplete
                     v-model="editedItem.myorgId"
-                    label="Плательшик"
+                    label="Плательщик"
                     :loading="loadingType.payers"
                     :items="payers"
                     item-value="id"
@@ -237,6 +237,7 @@
                     item-value="id"
                     item-text="clName"
                     hide-details="auto"
+                    auto-select-first="true"
                     outlined
                   />
                 </v-col>
@@ -428,14 +429,19 @@ export default {
       this.suppliers = await this.$axios.$get(
         '/meridian/oper/dict/spOrg/findByDogId?dogId=' + dogId
       )
+      if (this.suppliers.length) {
+        this.editedItem.consumerId = this.suppliers[0].id
+      }
       this.loadingType.suppliers = null
     },
     async findPayers() {
       if (!this.payers.length) {
         this.loadingType.payers = true
+
         this.payers = await this.$axios.$get(
           '/meridian/oper/dict/spOrg/findPayers'
         )
+
         this.loadingType.payers = null
       }
     },
