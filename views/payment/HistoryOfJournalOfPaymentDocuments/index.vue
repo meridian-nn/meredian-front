@@ -11,16 +11,15 @@
         <v-container
           class="journal-of-payment-docs-container"
         >
-          <div class="journal-of-payment-main-row">
+          <v-row>
             <v-col cols="10">
               <div
                 align="center"
-                class="headline"
+                class="journal-of-payment-main-row headline"
               >
-                Журнал документов на оплату
+                Журнал документов на оплату (История)
               </div>
             </v-col>
-
             <v-col cols="2">
               <v-text-field
                 v-model="date"
@@ -28,19 +27,15 @@
                 @input="updateAllInfo()"
               />
             </v-col>
-          </div>
+          </v-row>
 
           <v-row>
             <v-col
               cols="10"
-              class="journal-of-payment-docs-table-of-accounts-statistics"
             >
-              <v-data-table
-                :headers="orgAccInfoHeaders"
-                :items="orgAccInfoData"
-                hide-default-footer
-                class="elevation-1"
-              />
+              <v-subheader class="font-weight-medium text-subtitle-1">
+                Остатки на расчетных счетах
+              </v-subheader>
             </v-col>
 
             <v-col
@@ -60,6 +55,20 @@
           </v-row>
 
           <v-row>
+            <v-col
+              cols="12"
+              class="journal-of-payment-docs-table-of-accounts-statistics"
+            >
+              <v-data-table
+                :headers="orgAccInfoHeaders"
+                :items="orgAccInfoData"
+                hide-default-footer
+                class="elevation-1"
+              />
+            </v-col>
+          </v-row>
+
+          <v-row>
             <v-col cols="5">
               <v-autocomplete
                 label="Организация"
@@ -70,7 +79,11 @@
                 @change="organizationChange"
               />
             </v-col>
-            <v-col cols="7" />
+            <v-col cols="7">
+              <div>
+                <span class="headline">{{ restPaymentAccountInfo }}</span>
+              </div>
+            </v-col>
           </v-row>
 
           <v-row>
@@ -234,8 +247,14 @@
               class="journal-of-payment-docs-docs-from-pay-col journal-of-payment-docs-for-pay-col-5"
             >
               <v-subheader class="font-weight-medium text-subtitle-1">
-                Документы на оплату
+                <div
+                  align="center"
+                  class="journal-of-documents-subheader-first"
+                >
+                  Документы на оплату
+                </div>
               </v-subheader>
+
               <v-data-table
                 v-model="fromPaySelectedRows"
                 :headers="fromPayHeaders"
@@ -319,9 +338,7 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="5">
-              {{ restPaymentAccountInfo }}
-            </v-col>
+            <v-col cols="5" />
             <v-col cols="1" />
             <v-col cols="6">
               <v-text-field
@@ -361,13 +378,14 @@ export default {
       selectedOrganization: null,
       currentRowForContextMenu: null,
       paymentAccounts: [],
-      paymentAccountInfo: 'Сумма Р/С:',
+      paymentAccountInfo: 'Остаток на Р/С:',
       currentPaymentAccountBalance: 0,
-      restPaymentAccountInfo: 'Остаток Р/С:',
+      restPaymentAccountInfo: 'Остаток на Р/Счетах:',
+      accId: null,
       toPayHeaders: [
         {
           text: 'Подразделение',
-          value: 'nameViddoc'
+          value: 'depName'
         },
         {
           text: 'Дата',
@@ -395,16 +413,10 @@ export default {
         }
       ],
       toPayData: [],
-      totalSumDoc: 0,
-      totalSumOplat: 0,
-      totalToSumOplat: 0,
-      totalSumOplach: 0,
-      accId: null,
-      orgAccInfoData: [],
       fromPayHeaders: [
         {
           text: 'Подразделение',
-          value: 'nameViddoc'
+          value: 'depName'
         },
         {
           text: 'Дата',
@@ -440,38 +452,14 @@ export default {
         }
       ],
       fromPayData: [],
+      totalSumDoc: 0,
+      totalSumOplat: 0,
+      totalToSumOplat: 0,
+      totalSumOplach: 0,
       toPaySelectedRows: [],
       fromPaySelectedRows: [],
-      orgAccInfoHeaders: [
-        {
-          text: '',
-          value: 'name'
-        },
-        {
-          text: 'Меридиан',
-          value: 'org1Value'
-        },
-        {
-          text: 'Золотая нить',
-          value: 'org2Value'
-        },
-        {
-          text: 'БРИГ',
-          value: 'org3Value'
-        },
-        {
-          text: 'БОФ',
-          value: 'org4Value'
-        },
-        {
-          text: 'Голяткино',
-          value: 'org5Value'
-        },
-        {
-          text: 'Н шов. б. (Меридиан)',
-          value: 'org6Value'
-        }
-      ]
+      orgAccInfoData: [],
+      orgAccInfoHeaders: []
     }
   },
   mounted() {
@@ -484,6 +472,26 @@ export default {
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
       this.findOrganizatios()
+      this.findOrganizationsForTotalResults()
+    },
+    async findOrganizationsForTotalResults() {
+      const data = {
+        typeCode: 1
+      }
+      const response = await this.$axios.$get('/meridian/oper/dict/spOrg/findByOrgTypeCode', { params: data })
+
+      this.orgAccInfoHeaders.push({
+        text: '',
+        value: 'name'
+      })
+      response.forEach((element) => {
+        const columnOrgValueName = 'org' + element.id + 'Value'
+        this.orgAccInfoHeaders.push({
+          text: element.shortName,
+          orgId: element.id,
+          value: columnOrgValueName
+        })
+      })
       this.findOrgAccInfo()
     },
     updateAllInfo() {
@@ -519,48 +527,25 @@ export default {
       const data = {
         dateOplat: new Date(this.date).toLocaleDateString()
       }
-      await this.$axios.$get('/meridian/oper/spOplat/groupByOrg', { params: data }).then((response) => {
-        this.orgAccInfoData = []
-        let brigBalance = 0
-        let meridianBalance = 0
-        let goldenThread = 0
-        let bofBalance = 0
-        let golyatkinoBalance = 0
-        let nShovBalance = 0
-        response.forEach((element) => {
-          if (element.myOrg.id === 123) {
-            brigBalance = element.saldo
-          } else if (element.myOrg.id === 159) {
-            meridianBalance = element.saldo
-          } else if (element.myOrg.id === 19469) {
-            goldenThread = element.saldo
-          } else if (element.myOrg.id === 22110) {
-            bofBalance = element.saldo
-          } else if (element.myOrg.id === 31699) {
-            golyatkinoBalance = element.saldo
-          } else if (element.myOrg.id === 36315) {
-            nShovBalance = element.saldo
-          }
-        })
-        this.orgAccInfoData.push({
-          name: 'Расч. счёт',
-          org1Value: meridianBalance,
-          org2Value: goldenThread,
-          org3Value: brigBalance,
-          org4Value: bofBalance,
-          org5Value: golyatkinoBalance,
-          org6Value: nShovBalance
-        })
-        this.orgAccInfoData.push({
-          name: 'Касса',
-          org1Value: null,
-          org2Value: null,
-          org3Value: null,
-          org4Value: null,
-          org5Value: null,
-          org6Value: null
-        })
+      const response = await this.$axios.$get('/meridian/oper/spOplat/groupByOrg', { params: data })
+      this.orgAccInfoData = []
+
+      const orgAccInfoDataAccounts = {}
+      orgAccInfoDataAccounts.name = 'Расч. счёт'
+
+      const orgAccInfoDataCashbox = {}
+      orgAccInfoDataCashbox.name = 'Касса'
+
+      this.orgAccInfoHeaders.forEach((orgAccElem) => {
+        const responseElem = response.find(el => el.myOrg.id === orgAccElem.orgId)
+        if (responseElem) {
+          orgAccInfoDataAccounts[orgAccElem.value] = responseElem.saldo
+          orgAccInfoDataCashbox[orgAccElem.value] = 0
+        }
       })
+
+      this.orgAccInfoData.push(orgAccInfoDataAccounts)
+      this.orgAccInfoData.push(orgAccInfoDataCashbox)
     },
     closePaymentDocument() {
       console.log('close')
@@ -624,6 +609,7 @@ export default {
       this.loadingType.paymentAccounts = true
       this.paymentAccounts = await this.$axios.$get('/meridian/oper/spAcc/findByOrgId?orgId=' + val)
       this.loadingType.paymentAccounts = null
+      this.updateResPaymentAccountInfo()
     },
     async findSpDocoplForPay() {
       const data = {
@@ -655,7 +641,6 @@ export default {
         totalToSumOplat += value.sumOplat
       })
       this.totalToSumOplat = totalToSumOplat
-      this.updateResPaymentAccountInfo()
       this.updatePaymentAccountInfo(val)
     },
     organizationChange(val) {
@@ -666,7 +651,7 @@ export default {
       this.totalToSumOplat = 0
       this.findPaymentAccounts(val)
       this.findSpDocoplForPay()
-      this.updateResPaymentAccountInfo()
+      // this.updateResPaymentAccountInfo()
     },
     paymentAccountChange(val) {
       this.findToPay(val)
@@ -676,8 +661,7 @@ export default {
         const sumDocs = this.countSumOfArrayElements(this.fromPaySelectedRows.map(value => value.sumDoc))
 
         if (sumDocs > this.currentPaymentAccountBalance) {
-          this.showUserNotification('error', 'Сумма выбранных документов на оплату превышает сумму остатка по выбранному р/с!')
-          return
+          this.showUserNotification('warning', 'Сумма выбранных документов на оплату превышает сумму остатка по выбранному р/с!')
         }
 
         const ids = this.fromPaySelectedRows.map(value => value.id)
@@ -709,19 +693,43 @@ export default {
       }
     },
     async updateResPaymentAccountInfo() {
-      const data = {
-        dateOplat: new Date(this.date).toLocaleDateString()
-      }
-      const response = await this.$axios.$get('/meridian/oper/spOplat/groupByOrg', { params: data })
-      response.forEach((element) => {
-        if (element.myOrg.id === this.selectedOrganization) {
-          this.restPaymentAccountInfo = 'Остаток Р/С: ' + (element.saldo - this.totalToSumOplat)
-        }
+      const balanceOfSelectedOrganization = this.orgAccInfoData[0]['org' + this.selectedOrganization + 'Value']
+      const balanceOfOtherAccounts = await this.getBalanceOfOtherAccounts()
+
+      this.restPaymentAccountInfo = 'Остаток на Р/Счетах: ' + (balanceOfSelectedOrganization - balanceOfOtherAccounts)
+    },
+    async getBalanceOfOtherAccounts() {
+      let totalToSumOplat = 0
+      const arrayOfPromises = []
+      this.paymentAccounts.forEach((account) => {
+        const promise = this.getSumToPayDocsOfOrgByAccId(account.id)
+        arrayOfPromises.push(promise)
       })
+      await Promise.all(arrayOfPromises).then((results) => {
+        results.forEach((result) => {
+          console.log(result)
+          totalToSumOplat += result
+        })
+      })
+      return totalToSumOplat
+    },
+    async getSumToPayDocsOfOrgByAccId(accId) {
+      const data = {
+        dateDoc: new Date(this.date).toLocaleDateString(),
+        accId,
+        orgId: this.selectedOrganization
+      }
+
+      let totalToSumOplat = 0
+      const response = await this.$axios.$get('/meridian/oper/spDocopl/findSpDocoplToPay', { params: data })
+      response.forEach((value) => {
+        totalToSumOplat += value.sumOplat
+      })
+      return totalToSumOplat
     },
     async updatePaymentAccountInfo(accId) {
       if (!accId) {
-        this.paymentAccountInfo = 'Сумма Р/С: '
+        this.paymentAccountInfo = 'Остаток на Р/С: '
         this.currentPaymentAccountBalance = 0
         return
       }
@@ -734,7 +742,7 @@ export default {
       response.forEach((element) => {
         if (element.acc.id === accId) {
           this.currentPaymentAccountBalance = (element.saldo - this.totalToSumOplat)
-          this.paymentAccountInfo = 'Сумма Р/С: ' + this.currentPaymentAccountBalance
+          this.paymentAccountInfo = 'Остаток на Р/С: ' + this.currentPaymentAccountBalance
         }
       })
     },
@@ -779,7 +787,12 @@ export default {
   max-height: 1000px;
 }
 .journal-of-payment-docs-table-of-accounts-statistics{
-  padding-right: 0px;
+  padding-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 0px;
+  flex: 0 0 99%;
+  max-width: 99%;
 }
 .journal-of-payment-docs-table-of-accounts-statistics-enter-balances{
   padding-left: 0px;
@@ -830,12 +843,7 @@ export default {
     margin: -12px;
 }
 .journal-of-payment-main-row {
-    display: flex;
-    flex-wrap: wrap;
-    flex: 1 1 auto;
-    margin-left: -12px;
-    margin-right:  -12px;
-    margin-bottom:  -12px;
+    padding-bottom: 10px;
 }
 
 .context-menu {
@@ -846,4 +854,11 @@ export default {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     cursor: pointer;
 }
+
+.journal-of-documents-subheader-first {
+  padding-top: 12px;
+  margin-top: 9px;
+  padding-right: 30px;
+}
+
 </style>

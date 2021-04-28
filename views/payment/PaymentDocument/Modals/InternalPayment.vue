@@ -3,6 +3,7 @@
     v-model="dialog"
     :value="show"
     max-width="1000px"
+    @input="$emit('close')"
   >
     <v-card>
       <v-card-title>
@@ -92,9 +93,16 @@
 
 <script>
 export default {
+  name: 'InternalPayment',
+  props: {
+    show: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
-      date: '01.01.2021',
+      date: new Date().toLocaleDateString(),
       dialog: false,
       loadingType: {},
       id: null,
@@ -143,10 +151,12 @@ export default {
       if (errorMessage == null) {
         this.dialog = false
       }
+      this.$emit('save')
     },
     cancel() {
       this.reset()
       this.dialog = false
+      this.$emit('cancel')
     },
     reset() {
       this.loadingType = {}

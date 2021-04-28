@@ -3,6 +3,7 @@
     v-model="dialog"
     :value="show"
     max-width="1000px"
+    @input="$emit('close')"
   >
     <v-card>
       <v-card-title>
@@ -23,15 +24,15 @@
               <div
                 align="center"
               >
-                {{date}}
+                {{ date }}
               </div>
             </v-col>
           </v-row>
           <v-row>
             <v-col cols="10">
               <v-autocomplete
-                label="Плательшик"
                 v-model="editedItem.myorgId"
+                label="Плательшик"
                 :loading="loadingType.payers"
                 :items="payers"
                 item-value="id"
@@ -50,8 +51,8 @@
             </v-col>
             <v-col cols="5">
               <v-autocomplete
-                label="Группа"
                 v-model="editedItem.viddocId"
+                label="Группа"
                 :loading="loadingType.groups"
                 :items="groups"
                 item-value="id"
@@ -118,9 +119,16 @@
 
 <script>
 export default {
+  name: 'PaymentByCashbox',
+  props: {
+    show: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
-      date: '01.01.2021',
+      date: new Date().toLocaleDateString(),
       dialog: false,
       loadingType: {},
       id: null,
@@ -130,9 +138,17 @@ export default {
       groups: []
     }
   },
+  watch: {
+    dialog(val) {
+      if (val) {
+        this.init()
+      }
+    }
+  },
   methods: {
     init() {
       this.findPayers()
+      this.findGroups()
     },
     async findPayers() {
       if (!this.payers.length) {
@@ -156,6 +172,7 @@ export default {
     },
     async save() {
       let errorMessage = null
+      this.editedItem.dataDoc = this.date
       await this.$axios.$post('/meridian/oper/spDocopl/save', this.editedItem, this.axiosConfig).catch((error) => {
         errorMessage = error
         alert(errorMessage)
@@ -163,10 +180,12 @@ export default {
       if (errorMessage == null) {
         this.dialog = false
       }
+      this.$emit('save')
     },
     cancel() {
       this.reset()
       this.dialog = false
+      this.$emit('cancel')
     },
     reset() {
       this.loadingType = {}
@@ -183,13 +202,6 @@ export default {
       this.id = id
       this.dialog = true
       this.findEditedItem()
-    }
-  },
-  watch: {
-    dialog(val) {
-      if (val) {
-        this.init()
-      }
     }
   }
 }

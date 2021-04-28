@@ -53,7 +53,7 @@
             <v-list-item-title>Платежи</v-list-item-title>
           </template>
           <MenuItemButton
-            title="Документ на оплату"
+            title="Журнал документов"
             link="PaymentDocument"
             icon="mdi-brightness-5"
           />
@@ -69,17 +69,12 @@
           />
           <MenuItemButton
             title="Реестр"
-            link="ContextMenu"
-            icon="mdi-brightness-5"
-          />
-          <MenuItemButton
-            title="Журнал документов"
             link="PaymentDocument"
             icon="mdi-brightness-5"
           />
           <MenuItemButton
             title="История"
-            link="PaymentDocument"
+            link="HistoryOfPaymentDocuments"
             icon="mdi-brightness-5"
           />
         </v-list-group>

@@ -83,6 +83,19 @@
         </v-row>
 
         <v-row>
+          <v-col cols="12">
+            <div id="departmentsDataTable">
+              <v-client-table
+                v-model="departmentsDataTable"
+                :loading="loadingType.departments"
+                :columns="departmentsColumns"
+                :options="departmentsOptions"
+              />
+            </div>
+          </v-col>
+        </v-row>
+
+        <v-row>
           <v-col cols="2" />
 
           <v-col cols="8">
@@ -155,13 +168,9 @@
         </v-row>
 
         <v-row>
-          <v-col cols="2" />
-
-          <v-col cols="8">
+          <v-col cols="12">
             <div
               id="moneyDistributionData"
-              align="center"
-              class="headline"
             >
               <v-client-table
                 v-model="moneyDistributionData"
@@ -186,8 +195,6 @@
               </v-client-table>
             </div>
           </v-col>
-
-          <v-col cols="2" />
         </v-row>
 
         <v-row>
@@ -241,8 +248,21 @@ export default {
       date: new Date().toISOString().substr(0, 10),
       moneyDistributionData: [],
       departments: [],
-      loadingType: {},
+      departmentsDataTable: [],
+      departmentsColumns: ['name', 'distributionSum', 'notDistributedSum'],
+      departmentsOptions: {
+        filterable: false,
+        pagination: { show: false },
+        texts: { noResults: '' },
+        filterByColumn: false,
+        headings: {
+          name: 'Отдел',
+          distributionSum: 'Выделено',
+          notDistributedSum: 'Не распределено'
+        }
+      },
       department: {},
+      loadingType: {},
       depDistributedSum: null,
       depDistributionSum: null,
       budgetDistributionSum: null,
@@ -284,7 +304,8 @@ export default {
     },
 
     departmentRestDistributionSum() {
-      return (this.depDistributionSum - this.depDistributedSum)
+      const notDistributed = (this.depDistributionSum - this.depDistributedSum)
+      return (notDistributed < 0 ? 0 : notDistributed)
     }
   },
   watch: {
@@ -305,35 +326,31 @@ export default {
     this.init()
   },
   methods: {
+    // Расчет не распределеной суммы по отделу
     calcDepDistributedSum() {
       this.depDistributedSum = this.moneyDistributionData.length === 0
         ? 0
         : this.moneyDistributionData.reduce((acc, item) => { return acc + item.distributionSum || 0 }, 0)
     },
     /* calcBudgetDistributedSum() {
-      this.budgetDistributedSum = this.budgetDistributedSum - this.depDistributionSum
+      this.budgetDistributedSum = (this.budgetDistributionSum - this.budget.distributedSum) - this.depDistributionSum
     }, */
+
     init() {
       this.findDepartments()
       this.department = {}
       this.findBudgetByDate()
     },
+
+    // Обновление информации на форме при изменении даты
     updateAllInfo() {
       this.init()
-      this.findBudgetByDate()
-      console.log(this.selectedDep)
       if (this.selectedDep) {
         this.departmentChange(this.selectedDep)
       }
     },
-    async loadMoneyDistribution(val) {
-      const data = {
-        parentId: val,
-        distributionDate: new Date(this.date).toLocaleDateString()
-      }
-      this.moneyDistributionData = await this.$axios.$get('/meridian/oper/depMoneyDistribution/findForEdit', { params: data })
-      this.findBudgetByDate()
-    },
+
+    // Поиск бюджета на распределение на выбранную дату
     async findBudgetByDate() {
       const data = {
         distributionDate: new Date(this.date).toLocaleDateString()
@@ -342,7 +359,9 @@ export default {
       this.budgetDistributionSum = this.budget.distributionSum
       this.budgetDistributedSum = this.budget.distributionSum - this.budget.distributedSum
     },
-    async findDepartments(val) {
+
+    // Поиск отделов для выбора пользователем на форме
+    async findDepartments() {
       if (!this.departments.length) {
         this.loadingType.departments = true
         this.departments = await this.$axios.$get(
@@ -350,7 +369,40 @@ export default {
         )
         this.loadingType.departments = null
       }
+      const departments = this.departments
+      this.departmentsDataTable = this.findInfoForDepDataTable(departments)
     },
+
+    // Поиск информации о бюджетах всех отделов для демонстрации в таблице departmentsDataTable
+    findInfoForDepDataTable(departments) {
+      const departmentsDataTable = []
+      departments.forEach(async(dep) => {
+        const data = {
+          distributionDate: new Date(this.date).toLocaleDateString(),
+          departmentId: dep.id
+        }
+        const response = await this.$axios.$get('/meridian/oper/depMoneyDistribution/findByDepartmentId', { params: data })
+        const distSum = !response.distributionSum ? 0 : response.distributionSum
+        const distributedSum = !response.distributedSum ? 0 : response.distributedSum
+        const notDistSum = distSum - distributedSum
+        departmentsDataTable.push({
+          name: response.department.nameViddoc,
+          distributionSum: distSum,
+          notDistributedSum: notDistSum
+        })
+      })
+      return departmentsDataTable
+    },
+
+    // Обработка события "Выбор отдела пользователем на форме"
+    async departmentChange(val) {
+      await this.findByDepartmentId(val)
+      await this.loadMoneyDistribution(val)
+      this.depDistributedSum = this.department.distributedSum
+      this.depDistributionSum = this.department.distributionSum
+    },
+
+    // Поиск информации по выбранному подразделению
     async findByDepartmentId(id) {
       const data = {
         distributionDate: new Date(this.date).toLocaleDateString(),
@@ -358,30 +410,49 @@ export default {
       }
       this.department = await this.$axios.$get('/meridian/oper/depMoneyDistribution/findByDepartmentId', { params: data })
     },
-    async departmentChange(val) {
-      await this.loadMoneyDistribution(val)
-      await this.findByDepartmentId(val)
-      this.depDistributedSum = this.department.distributedSum
-      this.depDistributionSum = this.department.distributionSum
+
+    // Поиск информации о распределении бюджета на подразделения выбранного отдела
+    async loadMoneyDistribution(val) {
+      const data = {
+        parentId: val,
+        distributionDate: new Date(this.date).toLocaleDateString()
+      }
+      this.moneyDistributionData = await this.$axios.$get('/meridian/oper/depMoneyDistribution/findForEdit', { params: data })
+      // this.findBudgetByDate()
     },
+
+    // Обработка события сохранения распределения бюджетов на форме
+    async save() {
+      this.budget.distributionSum = this.budgetDistributionSum
+      this.budget.distributedSum = this.budgetDistributedSum
+      this.budget.distributionDate = this.getDateForSave()
+
+      // Сохранение распределения бюджета на отделы
+      await this.$axios.$post('/meridian/oper/depMoneyDistribution/save', [this.budget])
+      this.findBudgetByDate()
+      if (this.department.department) {
+        this.department.distributionSum = this.depDistributionSum || 0
+        this.department.distributedSum = this.depDistributedSum || 0
+
+        // Сохранение распределения бюджета на выбранный отдел
+        await this.$axios.$post('/meridian/oper/depMoneyDistribution/save', [this.department])
+        console.log(this.department)
+        this.findByDepartmentId(this.department.department.id)
+
+        // Сохранение распределения бюджета на подразделения отдела
+        await this.$axios.$post('/meridian/oper/depMoneyDistribution/save', this.moneyDistributionData)
+        this.loadMoneyDistribution(this.department.department.id)
+
+        this.findDepartments()
+      }
+    },
+
     getDateForSave() {
       return new Date(this.date).toLocaleDateString()
     },
+
     cancel() {
       this.updateAllInfo()
-    },
-    async save() {
-      this.budget.distributionDate = this.getDateForSave()
-      await this.$axios.$post('/meridian/oper/depMoneyDistribution/save', [this.budget])
-      this.findBudgetByDate()
-      this.department.distributionSum = this.depDistributionSum || 0
-      this.department.distributedSum = this.depDistributedSum || 0
-      this.budget.distributionSum = this.budgetDistributionSum
-      this.budget.distributedSum = this.budgetDistributedSum
-      await this.$axios.$post('/meridian/oper/depMoneyDistribution/save', [this.department])
-      this.findByDepartmentId(this.department.department.id)
-      await this.$axios.$post('/meridian/oper/depMoneyDistribution/save', this.moneyDistributionData)
-      this.loadMoneyDistribution(this.department.department.id)
     }
   }
 }
@@ -488,6 +559,30 @@ export default {
 #moneyDistributionData tr:hover {background-color: #ddd;}
 
 #moneyDistributionData th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #639db1 !important;
+  color: white;
+}
+
+#departmentsDataTable {
+  border-collapse: collapse;
+  width: 100%;
+}
+#departmentsDataTable table{
+  width: 100%
+}
+#departmentsDataTable td, #departmentsDataTable th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#departmentsDataTable tr:nth-child(even){background-color: #f2f2f2;}
+
+#departmentsDataTable tr:hover {background-color: #ddd;}
+
+#departmentsDataTable th {
   padding-top: 12px;
   padding-bottom: 12px;
   text-align: left;

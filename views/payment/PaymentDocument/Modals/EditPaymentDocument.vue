@@ -29,7 +29,7 @@
 
     <v-card class="modal-card">
       <v-card-title>
-        <span class="headline">Распределение платежей</span>
+        <span class="headline">Документ на оплату</span>
       </v-card-title>
 
       <v-card-text>
