@@ -30,8 +30,10 @@ const VcrmPage = dynamicPage(() =>
     import ('~/views/vcrm/VcrmPage'))
 const DashboardPage = dynamicPage(() =>
     import ('~/views/vcrm/Dashboard'))
-const PaymentDocumentPage = dynamicPage(() =>
+const JournalOfPaymentDocumentsPage = dynamicPage(() =>
     import ('~/views/payment/PaymentDocument/JournalOfPaymentDocuments'))
+const JournalOfEmailSendingPaymentDocumentsPage = dynamicPage(() =>
+    import ('~/views/payment/PaymentDocument/JournalOfEmailSendingPaymentDocuments'))
 const PaymentByCashboxPage = dynamicPage(() =>
     import ('~/views/payment/PaymentDocument/Modals/PaymentByCashbox.vue'))
 const InternalPaymentPage = dynamicPage(() =>
@@ -64,8 +66,17 @@ const createRouterConst = new Router({
             component: VcrmPage,
             children: [{
                 path: '',
-                name: 'PaymentDocument',
-                component: PaymentDocumentPage
+                name: 'JournalOfPaymentDocuments',
+                component: JournalOfPaymentDocumentsPage
+            }]
+        },
+        {
+            path: '/',
+            component: VcrmPage,
+            children: [{
+                path: '',
+                name: 'JournalOfEmailSendingPaymentDocuments',
+                component: JournalOfEmailSendingPaymentDocumentsPage
             }]
         },
         {

@@ -357,7 +357,7 @@ export default {
         },
         {
           text: 'Дата',
-          value: 'dataDoc'
+          value: 'dataCreate'
         },
         {
           text: 'Номер',
@@ -392,7 +392,7 @@ export default {
         },
         {
           text: 'Дата',
-          value: 'dataCreate'
+          value: 'dataDoc'
         },
         {
           text: 'Номер',
@@ -655,7 +655,7 @@ export default {
     // Функции контекстного меню
     // Вызов формы "Оплата по кассе"
     payedByCashboxForContextMenuOnly() {
-      this.$refs.paymentByCashbox.newDocument()
+      this.$refs.paymentByCashbox.editDocument(this.currentRowForContextMenu.docoplId, this.accId)
       console.log('payed by cashbox')
     },
 

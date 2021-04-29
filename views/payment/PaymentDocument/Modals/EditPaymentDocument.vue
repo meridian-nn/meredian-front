@@ -296,11 +296,29 @@
               </v-row>
             </v-col>
           </v-row>
+
+          <v-snackbar
+            v-model="snackbarUserNotification"
+            :timeout="snackbarUserNotificationTimeout"
+            :color="snackbarUserNotificationColor"
+          >
+            {{ snackbarUserNotificationText }}
+
+            <template #action="{ attrs }">
+              <v-btn
+                v-bind="attrs"
+                text
+                @click="snackbarUserNotification = false"
+              >
+                Закрыть
+              </v-btn>
+            </template>
+          </v-snackbar>
         </v-container>
       </v-card-text>
+
       <v-card-actions>
         <v-spacer />
-
         <v-btn
           color="blue darken-1"
           text
@@ -348,7 +366,13 @@ export default {
       select: null,
       dialog: false,
       editedItem: {},
-      id: null
+      id: null,
+
+      // Информационное сообщение для пользователя
+      snackbarUserNotification: false,
+      snackbarUserNotificationTimeout: 3000,
+      snackbarUserNotificationColor: '',
+      snackbarUserNotificationText: ''
     }
   },
   watch: {
@@ -366,6 +390,7 @@ export default {
       this.findPaymentStatuses()
       this.findDocumentKinds()
     },
+
     async findEditedItem(copyDoc = false) {
       if (this.id) {
         const editedItem = await this.$axios.$get(
@@ -384,6 +409,7 @@ export default {
         this.calcSum(editedItem.sumDoc)
       }
     },
+
     async findDepartments() {
       if (!this.departments.length) {
         this.loadingType.departments = true
@@ -393,6 +419,7 @@ export default {
         this.loadingType.departments = null
       }
     },
+
     async findPaymentStatuses() {
       if (!this.paymentStatuses.length) {
         this.loadingType.paymentStatuses = true
@@ -402,6 +429,7 @@ export default {
         this.loadingType.paymentStatuses = null
       }
     },
+
     async findDocumentType(parentId) {
       if (parentId) {
         this.loadingType.documentTypes = true
@@ -413,6 +441,7 @@ export default {
         this.documentTypes = []
       }
     },
+
     async findExecutors(viddocoplId) {
       if (viddocoplId) {
         this.loadingType.executors = true
@@ -424,16 +453,18 @@ export default {
         this.executors = []
       }
     },
+
     async findSuppliers(dogId) {
       this.loadingType.suppliers = true
       this.suppliers = await this.$axios.$get(
         '/meridian/oper/dict/spOrg/findByDogId?dogId=' + dogId
       )
       if (this.suppliers.length) {
-        this.editedItem.consumerId = this.suppliers[0].id
+        this.editedItem.consumerId = this.suppliers[this.suppliers.length - 1].id
       }
       this.loadingType.suppliers = null
     },
+
     async findPayers() {
       if (!this.payers.length) {
         this.loadingType.payers = true
@@ -445,6 +476,7 @@ export default {
         this.loadingType.payers = null
       }
     },
+
     async findDocumentKinds() {
       if (!this.documentKinds.length) {
         this.loadingType.documentKinds = true
@@ -454,6 +486,7 @@ export default {
         this.loadingType.documentKinds = null
       }
     },
+
     async findContracts(executorId) {
       this.loadingType.contracts = true
       this.contracts = await this.$axios.$get(
@@ -461,28 +494,33 @@ export default {
       )
       this.loadingType.contracts = null
     },
+
     calcSum(val) {
       this.editedItem.toPay = (val || 0) - (this.editedItem.sumPaid || 0)
     },
+
     departmentChange(val) {
       this.findDocumentType(val)
       this.findExecutors(val)
     },
+
     dataOplatChange(val) {
       if (!this.editedItem.dataDoc) {
-        alert('Сначало укажите дату документа!')
+        this.showUserNotification('warning', 'Сначало укажите дату документа!', 3000)
         this.editedItem.dataOplat = null
         return
       }
       if (val < this.editedItem.dataDoc) {
-        alert('Дата оплаты не может быть меньше даты документа!')
+        this.showUserNotification('warning', 'Дата оплаты не может быть меньше даты документа!', 3000)
         this.editedItem.dataOplat = null
       }
     },
+
     async save() {
       if (!this.checkParamsOfEditedItem()) {
         return
       }
+
       let errorMessage = null
       this.editedItem.dataOplat = new Date(this.editedItem.dataOplat).toLocaleDateString()
       this.editedItem.dataDoc = new Date(this.editedItem.dataDoc).toLocaleDateString()
@@ -501,19 +539,55 @@ export default {
       }
       this.$emit('save')
     },
+
     checkParamsOfEditedItem() {
       let verificationPassed = true
       if (!this.editedItem.dataOplat || !this.editedItem.dataDoc) {
-        alert('Укажите дату документа и дату оплаты документа!')
+        this.showUserNotification('error', 'Укажите дату документа и дату оплаты документа!', 3000)
+        verificationPassed = false
+      } else if (!this.editedItem.nameDoc) {
+        this.showUserNotification('error', 'Укажите номер документа!', 3000)
+        verificationPassed = false
+      } else if (!this.editedItem.departmentId) {
+        this.showUserNotification('error', 'Укажите подразделение!', 3000)
+        verificationPassed = false
+      } else if (!this.editedItem.viddocId) {
+        this.showUserNotification('error', 'Укажите тип документа!', 3000)
+        verificationPassed = false
+      } else if (!this.editedItem.ispId) {
+        this.showUserNotification('error', 'Укажите поставщика!', 3000)
+        verificationPassed = false
+      } else if (!this.editedItem.sumDoc) {
+        this.showUserNotification('error', 'Укажите сумму по договору!', 3000)
+        verificationPassed = false
+      } else if (!this.editedItem.contractId) {
+        this.showUserNotification('error', 'Укажите договор плательщика!', 3000)
+        verificationPassed = false
+      } else if (!this.editedItem.supplierId) {
+        this.showUserNotification('error', 'Укажите поставщика плательщика!', 3000)
+        verificationPassed = false
+      } else if (!this.editedItem.myorgId) {
+        this.showUserNotification('error', 'Укажите плательщика!', 3000)
+        verificationPassed = false
+      } else if (!this.editedItem.consumerId) {
+        this.showUserNotification('error', 'Укажите клиента!', 3000)
+        verificationPassed = false
+      } else if (!this.editedItem.documentKindId) {
+        this.showUserNotification('error', 'Укажите вид документа!', 3000)
+        verificationPassed = false
+      } else if (!this.editedItem.paymentStatus) {
+        this.showUserNotification('error', 'Укажите статус платежа!', 3000)
         verificationPassed = false
       }
       return verificationPassed
     },
+
     cancel() {
       this.reset()
       this.dialog = false
       this.$emit('cancel')
     },
+
     reset() {
       this.loadingType = {}
       this.editedItem = {}
@@ -523,22 +597,26 @@ export default {
       this.suppliers = []
       this.id = null
     },
+
     newDocument() {
       this.reset()
       this.dialog = true
     },
+
     editDocument(id) {
       this.reset()
       this.id = id
       this.dialog = true
       this.findEditedItem()
     },
+
     copyDocument(id) {
       this.reset()
       this.id = id
       this.dialog = true
       this.findEditedItem(true)
     },
+
     fillDatesEditedItem() {
       if (!this.editedItem) {
         return
@@ -546,10 +624,24 @@ export default {
       this.editedItem.dataDoc = new Date(this.parseDate(this.editedItem.dataDoc)).toISOString().substr(0, 10)
       this.editedItem.dataOplat = new Date(this.parseDate(this.editedItem.dataOplat)).toISOString().substr(0, 10)
     },
+
     parseDate(date) {
       if (!date) { return '' }
       const [day, month, year] = date.split('.')
       return `${year}-${month}-${day}`
+    },
+
+    // Отображение информационного сообщения пользователю
+    showUserNotification(color, text, timeout) {
+      if (!color ||
+      !text ||
+      !timeout) {
+        return
+      }
+      this.snackbarUserNotification = true
+      this.snackbarUserNotificationColor = color
+      this.snackbarUserNotificationTimeout = timeout
+      this.snackbarUserNotificationText = text
     }
   }
 }

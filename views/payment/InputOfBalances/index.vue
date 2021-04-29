@@ -96,6 +96,7 @@
             </div>
           </v-col>
         </v-row>
+
         <v-row>
           <v-col cols="3">
             <v-btn
@@ -232,10 +233,16 @@ export default {
     async findOrganizatios() {
       if (!this.organizations.length) {
         this.loadingType.organizations = true
-        this.organizations = await this.$axios.$get('/meridian/oper/dict/spOrg/findInternalOrg')
+
+        const data = {
+          typeCode: 1
+        }
+        this.organizations = await this.$axios.$get('/meridian/oper/dict/spOrg/findByOrgTypeCode', { params: data })
+
         this.loadingType.organizations = null
       }
     },
+
     async findByDataOplatAndMyOrgId(val) {
       const data = {
         dateOplat: new Date(this.date).toLocaleDateString(),
@@ -243,9 +250,11 @@ export default {
       }
       this.oplatData = await this.$axios.$get('/meridian/oper/spOplat/findByDataOplatAndMyOrgId', { params: data })
     },
+
     cancel() {
       this.init()
     },
+
     async save() {
       await this.$axios.$post('/meridian/oper/spOplat/saveAll', this.oplatData)
       this.init()

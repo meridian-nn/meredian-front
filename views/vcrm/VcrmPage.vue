@@ -54,7 +54,12 @@
           </template>
           <MenuItemButton
             title="Журнал документов"
-            link="PaymentDocument"
+            link="JournalOfPaymentDocuments"
+            icon="mdi-brightness-5"
+          />
+          <MenuItemButton
+            title="Журнал рассылки"
+            link="JournalOfEmailSendingPaymentDocuments"
             icon="mdi-brightness-5"
           />
           <MenuItemButton
@@ -69,7 +74,7 @@
           />
           <MenuItemButton
             title="Реестр"
-            link="PaymentDocument"
+            link="JournalOfPaymentDocuments"
             icon="mdi-brightness-5"
           />
           <MenuItemButton

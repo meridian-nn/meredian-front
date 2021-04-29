@@ -7,32 +7,26 @@
   >
     <v-card>
       <v-card-title>
-        <span class="headline">Оплата по кассе</span>
+        <v-row>
+          <v-col cols="10">
+            <span class="headline">Оплата по кассе</span>
+          </v-col>
+          <v-col cols="2">
+            <div
+              align="center"
+            >
+              {{ date }}
+            </div>
+          </v-col>
+        </v-row>
       </v-card-title>
       <v-card-text>
         <v-container>
           <v-row>
-            <v-col cols="10">
-              <div
-                align="center"
-                class="headline"
-              >
-                Оплата по кассе
-              </div>
-            </v-col>
-            <v-col cols="2">
-              <div
-                align="center"
-              >
-                {{ date }}
-              </div>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="10">
+            <v-col cols="12">
               <v-autocomplete
                 v-model="editedItem.myorgId"
-                label="Плательшик"
+                label="Плательщик"
                 :loading="loadingType.payers"
                 :items="payers"
                 item-value="id"
@@ -41,15 +35,14 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="5">
+            <v-col cols="6">
               <v-text-field
-                v-model="editedItem.sumDoc"
+                v-model.number="editedItem.sumDoc"
                 type="number"
                 label="Сумма"
-                @input="calcSum"
               />
             </v-col>
-            <v-col cols="5">
+            <v-col cols="6">
               <v-autocomplete
                 v-model="editedItem.viddocId"
                 label="Группа"
@@ -63,31 +56,35 @@
           <v-row>
             <v-col cols="4">
               <v-text-field
-                v-model="editedItem.prim"
+                v-model.number="spDocch.hozrasx"
+                type="number"
                 label="Хоз. расходы"
               />
             </v-col>
             <v-col cols="4">
               <v-text-field
-                v-model="editedItem.prim"
+                v-model.number="spDocch.komand"
+                type="number"
                 label="Командировочные"
               />
             </v-col>
             <v-col cols="4">
               <v-text-field
-                v-model="editedItem.prim"
+                v-model.number="spDocch.gsm"
+                type="number"
                 label="ГСМ"
               />
             </v-col>
             <v-col cols="4">
               <v-text-field
-                v-model="editedItem.prim"
+                v-model.number="spDocch.zarpl"
+                type="number"
                 label="Зарплата"
               />
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="10">
+            <v-col cols="12">
               <v-text-field
                 v-model="editedItem.prim"
                 label="Примечание"
@@ -98,6 +95,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
+
         <v-btn
           color="blue darken-1"
           text
@@ -153,27 +151,34 @@ export default {
     async findPayers() {
       if (!this.payers.length) {
         this.loadingType.payers = true
-        this.payers = await this.$axios.$get('/meridian/oper/dict/spOrg/findPayers', this.axiosConfig)
+        this.payers = await this.$axios.$get('/meridian/oper/dict/spOrg/findPayers')
         this.loadingType.payers = null
       }
     },
     async findGroups() {
       if (!this.groups.length) {
         this.loadingType.groups = true
-        this.groups = await this.$axios.$get('/meridian/oper/dict/spViddocopl/findDepartments', this.axiosConfig)
+        this.groups = await this.$axios.$get('/meridian/oper/dict/spViddocopl/findGroup')
         this.loadingType.groups = null
       }
     },
-    async findEditedItem() {
+    async findEditedItem(accId) {
       if (this.id) {
-        const editedItem = await this.$axios.$get('/meridian/oper/spDocopl/findById/' + this.id, this.axiosConfig)
-        this.spDocch = editedItem.spDocch || {}
+        this.editedItem = await this.$axios.$get('/meridian/oper/spDocopl/findById/' + this.id)
+        this.editedItem.accId = accId
+        this.spDocch = this.editedItem.spDocch || this.spDocch
       }
     },
     async save() {
       let errorMessage = null
       this.editedItem.dataDoc = this.date
-      await this.$axios.$post('/meridian/oper/spDocopl/save', this.editedItem, this.axiosConfig).catch((error) => {
+      this.editedItem.spDocch = this.spDocch
+
+      if (!this.editedItem.spDocch.id) {
+        this.editedItem.spDocch.id = 0
+      }
+
+      await this.$axios.$post('/meridian/oper/spDocopl/savePayment', this.editedItem).catch((error) => {
         errorMessage = error
         alert(errorMessage)
       })
@@ -193,15 +198,15 @@ export default {
       this.spDocch = {}
       this.id = null
     },
-    newDocument() {
+    /* newDocument() {
       this.reset()
       this.dialog = true
-    },
-    editDocument(id) {
+    }, */
+    editDocument(id, accId) {
       this.reset()
       this.id = id
       this.dialog = true
-      this.findEditedItem()
+      this.findEditedItem(accId)
     }
   }
 }
