@@ -36,7 +36,7 @@
           <v-row>
             <v-col cols="12">
               <v-autocomplete
-                v-model="editedItem.kontrId"
+                v-model="editedItem.contractorId"
                 label="Кому"
                 :loading="loadingType.organizations"
                 :items="organizations"
@@ -220,7 +220,7 @@ export default {
       }
 
       let errorMessage = null
-      await this.$axios.$post('/meridian/oper/spDocopl/save', this.editedItem, this.axiosConfig).catch((error) => {
+      await this.$axios.$post('/meridian/oper/spDocopl/saveInternalPayment', this.editedItem, this.axiosConfig).catch((error) => {
         errorMessage = error
         alert(errorMessage)
       })
