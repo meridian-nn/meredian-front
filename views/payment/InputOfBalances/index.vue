@@ -123,12 +123,19 @@ export default {
   data() {
     return {
       date: new Date().toISOString().substr(0, 10),
+
+      // id выбранной организации
       orgId: null,
+
+      // объект для отображения загрузки данных для полей
       loadingType: {},
-      groupByOrgData: [],
-      oplatData: [],
+
+      // массив организаций для выбора пользователем
       organizations: [],
+
+      // таблица данных по остаткам на р/с организаций
       groupByOrgColumns: ['name', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
+      groupByOrgData: [],
       groupByOrgOptions: {
         filterable: false,
         pagination: { show: false },
@@ -144,7 +151,9 @@ export default {
         }
       },
 
+      // таблица данных по остаткам на р/с выбранной организации
       oplatDataColumns: ['acc.shortName', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
+      oplatData: [],
       oplatDataOptions: {
         filterable: ['acc.shortName'],
         pagination: { show: false },
@@ -175,14 +184,16 @@ export default {
       this.loadingType = {}
       this.findByDataOplatAndMyOrgId(this.orgId)
     },
+
+    // Инициализация журнала оплат
     async selOplat() {
       await this.$axios.$post('/meridian/oper/spDocopl/selOplat', this.axiosConfig)
     },
+
+    // Метод получения итоговой суммы документов к оплате по выбранной организации
     async groupByOrg() {
       this.groupByOrgData = await this.getInfoAboutOrgs()
     },
-
-    // Метод получения итоговой суммы документов к оплате по организации
     async getInfoAboutOrgs() {
       const data = {
         dateOplat: new Date(this.date).toLocaleDateString()
@@ -230,6 +241,7 @@ export default {
       return totalToSumOplat
     },
 
+    // Поиск организаций для выбора пользователем
     async findOrganizatios() {
       if (!this.organizations.length) {
         this.loadingType.organizations = true
@@ -243,18 +255,66 @@ export default {
       }
     },
 
+    // Получение списка расч. счетов выбранной организации и их сортировка по возрастанию
     async findByDataOplatAndMyOrgId(val) {
       const data = {
         dateOplat: new Date(this.date).toLocaleDateString(),
         orgId: val || 0
       }
       this.oplatData = await this.$axios.$get('/meridian/oper/spOplat/findByDataOplatAndMyOrgId', { params: data })
+      this.oplatData.forEach((elem) => {
+        elem.shortNameOfAcc = elem.acc.shortName
+      })
+      this.oplatData = this.oplatData.sort(this.compare('shortNameOfAcc'))
+    },
+    compare(field, order) {
+      let len = arguments.length
+      if (len === 0) {
+        return (a, b) => (a < b && -1) || (a > b && 1) || 0
+      }
+      if (len === 1) {
+        switch (typeof field) {
+          case 'number':
+            return field < 0
+              ? (a, b) => (a < b && 1) || (a > b && -1) || 0
+              : (a, b) => (a < b && -1) || (a > b && 1) || 0
+          case 'string':
+            return (a, b) => (a[field] < b[field] && -1) || (a[field] > b[field] && 1) || 0
+        }
+      }
+      if (len === 2 && typeof order === 'number') {
+        return order < 0
+          ? (a, b) => (a[field] < b[field] && 1) || (a[field] > b[field] && -1) || 0
+          : (a, b) => (a[field] < b[field] && -1) || (a[field] > b[field] && 1) || 0
+      }
+      let fields, orders
+      if (typeof field === 'object') {
+        fields = Object.getOwnPropertyNames(field)
+        orders = fields.map(key => field[key])
+        len = fields.length
+      } else {
+        fields = new Array(len)
+        orders = new Array(len)
+        for (let i = len; i--;) {
+          fields[i] = arguments[i]
+          orders[i] = 1
+        }
+      }
+      return (a, b) => {
+        for (let i = 0; i < len; i++) {
+          if (a[fields[i]] < b[fields[i]]) { return orders[i] }
+          if (a[fields[i]] > b[fields[i]]) { return -orders[i] }
+        }
+        return 0
+      }
     },
 
+    // Отмена внесенных изменений и переполучение информации для формы из api
     cancel() {
       this.init()
     },
 
+    // Сохранение внесенных пользователем изменений
     async save() {
       await this.$axios.$post('/meridian/oper/spOplat/saveAll', this.oplatData)
       this.init()

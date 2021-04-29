@@ -7,32 +7,26 @@
   >
     <v-card>
       <v-card-title>
-        <span class="headline">Внутренний платёж</span>
+        <v-row>
+          <v-col cols="10">
+            <span class="headline">Внутренний платёж</span>
+          </v-col>
+          <v-col cols="2">
+            <div
+              align="center"
+            >
+              {{ date }}
+            </div>
+          </v-col>
+        </v-row>
       </v-card-title>
       <v-card-text>
         <v-container>
           <v-row>
-            <v-col cols="10">
-              <div
-                align="center"
-                class="headline"
-              >
-                Внутренний платёж
-              </div>
-            </v-col>
-            <v-col cols="2">
-              <div
-                align="center"
-              >
-                {{ date }}
-              </div>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="10">
+            <v-col cols="12">
               <v-autocomplete
                 v-model="editedItem.myorgId"
-                label="Плательшик"
+                label="Плательщик"
                 :loading="loadingType.payers"
                 :items="payers"
                 item-value="id"
@@ -41,7 +35,31 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="5">
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="editedItem.kontrId"
+                label="Кому"
+                :loading="loadingType.payers"
+                :items="payers"
+                item-value="id"
+                item-text="clName"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="editedItem.accId"
+                label="Р/счет"
+                :loading="loadingType.payers"
+                :items="payers"
+                item-value="id"
+                item-text="clName"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="6">
               <v-text-field
                 v-model="editedItem.sumDoc"
                 type="number"
@@ -49,7 +67,7 @@
                 @input="calcSum"
               />
             </v-col>
-            <v-col cols="5">
+            <v-col cols="6">
               <v-autocomplete
                 v-model="editedItem.viddocId"
                 label="Группа"
@@ -61,7 +79,7 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="10">
+            <v-col cols="12">
               <v-text-field
                 v-model="editedItem.prim"
                 label="Примечание"

@@ -179,7 +179,7 @@ export default {
         errorMessage = error
         alert(errorMessage)
       })
-      if (errorMessage == null) {
+      if (errorMessage == null && this.editedItem.viddocId === 25) {
         await this.$axios.$post('/meridian/oper/spDocopl/saveSpDocch', this.spDocch).catch((error) => {
           errorMessage = error
           alert(errorMessage)

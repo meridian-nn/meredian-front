@@ -250,29 +250,35 @@ export default {
   data() {
     return {
       date: new Date().toISOString().substr(0, 10),
-      moneyDistributionData: [],
-      departments: [],
-      departmentsDataTable: [],
-      departmentsColumns: ['name', 'distributionSum', 'notDistributedSum'],
-      departmentsOptions: {
-        filterable: false,
-        pagination: { show: false },
-        texts: { noResults: '' },
-        filterByColumn: false,
-        headings: {
-          name: 'Отдел',
-          distributionSum: 'Выделено',
-          notDistributedSum: 'Не распределено'
-        }
-      },
-      department: {},
+
+      // объект для отображения загрузки данных для полей
       loadingType: {},
-      depDistributedSum: null,
-      depDistributionSum: null,
-      budgetDistributionSum: null,
-      budgetDistributedSum: null,
-      selectedDep: null,
+
+      // объект с информацией о выделенном бюджете на выбранную дату
       budget: {},
+      // сумма выделенного бюджета на текущую дату
+      budgetDistributionSum: null,
+      // сумма распределенного бюджета на текущую дату
+      budgetDistributedSum: null,
+
+      // выбранный отдел с информацией по бюджету
+      department: {},
+      // сумма выделенного бюджета на отделу
+      depDistributionSum: null,
+      // сумма распределенного бюджета по отделу
+      depDistributedSum: null,
+
+      // признак, показывающий что не распределенный бюджет по отделу меньше 0
+      notDistributedLessThenZero: false,
+
+      // id выбранного отдела
+      selectedDep: null,
+
+      // массив отделов для выбора пользователем
+      departments: [],
+
+      // таблица данных по распределению бюджета по подразделениям выбранного отдела
+      moneyDistributionData: [],
       columns: ['department.nameViddoc', 'distributionSum', 'note'],
       options: {
         filterable: false,
@@ -293,10 +299,25 @@ export default {
           autoUpdateInput: true
         }
       },
-      notDistributedLessThenZero: false
+
+      // таблица данных по распределению общего бюджета по отделам
+      departmentsDataTable: [],
+      departmentsColumns: ['name', 'distributionSum', 'notDistributedSum'],
+      departmentsOptions: {
+        filterable: false,
+        pagination: { show: false },
+        texts: { noResults: '' },
+        filterByColumn: false,
+        headings: {
+          name: 'Отдел',
+          distributionSum: 'Выделено',
+          notDistributedSum: 'Не распределено'
+        }
+      }
     }
   },
   computed: {
+    // функция для расчета суммы не распределенного бюджета на день (пока не используется)
     budgetRestDistributionSum() {
       const budgetDistributedSum = this.budget.restSum < 0 ? Math.abs(this.budget.restSum) - 1 : this.budget.restSum
 
@@ -308,6 +329,7 @@ export default {
       return budgetRestDistributionSum
     },
 
+    // функция для расчета суммы не распределенного бюджета на отдел (пока не используется)
     departmentRestDistributionSum() {
       const notDistributed = (this.depDistributionSum - this.depDistributedSum)
       this.notDistributedLessThenZero = (notDistributed < 0)
@@ -332,7 +354,7 @@ export default {
     this.init()
   },
   methods: {
-    // Расчет не распределеной суммы по отделу
+    // Расчет распределеной суммы по отделу
     calcDepDistributedSum() {
       this.depDistributedSum = this.moneyDistributionData.length === 0
         ? 0

@@ -353,19 +353,42 @@ export default {
   },
   data() {
     return {
+
+      // объект для отображения загрузки данных для полей
       loadingType: {},
+
+      // массив подразделений для выбора пользователем
       departments: [],
+
+      // массив типов документов для выбора пользователем
       documentTypes: [],
+
+      // массив статусов оплаты документов для выбора пользователем
       paymentStatuses: [],
+
+      // массив поставщиков для выбора пользователем
       executors: [],
+
+      // массив договоров для выбора пользователем
       contracts: [],
+
+      // массив плательщиков для выбора пользователем
       payers: [],
+
+      // массив клиентов для выбора пользователем
       suppliers: [],
+
+      // массив видов документов для выбора пользователем
       documentKinds: [],
       search: null,
+
       select: null,
       dialog: false,
+
+      // объект, в котором хранится редактируемый документ
       editedItem: {},
+
+      // id редактируемого документа
       id: null,
 
       // Информационное сообщение для пользователя
@@ -391,6 +414,7 @@ export default {
       this.findDocumentKinds()
     },
 
+    // Поиск документа на оплату для редатирования / создания на основе нового документа
     async findEditedItem(copyDoc = false) {
       if (this.id) {
         const editedItem = await this.$axios.$get(
@@ -410,6 +434,7 @@ export default {
       }
     },
 
+    // поиск подразделений для выбора пользователем
     async findDepartments() {
       if (!this.departments.length) {
         this.loadingType.departments = true
@@ -420,6 +445,7 @@ export default {
       }
     },
 
+    // поиск статусов оплаты документа для выбора пользователем
     async findPaymentStatuses() {
       if (!this.paymentStatuses.length) {
         this.loadingType.paymentStatuses = true
@@ -430,6 +456,7 @@ export default {
       }
     },
 
+    // поиск типов документов для выбора пользователем
     async findDocumentType(parentId) {
       if (parentId) {
         this.loadingType.documentTypes = true
@@ -442,6 +469,7 @@ export default {
       }
     },
 
+    // поиск поставщиков для выбора пользователем
     async findExecutors(viddocoplId) {
       if (viddocoplId) {
         this.loadingType.executors = true
@@ -454,6 +482,7 @@ export default {
       }
     },
 
+    // поиск клиентов для выбора пользователем
     async findSuppliers(dogId) {
       this.loadingType.suppliers = true
       this.suppliers = await this.$axios.$get(
@@ -465,6 +494,7 @@ export default {
       this.loadingType.suppliers = null
     },
 
+    // поиск плательщиков для выбора пользователем
     async findPayers() {
       if (!this.payers.length) {
         this.loadingType.payers = true
@@ -477,6 +507,7 @@ export default {
       }
     },
 
+    // поиск видов документов для выбора пользователем
     async findDocumentKinds() {
       if (!this.documentKinds.length) {
         this.loadingType.documentKinds = true
@@ -487,6 +518,7 @@ export default {
       }
     },
 
+    // поиск договоров для выбора пользователем
     async findContracts(executorId) {
       this.loadingType.contracts = true
       this.contracts = await this.$axios.$get(
@@ -495,15 +527,22 @@ export default {
       this.loadingType.contracts = null
     },
 
+    // расчет суммы к оплате документа
     calcSum(val) {
       this.editedItem.toPay = (val || 0) - (this.editedItem.sumPaid || 0)
     },
 
+    // функция отработки события изменения подразделения на форме
     departmentChange(val) {
       this.findDocumentType(val)
       this.findExecutors(val)
+      this.contracts = []
+      this.executors = []
+      this.payers = []
+      this.suppliers = []
     },
 
+    // функция отработки события изменения дат на форме
     dataOplatChange(val) {
       if (!this.editedItem.dataDoc) {
         this.showUserNotification('warning', 'Сначало укажите дату документа!', 3000)
@@ -516,6 +555,7 @@ export default {
       }
     },
 
+    // функция сохранения документам
     async save() {
       if (!this.checkParamsOfEditedItem()) {
         return
@@ -540,6 +580,7 @@ export default {
       this.$emit('save')
     },
 
+    // функция проверки заполнения обязательных полей
     checkParamsOfEditedItem() {
       let verificationPassed = true
       if (!this.editedItem.dataOplat || !this.editedItem.dataDoc) {
@@ -582,12 +623,15 @@ export default {
       return verificationPassed
     },
 
+    // функция отработки события нажития на кнопку "отмена"
     cancel() {
+      console.log('cancel')
       this.reset()
       this.dialog = false
       this.$emit('cancel')
     },
 
+    // функция обнуления всех переменных формы
     reset() {
       this.loadingType = {}
       this.editedItem = {}
@@ -598,11 +642,13 @@ export default {
       this.id = null
     },
 
+    // функция открытия формы для создания нового документа
     newDocument() {
       this.reset()
       this.dialog = true
     },
 
+    // функция открытия формы для редактирования документа
     editDocument(id) {
       this.reset()
       this.id = id
@@ -610,6 +656,7 @@ export default {
       this.findEditedItem()
     },
 
+    // функция открытия формы для создания нового документа на основе уже имеющегося документа
     copyDocument(id) {
       this.reset()
       this.id = id
@@ -617,6 +664,7 @@ export default {
       this.findEditedItem(true)
     },
 
+    // функция заполнения дат документа, если форме был передан уже созданный документ
     fillDatesEditedItem() {
       if (!this.editedItem) {
         return
@@ -625,6 +673,7 @@ export default {
       this.editedItem.dataOplat = new Date(this.parseDate(this.editedItem.dataOplat)).toISOString().substr(0, 10)
     },
 
+    // функция парсинга дат для сохранения
     parseDate(date) {
       if (!date) { return '' }
       const [day, month, year] = date.split('.')

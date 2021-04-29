@@ -475,6 +475,7 @@ export default {
       this.findOrganizatios()
     },
 
+    // Инициализация журнала оплат
     async selOplat() {
       await this.$axios.$post('/meridian/oper/spDocopl/selOplat', this.axiosConfig)
     },
@@ -517,10 +518,12 @@ export default {
     async findPaymentAccounts(val) {
       this.loadingType.paymentAccounts = true
 
-      const paymentAccounts = await this.$axios.$get('/meridian/oper/spAcc/findByOrgId?orgId=' + val)
+      let paymentAccounts = await this.$axios.$get('/meridian/oper/spAcc/findByOrgId?orgId=' + val)
+      paymentAccounts = paymentAccounts.sort(this.compare('shortName'))
       paymentAccounts.forEach((account) => {
         account.shortName = account.shortName + ' - ' + account.numAcc.slice(account.numAcc.length - 4)
       })
+
       this.paymentAccounts = paymentAccounts
 
       this.loadingType.paymentAccounts = null
@@ -532,6 +535,7 @@ export default {
       if (!accId) {
         this.paymentAccountInfo = 'Остаток на Р/С: '
         this.currentPaymentAccountBalance = 0
+        this.currentPaymentAccountBalanceLessThenZero = false
         return
       }
 
@@ -755,6 +759,8 @@ export default {
     // Функционал кнопок таблицы "Документы на оплату"
     // Добавление нового документа в таблицу "Документы на оплату"
     newDocument() {
+      console.log('new doc')
+      console.log(this.$refs)
       this.$refs.editPaymentDocument.newDocument()
     },
 
@@ -835,7 +841,7 @@ export default {
 
     // Обработка события "Сохранение новой оплаты по кассе"
     savePaymentByCashbox() {
-      console.log('save payment by cashbox')
+      this.findSpDocoplForPay()
     },
 
     // Обработка события "Закрытие модальной формы внутреннего платежа"
@@ -846,6 +852,66 @@ export default {
     // Обработка события "Сохранение нового внутреннего платежа"
     saveInternalPayment() {
       console.log('save internal payment')
+    },
+
+    // Функция для сортировки массивов по переданному полю
+    /* Примеры использования
+    arr.sort(compare()); - Обычная типобезопасная сортировка по возрастанию
+    arr.sort(compare(-1)); - Обычная типобезопасная сортировка по убыванию
+    arr.sort(compare('field')); - Сортировка по свойству field по возрастанию
+    arr.sort(compare('field', -1)); - Сортировка по свойству field по убыванию
+
+    Сортировка сначала по полю field1
+    при совпадении по полю field2, а если и оно совпало, то по полю field3
+    все по возрастанию
+    arr.sort(compare('field1', 'field2', 'field3'));
+
+    Сортировка сначала по полю field1 по возрастанию
+    при совпадении по полю field2 по убыванию
+    arr.sort(compare({
+        field1 : 1,
+        field2 : -1
+    })); */
+    compare(field, order) {
+      let len = arguments.length
+      if (len === 0) {
+        return (a, b) => (a < b && -1) || (a > b && 1) || 0
+      }
+      if (len === 1) {
+        switch (typeof field) {
+          case 'number':
+            return field < 0
+              ? (a, b) => (a < b && 1) || (a > b && -1) || 0
+              : (a, b) => (a < b && -1) || (a > b && 1) || 0
+          case 'string':
+            return (a, b) => (a[field] < b[field] && -1) || (a[field] > b[field] && 1) || 0
+        }
+      }
+      if (len === 2 && typeof order === 'number') {
+        return order < 0
+          ? (a, b) => (a[field] < b[field] && 1) || (a[field] > b[field] && -1) || 0
+          : (a, b) => (a[field] < b[field] && -1) || (a[field] > b[field] && 1) || 0
+      }
+      let fields, orders
+      if (typeof field === 'object') {
+        fields = Object.getOwnPropertyNames(field)
+        orders = fields.map(key => field[key])
+        len = fields.length
+      } else {
+        fields = new Array(len)
+        orders = new Array(len)
+        for (let i = len; i--;) {
+          fields[i] = arguments[i]
+          orders[i] = 1
+        }
+      }
+      return (a, b) => {
+        for (let i = 0; i < len; i++) {
+          if (a[fields[i]] < b[fields[i]]) { return orders[i] }
+          if (a[fields[i]] > b[fields[i]]) { return -orders[i] }
+        }
+        return 0
+      }
     }
   }
 }

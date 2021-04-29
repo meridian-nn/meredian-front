@@ -1,3 +1,4 @@
+/* eslint-disable */
 export default {
     ssr: false,
 
@@ -20,9 +21,11 @@ export default {
     components: true,
 
     plugins: [
-      '~/plugins/axios',
-      '~/plugins/utils',
-      { src: '~plugins/vue-tables-2.js', ssr: false }
+        '~/plugins/axios',
+        '~/plugins/utils',
+        { src: '~plugins/vue-tables-2.js', ssr: false },
+        { src: '~plugins/vue-json-excel.js', ssr: false },
+        { src: '~plugins/vue-html-to-paper.js', ssr: false }
         // { src: '~/plugins/bootstrap', mode: 'client' }
     ],
 
@@ -95,6 +98,6 @@ export default {
     },
 
     build: {
-      vendor: ['vue-tables-2']
+        vendor: ['vue-tables-2', 'vue-json-excel', 'vue-html-to-paper']
     }
 }
