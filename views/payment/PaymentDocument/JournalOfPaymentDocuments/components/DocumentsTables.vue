@@ -665,7 +665,7 @@ export default {
 
     // Вн. перемещение
     internalMovementForContextMenuOnly() {
-      this.$refs.internalPayment.newDocument()
+      this.$refs.internalPayment.newDocument(this.selectedOrganization)
       console.log('internal movement')
     },
 
