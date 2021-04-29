@@ -166,22 +166,25 @@ export default {
       if (this.id) {
         this.editedItem = await this.$axios.$get('/meridian/oper/spDocopl/findById/' + this.id)
         this.editedItem.accId = accId
-        this.spDocch = this.editedItem.spDocch || this.spDocch
       }
     },
     async save() {
       let errorMessage = null
       this.editedItem.dataDoc = this.date
-      this.editedItem.spDocch = this.spDocch
-
-      if (!this.editedItem.spDocch.id) {
-        this.editedItem.spDocch.id = 0
+      this.spDocch.spDocopl = this.editedItem
+      if (!this.spDocch.id) {
+        this.spDocch.id = 0
       }
-
       await this.$axios.$post('/meridian/oper/spDocopl/savePayment', this.editedItem).catch((error) => {
         errorMessage = error
         alert(errorMessage)
       })
+      if (errorMessage == null) {
+        await this.$axios.$post('/meridian/oper/spDocopl/saveSpDocch', this.spDocch).catch((error) => {
+          errorMessage = error
+          alert(errorMessage)
+        })
+      }
       if (errorMessage == null) {
         this.dialog = false
       }
