@@ -207,11 +207,45 @@ export default {
       this.loadingType.paymentAccounts = null
     },
 
+    /* newDocument(selectedOrganization) {
+      this.reset()
+      this.findPayerById()
+
+      this.dialog = true
+    }, */
+
+    editDocument(id, selectedOrganization) {
+      this.reset()
+
+      this.selectedOrganizationId = selectedOrganization
+      this.findPayerById()
+
+      this.id = id
+      this.dialog = true
+      this.findEditedItem()
+    },
+
+    async findPayerById() {
+      this.selectedOrganization = await this.$axios.$get('/meridian/oper/dict/spOrg/findById/' + this.selectedOrganizationId)
+    },
+
     async findEditedItem() {
       if (this.id) {
         const editedItem = await this.$axios.$get('/meridian/oper/spDocopl/findById/' + this.id, this.axiosConfig)
         this.editedItem = editedItem
       }
+    },
+
+    cancel() {
+      this.reset()
+      this.dialog = false
+      this.$emit('cancel')
+    },
+
+    reset() {
+      this.loadingType = {}
+      this.editedItem = {}
+      this.id = null
     },
 
     async save() {
@@ -237,36 +271,6 @@ export default {
         verificationPassed = false
       }
       return verificationPassed
-    },
-
-    cancel() {
-      this.reset()
-      this.dialog = false
-      this.$emit('cancel')
-    },
-
-    reset() {
-      this.loadingType = {}
-      this.editedItem = {}
-      this.id = null
-    },
-
-    newDocument(selectedOrganization) {
-      this.selectedOrganizationId = selectedOrganization
-      this.findPayerById()
-      this.reset()
-      this.dialog = true
-    },
-
-    async findPayerById() {
-      this.selectedOrganization = await this.$axios.$get('/meridian/oper/dict/spOrg/findById/' + this.selectedOrganizationId)
-    },
-
-    editDocument(id) {
-      this.reset()
-      this.id = id
-      this.dialog = true
-      this.findEditedItem()
     },
 
     // Отображение информационного сообщения пользователю

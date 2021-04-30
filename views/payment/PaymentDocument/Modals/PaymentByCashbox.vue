@@ -175,16 +175,19 @@ export default {
       if (!this.spDocch.id) {
         this.spDocch.id = 0
       }
+
       await this.$axios.$post('/meridian/oper/spDocopl/savePayment', this.editedItem).catch((error) => {
         errorMessage = error
         alert(errorMessage)
       })
+
       if (errorMessage == null && this.editedItem.viddocId === 25) {
         await this.$axios.$post('/meridian/oper/spDocopl/saveSpDocch', this.spDocch).catch((error) => {
           errorMessage = error
           alert(errorMessage)
         })
       }
+
       if (errorMessage == null) {
         this.dialog = false
       }

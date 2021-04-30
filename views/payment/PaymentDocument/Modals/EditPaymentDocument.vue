@@ -425,10 +425,14 @@ export default {
         this.findSuppliers(editedItem.contractId)
         this.findContracts(editedItem.ispId)
         this.editedItem = editedItem
+
         if (copyDoc) {
           this.id = null
           this.editedItem.id = null
+          this.editedItem.spDocches = []
+          this.editedItem.spDocints = []
         }
+
         this.fillDatesEditedItem()
         this.calcSum(editedItem.sumDoc)
       }
@@ -534,12 +538,18 @@ export default {
 
     // функция отработки события изменения подразделения на форме
     departmentChange(val) {
+      // очищаем массивы договоров и поставщиков для выбора пользователем, т.к. они будут изменены выбранным поставщиком
+      this.contracts = []
+      this.suppliers = []
+
+      delete (this.editedItem.ispId)
+      delete (this.editedItem.viddocId)
+      delete (this.editedItem.contractId)
+      delete (this.editedItem.supplierId)
+      delete (this.editedItem.consumerId)
+
       this.findDocumentType(val)
       this.findExecutors(val)
-      this.contracts = []
-      this.executors = []
-      this.payers = []
-      this.suppliers = []
     },
 
     // функция отработки события изменения дат на форме

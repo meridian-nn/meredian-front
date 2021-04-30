@@ -665,7 +665,7 @@ export default {
 
     // Вн. перемещение
     internalMovementForContextMenuOnly() {
-      this.$refs.internalPayment.newDocument(this.selectedOrganization)
+      this.$refs.internalPayment.editDocument(this.currentRowForContextMenu.docoplId, this.selectedOrganization)
       console.log('internal movement')
     },
 
@@ -841,7 +841,7 @@ export default {
 
     // Обработка события "Сохранение новой оплаты по кассе"
     savePaymentByCashbox() {
-      this.findSpDocoplForPay()
+      this.refreshTables()
     },
 
     // Обработка события "Закрытие модальной формы внутреннего платежа"
@@ -851,6 +851,7 @@ export default {
 
     // Обработка события "Сохранение нового внутреннего платежа"
     saveInternalPayment() {
+      this.refreshTables()
       console.log('save internal payment')
     },
 
