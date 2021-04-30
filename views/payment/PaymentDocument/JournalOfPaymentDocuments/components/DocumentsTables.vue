@@ -116,23 +116,7 @@
           </template>
         </v-data-table>
 
-        <v-snackbar
-          v-model="snackbarUserNotification"
-          :timeout="snackbarUserNotificationTimeout"
-          :color="snackbarUserNotificationColor"
-        >
-          {{ snackbarUserNotificationText }}
-
-          <template #action="{ attrs }">
-            <v-btn
-              v-bind="attrs"
-              text
-              @click="snackbarUserNotification = false"
-            >
-              Закрыть
-            </v-btn>
-          </template>
-        </v-snackbar>
+        <user-notification ref="userNotification" />
 
         <v-menu
           v-model="payMenu"
@@ -323,13 +307,15 @@
 import EditPaymentDocument from '@/views/payment/PaymentDocument/Modals/EditPaymentDocument'
 import PaymentByCashbox from '@/views/payment/PaymentDocument/Modals/PaymentByCashbox'
 import InternalPayment from '@/views/payment/PaymentDocument/Modals/InternalPayment'
+import UserNotification from '@/views/special_components/information_window/UserNotification'
 
 export default {
   name: 'JournalOfPaymentDocumentsDocumentsTables',
   components: {
     EditPaymentDocument,
     PaymentByCashbox,
-    InternalPayment
+    InternalPayment,
+    UserNotification
   },
   data() {
     return {
@@ -448,12 +434,6 @@ export default {
       x: 0,
       y: 0,
       currentRowForContextMenu: null,
-
-      // Информационное сообщение для пользователя
-      snackbarUserNotification: false,
-      snackbarUserNotificationTimeout: 3000,
-      snackbarUserNotificationColor: '',
-      snackbarUserNotificationText: '',
 
       // Отображение остатков ден. средств на выбранном расчетном счете
       paymentAccountInfo: 'Остаток на Р/С:',
@@ -584,7 +564,6 @@ export default {
       })
       await Promise.all(arrayOfPromises).then((results) => {
         results.forEach((result) => {
-          console.log(result)
           totalToSumOplat += result
         })
       })
@@ -648,12 +627,12 @@ export default {
       await this.$axios.$post('/meridian/oper/spDocopl/saveSpDocoplToPay', this.toPaySelectedRows)
       this.toPaySelectedRows = []
       this.refreshTables()
-      this.showUserNotification('success', 'Сумма оплаты сохранена', 3000)
+      this.$refs.userNotification.showUserNotification('success', 'Сумма оплаты сохранена')
       this.updateResPaymentAccountInfo()
     },
     // Отмена внесения измененя в сумму оплаты документа
     cancelSumOplat() {
-      this.showUserNotification('error', 'Сумма оплаты не была изменена', 3000)
+      this.$refs.userNotification.showUserNotification('error', 'Сумма оплаты не была изменена')
     },
 
     // Функции контекстного меню
@@ -665,7 +644,10 @@ export default {
 
     // Вн. перемещение
     internalMovementForContextMenuOnly() {
-      this.$refs.internalPayment.editDocument(this.currentRowForContextMenu.docoplId, this.selectedOrganization)
+      this.$refs.internalPayment.editDocument(this.currentRowForContextMenu.docoplId,
+        this.selectedOrganization,
+        this.accId)
+
       console.log('internal movement')
     },
 
@@ -686,7 +668,7 @@ export default {
     // Перемещение документа из таблицы "Документы на оплату" в таблицу "Документы к оплате" по нажатию на стрелку
     addPaymentDocument() {
       if (!this.accId) {
-        this.showUserNotification('error', 'Выберите расчётный счёт!', 3000)
+        this.$refs.userNotification.showUserNotification('error', 'Выберите расчётный счёт!')
         return
       }
       this.addPayments()
@@ -697,7 +679,7 @@ export default {
         const sumDocs = this.countSumOfArrayElements(this.fromPaySelectedRows.map(value => value.sumDoc))
 
         if (sumDocs > this.currentPaymentAccountBalance) {
-          this.showUserNotification('warning', 'Сумма выбранных документов на оплату превышает сумму остатка по выбранному р/с!', 4000)
+          this.$refs.userNotification.showUserNotification('warning', 'Сумма выбранных документов на оплату превышает сумму остатка по выбранному р/с!', 4000)
         }
 
         const ids = this.fromPaySelectedRows.map(value => value.id)
@@ -718,7 +700,6 @@ export default {
     async deleteSelectedPayments() {
       if (this.toPaySelectedRows && this.toPaySelectedRows.length) {
         const ids = this.toPaySelectedRows.map(value => value.id)
-        console.log(ids)
         await this.$axios.$post('/meridian/oper/spDocopl/deleteSelectedPayments', ids)
         this.refreshTables()
         this.updateResPaymentAccountInfo()
@@ -759,8 +740,6 @@ export default {
     // Функционал кнопок таблицы "Документы на оплату"
     // Добавление нового документа в таблицу "Документы на оплату"
     newDocument() {
-      console.log('new doc')
-      console.log(this.$refs)
       this.$refs.editPaymentDocument.newDocument()
     },
 
@@ -768,7 +747,7 @@ export default {
     editDocument() {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
         if (this.fromPaySelectedRows[0].sumOplach !== 0) {
-          this.showUserNotification('error', 'Изменение документа, по которому уже есть оплата, невозможно!', 3000)
+          this.$refs.userNotification.showUserNotification('error', 'Изменение документа, по которому уже есть оплата, невозможно!')
           return
         }
         this.$refs.editPaymentDocument.editDocument(this.fromPaySelectedRows[0].id)
@@ -782,7 +761,7 @@ export default {
         const isDeletionPossible = this.checkSelectedRowsBeforeDelete(selectedRows)
 
         if (isDeletionPossible === false) {
-          this.showUserNotification('error', 'В выбранных на удаление документах на оплату есть документ, по которому есть оплата! Удаление невозможно!', 5000)
+          this.$refs.userNotification.showUserNotification('error', 'В выбранных на удаление документах на оплату есть документ, по которому есть оплата! Удаление невозможно!', 5000)
           return
         }
 
@@ -819,19 +798,6 @@ export default {
       console.log('open')
       this.findSpDocoplForPay()
       this.fromPaySelectedRows = []
-    },
-
-    // Отображение информационного сообщения пользователю
-    showUserNotification(color, text, timeout) {
-      if (!color ||
-      !text ||
-      !timeout) {
-        return
-      }
-      this.snackbarUserNotification = true
-      this.snackbarUserNotificationColor = color
-      this.snackbarUserNotificationTimeout = timeout
-      this.snackbarUserNotificationText = text
     },
 
     // Обработка события "Закрытие модальной формы оплаты по кассе"

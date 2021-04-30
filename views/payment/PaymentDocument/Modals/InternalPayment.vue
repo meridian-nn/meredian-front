@@ -36,7 +36,7 @@
           <v-row>
             <v-col cols="12">
               <v-autocomplete
-                v-model="editedItem.contractorId"
+                v-model="spDocint.kontrId"
                 label="Кому"
                 :loading="loadingType.organizations"
                 :items="organizations"
@@ -49,7 +49,7 @@
           <v-row>
             <v-col cols="12">
               <v-autocomplete
-                v-model="editedItem.accId"
+                v-model="spDocint.accId"
                 label="Р/счет"
                 :loading="loadingType.paymentAccounts"
                 :items="paymentAccounts"
@@ -87,23 +87,7 @@
             </v-col>
           </v-row>
 
-          <v-snackbar
-            v-model="snackbarUserNotification"
-            :timeout="snackbarUserNotificationTimeout"
-            :color="snackbarUserNotificationColor"
-          >
-            {{ snackbarUserNotificationText }}
-
-            <template #action="{ attrs }">
-              <v-btn
-                v-bind="attrs"
-                text
-                @click="snackbarUserNotification = false"
-              >
-                Закрыть
-              </v-btn>
-            </template>
-          </v-snackbar>
+          <user-notification ref="userNotification" />
         </v-container>
       </v-card-text>
       <v-card-actions>
@@ -128,34 +112,56 @@
 </template>
 
 <script>
+import UserNotification from '@/views/special_components/information_window/UserNotification'
+
 export default {
   name: 'InternalPayment',
+  components: {
+    UserNotification
+  },
+
   props: {
     show: {
       type: Boolean,
       default: false
     }
   },
+
   data() {
     return {
       date: new Date().toLocaleDateString(),
-      selectedOrganizationId: null,
-      selectedOrganization: {},
-      dialog: false,
-      loadingType: {},
-      id: null,
-      editedItem: {},
-      organizations: [],
-      paymentAccounts: [],
-      groups: [],
 
-      // Информационное сообщение для пользователя
-      snackbarUserNotification: false,
-      snackbarUserNotificationTimeout: 3000,
-      snackbarUserNotificationColor: '',
-      snackbarUserNotificationText: ''
+      // id организации, выбранной на форме "Журнал документов на оплату"
+      selectedOrganizationId: null,
+
+      // организация, выбранная на форме "Журнал документов на оплату"
+      selectedOrganization: {},
+
+      dialog: false,
+
+      // объект для отображения загрузки данных для полей
+      loadingType: {},
+
+      // id документа на оплату
+      id: null,
+
+      // документ на оплату
+      editedItem: {},
+
+      // внутренний платеж
+      spDocint: {},
+
+      // список организаций для выбора пользователем
+      organizations: [],
+
+      // р/счета выбранной организации
+      paymentAccounts: [],
+
+      // список групп для выбора пользователем
+      groups: []
     }
   },
+
   watch: {
     dialog(val) {
       if (val) {
@@ -163,12 +169,14 @@ export default {
       }
     }
   },
+
   methods: {
     init() {
       this.findOrganizations()
       this.findGroups()
     },
 
+    // поиск организаций для выбора пользователем на форме
     async findOrganizations() {
       this.loadingType.organizations = true
 
@@ -180,6 +188,7 @@ export default {
       this.loadingType.organizations = null
     },
 
+    // поиск групп для выбора пользователем на форме
     async findGroups() {
       if (!this.groups.length) {
         this.loadingType.groups = true
@@ -188,7 +197,10 @@ export default {
       }
     },
 
+    // обработка события изменения организации пользователем на форме
     organizationChange(val) {
+      delete (this.spDocint.accId)
+      this.editedItem.contractorId = this.spDocint.kontrId
       this.findPaymentAccounts(val)
     },
 
@@ -214,7 +226,8 @@ export default {
       this.dialog = true
     }, */
 
-    editDocument(id, selectedOrganization) {
+    // открытие формы из журнала документов
+    editDocument(id, selectedOrganization, accId) {
       this.reset()
 
       this.selectedOrganizationId = selectedOrganization
@@ -222,37 +235,44 @@ export default {
 
       this.id = id
       this.dialog = true
-      this.findEditedItem()
+      this.findEditedItem(accId)
     },
 
+    // поиск организации-плательщика по id
     async findPayerById() {
       this.selectedOrganization = await this.$axios.$get('/meridian/oper/dict/spOrg/findById/' + this.selectedOrganizationId)
     },
 
-    async findEditedItem() {
+    // поиск документа на оплату по id
+    async findEditedItem(accId) {
       if (this.id) {
         const editedItem = await this.$axios.$get('/meridian/oper/spDocopl/findById/' + this.id, this.axiosConfig)
         this.editedItem = editedItem
+        this.editedItem.accId = accId
       }
     },
 
+    // функция отработки события нажития на кнопку "отмена"
     cancel() {
       this.reset()
       this.dialog = false
       this.$emit('cancel')
     },
 
+    // функция обнуления всех переменных формы
     reset() {
       this.loadingType = {}
       this.editedItem = {}
       this.id = null
     },
 
+    // функция сохранения внутреннего платежа
     async save() {
       if (!this.checkParamsOfEditedItem()) {
         return
       }
 
+      this.editedItem.spDocints.push(this.spDocint)
       let errorMessage = null
       await this.$axios.$post('/meridian/oper/spDocopl/saveInternalPayment', this.editedItem, this.axiosConfig).catch((error) => {
         errorMessage = error
@@ -264,26 +284,26 @@ export default {
       this.$emit('save')
     },
 
+    // функция проверки заполнения обязательных полей
     checkParamsOfEditedItem() {
       let verificationPassed = true
-      if (this.editedItem.kontrId === this.selectedOrganizationId) {
-        this.showUserNotification('error', 'В полях "Плательщик" и "Кому" не может быть одна и та же организация!', 3000)
+      if (this.spDocint.kontrId === this.selectedOrganizationId) {
+        this.$refs.userNotification.showUserNotification('error', 'В полях "Плательщик" и "Кому" не может быть одна и та же организация!')
+        verificationPassed = false
+      } else if (!this.spDocint.kontrId) {
+        this.$refs.userNotification.showUserNotification('error', 'Выберите организацию, которой производится платёж!')
+        verificationPassed = false
+      } else if (!this.spDocint.accId) {
+        this.$refs.userNotification.showUserNotification('error', 'Выберите расчетный счет организации!')
+        verificationPassed = false
+      } else if (!this.editedItem.sumDoc) {
+        this.$refs.userNotification.showUserNotification('error', 'Укажите сумму оплаты!')
+        verificationPassed = false
+      } else if (!this.editedItem.viddocId) {
+        this.$refs.userNotification.showUserNotification('error', 'Укажите группу!')
         verificationPassed = false
       }
       return verificationPassed
-    },
-
-    // Отображение информационного сообщения пользователю
-    showUserNotification(color, text, timeout) {
-      if (!color ||
-      !text ||
-      !timeout) {
-        return
-      }
-      this.snackbarUserNotification = true
-      this.snackbarUserNotificationColor = color
-      this.snackbarUserNotificationTimeout = timeout
-      this.snackbarUserNotificationText = text
     },
 
     compare(field, order) {

@@ -20,12 +20,14 @@
           </v-col>
         </v-row>
       </v-card-title>
+
       <v-card-text>
         <v-container>
           <v-row>
             <v-col cols="12">
               <v-autocomplete
                 v-model="editedItem.myorgId"
+                readonly="true"
                 label="Плательщик"
                 :loading="loadingType.payers"
                 :items="payers"
@@ -34,6 +36,7 @@
               />
             </v-col>
           </v-row>
+
           <v-row>
             <v-col cols="6">
               <v-text-field
@@ -53,6 +56,7 @@
               />
             </v-col>
           </v-row>
+
           <v-row>
             <v-col cols="4">
               <v-text-field
@@ -83,6 +87,7 @@
               />
             </v-col>
           </v-row>
+
           <v-row>
             <v-col cols="12">
               <v-text-field
@@ -91,8 +96,11 @@
               />
             </v-col>
           </v-row>
+
+          <user-notification ref="userNotification" />
         </v-container>
       </v-card-text>
+
       <v-card-actions>
         <v-spacer />
 
@@ -116,26 +124,47 @@
 </template>
 
 <script>
+import UserNotification from '@/views/special_components/information_window/UserNotification'
+
 export default {
   name: 'PaymentByCashbox',
+
+  components: {
+    UserNotification
+  },
+
   props: {
     show: {
       type: Boolean,
       default: false
     }
   },
+
   data() {
     return {
       date: new Date().toLocaleDateString(),
       dialog: false,
+
+      // объект для отображения загрузки данных для полей
       loadingType: {},
+
+      // id документа на оплату
       id: null,
+
+      // документ на оплату
       editedItem: {},
+
+      // оплата по кассе (Хозрасходы) - т.е. если выбранная группа = Хозрасходы
       spDocch: {},
+
+      // список плательщиков
       payers: [],
+
+      // список групп
       groups: []
     }
   },
+
   watch: {
     dialog(val) {
       if (val) {
@@ -143,11 +172,14 @@ export default {
       }
     }
   },
+
   methods: {
     init() {
       this.findPayers()
       this.findGroups()
     },
+
+    // поиск плательщиков для выбора пользователем на форме(возможно не потребуется)
     async findPayers() {
       if (!this.payers.length) {
         this.loadingType.payers = true
@@ -155,6 +187,8 @@ export default {
         this.loadingType.payers = null
       }
     },
+
+    // поиск групп для выбора пользователем на форме
     async findGroups() {
       if (!this.groups.length) {
         this.loadingType.groups = true
@@ -162,19 +196,31 @@ export default {
         this.loadingType.groups = null
       }
     },
+
+    // открытие формы из журнала документов
+    editDocument(id, accId) {
+      this.reset()
+      this.id = id
+      this.dialog = true
+      this.findEditedItem(accId)
+    },
+
+    // поиск документа на оплату по id
     async findEditedItem(accId) {
       if (this.id) {
         this.editedItem = await this.$axios.$get('/meridian/oper/spDocopl/findById/' + this.id)
         this.editedItem.accId = accId
       }
     },
+
+    // функция сохранения оплаты по кассе
     async save() {
+      if (!this.checkParamsOfEditedItem()) {
+        return
+      }
+
       let errorMessage = null
       this.editedItem.dataDoc = this.date
-      this.spDocch.spDocopl = this.editedItem
-      if (!this.spDocch.id) {
-        this.spDocch.id = 0
-      }
 
       await this.$axios.$post('/meridian/oper/spDocopl/savePayment', this.editedItem).catch((error) => {
         errorMessage = error
@@ -182,6 +228,11 @@ export default {
       })
 
       if (errorMessage == null && this.editedItem.viddocId === 25) {
+        this.spDocch.spDocopl = this.editedItem
+        if (!this.spDocch.id) {
+          this.spDocch.id = 0
+        }
+
         await this.$axios.$post('/meridian/oper/spDocopl/saveSpDocch', this.spDocch).catch((error) => {
           errorMessage = error
           alert(errorMessage)
@@ -193,27 +244,47 @@ export default {
       }
       this.$emit('save')
     },
+
+    // функция проверки заполнения обязательных полей
+    checkParamsOfEditedItem() {
+      let verificationPassed = true
+      if (this.editedItem.viddocId === 25) {
+        if (!this.spDocch.hozrasx) {
+          this.$refs.userNotification.showUserNotification('error', 'Укажите сумму хоз. расходов!')
+          verificationPassed = false
+        } else if (!this.spDocch.komand) {
+          this.$refs.userNotification.showUserNotification('error', 'Укажите сумму командировочных!')
+          verificationPassed = false
+        } else if (!this.spDocch.gsm) {
+          this.$refs.userNotification.showUserNotification('error', 'Укажите сумму ГСМ!')
+          verificationPassed = false
+        } else if (!this.spDocch.zarpl) {
+          this.$refs.userNotification.showUserNotification('error', 'Укажите сумму зарплаты!')
+          verificationPassed = false
+        }
+      }
+      return verificationPassed
+    },
+
+    // функция отработки события нажития на кнопку "отмена"
     cancel() {
       this.reset()
       this.dialog = false
       this.$emit('cancel')
     },
+
+    // функция обнуления всех переменных формы
     reset() {
       this.loadingType = {}
       this.editedItem = {}
       this.spDocch = {}
       this.id = null
-    },
+    }
     /* newDocument() {
       this.reset()
       this.dialog = true
     }, */
-    editDocument(id, accId) {
-      this.reset()
-      this.id = id
-      this.dialog = true
-      this.findEditedItem(accId)
-    }
+
   }
 }
 </script>

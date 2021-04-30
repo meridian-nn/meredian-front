@@ -297,23 +297,9 @@
             </v-col>
           </v-row>
 
-          <v-snackbar
-            v-model="snackbarUserNotification"
-            :timeout="snackbarUserNotificationTimeout"
-            :color="snackbarUserNotificationColor"
-          >
-            {{ snackbarUserNotificationText }}
-
-            <template #action="{ attrs }">
-              <v-btn
-                v-bind="attrs"
-                text
-                @click="snackbarUserNotification = false"
-              >
-                Закрыть
-              </v-btn>
-            </template>
-          </v-snackbar>
+          <user-notification
+            ref="userNotification"
+          /></user-notification>
         </v-container>
       </v-card-text>
 
@@ -339,8 +325,15 @@
 </template>
 
 <script>
+import UserNotification from '@/views/special_components/information_window/UserNotification'
+
 export default {
   name: 'EditPaymentDocument',
+
+  components: {
+    UserNotification
+  },
+
   props: {
     title: {
       type: String,
@@ -351,6 +344,7 @@ export default {
       default: false
     }
   },
+
   data() {
     return {
 
@@ -389,15 +383,10 @@ export default {
       editedItem: {},
 
       // id редактируемого документа
-      id: null,
-
-      // Информационное сообщение для пользователя
-      snackbarUserNotification: false,
-      snackbarUserNotificationTimeout: 3000,
-      snackbarUserNotificationColor: '',
-      snackbarUserNotificationText: ''
+      id: null
     }
   },
+
   watch: {
     dialog(val) {
       if (val) {
@@ -405,6 +394,7 @@ export default {
       }
     }
   },
+
   methods: {
     init() {
       this.findDepartments()
@@ -555,17 +545,17 @@ export default {
     // функция отработки события изменения дат на форме
     dataOplatChange(val) {
       if (!this.editedItem.dataDoc) {
-        this.showUserNotification('warning', 'Сначало укажите дату документа!', 3000)
+        this.$refs.userNotification.showUserNotification('warning', 'Сначало укажите дату документа!')
         this.editedItem.dataOplat = null
         return
       }
       if (val < this.editedItem.dataDoc) {
-        this.showUserNotification('warning', 'Дата оплаты не может быть меньше даты документа!', 3000)
+        this.$refs.userNotification.showUserNotification('warning', 'Дата оплаты не может быть меньше даты документа!')
         this.editedItem.dataOplat = null
       }
     },
 
-    // функция сохранения документам
+    // функция сохранения документа
     async save() {
       if (!this.checkParamsOfEditedItem()) {
         return
@@ -594,40 +584,40 @@ export default {
     checkParamsOfEditedItem() {
       let verificationPassed = true
       if (!this.editedItem.dataOplat || !this.editedItem.dataDoc) {
-        this.showUserNotification('error', 'Укажите дату документа и дату оплаты документа!', 3000)
+        this.$refs.userNotification.showUserNotification('error', 'Укажите дату документа и дату оплаты документа!')
         verificationPassed = false
       } else if (!this.editedItem.nameDoc) {
-        this.showUserNotification('error', 'Укажите номер документа!', 3000)
+        this.$refs.userNotification.showUserNotification('error', 'Укажите номер документа!')
         verificationPassed = false
       } else if (!this.editedItem.departmentId) {
-        this.showUserNotification('error', 'Укажите подразделение!', 3000)
+        this.$refs.userNotification.showUserNotification('error', 'Укажите подразделение!')
         verificationPassed = false
       } else if (!this.editedItem.viddocId) {
-        this.showUserNotification('error', 'Укажите тип документа!', 3000)
+        this.$refs.userNotification.showUserNotification('error', 'Укажите тип документа!')
         verificationPassed = false
       } else if (!this.editedItem.ispId) {
-        this.showUserNotification('error', 'Укажите поставщика!', 3000)
+        this.$refs.userNotification.showUserNotification('error', 'Укажите поставщика!')
         verificationPassed = false
       } else if (!this.editedItem.sumDoc) {
-        this.showUserNotification('error', 'Укажите сумму по договору!', 3000)
+        this.$refs.userNotification.showUserNotification('error', 'Укажите сумму по договору!')
         verificationPassed = false
       } else if (!this.editedItem.contractId) {
-        this.showUserNotification('error', 'Укажите договор плательщика!', 3000)
+        this.$refs.userNotification.showUserNotification('error', 'Укажите договор плательщика!')
         verificationPassed = false
       } else if (!this.editedItem.supplierId) {
-        this.showUserNotification('error', 'Укажите поставщика плательщика!', 3000)
+        this.$refs.userNotification.showUserNotification('error', 'Укажите поставщика плательщика!')
         verificationPassed = false
       } else if (!this.editedItem.myorgId) {
-        this.showUserNotification('error', 'Укажите плательщика!', 3000)
+        this.$refs.userNotification.showUserNotification('error', 'Укажите плательщика!')
         verificationPassed = false
       } else if (!this.editedItem.consumerId) {
-        this.showUserNotification('error', 'Укажите клиента!', 3000)
+        this.$refs.userNotification.showUserNotification('error', 'Укажите клиента!')
         verificationPassed = false
       } else if (!this.editedItem.documentKindId) {
-        this.showUserNotification('error', 'Укажите вид документа!', 3000)
+        this.$refs.userNotification.showUserNotification('error', 'Укажите вид документа!')
         verificationPassed = false
       } else if (!this.editedItem.paymentStatus) {
-        this.showUserNotification('error', 'Укажите статус платежа!', 3000)
+        this.$refs.userNotification.showUserNotification('error', 'Укажите статус платежа!')
         verificationPassed = false
       }
       return verificationPassed
@@ -688,19 +678,6 @@ export default {
       if (!date) { return '' }
       const [day, month, year] = date.split('.')
       return `${year}-${month}-${day}`
-    },
-
-    // Отображение информационного сообщения пользователю
-    showUserNotification(color, text, timeout) {
-      if (!color ||
-      !text ||
-      !timeout) {
-        return
-      }
-      this.snackbarUserNotification = true
-      this.snackbarUserNotificationColor = color
-      this.snackbarUserNotificationTimeout = timeout
-      this.snackbarUserNotificationText = text
     }
   }
 }
