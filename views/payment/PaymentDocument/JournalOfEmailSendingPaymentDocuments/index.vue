@@ -11,7 +11,7 @@
               align="center"
               class="journal-of-email-sending-payment-docs-main-row headline"
             >
-              Журнал рассылки на e-mail документов к оплате
+              Журнал рассылки на e-mail документов на оплату
             </div>
           </v-col>
           <v-col cols="2">
@@ -61,20 +61,27 @@
               outlined
               hide-details="auto"
             /-->
-          </v-col>
-
-          <v-col cols="2">
             <download-excel
-              :data="documentsToPayData"
+              :data="documentsForExport"
               :fields="exportFields"
               :footer="exportFooter"
               :name="exportFileName"
               :before-generate="generateNameForExportFile"
             >
-              <v-btn>
+              <!--v-btn ref="downloadExcel">
                 Скачать таблицу
-              </v-btn>
+              </v-btn-->
+
+              <button
+                ref="downloadExcel"
+              />
             </download-excel>
+          </v-col>
+
+          <v-col cols="2">
+            <v-btn @click="startDownloadExcel">
+              Скачать таблицу
+            </v-btn>
           </v-col>
 
           <v-col cols="2">
@@ -88,8 +95,8 @@
           <v-col>
             <v-data-table
               id="dataTable"
-              :headers="documentsToPayHeaders"
-              :items="documentsToPayData"
+              :headers="documentsFromPayHeaders"
+              :items="documentsFromPayData"
               :show-select="false"
               :items-per-page="100"
               :disable-items-per-page="true"
@@ -144,7 +151,7 @@ export default {
       linkToDocumentForSending: null,
 
       // Шапка таблицы "Документы к оплате"
-      documentsToPayHeaders: [
+      documentsFromPayHeaders: [
         {
           text: 'Дата',
           value: 'dataCreate'
@@ -159,7 +166,7 @@ export default {
         },
         {
           text: 'Сумма оплаты',
-          value: 'sumOplat'
+          value: 'sumOplach'
         },
         {
           text: 'Подразделение',
@@ -175,12 +182,27 @@ export default {
         }
       ],
 
+      // Список документов таблицы "Документы к оплате"
+      documentsFromPayData: [],
+
+      // Массив документов для экпорта в excel
+      documentsForExport: [],
+
+      // Количество различных департаментов в таблице
+      depsInPayData: [],
+
+      // Текущий департамент из цикла выгрузки документов
+      currentDep: null,
+
+      // Итоговая сумма по колонке "К оплате" документов на оплату
+      totalSumOplat: 0,
+
       // Список колонок таблицы для экспорта в excel
       exportFields: {
         'Дата': 'dataCreate',
         'Номер': 'nameDoc',
         'Контрагент': 'namePlat',
-        'Сумма оплаты': 'sumOplat',
+        'Сумма оплаты': 'sumOplach',
         'Подразделение': 'depName',
         'Частичная оплата': 'partialPayment',
         'Комментарий': 'prim'
@@ -189,13 +211,9 @@ export default {
       // Данные для экспорта в подвал таблицы
       exportFooter: '',
 
-      exportFileName: '',
+      // Имя экспортируемого файла
+      exportFileName: ''
 
-      // Список документов таблицы "Документы к оплате"
-      documentsToPayData: [],
-
-      // Итоговая сумма по колонке "К оплате" документов на оплату
-      totalSumOplat: 0
     }
   },
   mounted() {
@@ -204,6 +222,33 @@ export default {
   methods: {
     init() {
       this.findPayers()
+    },
+
+    async startDownloadExcel() {
+      for (const dep of this.depsInPayData) {
+        const result = await this.downloadDep(dep)
+        console.log(result)
+      }
+    },
+
+    downloadDep(dep) {
+      const promise = new Promise((resolve, reject) => {
+        const depDocs = this.documentsFromPayData.filter(doc => doc.depName === dep)
+        let sumOfDocs = 0
+        this.documentsForExport = depDocs
+        this.documentsForExport.forEach((doc) => {
+          sumOfDocs += doc.sumOplach
+        })
+        this.exportFooter = 'Итого к оплате: ' + sumOfDocs
+        this.currentDep = dep
+
+        console.log(this.documentsForExport)
+        console.log(this.currentDep)
+
+        this.$refs.downloadExcel.click()
+        resolve('download' + this.currentDep)
+      })
+      return promise
     },
 
     async findPayers() {
@@ -231,57 +276,28 @@ export default {
 
     // Поиск документов для таблицы "Документы на оплату" по выбранной организации
     async findSpDocoplForPay() {
-      this.documentsToPayData = await this.getDocumentsToPay()
-    },
-
-    // Метод получения документов к оплате выбранной организации
-    async getDocumentsToPay() {
-      const arrayOfDocsToPay = []
-      const paymentAccounts = await this.$axios.$get('/meridian/oper/spAcc/findByOrgId?orgId=' + this.seletedPayer)
-      const arrayOfDocsToPayByPaymentAccs = await this.getAllDocsToPayOfOrgByPaymentAccs(paymentAccounts)
-
-      let totalToSumOplat = 0
-      arrayOfDocsToPayByPaymentAccs.forEach((array) => {
-        array.forEach((element) => {
-          totalToSumOplat += element.sumOplat
-          element.partialPayment = true
-          arrayOfDocsToPay.push(element)
-        })
-      })
-
-      this.exportFooter = 'Итого к оплате: ' + totalToSumOplat
-      this.totalSumOplat = totalToSumOplat
-      return arrayOfDocsToPay
-    },
-    async getAllDocsToPayOfOrgByPaymentAccs(paymentAccounts) {
-      const arrayOfDocsToPayByPaymentAccs = []
-      const arrayOfPromises = []
-      paymentAccounts.forEach((account) => {
-        const promise = this.getDocumentsToPayOfOrgByAccId(account.id)
-        arrayOfPromises.push(promise)
-      })
-      await Promise.all(arrayOfPromises).then((results) => {
-        results.forEach((result) => {
-          if (result.length) {
-            arrayOfDocsToPayByPaymentAccs.push(result)
-          }
-        })
-      })
-      return arrayOfDocsToPayByPaymentAccs
-    },
-    async getDocumentsToPayOfOrgByAccId(accId) {
       const data = {
         dateDoc: new Date(this.date).toLocaleDateString(),
-        accId,
-        orgId: this.selectedOrganization
+        orgId: this.seletedPayer
       }
 
-      const response = await this.$axios.$get('/meridian/oper/spDocopl/findSpDocoplToPay', { params: data })
-      return response
+      this.documentsFromPayData = await this.$axios.$get('/meridian/oper/spDocopl/findSpDocoplForPay', { params: data })
+      let totalSumOplat = 0
+      this.documentsFromPayData.forEach((value) => {
+        if (!this.depsInPayData.includes(value.depName)) {
+          this.depsInPayData.push(value.depName)
+        }
+
+        totalSumOplat += value.sumOplach
+        value.partialPayment = (value.sumDoc !== value.sumOplach)
+      })
+
+      this.totalSumOplat = totalSumOplat
     },
 
+    // Метод генерации имени для файла выгрузки
     generateNameForExportFile() {
-      this.exportFileName = 'journal_of_documents_to_pay' + new Date().toLocaleDateString() + ' - ' + new Date().toLocaleTimeString() + '.xls'
+      this.exportFileName = 'Журнал_документов_на_оплату_подр._' + this.currentDep + '_' + new Date().toLocaleDateString() + ' - ' + new Date().toLocaleTimeString() + '.xls'
       // this.linkToDocumentForSending =
     },
 
@@ -289,7 +305,7 @@ export default {
 
     },
 
-    // Пример печати документа
+    // Печать таблицы документов на оплату
     print() {
       this.$htmlToPaper('dataTable')
     }

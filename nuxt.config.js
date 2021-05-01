@@ -23,6 +23,7 @@ export default {
     plugins: [
         '~/plugins/axios',
         '~/plugins/utils',
+        '~/plugins/custom-compare.js',
         { src: '~plugins/vue-tables-2.js', ssr: false },
         { src: '~plugins/vue-json-excel.js', ssr: false },
         { src: '~plugins/vue-html-to-paper.js', ssr: false }
