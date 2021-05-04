@@ -17,6 +17,8 @@ $ yarn start
 $ yarn generate
 ```
 # install components
+$yarn add --dev vue-tables-2
+
 $ yarn add --dev @nuxt/components
 
 For detailed explanation on how things work, check out [Nuxt.js docs](https://nuxtjs.org).

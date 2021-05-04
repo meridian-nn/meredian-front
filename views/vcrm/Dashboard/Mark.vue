@@ -133,7 +133,10 @@
       </template>
 
       <template #[`item.code`]="{ item }">
-        <span class="dialog-code-btn" @click="openBarCodeDialog(item.code)">{{ item.code }}</span>
+        <span
+          class="dialog-code-btn"
+          @click="openBarCodeDialog(item.code)"
+        >{{ item.code }}</span>
       </template>
     </v-data-table>
 
@@ -142,8 +145,10 @@
       max-width="266px"
     >
       <div class="dialog-code-wrapp">
-        <img alt='Barcode Generator'
-             :src='`https://barcode.tec-it.com/barcode.ashx?data=${this.barCodeData}&code=DataMatrix&multiplebarcodes=false&translate-esc=false&unit=Fit&dpi=96&imagetype=Jpeg&rotation=0&color=%23000000&bgcolor=%23ffffff&codepage=Default&qunit=Mm&quiet=0&dmsize=300px`'/>
+        <img
+          alt="Barcode Generator"
+          :src="`https://barcode.tec-it.com/barcode.ashx?data=${this.barCodeData}&code=DataMatrix&multiplebarcodes=false&translate-esc=false&unit=Fit&dpi=96&imagetype=Jpeg&rotation=0&color=%23000000&bgcolor=%23ffffff&codepage=Default&qunit=Mm&quiet=0&dmsize=300px`"
+        >
       </div>
     </v-dialog>
   </v-container>
@@ -177,6 +182,7 @@ export default {
 
   async fetch() {
     const { content } = await this.$api.code.markCodeList()
+    // await this.$axios.$get('/meridian/markCode/findAll?page=0&size=200')
 
     this.fullDesserts = content
 

@@ -272,7 +272,6 @@
           <span class="headline">{{ title }}</span>
         </v-card-title>
 
-
         <v-card-text>
           <v-container>
             <v-row>
@@ -300,7 +299,7 @@
                   offset-y
                   min-width="auto"
                 >
-                  <template v-slot:activator="{ on, attrs }">
+                  <template #activator="{ on, attrs }">
                     <v-text-field
                       v-model="date"
                       label="Picker in menu"
@@ -308,14 +307,14 @@
                       readonly
                       v-bind="attrs"
                       v-on="on"
-                    ></v-text-field>
+                    />
                   </template>
                   <v-date-picker
                     v-model="date"
                     no-title
                     scrollable
                   >
-                    <v-spacer></v-spacer>
+                    <v-spacer />
                     <v-btn
                       text
                       color="primary"
@@ -1126,7 +1125,8 @@ export default {
       this.loading = true
 
       try {
-        await this.$api.code.gtinCodeList(this.editedIndex > -1 ? Object.assign(this.fullDesserts[this.editedIndex], this.editedItem) : this.editedItem)
+        await this.$api.code.gtinCodeList(
+          this.editedIndex > -1 ? Object.assign(this.fullDesserts[this.editedIndex], this.editedItem) : this.editedItem)
 
         await this.$fetch()
 
@@ -1175,7 +1175,8 @@ export default {
       }
 
       try {
-        await this.$axios.$post(`http://192.168.1.70:9037/markCodeRequest/saveMarkCodeRequest?${new URLSearchParams(request).toString()}`)
+        // await this.$api.code.markCodeSave(request)
+        await this.$axios.$post(`http://192.168.1.70:9037/meridian/markCodeRequest/saveMarkCodeRequest?${new URLSearchParams(request).toString()}`)
 
         this.dialogMark = false
       } catch (err) {
