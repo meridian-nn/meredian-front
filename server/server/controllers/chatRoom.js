@@ -11,7 +11,11 @@ export default {
 
       const chatRooms = await ChatRoomModel.initiateChat(userIds)
 
-      return res.status(200).json({ success: true, data: chatRooms })
+      if (chatRooms.new) {
+        global.io.sockets.emit('update rooms', chatRooms.data)
+      }
+
+      return res.status(200).json({ success: true, data: chatRooms.data })
     } catch (error) {
       return res.status(500).json({ success: false, error })
     }

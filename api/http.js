@@ -18,7 +18,6 @@ export default class HttpClient {
   }
 
   config(method, params = {}) {
-    console.log(this.headers)
     return {
       method,
       ...(method === 'POST' && {

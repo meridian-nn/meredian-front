@@ -116,20 +116,26 @@
         <v-spacer />
 
         <v-menu offset-y>
-          <template v-slot:activator="{ attrs, on }">
+          <template #activator="{ attrs, on }">
             <v-btn
               text
               v-bind="attrs"
-              v-on="on"
               class="white--text"
+              v-on="on"
             >
               {{ user.email }}
               <v-icon color="white">
                 mdi-chevron-down
               </v-icon>
 
-              <v-avatar class="mr-2" size="36">
-                <img src="http://i.pravatar.cc/150?img=53" alt="avatar">
+              <v-avatar
+                class="mr-2"
+                size="36"
+              >
+                <img
+                  src="http://i.pravatar.cc/150?img=53"
+                  alt="avatar"
+                >
               </v-avatar>
             </v-btn>
           </template>
@@ -145,7 +151,10 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item href="#" @click="logout">
+            <v-list-item
+              href="#"
+              @click="logout"
+            >
               <v-icon class="mr-2">
                 mdi-exit-to-app
               </v-icon>
@@ -167,6 +176,10 @@ export default {
   name: 'VcrmPage',
 
   middleware: 'auth-not-authorized',
+
+  async asyncData({ store }) {
+    await store.dispatch('profile/fetch')
+  },
 
   data() {
     return {
@@ -193,10 +206,6 @@ export default {
     user() {
       return this.$store.state.profile.user
     }
-  },
-
-  async asyncData({ store }) {
-    await store.dispatch('profile/fetch')
   },
 
   watch: {

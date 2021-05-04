@@ -71,12 +71,12 @@ chatRoomSchema.statics.initiateChat = async function(userIds) {
     const availableRoom = await this.findOne({ userIds: { $all: [userIds] } })
 
     if (availableRoom) {
-      return availableRoom
+      return { data: availableRoom, new: false }
     }
 
     const newRoom = await this.create({ userIds })
 
-    return { data: newRoom }
+    return { data: newRoom, new: true }
   } catch (error) {
     console.log('error on start chat method', error)
     throw error
