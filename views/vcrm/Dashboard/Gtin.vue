@@ -1175,8 +1175,8 @@ export default {
       }
 
       try {
-        // await this.$api.code.markCodeSave(request)
-        await this.$axios.$post(`http://192.168.1.70:9037/meridian/markCodeRequest/saveMarkCodeRequest?${new URLSearchParams(request).toString()}`)
+        await this.$api.code.markCodeSave(request)
+        // await this.$axios.$post(`http://192.168.1.70:9037/meridian/markCodeRequest/saveMarkCodeRequest?${new URLSearchParams(request).toString()}`)
 
         this.dialogMark = false
       } catch (err) {

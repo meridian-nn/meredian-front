@@ -313,7 +313,10 @@ export default {
           distributionSum: 'Выделено',
           notDistributedSum: 'Не распределено'
         }
-      }
+      },
+
+      // Итоговая сумма по колонке "Выделено"
+      totalSumOfDistributionSum: 0
     }
   },
   computed: {
@@ -402,6 +405,7 @@ export default {
     // Поиск информации о бюджетах всех отделов для демонстрации в таблице departmentsDataTable
     async findInfoForDepDataTable(departments) {
       const departmentsDataTable = []
+      this.totalSumOfDistributionSum = 0
       const arrayOfPromises = []
       departments.forEach((dep) => {
         const response = this.getInfoAboutDepById(dep.id)
@@ -410,6 +414,7 @@ export default {
       await Promise.all(arrayOfPromises).then((results) => {
         results.forEach((result) => {
           const distSum = !result.distributionSum ? 0 : result.distributionSum
+          this.totalSumOfDistributionSum += distSum
           const distributedSum = !result.distributedSum ? 0 : result.distributedSum
           const notDistSum = distSum - distributedSum
           departmentsDataTable.push({
@@ -417,6 +422,10 @@ export default {
             distributionSum: distSum,
             notDistributedSum: notDistSum
           })
+        })
+        departmentsDataTable.push({
+          name: 'Итого:',
+          distributionSum: this.totalSumOfDistributionSum
         })
       })
       return departmentsDataTable
@@ -465,6 +474,7 @@ export default {
       this.budget.distributionDate = this.getDateForSave()
 
       // Сохранение распределения бюджета на отделы
+      // await this.$api.payment.moneyDistributionByDepartments.save([this.budget])
       await this.$axios.$post('/oper/depMoneyDistribution/save', [this.budget])
 
       if (this.department.department) {
@@ -472,11 +482,13 @@ export default {
         this.department.distributedSum = this.depDistributedSum || 0
 
         // Сохранение распределения бюджета на выбранный отдел
+        // await this.$api.payment.moneyDistributionByDepartments.save([this.department])
         await this.$axios.$post('/oper/depMoneyDistribution/save', [this.department])
         console.log(this.department)
         this.findByDepartmentId(this.department.department.id)
 
         // Сохранение распределения бюджета на подразделения отдела
+        // await this.$api.payment.moneyDistributionByDepartments.save(this.moneyDistributionData)
         await this.$axios.$post('/oper/depMoneyDistribution/save', this.moneyDistributionData)
         this.loadMoneyDistribution(this.department.department.id)
 

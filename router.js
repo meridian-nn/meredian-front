@@ -24,30 +24,49 @@ function scrollBehavior(to, from, savedPosition) {
 
 const AuthPage = dynamicPage(() =>
     import ('~/views/auth/AuthPage'))
+
 const AuthLogin = dynamicPage(() =>
     import ('~/views/auth/Form/FormLogin'))
+
 const VcrmPage = dynamicPage(() =>
     import ('~/views/vcrm/VcrmPage'))
+
 const DashboardPage = dynamicPage(() =>
     import ('~/views/vcrm/Dashboard'))
+
+const PaymentMenuPage = dynamicPage(() =>
+    import ('~/views/payment/Menu'))
+
 const JournalOfPaymentDocumentsPage = dynamicPage(() =>
     import ('~/views/payment/PaymentDocument/JournalOfPaymentDocuments'))
+
 const JournalOfEmailSendingPaymentDocumentsPage = dynamicPage(() =>
     import ('~/views/payment/PaymentDocument/JournalOfEmailSendingPaymentDocuments'))
+
 const PaymentByCashboxPage = dynamicPage(() =>
     import ('~/views/payment/PaymentDocument/Modals/PaymentByCashbox.vue'))
+
 const InternalPaymentPage = dynamicPage(() =>
     import ('~/views/payment/PaymentDocument/Modals/InternalPayment.vue'))
+
 const HistoryOfPaymentDocumentsPage = dynamicPage(() =>
     import ('~/views/payment/HistoryOfJournalOfPaymentDocuments'))
+
 const MoneyDistributionPage = dynamicPage(() =>
     import ('~/views/payment/MoneyDistribution'))
+
 const InputOfBalancesPage = dynamicPage(() =>
     import ('~/views/payment/InputOfBalances'))
+
+const PaymentBudgetByDepartmentsPage = dynamicPage(() =>
+    import ('~/views/payment/PaymentBudgetByDepartments'))
+
 const GtinPage = dynamicPage(() =>
     import ('~/views/vcrm/Dashboard/Gtin'))
+
 const MarkPage = dynamicPage(() =>
     import ('~/views/vcrm/Dashboard/Mark'))
+
 const ChatPage = dynamicPage(() =>
     import ('~/views/vcrm/Dashboard/Chat/ChatPage'))
 
@@ -88,7 +107,6 @@ const createRouterConst = new Router({
                         }
                     },
 
-
                     {
                         path: 'chat',
                         name: 'ChatPage',
@@ -104,7 +122,21 @@ const createRouterConst = new Router({
             }]
         },
         {
-            path: '/meridian',
+            path: '/meridian/payment_menu',
+            component: VcrmPage,
+            children: [{
+                path: '',
+                name: 'PaymentMenu',
+                component: PaymentMenuPage,
+                meta: {
+                    breadcrumb: [
+                        { text: 'Меню реестра оплат', disabled: false }
+                    ]
+                }
+            }]
+        },
+        {
+            path: '/meridian/journal_of_payment_documents',
             component: VcrmPage,
             children: [{
                 path: '',
@@ -113,7 +145,7 @@ const createRouterConst = new Router({
             }]
         },
         {
-            path: '/meridian',
+            path: '/meridian/journal_of_email_sending_payment_documents',
             component: VcrmPage,
             children: [{
                 path: '',
@@ -122,7 +154,7 @@ const createRouterConst = new Router({
             }]
         },
         {
-            path: '/meridian',
+            path: '/meridian/payment_by_cashbox',
             component: VcrmPage,
             children: [{
                 path: '',
@@ -131,7 +163,7 @@ const createRouterConst = new Router({
             }]
         },
         {
-            path: '/meridian',
+            path: '/meridian/internal_payment',
             component: VcrmPage,
             children: [{
                 path: '',
@@ -140,7 +172,7 @@ const createRouterConst = new Router({
             }]
         },
         {
-            path: '/meridian',
+            path: '/meridian/history_of_payment_documents',
             component: VcrmPage,
             children: [{
                 path: '',
@@ -149,7 +181,7 @@ const createRouterConst = new Router({
             }]
         },
         {
-            path: '/meridian',
+            path: '/meridian/money_distribution',
             component: VcrmPage,
             children: [{
                 path: '',
@@ -158,12 +190,21 @@ const createRouterConst = new Router({
             }]
         },
         {
-            path: '/meridian',
+            path: '/meridian/input_of_balances',
             component: VcrmPage,
             children: [{
                 path: '',
                 name: 'InputOfBalances',
                 component: InputOfBalancesPage
+            }]
+        },
+        {
+            path: '/meridian/payment_budget_by_departmens',
+            component: VcrmPage,
+            children: [{
+                path: '',
+                name: 'PaymentBudgetByDepartments',
+                component: PaymentBudgetByDepartmentsPage
             }]
         },
         {

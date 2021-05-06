@@ -840,12 +840,12 @@ export default {
       this.loading = true
 
       try {
-        // gtin/findByGtinRequestId
         // eslint-disable-next-line vue/max-len
-        const params = new URLSearchParams(this.editedIndex > -1 ? Object.assign(this.fullDesserts[this.editedIndex], data) : data).toString()
-        await this.$axios.$post(`http://192.168.1.70:9037/meridian/gtinRequest/saveGtinRequest?${params}`)
+        // const params = new URLSearchParams(this.editedIndex > -1 ? Object.assign(this.fullDesserts[this.editedIndex], data) : data).toString()
+        // await this.$axios.$post(`http://192.168.1.70:9037/meridian/gtinRequest/saveGtinRequest?${params}`)
         // eslint-disable-next-line vue/max-len
-        // await this.$api.code.gtinCodeSave(this.editedIndex > -1 ? Object.assign(this.fullDesserts[this.editedIndex], this.editedItem) : this.editedItem)
+        const params = this.editedIndex > -1 ? Object.assign(this.fullDesserts[this.editedIndex], this.editedItem) : this.editedItem
+        await this.$api.code.gtinCodeSave(params)
 
         await this.$fetch()
 
@@ -894,9 +894,10 @@ export default {
       }
 
       try {
-        // await this.$api.code.markCodeSave(request)
-        const params = new URLSearchParams(request).toString()
-        await this.$axios.$post(`http://192.168.1.70:9037/meridian/markCodeRequest/saveMarkCodeRequest?${params}`)
+        // const params = new URLSearchParams(request).toString()
+        // await this.$axios.$post(`http://192.168.1.70:9037/meridian/markCodeRequest/saveMarkCodeRequest?${params}`)
+        const params = request
+        await this.$api.code.markCodeSave(params)
 
         this.dialogMark = false
       } catch (err) {

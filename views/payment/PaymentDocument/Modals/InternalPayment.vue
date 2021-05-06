@@ -282,6 +282,7 @@ export default {
 
       this.editedItem.spDocints.push(this.spDocint)
       let errorMessage = null
+      // await this.$api.payment.saveInternalPayment(this.editedItem)
       await this.$axios.$post('/oper/spDocopl/saveInternalPayment', this.editedItem).catch((error) => {
         errorMessage = error
         alert(errorMessage)

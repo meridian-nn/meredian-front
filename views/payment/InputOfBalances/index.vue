@@ -151,6 +151,13 @@ export default {
         }
       },
 
+      // Итоги по колонкам "Наименование, Остаток на р/с, Прочее, ВнПл, К оплате и Остаток на конец"
+      totalSumOfSaldo: 0,
+      totalSumOfNalich: 0,
+      totalSumOfVNPL: 0,
+      totalSumOfCredit: 0,
+      totalSumOfEndBalance: 0,
+
       // таблица данных по остаткам на р/с выбранной организации
       oplatDataColumns: ['acc.shortName', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
       oplatData: [],
@@ -195,16 +202,37 @@ export default {
       this.groupByOrgData = await this.getInfoAboutOrgs()
     },
     async getInfoAboutOrgs() {
+      this.totalSumOfSaldo = 0
+      this.totalSumOfNalich = 0
+      this.totalSumOfVNPL = 0
+      this.totalSumOfCredit = 0
+      this.totalSumOfEndBalance = 0
+
       const data = {
         dateOplat: new Date(this.date).toLocaleDateString()
       }
 
       const response = await this.$api.paymentAccounts.groupByOrg(data)
       // $axios.$get('/meridian/oper/spOplat/groupByOrg', { params: data })
-      response.forEach(async(element) => {
+      for (const element of response) {
         element.name = element.myOrg.shortName
         element.credit = await this.getSumOfDocumentsToPayByOrgId(element.myOrg.id)
         element.endBalance = element.saldo - element.credit
+
+        this.totalSumOfSaldo += element.saldo
+        this.totalSumOfNalich += element.nalich
+        this.totalSumOfVNPL += element.vnpl
+        this.totalSumOfCredit += element.credit
+        this.totalSumOfEndBalance += element.endBalance
+      }
+
+      response.push({
+        'name': 'Итого:',
+        'saldo': this.totalSumOfSaldo,
+        'nalich': this.totalSumOfNalich,
+        'vnpl': this.totalSumOfVNPL,
+        'credit': this.totalSumOfCredit,
+        'endBalance': this.totalSumOfEndBalance
       })
       return response
     },
@@ -325,6 +353,7 @@ export default {
 
     // Сохранение внесенных пользователем изменений
     async save() {
+      // await this.$api.payment.balanceOfPaymentAccount.save(this.oplatData)
       await this.$axios.$post('/oper/spOplat/saveAll', this.oplatData)
       this.init()
     }

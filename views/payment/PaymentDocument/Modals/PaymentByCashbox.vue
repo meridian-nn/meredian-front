@@ -225,6 +225,7 @@ export default {
       let errorMessage = null
       this.editedItem.dataDoc = this.date
 
+      //  this.$api.payment.docOplForPay.savePayment(this.editedItem)
       await this.$axios.$post('/oper/spDocopl/savePayment', this.editedItem).catch((error) => {
         errorMessage = error
         alert(errorMessage)
@@ -236,6 +237,7 @@ export default {
           this.spDocch.id = 0
         }
 
+        // this.$api.payment.docOplForPay.saveSpDocch(this.spDocch)
         await this.$axios.$post('/oper/spDocopl/saveSpDocch', this.spDocch).catch((error) => {
           errorMessage = error
           alert(errorMessage)

@@ -1,9 +1,9 @@
 <template>
   <div>
     <v-card>
-      <v-card-text class="journal-of-payment-docs-card-text">
+      <v-card-text class="journal-of-payment-docs-history-card-text">
         <v-container
-          class="journal-of-payment-docs-container"
+          class="journal-of-payment-docs-history-container"
         >
           <v-row>
             <v-col cols="10">
@@ -95,7 +95,7 @@
 
           <v-row class="journal-of-payment-docs-tables-row">
             <v-col
-              class="journal-of-payment-docs-docs-to-pay-col journal-of-payment-docs-to-pay-col-5"
+              class="journal-of-payment-docs-docs-to-pay-col journal-of-payment-docs-to-pay-history-col-5"
             >
               <v-subheader class="font-weight-medium text-subtitle-1">
                 Документы к оплате
@@ -127,11 +127,11 @@
             </v-col>
 
             <v-col
-              class="journal-of-payment-docs-arrows journal-of-payment-docs-col-1"
+              class="journal-of-payment-docs-arrows journal-of-payment-docs-history-col-1"
             />
 
             <v-col
-              class="journal-of-payment-docs-docs-from-pay-col journal-of-payment-docs-for-pay-col-5"
+              class="journal-of-payment-docs-docs-from-pay-col journal-of-payment-docs-for-pay-history-col-5"
             >
               <v-subheader class="font-weight-medium text-subtitle-1">
                 <div
@@ -327,15 +327,19 @@ export default {
       this.findOrgAccInfo()
     },
 
-    updateAllInfo() {
+    async updateAllInfo() {
+      this.loadingType.timeChanged = true
+
+      await this.findOrgAccInfo()
       if (this.selectedOrganization) {
-        this.findSpDocoplForPay()
+        await this.updateResPaymentAccountInfo()
+        await this.findSpDocoplForPay()
         if (this.accId) {
-          this.findToPay(this.accId)
+          await this.findToPay(this.accId)
         }
-        this.updateResPaymentAccountInfo()
       }
-      this.findOrgAccInfo()
+
+      this.loadingType.timeChanged = null
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
     },
@@ -414,7 +418,7 @@ export default {
       }
 
       // TODO поменять на /oper/spDocopl/findSpDocoplForPayBetweenDates
-      this.fromPayData = await this.$api.payment.docOplForPay.findSpDocoplForPay(data)
+      this.fromPayData = await this.$api.payment.docOplForPay.findSpDocoplForPayBetweenDates(data)
       // $axios.$get('/meridian/oper/spDocopl/findSpDocoplForPay', { params: data })
       let totalSumDoc = 0
       let totalSumOplat = 0
@@ -551,13 +555,12 @@ export default {
 .journal-of-payment-docs-tables-row{
   margin-top: 0px;
 }
-.journal-of-payment-docs-container{
-  padding-top: 0px;
+.journal-of-payment-docs-history-container{
   padding-right: 0px;
   padding-bottom: 0px;
   max-width: none;
 }
-.journal-of-payment-docs-card-text{
+.journal-of-payment-docs-history-card-text{
   padding: 0px;
   max-height: 1000px;
 }
@@ -599,15 +602,15 @@ export default {
   padding-left: 0px;
   padding-right: 0px;
 }
-.journal-of-payment-docs-col-1 {
+.journal-of-payment-docs-history-col-1 {
     flex: 0 0 1%;
     max-width: 1%;
 }
-.journal-of-payment-docs-to-pay-col-5 {
+.journal-of-payment-docs-to-pay-history-col-5 {
     flex: 0 0 40%;
     max-width: 40%;
 }
-.journal-of-payment-docs-for-pay-col-5 {
+.journal-of-payment-docs-for-pay-history-col-5 {
     flex: 0 0 58%;
     max-width: 58%;
 }

@@ -24,7 +24,7 @@ export const factory = send => ({
         },
 
         markCodeSave(params) {
-            return send('POST', `/markCodeRequest/saveGtinRequest&${new URLSearchParams(params).toString()}`)
+            return send('POST', `/markCodeRequest/saveMarkCodeRequest?${new URLSearchParams(params).toString()}`)
         },
 
         gtinCodeList(params) {
@@ -32,7 +32,7 @@ export const factory = send => ({
         },
 
         gtinCodeSave(params) {
-            return send('POST', `/gtinRequest/saveGtinRequest&${new URLSearchParams(params).toString()}`)
+            return send('POST', `/gtinRequest/saveGtinRequest?${new URLSearchParams(params).toString()}`)
         }
     },
 
@@ -70,6 +70,9 @@ export const factory = send => ({
         findDocumentTypesByParentId(params) {
             return send('GET', `/oper/dict/spViddocopl/findByParentId?${new URLSearchParams(params).toString()}`)
         },
+        findDocumentTypeById(id) {
+            return send('GET', `/oper/dict/spViddocopl/findById/${id}`)
+        },
         findContractsByExecId(params) {
             return send('GET', `/oper/dogSelDogSpisSpec/findByMyDescr?${new URLSearchParams(params).toString()}`)
         },
@@ -81,6 +84,9 @@ export const factory = send => ({
     executors: {
         findExecutorsByDepartmentId(params) {
             return send('GET', `/oper/dict/spIsp/findByViddocopl?${new URLSearchParams(params).toString()}`)
+        },
+        findById(id) {
+            return send('GET', `/oper/dict/spIsp/findById/${id}`)
         }
     },
 
@@ -96,22 +102,29 @@ export const factory = send => ({
         },
 
         payDocument(params) {
-            return send('POST', `/oper/spDocopl/payDocument?${new URLSearchParams(params).toString()}`)
+            return send('POST', `/oper/spDocopl/payDocument`, params)
         },
 
         findPaymentStatuses() {
             return send('GET', '/oper/spDocopl/findPaymentStatuses')
         },
 
+        saveInternalPayment(params) {
+            return send('POST', `/oper/spDocopl/saveInternalPayment`, params)
+        },
+
         docOplToPay: {
             findSpDocoplToPay(params) {
                 return send('GET', `/oper/spDocopl/findSpDocoplToPay?${new URLSearchParams(params).toString()}`)
             },
+            findDocToPayByDocoplForPay(params) {
+                return send('GET', `/oper/spDocopl/findDocToPayByDocoplForPay?${new URLSearchParams(params).toString()}`)
+            },
             saveSpDocoplToPay(params) {
-                return send('POST', `/oper/spDocopl/saveSpDocoplToPay?${new URLSearchParams(params).toString()}`)
+                return send('POST', `/oper/spDocopl/saveSpDocoplToPay`, params)
             },
             deleteSelectedPayments(params) {
-                return send('POST', `/oper/spDocopl/deleteSelectedPayments?${new URLSearchParams(params).toString()}`)
+                return send('POST', `/oper/spDocopl/deleteSelectedPayments`, params)
             }
         },
 
@@ -119,14 +132,29 @@ export const factory = send => ({
             findSpDocoplForPay(params) {
                 return send('GET', `/oper/spDocopl/findSpDocoplForPay?${new URLSearchParams(params).toString()}`)
             },
+            findSpDocoplForPayBetweenParamDates(params) {
+                return send('GET', `/oper/spDocopl/findSpDocoplForPayBetweenDates?${new URLSearchParams(params).toString()}`)
+            },
+            findByDataDocBetween(params) {
+                return send('GET', `/oper/spDocoplRead/findByDataDocBetween?${new URLSearchParams(params).toString()}`)
+            },
             deleteSelectedPayments(params) {
-                return send('POST', `/oper/spDocopl/deletePayment?${new URLSearchParams(params).toString()}`)
+                return send('POST', `/oper/spDocopl/deletePayment`, params)
             },
             findById(id) {
                 return send('GET', `/oper/spDocopl/findById/${id}`)
             },
             save(params) {
                 return send('POST', `/oper/spDocopl/save`, params)
+            },
+            findSpDocoplForPayBetweenDates(params) {
+                return send('GET', `/oper/spDocopl/findSpDocoplForPayBetweenDates?${new URLSearchParams(params).toString()}`)
+            },
+            savePayment(params) {
+                return send('POST', `/oper/spDocopl/savePayment`, params)
+            },
+            saveSpDocch(params) {
+                return send('POST', `/oper/spDocopl/saveSpDocch`, params)
             }
         },
 
@@ -139,7 +167,16 @@ export const factory = send => ({
             },
             findForEdit(params) {
                 return send('GET', `/oper/depMoneyDistribution/findForEdit?${new URLSearchParams(params).toString()}`)
+            },
+            save(params) {
+                return send('POST', `/oper/depMoneyDistribution/save`, params)
             }
+        },
+
+        balanceOfPaymentAccount: {
+            save(params) {
+                return send('POST', `/oper/spOplat/save`, params)
+            },
         }
     }
 })

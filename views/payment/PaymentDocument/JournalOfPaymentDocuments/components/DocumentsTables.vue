@@ -120,8 +120,8 @@
 
         <v-menu
           v-model="payMenu"
-          :position-x="x"
-          :position-y="y"
+          :position-x="xToPayMenu"
+          :position-y="yToPayMenu"
           absolute
           offset-y
         >
@@ -187,6 +187,11 @@
         @save="savePaymentDocument"
       />
 
+      <payment-card-by-document
+        ref="paymentCardByDocument"
+        @close="closePaymentCardByDocument"
+      />
+
       <v-col
         class="journal-of-payment-docs-docs-from-pay-col journal-of-payment-docs-for-pay-col-5"
       >
@@ -217,6 +222,7 @@
           :items-per-page="5"
           :footer-props="{ itemsPerPageText: 'Количество строк на странице:' }"
           class="elevation-1 journal-of-payment-docs-docs-from-pay-table"
+          @contextmenu:row="showFromPayMenu"
         >
           <template
             slot="body.append"
@@ -235,6 +241,22 @@
             </tr>
           </template>
         </v-data-table>
+
+        <v-menu
+          v-model="fromPayMenu"
+          :position-x="xFromPayMenu"
+          :position-y="yFromPayMenu"
+          absolute
+          offset-y
+        >
+          <v-list>
+            <v-list-item @click="historyOfPaymentFromPaymentForContextMenuOnly">
+              <v-list-item-title>
+                История оплат
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-col>
 
       <v-col
@@ -308,6 +330,7 @@ import EditPaymentDocument from '@/views/payment/PaymentDocument/Modals/EditPaym
 import PaymentByCashbox from '@/views/payment/PaymentDocument/Modals/PaymentByCashbox'
 import InternalPayment from '@/views/payment/PaymentDocument/Modals/InternalPayment'
 import UserNotification from '@/views/special_components/information_window/UserNotification'
+import PaymentCardByDocument from '@/views/payment/PaymentDocument/Modals/PaymentCardByDocument'
 
 export default {
   name: 'JournalOfPaymentDocumentsDocumentsTables',
@@ -315,7 +338,8 @@ export default {
     EditPaymentDocument,
     PaymentByCashbox,
     InternalPayment,
-    UserNotification
+    UserNotification,
+    PaymentCardByDocument
   },
   data() {
     return {
@@ -429,11 +453,17 @@ export default {
       // Массив выбранных строк в таблице "Документы на оплату"
       fromPaySelectedRows: [],
 
-      // Контекстное меню
+      // Контекстное меню документов к оплате
       payMenu: false,
-      x: 0,
-      y: 0,
+      xToPayMenu: 0,
+      yToPayMenu: 0,
       currentRowForContextMenu: null,
+
+      // Контекстное меню документов на оплату
+      fromPayMenu: false,
+      xFromPayMenu: 0,
+      yFromPayMenu: 0,
+      currentRowForContextMenuOfFromPayDocument: null,
 
       // Отображение остатков ден. средств на выбранном расчетном счете
       paymentAccountInfo: 'Остаток на Р/С:',
@@ -610,13 +640,34 @@ export default {
     // Вызов контекстного меню таблицы "Документы к оплате"
     showPayMenu(event, item) {
       event.preventDefault()
+      // Закрываем контекстное меню таблицы "Документы на оплату", если оно открыто
+      this.fromPayMenu = false
+      this.currentRowForContextMenuOfFromPayDocument = null
+
       this.payMenu = false
       this.currentRowForContextMenu = null
-      this.x = event.clientX
-      this.y = event.clientY
+      this.xToPayMenu = event.clientX
+      this.yToPayMenu = event.clientY
       this.$nextTick(() => {
         this.payMenu = true
         this.currentRowForContextMenu = item.item
+      })
+    },
+
+    // Вызов контекстного меню таблицы "Документы на оплату"
+    showFromPayMenu(event, item) {
+      event.preventDefault()
+      // Закрываем контекстное меню таблицы "Документы к оплате", если оно открыто
+      this.payMenu = false
+      this.currentRowForContextMenu = null
+
+      this.fromPayMenu = false
+      this.currentRowForContextMenuOfFromPayDocument = null
+      this.xFromPayMenu = event.clientX
+      this.yFromPayMenu = event.clientY
+      this.$nextTick(() => {
+        this.fromPayMenu = true
+        this.currentRowForContextMenuOfFromPayDocument = item.item
       })
     },
 
@@ -626,9 +677,9 @@ export default {
       this.toPaySelectedRows = []
       this.toPaySelectedRows.push(selectedDoc)
 
+      // await this.$api.payment.docOplToPay.saveSpDocoplToPay(this.toPaySelectedRows)
       await this.$axios.$post('/oper/spDocopl/saveSpDocoplToPay', this.toPaySelectedRows)
-      // $api.payment.DocOplToPay.saveSpDocoplToPay(this.toPaySelectedRows)
-      //
+
       this.toPaySelectedRows = []
       this.refreshTables()
       this.$refs.userNotification.showUserNotification('success', 'Сумма оплаты сохранена')
@@ -640,7 +691,7 @@ export default {
       this.$refs.userNotification.showUserNotification('error', 'Сумма оплаты не была изменена')
     },
 
-    // Функции контекстного меню
+    // Функции контекстного меню таблицы документов к оплате
     // Вызов формы "Оплата по кассе"
     payedByCashboxForContextMenuOnly() {
       this.$refs.paymentByCashbox.editDocument(this.currentRowForContextMenu.docoplId, this.accId)
@@ -656,7 +707,6 @@ export default {
       console.log('internal movement')
     },
 
-    // Вызов формы "История оплат"
     historyOfPaymentForContextMenuOnly() {
       console.log('hisoty of payment')
     },
@@ -668,6 +718,26 @@ export default {
       this.deleteSelectedPayments()
       this.refreshTables()
       this.updateResPaymentAccountInfo()
+    },
+    async deleteSelectedPayments() {
+      if (this.toPaySelectedRows && this.toPaySelectedRows.length) {
+        const ids = this.toPaySelectedRows.map(value => value.id)
+        /* await this.$api.payment.docOplToPay.deleteSelectedPayments(ids).catch((error) => {
+          const errorMessage = error
+          alert(errorMessage)
+        }) */
+        await this.$axios.$post('/oper/spDocopl/deleteSelectedPayments', ids)
+
+        this.refreshTables()
+        this.updateResPaymentAccountInfo()
+      }
+    },
+
+    // Функции контекстного меню таблицы документов на оплату
+    // Вызов формы "История оплат"
+    historyOfPaymentFromPaymentForContextMenuOnly() {
+      this.$refs.paymentCardByDocument.openForm(this.currentRowForContextMenuOfFromPayDocument.id)
+      console.log('hisoty of payment from payment')
     },
 
     // Перемещение документа из таблицы "Документы на оплату" в таблицу "Документы к оплате" по нажатию на стрелку
@@ -689,8 +759,12 @@ export default {
 
         const ids = this.fromPaySelectedRows.map(value => value.id)
         const data = { ids, accId: this.accId }
+        /* await this.$api.payment.payDocument(data).catch((error) => {
+          const errorMessage = error
+          alert(errorMessage)
+        }) */
         await this.$axios.$post('/oper/spDocopl/payDocument', data)
-        // $api.payment.payDocument(data)
+
         this.refreshTables()
       }
     },
@@ -702,17 +776,6 @@ export default {
       return sum
     },
 
-    // Перемещение документа из таблицы "Документы к оплате" в таблицу "Документы на оплату" по нажатию на стрелку
-    async deleteSelectedPayments() {
-      if (this.toPaySelectedRows && this.toPaySelectedRows.length) {
-        const ids = this.toPaySelectedRows.map(value => value.id)
-        await this.$axios.$post('/oper/spDocopl/deleteSelectedPayments', ids)
-        // $api.payment.DocOplToPay.deleteSelectedPayments(ids)
-        this.refreshTables()
-        this.updateResPaymentAccountInfo()
-      }
-    },
-
     // Поиск документов для таблицы "Документы на оплату" по выбранной организации
     async findSpDocoplForPay() {
       const data = {
@@ -721,7 +784,7 @@ export default {
       }
 
       // TODO поменять на /oper/spDocopl/findSpDocoplForPayBetweenDates
-      this.fromPayData = await this.$api.payment.docOplForPay.findSpDocoplForPay(data)
+      this.fromPayData = await this.$api.payment.docOplForPay.findSpDocoplForPayBetweenDates(data)
       // $axios.$get('/meridian/oper/spDocopl/findSpDocoplForPay', { params: data })
       let totalSumDoc = 0
       let totalSumOplat = 0
@@ -774,8 +837,9 @@ export default {
         }
 
         const ids = this.fromPaySelectedRows.map(value => value.id)
+        // await this.$api.payment.DocOplForPay.deleteSelectedPayments(ids)
         await this.$axios.$post('/oper/spDocopl/deletePayment', ids)
-        // $api.payment.DocOplForPay.deleteSelectedPayments(ids)
+
         this.findSpDocoplForPay()
       }
     },
@@ -807,6 +871,11 @@ export default {
       console.log('open')
       this.findSpDocoplForPay()
       this.fromPaySelectedRows = []
+    },
+
+    // Обработка события "Закрытие модальной формы карточки оплат по документу"
+    closePaymentCardByDocument() {
+      console.log('close PaymentCardByDocument')
     },
 
     // Обработка события "Закрытие модальной формы оплаты по кассе"
