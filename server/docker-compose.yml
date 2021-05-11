@@ -13,7 +13,6 @@ services:
       DB_NAME: ${MONGO_INITDB_DATABASE}
     ports:
       - "${NODE_PORT}:3001"
-    entrypoint: ["wait-for-it", "-s" , "-t", "20", "mongodb:27017", "--"]
     command: [ "npm", "run", "start:server" ]
     restart: always
 
