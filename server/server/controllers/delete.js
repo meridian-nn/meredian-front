@@ -1,8 +1,27 @@
-import ChatMessageModel from '../models/ChatMessage.js';
-import makeValidation from '@withvoid/make-validation';
+import makeValidation from '@withvoid/make-validation'
+import ChatRoomModel from '../models/ChatRoom.js'
+import ChatMessageModel from '../models/ChatMessage.js'
 
 export default {
-  deleteMessageById: async (req, res) => {
+  deleteRoomById: async(req, res) => {
+    try {
+      const { roomId } = req.params
+      console.log(roomId)
+      const room = await ChatRoomModel.remove({ _id: roomId })
+      const messages = await ChatMessageModel.remove({ chatRoomId: roomId })
+
+      return res.status(200).json({
+        success: true,
+        message: 'Operation performed succesfully',
+        deletedRoomsCount: room.deletedCount,
+        deletedMessagesCount: messages.deletedCount
+      })
+    } catch (error) {
+      return res.status(500).json({ success: false, error })
+    }
+  },
+
+  deleteMessageById: async(req, res) => {
     try {
       const validation = makeValidation(types => ({
         payload: req.params,
@@ -14,20 +33,20 @@ export default {
             type: types.string
           }
         }
-      }));
-      if (!validation.success) return res.status(400).json({ ...validation });
+      }))
+      if (!validation.success) { return res.status(400).json({ ...validation }) }
 
-      const { messageId, roomId } = req.params;
-      const message = await ChatMessageModel.removeMessageById(messageId);
+      const { messageId, roomId } = req.params
+      const message = await ChatMessageModel.removeMessageById(messageId)
 
-      global.io.sockets.in(roomId).emit('remove message', messageId);
+      global.io.sockets.in(roomId).emit('remove message', messageId)
 
       return res.status(200).json({
-        success: true, 
-        deletedMessagesCount: message.deletedCount,
-      });
+        success: true,
+        deletedMessagesCount: message.deletedCount
+      })
     } catch (error) {
-      return res.status(500).json({ success: false, error: error })
+      return res.status(500).json({ success: false, error })
     }
-  },
+  }
 }

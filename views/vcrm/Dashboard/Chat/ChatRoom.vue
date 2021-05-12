@@ -1,5 +1,6 @@
 <template>
   <v-responsive
+    v-if="messageTo"
     class="overflow-y-hidden fill-height chat-room"
     height="500"
   >
@@ -44,7 +45,6 @@
 
 <script>
 import debounce from 'lodash/debounce'
-import { io } from 'socket.io-client'
 import ChatMessage from './ChatMessage'
 export default {
   name: 'ChatRoom',
@@ -59,6 +59,10 @@ export default {
       default: 1
     },
 
+    socket: {
+      required: true
+    },
+
     messageTo: {
       type: Object,
       default: () => {}
@@ -66,7 +70,6 @@ export default {
   },
 
   data: () => ({
-    socket: io(process.env.API_HOST_SOCKET),
     roomInfo: null,
     messagesList: [],
     form: {
@@ -76,14 +79,18 @@ export default {
 
   watch: {
     messageTo: {
-      async handler() {
-        await this.getRoomInfo()
+      async handler(value) {
+        if (value) {
+          await this.getRoomInfo()
 
-        this.socket.emit('init', this.roomInfo._id)
+          this.socket.emit('init', this.roomInfo._id)
 
-        await this.markMessageRead(this.roomInfo._id)
+          await this.markMessageRead(this.roomInfo._id)
 
-        this.getMessage(this.roomInfo._id)
+          await this.getMessage(this.roomInfo._id)
+
+          this.$nextTick(() => this.scrollToBottom())
+        }
       },
 
       deep: true
@@ -94,7 +101,9 @@ export default {
     this.socket.on('new message', (post) => {
       this.messagesList.push(post)
 
-      this.$nextTick(() => this.scrollToBottom())
+      setTimeout(() => {
+        this.$nextTick(() => this.scrollToBottom())
+      }, 0)
     })
 
     this.socket.on('remove message', (id) => {
@@ -189,7 +198,7 @@ export default {
     },
 
     scrollToBottom() {
-      const scrollbar = this.$refs.scrollbar.$el
+      const scrollbar = this.$refs.scrollbar
 
       if (scrollbar && scrollbar.scrollHeight >= scrollbar.scrollTop + scrollbar.clientHeight) {
         scrollbar.scrollTop = scrollbar.scrollHeight

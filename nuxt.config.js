@@ -1,37 +1,36 @@
-/* eslint-disable */
 import path from 'path'
 require('dotenv').config({
-    path: path.resolve(__dirname, 'config', '.env')
+  path: path.resolve(__dirname, 'config', '.env')
 })
 
 export default {
-    ssr: false,
+  ssr: false,
 
-    env: {
-        USER: process.env.USER,
-        PASSWORD: process.env.PASSWORD,
-        API_HOST_SOCKET: process.env.API_HOST_SOCKET,
-        API_HOST: process.env.API_HOST,
-        YM_ENV: process.env.YM_ENV
+  env: {
+    USER: process.env.USER,
+    PASSWORD: process.env.PASSWORD,
+    API_HOST_SOCKET: process.env.API_HOST_SOCKET,
+    API_HOST: process.env.API_HOST,
+    YM_ENV: process.env.YM_ENV
+  },
+
+  head: {
+    titleTemplate: '%s - foxPro',
+    title: 'foxPro',
+    htmlAttrs: {
+      lang: 'en'
     },
+    meta: [
+      { charset: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { hid: 'description', name: 'description', content: '' }
+    ],
+    link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
+  },
 
-    head: {
-        titleTemplate: '%s - foxPro',
-        title: 'foxPro',
-        htmlAttrs: {
-            lang: 'en'
-        },
-        meta: [
-            { charset: 'utf-8' },
-            { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-            { hid: 'description', name: 'description', content: '' }
-        ],
-        link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
-    },
+  css: [],
 
-    css: [],
-
-    components: true,
+  components: true,
 
     plugins: [
         '~/plugins/axios',

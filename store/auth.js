@@ -33,7 +33,6 @@ export default {
     },
 
     saveAuthToken(_, token) {
-      console.log('test')
       Cookies.set('JWTmeredian', token)
     },
 
