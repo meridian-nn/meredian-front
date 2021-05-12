@@ -417,7 +417,6 @@ export default {
         orgId: this.selectedOrganization
       }
 
-      // TODO поменять на /oper/spDocopl/findSpDocoplForPayBetweenDates
       this.fromPayData = await this.$api.payment.docOplForPay.findSpDocoplForPayBetweenDates(data)
       // $axios.$get('/meridian/oper/spDocopl/findSpDocoplForPay', { params: data })
       let totalSumDoc = 0
@@ -434,18 +433,51 @@ export default {
     },
 
     async findToPay(val) {
-      const data = {
-        dateDoc: new Date(this.date).toLocaleDateString(),
-        accId: val,
-        orgId: this.selectedOrganization
-      }
-      this.toPayData = await this.$api.payment.docOplToPay.findSpDocoplToPay(data)
+      const data = this.createCriteriasForRequest(val, this.selectedOrganization)
+      this.toPayData = await this.$api.payment.docOplToPay.findDocumentsByCriterias(data)
       let totalToSumOplat = 0
       this.toPayData.forEach((value) => {
         totalToSumOplat += value.sumOplat
       })
       this.totalToSumOplat = totalToSumOplat.toFixed(2)
       this.updatePaymentAccountInfo(val)
+    },
+    createCriteriasForRequest(accId, orgId) {
+      const secDate = new Date(this.date)
+      const curDateNum = secDate.getDate()
+      secDate.setDate(curDateNum + 1)
+      const data = [
+        {
+          'dataType': 'INTEGER',
+          'key': 'accId',
+          'operation': 'EQUALS',
+          'type': 'AND',
+          'values':
+          [
+            accId
+          ]
+        },
+        {
+          'dataType': 'INTEGER',
+          'key': 'platId',
+          'operation': 'EQUALS',
+          'type': 'AND',
+          'values':
+          [
+            orgId
+          ]
+        },
+        {
+          'dataType': 'DATE',
+          'key': 'dataOplat',
+          'operation': 'BETWEEN',
+          'type': 'AND',
+          'values': [
+            new Date(this.date).toLocaleDateString(), secDate.toLocaleDateString()
+          ]
+        }
+      ]
+      return data
     },
 
     organizationChange(val) {
@@ -472,7 +504,8 @@ export default {
     },
 
     async updateResPaymentAccountInfo() {
-      const balanceOfSelectedOrganization = this.orgAccInfoData[0]['org' + this.selectedOrganization + 'Value']
+      let balanceOfSelectedOrganization = this.orgAccInfoData[0]['org' + this.selectedOrganization + 'Value']
+      balanceOfSelectedOrganization = balanceOfSelectedOrganization === undefined ? 0 : balanceOfSelectedOrganization
       const balanceOfOtherAccounts = await this.getBalanceOfOtherAccounts()
 
       this.restPaymentAccountInfo = 'Остаток на Р/Счетах: ' + ((balanceOfSelectedOrganization - balanceOfOtherAccounts).toFixed(2))
@@ -494,15 +527,9 @@ export default {
     },
 
     async getSumToPayDocsOfOrgByAccId(accId) {
-      const data = {
-        dateDoc: new Date(this.date).toLocaleDateString(),
-        accId,
-        orgId: this.selectedOrganization
-      }
-
+      const data = this.createCriteriasForRequest(accId, this.selectedOrganization)
       let totalToSumOplat = 0
-      const response = await this.$api.payment.docOplToPay.findSpDocoplToPay(data)
-      // $axios.$get('/meridian/oper/spDocopl/findSpDocoplToPay', { params: data })
+      const response = await this.$api.payment.docOplToPay.findDocumentsByCriterias(data)
       response.forEach((value) => {
         totalToSumOplat += value.sumOplat
       })
@@ -518,10 +545,18 @@ export default {
       }
 
       const data = {
-        dateOplat: new Date().toLocaleDateString(),
+        dateOplat: new Date(this.date).toLocaleDateString(),
         orgId: this.selectedOrganization
       }
       const response = await this.$api.paymentAccounts.findByDataOplatAndMyOrgId(data)
+
+      if (response.length === 0) {
+        this.paymentAccountInfo = 'Остаток на Р/С: '
+        this.currentPaymentAccountBalance = 0
+        this.currentPaymentAccountBalanceLessThenZero = false
+        return
+      }
+
       const responseElement = response.find(el => el.acc.id === accId)
       const saldo = responseElement.saldo
 
