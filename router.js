@@ -80,50 +80,52 @@ const createRouterConst = new Router({
 
     scrollBehavior,
 
-    routes: [{
-            path: '/meridian',
-            component: VcrmPage,
-            children: [{
-                path: 'dashboard',
-                name: 'Dashboard',
-                component: DashboardPage,
-                children: [{
-                        path: 'gtin',
-                        name: 'GtinPage',
-                        component: GtinPage,
-                        meta: {
-                            breadcrumb: [
-                                { text: 'Профиль', disabled: false, href: 'Dashboard' },
-                                { text: 'Журнал GTIN', disabled: true, href: 'GtinPage' }
-                            ]
-                        }
-                    },
-                    {
-                        path: 'mark',
-                        name: 'MarkPage',
-                        component: MarkPage,
-                        meta: {
-                            breadcrumb: [
-                                { text: 'Профиль', disabled: false, href: 'Dashboard' },
-                                { text: 'Журнал Кодов Маркировки', disabled: true, href: 'MarkPage' }
-                            ]
-                        }
-                    },
-
-                    {
-                        path: 'chat',
-                        name: 'ChatPage',
-                        component: ChatPage,
-                        meta: {
-                            breadcrumb: [
-                                { text: 'Профиль', disabled: false, href: 'Dashboard' },
-                                { text: 'Чат', disabled: true, href: 'ChatPage' }
-                            ]
-                        }
-                    }
-                ],
-            }]
-        },
+    routes: [   {
+      path: '/meridian',
+      component: VcrmPage,
+      children: [
+        {
+          path: 'dashboard',
+          name: 'Dashboard',
+          component: DashboardPage,
+          children: [
+            {
+              path: 'gtin',
+              name: 'GtinPage',
+              component: GtinPage,
+              meta: {
+                breadcrumb: [
+                  { text: 'Профиль', disabled: false, href: 'Dashboard' },
+                  { text: 'Журнал GTIN', disabled: true, href: 'GtinPage' }
+                ]
+              }
+            },
+            {
+              path: 'mark',
+              name: 'MarkPage',
+              component: MarkPage,
+              meta: {
+                breadcrumb: [
+                  { text: 'Профиль', disabled: false, href: 'Dashboard' },
+                  { text: 'Журнал Кодов Маркировки', disabled: true, href: 'MarkPage' }
+                ]
+              }
+            },
+            {
+              path: 'chat',
+              name: 'ChatPage',
+              component: ChatPage,
+              meta: {
+                breadcrumb: [
+                  { text: 'Профиль', disabled: false, href: 'Dashboard' },
+                  { text: 'Чат', disabled: true, href: 'ChatPage' }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
         {
             path: '/meridian/payment_menu',
             component: VcrmPage,
