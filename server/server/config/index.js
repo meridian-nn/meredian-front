@@ -1,7 +1,7 @@
 const config = {
   db: {
-    url: 'localhost:27017',
-    name: 'chatdb'
+    url: process.env.DB_USER + ':' + process.env.DB_PASSWORD +'@' + process.env.DB_HOST + ':' + process.env.DB_PORT,
+    name: process.env.DB_NAME
   }
 }
 
