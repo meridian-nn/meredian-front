@@ -367,7 +367,7 @@ export default {
         },
         {
           text: 'Дата',
-          value: 'dataCreate'
+          value: 'dataOplat'
         },
         {
           text: 'Номер',
@@ -623,18 +623,57 @@ export default {
 
     // Поиск документов к оплате по выбранному расчетному счету организации
     async findToPay(val) {
-      const data = {
+      /* const data = {
         dateDoc: new Date().toLocaleDateString(),
         accId: val,
         orgId: this.selectedOrganization
-      }
-      this.toPayData = await this.$api.payment.docOplToPay.findSpDocoplToPay(data)
+      } */
+      const data = this.createCriteriasForRequest(val, this.selectedOrganization)
+      this.toPayData = await this.$api.payment.docOplToPay.findDocumentsByCriterias(data)
       let totalToSumOplat = 0
       this.toPayData.forEach((value) => {
         totalToSumOplat += value.sumOplat
       })
-      this.totalToSumOplat = totalToSumOplat
+      this.totalToSumOplat = totalToSumOplat.toFixed(2)
       this.updatePaymentAccountInfo(val)
+    },
+    createCriteriasForRequest(accId, orgId) {
+      const secDate = new Date()
+      const curDateNum = secDate.getDate()
+      secDate.setDate(curDateNum + 1)
+      console.log(secDate)
+      const data = [
+        {
+          'dataType': 'INTEGER',
+          'key': 'accId',
+          'operation': 'EQUALS',
+          'type': 'AND',
+          'values':
+          [
+            accId
+          ]
+        },
+        {
+          'dataType': 'INTEGER',
+          'key': 'platId',
+          'operation': 'EQUALS',
+          'type': 'AND',
+          'values':
+          [
+            orgId
+          ]
+        },
+        {
+          'dataType': 'DATE',
+          'key': 'dataOplat',
+          'operation': 'BETWEEN',
+          'type': 'AND',
+          'values': [
+            new Date().toLocaleDateString(), secDate.toLocaleDateString()
+          ]
+        }
+      ]
+      return data
     },
 
     // Вызов контекстного меню таблицы "Документы к оплате"
@@ -794,9 +833,9 @@ export default {
         totalSumOplat += value.sumOplat
         totalSumOplach += value.sumOplach
       })
-      this.totalSumDoc = totalSumDoc
-      this.totalSumOplat = totalSumOplat
-      this.totalSumOplach = totalSumOplach
+      this.totalSumDoc = totalSumDoc.toFixed(2)
+      this.totalSumOplat = totalSumOplat.toFixed(2)
+      this.totalSumOplach = totalSumOplach.toFixed(2)
     },
 
     // Обновление списка документов на оплату при изменении даты

@@ -428,9 +428,9 @@ export default {
         totalSumOplat += value.sumOplat
         totalSumOplach += value.sumOplach
       })
-      this.totalSumDoc = totalSumDoc
-      this.totalSumOplat = totalSumOplat
-      this.totalSumOplach = totalSumOplach
+      this.totalSumDoc = totalSumDoc.toFixed(2)
+      this.totalSumOplat = totalSumOplat.toFixed(2)
+      this.totalSumOplach = totalSumOplach.toFixed(2)
     },
 
     async findToPay(val) {
@@ -444,7 +444,7 @@ export default {
       this.toPayData.forEach((value) => {
         totalToSumOplat += value.sumOplat
       })
-      this.totalToSumOplat = totalToSumOplat
+      this.totalToSumOplat = totalToSumOplat.toFixed(2)
       this.updatePaymentAccountInfo(val)
     },
 

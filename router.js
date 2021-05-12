@@ -61,6 +61,9 @@ const InputOfBalancesPage = dynamicPage(() =>
 const PaymentBudgetByDepartmentsPage = dynamicPage(() =>
     import ('~/views/payment/PaymentBudgetByDepartments'))
 
+const RegisterOfDocumentsToPayPage = dynamicPage(() =>
+    import ('~/views/payment/RegisterOfDocumentsToPay'))
+
 const GtinPage = dynamicPage(() =>
     import ('~/views/vcrm/Dashboard/Gtin'))
 
@@ -205,6 +208,15 @@ const createRouterConst = new Router({
                 path: '',
                 name: 'PaymentBudgetByDepartments',
                 component: PaymentBudgetByDepartmentsPage
+            }]
+        },
+        {
+            path: '/meridian/register_of_documents_to_pay',
+            component: VcrmPage,
+            children: [{
+                path: '',
+                name: 'RegisterOfDocumentsToPay',
+                component: RegisterOfDocumentsToPayPage
             }]
         },
         {

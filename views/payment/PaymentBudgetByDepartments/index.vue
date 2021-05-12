@@ -29,7 +29,6 @@
             <v-text-field
               v-model="startDate"
               type="date"
-              @input="init"
             />
           </div>
 
@@ -46,7 +45,6 @@
             <v-text-field
               v-model="endDate"
               type="date"
-              @input="init"
             />
           </div>
 
@@ -67,7 +65,7 @@
             <v-subheader class="font-weight-medium text-subtitle-1">
               История оплаты
             </v-subheader>
-            <div id="groupByDate">
+            <div id="paymentBudgetByDepGroupByDate">
               <v-client-table
                 v-model="groupByDate"
                 :columns="groupByDateColumns"
@@ -90,7 +88,7 @@
             <v-subheader class="font-weight-medium text-subtitle-1">
               История оплаты по подразделениям
             </v-subheader>
-            <div id="groupByDep">
+            <div id="paymentBudgetByDepGroupByDep">
               <v-client-table
                 v-model="groupByDep"
                 :columns="groupByDepColumns"
@@ -119,7 +117,7 @@ export default {
 
       // Таблица для отображения инфрмации о итогах по документам на оплату в разрезе по дням
       groupByDate: [],
-      groupByDateColumns: ['dataDoc', 'sumDoc', 'sumOplach'],
+      groupByDateColumns: ['dataOplat', 'sumDoc', 'sumOplach'],
       groupByDateOptions: {
         filterable: false,
         pagination: { show: false },
@@ -128,13 +126,14 @@ export default {
         perPage: 100,
         perPageValues: [100],
         headings: {
-          dataDoc: 'Дата документа',
+          dataOplat: 'Дата оплаты',
           sumDoc: 'План',
           sumOplach: 'Факт'
         }
       },
 
       arrayForStashAllGroupsByDep: [],
+
       // Таблица для отображения инфрмации о итогах по документам на оплату в разрезе по подразделениям
       groupByDep: [],
       groupByDepColumns: ['dep', 'sumFact', 'prim'],
@@ -168,52 +167,82 @@ export default {
     async findDocOplInPeriod() {
       if (this.startDate > this.endDate) {
         this.$refs.userNotification.showUserNotification('error', 'Начальная дата выбранного периода не может быть больше конечной даты выбранного периода!')
+        return
       }
+
+      this.$refs.userNotification.showUserNotification('warning', 'Поиск документов')
+
+      this.reset()
+      const groupByDate = []
+      const groupByDep = []
 
       const data = {
         finishDate: new Date(this.endDate).toLocaleDateString(),
         startDate: new Date(this.startDate).toLocaleDateString()
       }
 
-      const groupByDate = []
-      const groupByDep = []
-      const response = await this.$api.payment.docOplForPay.findSpDocoplForPayBetweenParamDates(data)
-      response.forEach((value) => {
-        let record = groupByDate.find(item => item.dataDoc === value.dataDoc)
+      const response = await this.$api.payment.docOplForPay.findByDataOplatBetweenParamDates(data)
+      for (const value of response) {
+        if (value.departmentId === null) {
+          continue
+        }
+
+        let record = groupByDate.find(item => item.dataOplat === value.dataOplat)
+        const sumOplach = value.sumPaid === null ? 0 : value.sumPaid
+        const depName = await this.findDepDocById(value.departmentId)
         if (record === undefined) {
           record = {
-            dataDoc: value.dataDoc,
+            dataOplat: value.dataOplat,
             sumDoc: value.sumDoc,
-            sumOplach: value.sumOplach
+            sumOplach
           }
           groupByDate.push(record)
         } else {
           record.sumDoc += value.sumDoc
-          record.sumOplach += value.sumOplach
+          record.sumOplach += sumOplach
         }
 
-        let recordDep = groupByDep.find(item => item.dataDoc === value.dataDoc && item.dep === value.depName)
+        let recordDep = groupByDep.find(item => item.dataOplat === value.dataOplat && item.dep === depName)
         if (recordDep === undefined) {
           recordDep = {
-            dataDoc: value.dataDoc,
-            dep: value.depName,
-            sumFact: value.sumOplach,
+            dataOplat: value.dataOplat,
+            dep: depName,
+            sumFact: sumOplach,
             prim: value.prim
           }
           groupByDep.push(recordDep)
         } else {
-          recordDep.sumFact += value.sumOplach
+          recordDep.sumFact += sumOplach
         }
-      })
+      }
 
       this.arrayForStashAllGroupsByDep = groupByDep
       this.groupByDate = groupByDate
-      // const response = this.
+      if (this.groupByDate.length > 0) {
+        this.$refs.userNotification.showUserNotification('success', 'Документы найдены')
+      } else {
+        this.$refs.userNotification.showUserNotification('warning', 'В указанном периоде документы не найдены')
+      }
+    },
+
+    reset() {
+      this.groupByDate = []
+      this.groupByDep = []
+      this.arrayForStashAllGroupsByDep = []
+    },
+
+    async findDepDocById(departmentId) {
+      const data = {
+        departmentId
+      }
+
+      const response = await this.$api.payment.moneyDistributionByDepartments.findByDepartmentId(data)
+      return response.department.nameViddoc
     },
 
     findGroupByDep(item) {
       console.log(item.row)
-      const groupByDep = this.arrayForStashAllGroupsByDep.filter(record => record.dataDoc === item.row.dataDoc)
+      const groupByDep = this.arrayForStashAllGroupsByDep.filter(record => record.dataOplat === item.row.dataOplat)
       this.groupByDep = groupByDep
     }
   }
@@ -226,57 +255,58 @@ export default {
     margin-top: 9px;
 }
 
-#groupByDate {
-  border-collapse: collapse;
-  width: 100%;
-}
-#groupByDate table{
-  width: 100%
-}
-#groupByDate td, #groupByDate th {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-#groupByDate tr:nth-child(even){background-color: #f2f2f2;}
-
-#groupByDate tr:hover {background-color: #ddd;}
-
-#groupByDate th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: left;
-  background-color: #639db1 !important;
-  color: white;
-}
-
-#groupByDep {
-  border-collapse: collapse;
-  width: 100%;
-}
-#groupByDep table{
-  width: 100%
-}
-#groupByDep td, #groupByDep th {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-#groupByDep tr:nth-child(even){background-color: #f2f2f2;}
-
-#groupByDep tr:hover {background-color: #ddd;}
-
-#groupByDep th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: left;
-  background-color: #639db1 !important;
-  color: white;
-}
-
 .payment-budget-by-dep-col-2 {
     padding: 16px;
     flex: 0 0 12%;
     max-width: 12%;
 }
+
+#paymentBudgetByDepGroupByDate {
+  border-collapse: collapse;
+  width: 100%;
+}
+#paymentBudgetByDepGroupByDate table{
+  width: 100%
+}
+#paymentBudgetByDepGroupByDate td, #paymentBudgetByDepGroupByDate th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#paymentBudgetByDepGroupByDate tr:nth-child(even){background-color: #f2f2f2;}
+
+#paymentBudgetByDepGroupByDate tr:hover {background-color: #ddd;}
+
+#paymentBudgetByDepGroupByDate th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #639db1 !important;
+  color: white;
+}
+
+#paymentBudgetByDepGroupByDep {
+  border-collapse: collapse;
+  width: 100%;
+}
+#paymentBudgetByDepGroupByDep table{
+  width: 100%
+}
+#paymentBudgetByDepGroupByDep td, #paymentBudgetByDepGroupByDep th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#paymentBudgetByDepGroupByDep tr:nth-child(even){background-color: #f2f2f2;}
+
+#paymentBudgetByDepGroupByDep tr:hover {background-color: #ddd;}
+
+#paymentBudgetByDepGroupByDep th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #639db1 !important;
+  color: white;
+}
+
 </style>

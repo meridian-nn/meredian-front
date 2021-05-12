@@ -117,12 +117,60 @@ export const factory = send => ({
             findSpDocoplToPay(params) {
                 return send('GET', `/oper/spDocopl/findSpDocoplToPay?${new URLSearchParams(params).toString()}`)
             },
+
             findDocToPayByDocoplForPay(params) {
                 return send('GET', `/oper/spDocopl/findDocToPayByDocoplForPay?${new URLSearchParams(params).toString()}`)
             },
+
+            /*
+                Производит поиск документов на оплату по заданным параметрам
+                Пример передаваемых параметров 
+                {
+                    "dataType": "VARCHAR",
+                    "key": "nameDoc",
+                    "operation": "EQUALS",
+                    "type": "AND",
+                    "values": [
+                        "583"
+                    ]
+	            }
+            */
+            findDocumentsByCriteria(params) {
+                return send('POST', `/oper/spDocoplToPay/findBySearchCriteria`, params)
+            },
+
+            /*
+            Производит поиск документов на оплату по заданным параметрам
+            Пример передаваемых параметров 
+            [
+                {
+                    "dataType": "DATE",
+                    "key": "dataOplat",
+                    "operation": "BETWEEN",
+                    "type": "AND",
+                    "values": [
+                        "01.05.2021", "09.05.2021"
+                    ]
+                },
+                {
+                    "dataType": "VARCHAR",
+                    "key": "nameDoc",
+                    "operation": "EQUALS",
+                    "type": "AND",
+                    "values": [
+                        "583"
+                    ]
+	            }
+            ]
+            */
+            findDocumentsByCriterias(params) {
+                return send('POST', `/oper/spDocoplToPay/findBySearchCriterias`, params)
+            },
+
             saveSpDocoplToPay(params) {
                 return send('POST', `/oper/spDocopl/saveSpDocoplToPay`, params)
             },
+
             deleteSelectedPayments(params) {
                 return send('POST', `/oper/spDocopl/deleteSelectedPayments`, params)
             }
@@ -132,27 +180,81 @@ export const factory = send => ({
             findSpDocoplForPay(params) {
                 return send('GET', `/oper/spDocopl/findSpDocoplForPay?${new URLSearchParams(params).toString()}`)
             },
-            findSpDocoplForPayBetweenParamDates(params) {
-                return send('GET', `/oper/spDocopl/findSpDocoplForPayBetweenDates?${new URLSearchParams(params).toString()}`)
-            },
-            findByDataDocBetween(params) {
-                return send('GET', `/oper/spDocoplRead/findByDataDocBetween?${new URLSearchParams(params).toString()}`)
-            },
-            deleteSelectedPayments(params) {
-                return send('POST', `/oper/spDocopl/deletePayment`, params)
-            },
-            findById(id) {
-                return send('GET', `/oper/spDocopl/findById/${id}`)
-            },
-            save(params) {
-                return send('POST', `/oper/spDocopl/save`, params)
-            },
+
+            //Производит поиск документов на оплату, у которых переданная в параметре запроса дата находится в промежутке между data_doc и data_oplat
             findSpDocoplForPayBetweenDates(params) {
                 return send('GET', `/oper/spDocopl/findSpDocoplForPayBetweenDates?${new URLSearchParams(params).toString()}`)
             },
+
+            //Производит поиск документов на оплату, у которых data_doc находится в промеждутке между startDate и finishDate, которые переданы в параметрах запроса
+            findByDataDocBetweenParamDates(params) {
+                return send('GET', `/oper/spDocoplRead/findByDataDocBetween?${new URLSearchParams(params).toString()}`)
+            },
+
+            //Производит поиск документов на оплату, у которых data_oplat находится в промеждутке между startDate и finishDate, которые переданы в параметрах запроса
+            findByDataOplatBetweenParamDates(params) {
+                return send('GET', `/oper/spDocoplRead/findByDataOplatBetween?${new URLSearchParams(params).toString()}`)
+            },
+
+            /*
+            Производит поиск документов на оплату по заданным параметрам
+            Пример передаваемых параметров 
+            {
+                "dataType": "VARCHAR",
+                "key": "nameDoc",
+                "operation": "EQUALS",
+                "type": "AND",
+                "values": [
+                    "583"
+                ]
+	        }*/
+            findDocumentsByCriteria(params) {
+                return send('POST', `/oper/spDocopl/findBySearchCriteria`, params)
+            },
+
+            /*
+            Производит поиск документов на оплату по заданным параметрам
+            Пример передаваемых параметров 
+            [
+                {
+                    "dataType": "DATE",
+                    "key": "dataOplat",
+                    "operation": "BETWEEN",
+                    "type": "AND",
+                    "values": [
+                        "01.05.2021", "09.05.2021"
+                    ]
+                },
+                {
+                    "dataType": "INTEGER",
+                    "key": "myorgId",
+                    "operation": "EQUALS",
+                    "type": "AND",
+                    "values": [
+                        "123"
+                    ]
+                }
+            ]*/
+            findDocumentsByCriterias(params) {
+                return send('POST', `/oper/spDocopl/findBySearchCriterias`, params)
+            },
+
+            deleteSelectedPayments(params) {
+                return send('POST', `/oper/spDocopl/deletePayment`, params)
+            },
+
+            findById(id) {
+                return send('GET', `/oper/spDocopl/findById/${id}`)
+            },
+
+            save(params) {
+                return send('POST', `/oper/spDocopl/save`, params)
+            },
+
             savePayment(params) {
                 return send('POST', `/oper/spDocopl/savePayment`, params)
             },
+
             saveSpDocch(params) {
                 return send('POST', `/oper/spDocopl/saveSpDocch`, params)
             }

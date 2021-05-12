@@ -173,7 +173,7 @@ export default {
       toPayHeaders: [
         {
           text: 'Дата',
-          value: 'dataCreate'
+          value: 'dataOplat'
         },
         {
           text: 'Сумма оплаты',
