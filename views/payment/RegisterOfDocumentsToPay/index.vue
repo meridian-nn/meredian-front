@@ -1,81 +1,75 @@
 <template>
-  <v-card>
-    <v-card-text>
-      <v-container class="register-of-docs-to-pay-container">
-        <v-row>
-          <v-col cols="12">
-            <div
-              align="center"
-              class="headline"
-            >
-              Реестр документов к оплате
-            </div>
-          </v-col>
-        </v-row>
+  <div class="register-of-docs-to-pay-main-div">
+    <div class="register-of-docs-to-pay-row">
+      <v-col cols="12">
+        <div
+          align="center"
+          class="register-of-docs-to-pay-headline"
+        >
+          Реестр документов к оплате
+        </div>
+      </v-col>
+    </div>
 
-        <v-row>
-          <v-col cols="3" />
+    <div class="register-of-docs-to-pay-row">
+      <v-col cols="3" />
 
-          <v-col cols="1">
-            <div
-              align="center"
-              class="headline register-of-docs-to-pay-header"
-            >
-              Дата: с
-            </div>
-          </v-col>
+      <v-col cols="1">
+        <div
+          align="center"
+          class="register-of-docs-to-pay-header"
+        >
+          Дата: с
+        </div>
+      </v-col>
 
-          <div class="register-of-docs-to-pay-col-2">
-            <v-text-field
-              v-model="startDate"
-              type="date"
-            />
-          </div>
+      <div class="register-of-docs-to-pay-col-2">
+        <v-text-field
+          v-model="startDate"
+          type="date"
+        />
+      </div>
 
-          <v-col cols="1">
-            <div
-              align="center"
-              class="headline register-of-docs-to-pay-header"
-            >
-              по
-            </div>
-          </v-col>
+      <v-col cols="1">
+        <div
+          align="center"
+          class="register-of-docs-to-pay-header"
+        >
+          по
+        </div>
+      </v-col>
 
-          <div class="register-of-docs-to-pay-col-2">
-            <v-text-field
-              v-model="endDate"
-              type="date"
-            />
-          </div>
+      <div class="register-of-docs-to-pay-col-2">
+        <v-text-field
+          v-model="endDate"
+          type="date"
+        />
+      </div>
 
-          <div class="register-of-docs-to-pay-col-2">
-            <v-btn
-              class="register-of-docs-to-pay-header"
-              @click="findDocsToPayInPeriod"
-            >
-              Найти
-            </v-btn>
-          </div>
+      <div class="register-of-docs-to-pay-col-2">
+        <v-btn
+          class="register-of-docs-to-pay-button"
+          @click="findDocsToPayInPeriod"
+        >
+          Найти
+        </v-btn>
+      </div>
 
-          <v-col cols="1" />
-        </v-row>
+      <v-col cols="1" />
+    </div>
 
-        <v-row>
-          <v-col cols="12">
-            <div id="registerOfDocsToPayGroupByDate">
-              <v-client-table
-                v-model="groupByDate"
-                :columns="groupByDateColumns"
-                :options="groupByDateOptions"
-              />
-            </div>
-          </v-col>
-        </v-row>
+    <div class="register-of-docs-to-pay-row">
+      <div id="registerOfDocsToPayGroupByDate">
+        <v-client-table
+          v-model="groupByDate"
+          :columns="groupByDateColumns"
+          :options="groupByDateOptions"
+        />
+      </div>
+    </div>
 
-        <user-notification ref="userNotification" />
-      </v-container>
-    </v-card-text>
-  </v-card>
+    <user-notification ref="userNotification" />
+  </div>
 </template>
 
 <script>
@@ -179,10 +173,42 @@ export default {
 </script>
 
 <style lang="scss">
-.register-of-docs-to-pay-header {
-    padding-top: 12px;
-    margin-top: 9px;
+.register-of-docs-to-pay-main-div {
+  padding:10px
 }
+
+.register-of-docs-to-pay-row {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  margin: 0px;
+}
+
+.register-of-docs-to-pay-headline {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 1.5rem !important;
+  font-weight: 400;
+  line-height: 2rem;
+  letter-spacing: normal !important;
+  font-family: "Roboto", sans-serif !important;
+}
+
+.register-of-docs-to-pay-header {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 1.5rem !important;
+  font-weight: 400;
+  line-height: 2rem;
+  letter-spacing: normal !important;
+  font-family: "Roboto", sans-serif !important;
+  padding-top: 12px;
+  margin-top: 9px;
+}
+
+.register-of-docs-to-pay-button {
+  padding-top: 12px;
+  margin-top: 15px;
+}
+
 .register-of-docs-to-pay-col-2 {
     padding: 16px;
     flex: 0 0 12%;
@@ -198,7 +224,7 @@ export default {
 }
 #registerOfDocsToPayGroupByDate td, #registerOfDocsToPayGroupByDate th {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 0px;
 }
 
 #registerOfDocsToPayGroupByDate tr:nth-child(even){background-color: #f2f2f2;}

@@ -1,10 +1,10 @@
 <template>
   <div
-    name="journal-of-payment-documents-documents-tables"
-    class="journal-of-payment-documents-documents-tables"
+    name="journal-of-payment-docs-documents-tables"
+    class="journal-of-payment-docs-documents-tables"
   >
-    <v-row>
-      <v-col cols="5">
+    <div class="journal-of-payment-docs-row">
+      <div class="journal-of-payment-docs-list-of-orgs">
         <v-autocomplete
           label="Организация"
           :loading="loadingType.organizations"
@@ -13,315 +13,318 @@
           item-text="clName"
           @change="organizationChange"
         />
-      </v-col>
-      <v-col cols="7">
-        <div>
-          <span class="headline">{{ restPaymentAccountInfo }}</span>
-        </div>
-      </v-col>
-    </v-row>
+      </div>
 
-    <v-row>
-      <v-col cols="5">
-        <v-autocomplete
-          v-model="accId"
-          label="Расч. счёт"
-          :loading="loadingType.paymentAccounts"
-          :items="paymentAccounts"
-          item-value="id"
-          item-text="shortName"
-          @change="paymentAccountChange"
+      <div class="journal-of-payment-docs-org-payment-accounts-info">
+        <div>
+          <span class="journal-of-payment-docs-headline">{{ restPaymentAccountInfo }}</span>
+        </div>
+        </v-col>
+      </div>
+
+      <div class="journal-of-payment-docs-row">
+        <div class="journal-of-payment-docs-list-of-payment-accounts-of-org">
+          <v-autocomplete
+            v-model="accId"
+            label="Расч. счёт"
+            :loading="loadingType.paymentAccounts"
+            :items="paymentAccounts"
+            item-value="id"
+            item-text="shortName"
+            @change="paymentAccountChange"
+          />
+        </div>
+
+        <div class="journal-of-payment-docs-chousen-payment-account-info">
+          <div>
+            <span
+              class="journal-of-payment-docs-headline"
+              :class="{'journal-of-payment-docs-text-danger': currentPaymentAccountBalanceLessThenZero}"
+            >{{ paymentAccountInfo }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="journal-of-payment-docs-row">
+        <payment-by-cashbox
+          ref="paymentByCashbox"
+          @close="closePaymentByCashbox"
+          @cancel="closePaymentByCashbox"
+          @save="savePaymentByCashbox"
         />
-      </v-col>
 
-      <v-col cols="7">
-        <div>
-          <span
-            class="headline"
-            :class="{'text-danger': currentPaymentAccountBalanceLessThenZero}"
-          >{{ paymentAccountInfo }}</span>
-        </div>
-      </v-col>
-    </v-row>
+        <internal-payment
+          ref="internalPayment"
+          @close="closeInternalPayment"
+          @cancel="closeInternalPayment"
+          @save="saveInternalPayment"
+        />
 
-    <v-row class="journal-of-payment-docs-tables-row">
-      <payment-by-cashbox
-        ref="paymentByCashbox"
-        @close="closePaymentByCashbox"
-        @cancel="closePaymentByCashbox"
-        @save="savePaymentByCashbox"
-      />
-
-      <internal-payment
-        ref="internalPayment"
-        @close="closeInternalPayment"
-        @cancel="closeInternalPayment"
-        @save="saveInternalPayment"
-      />
-
-      <v-col
-        class="journal-of-payment-docs-docs-to-pay-col journal-of-payment-docs-to-pay-col-5"
-      >
-        <v-subheader class="font-weight-medium text-subtitle-1">
-          Документы к оплате
-        </v-subheader>
-
-        <v-data-table
-          v-model="toPaySelectedRows"
-          :headers="toPayHeaders"
-          :items="toPayData"
-          :items-per-page="5"
-          :show-select="true"
-          :single-select="false"
-          :footer-props="{ itemsPerPageText: 'Количество строк на странице:' }"
-          class="elevation-1 journal-of-payment-docs-docs-to-pay-table"
-          @contextmenu:row="showPayMenu"
+        <div
+          class="journal-of-payment-docs-to-pay-col-5"
         >
-          <template slot="body.append">
-            <tr>
-              <th>Итого</th>
-              <th />
-              <th />
-              <th />
-              <th />
-              <th />
-              <th>{{ totalToSumOplat }}</th>
-              <th />
-            </tr>
-          </template>
+          <v-subheader class="font-weight-medium text-subtitle-1">
+            Документы к оплате
+          </v-subheader>
 
-          <template #[`item.sumOplat`]="props">
-            <v-edit-dialog
-              :return-value.sync="props.item.sumOplat"
-              large
-              cancel-text="Закрыть"
-              save-text="Сохранить"
-              @save="saveSumOplat(props.item)"
-              @cancel="cancelSumOplat"
+          <v-data-table
+            v-model="toPaySelectedRows"
+            :headers="toPayHeaders"
+            :items="toPayData"
+            :items-per-page="5"
+            :show-select="true"
+            :single-select="false"
+            :footer-props="{ itemsPerPageText: 'Количество строк на странице:' }"
+            class="elevation-1 journal-of-payment-docs-docs-to-pay-table"
+            @contextmenu:row="showPayMenu"
+          >
+            <template slot="body.append">
+              <tr>
+                <th>Итого</th>
+                <th />
+                <th />
+                <th />
+                <th />
+                <th />
+                <th>{{ totalToSumOplat }}</th>
+                <th />
+              </tr>
+            </template>
+
+            <template #[`item.sumOplat`]="props">
+              <v-edit-dialog
+                :return-value.sync="props.item.sumOplat"
+                large
+                cancel-text="Закрыть"
+                save-text="Сохранить"
+                @save="saveSumOplat(props.item)"
+                @cancel="cancelSumOplat"
+              >
+                <div>{{ props.item.sumOplat }}</div>
+                <template #input>
+                  <div class="mt-4 title">
+                    Сумма оплаты
+                  </div>
+                  <v-text-field
+                    v-model="props.item.sumOplat"
+                    label="Сумма"
+                    single-line
+                    counter
+                    autofocus
+                  />
+                </template>
+              </v-edit-dialog>
+            </template>
+          </v-data-table>
+
+          <user-notification ref="userNotification" />
+
+          <v-menu
+            v-model="payMenu"
+            :position-x="xToPayMenu"
+            :position-y="yToPayMenu"
+            absolute
+            offset-y
+          >
+            <v-list>
+              <v-list-item @click="payedByCashboxForContextMenuOnly">
+                <v-list-item-title>
+                  Оплата по кассе
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="internalMovementForContextMenuOnly">
+                <v-list-item-title>
+                  Вн. перемещение
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="historyOfPaymentForContextMenuOnly">
+                <v-list-item-title>
+                  История оплат
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="deleteFromToPayForContextMenuOnly">
+                <v-list-item-title>
+                  Удалить из "к оплате"
+                </v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </div>
+
+        <div
+          class="journal-of-payment-docs-arrows"
+        >
+          <div align="center">
+            <v-subheader class="font-weight-medium text-subtitle-1" />
+            <v-btn
+              color="blue"
+              class="mr-2 mb-2"
+              fab
+              dark
+              small
+
+              @click="addPaymentDocument"
             >
-              <div>{{ props.item.sumOplat }}</div>
-              <template #input>
-                <div class="mt-4 title">
-                  Сумма оплаты
-                </div>
+              <v-icon>mdi-arrow-left</v-icon>
+            </v-btn>
+            <br>
+            <v-btn
+              color="blue"
+              class="mr-2 mb-2"
+              fab
+              dark
+              small
+              @click="deleteSelectedPayments"
+            >
+              <v-icon>mdi-arrow-right</v-icon>
+            </v-btn>
+          </div>
+        </div>
+
+        <edit-payment-document
+          ref="editPaymentDocument"
+          @close="closePaymentDocument"
+          @cancel="closePaymentDocument"
+          @save="savePaymentDocument"
+        />
+
+        <payment-card-by-document
+          ref="paymentCardByDocument"
+          @close="closePaymentCardByDocument"
+        />
+
+        <div
+          class="journal-of-payment-docs-for-pay-col-5"
+        >
+          <v-subheader class="font-weight-medium text-subtitle-1">
+            <v-row>
+              <div
+                align="center"
+                class="journal-of-payment-docs-subheader-first"
+              >
+                Документы на оплату
+              </div>
+              <div>
                 <v-text-field
-                  v-model="props.item.sumOplat"
-                  label="Сумма"
-                  single-line
-                  counter
-                  autofocus
+                  v-model="date"
+                  type="date"
+                  @input="updateDocoplForPay()"
                 />
-              </template>
-            </v-edit-dialog>
-          </template>
-        </v-data-table>
+              </div>
+            </v-row>
+          </v-subheader>
 
-        <user-notification ref="userNotification" />
-
-        <v-menu
-          v-model="payMenu"
-          :position-x="xToPayMenu"
-          :position-y="yToPayMenu"
-          absolute
-          offset-y
-        >
-          <v-list>
-            <v-list-item @click="payedByCashboxForContextMenuOnly">
-              <v-list-item-title>
-                Оплата по кассе
-              </v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="internalMovementForContextMenuOnly">
-              <v-list-item-title>
-                Вн. перемещение
-              </v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="historyOfPaymentForContextMenuOnly">
-              <v-list-item-title>
-                История оплат
-              </v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="deleteFromToPayForContextMenuOnly">
-              <v-list-item-title>
-                Удалить из "к оплате"
-              </v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-      </v-col>
-
-      <v-col
-        class="journal-of-payment-docs-arrows journal-of-payment-docs-col-1"
-      >
-        <div align="center">
-          <v-subheader class="font-weight-medium text-subtitle-1" />
-          <v-btn
-            color="blue"
-            class="mr-2 mb-2"
-            fab
-            dark
-            small
-
-            @click="addPaymentDocument"
+          <v-data-table
+            v-model="fromPaySelectedRows"
+            :headers="fromPayHeaders"
+            :items="fromPayData"
+            :show-select="true"
+            :single-select="false"
+            :items-per-page="5"
+            :footer-props="{ itemsPerPageText: 'Количество строк на странице:' }"
+            class="elevation-1 journal-of-payment-docs-docs-from-pay-table"
+            @contextmenu:row="showFromPayMenu"
           >
-            <v-icon>mdi-arrow-left</v-icon>
-          </v-btn>
-          <br>
-          <v-btn
-            color="blue"
-            class="mr-2 mb-2"
-            fab
-            dark
-            small
-            @click="deleteSelectedPayments"
-          >
-            <v-icon>mdi-arrow-right</v-icon>
-          </v-btn>
-        </div>
-      </v-col>
-
-      <edit-payment-document
-        ref="editPaymentDocument"
-        @close="closePaymentDocument"
-        @cancel="closePaymentDocument"
-        @save="savePaymentDocument"
-      />
-
-      <payment-card-by-document
-        ref="paymentCardByDocument"
-        @close="closePaymentCardByDocument"
-      />
-
-      <v-col
-        class="journal-of-payment-docs-docs-from-pay-col journal-of-payment-docs-for-pay-col-5"
-      >
-        <v-subheader class="font-weight-medium text-subtitle-1">
-          <v-row>
-            <div
-              align="center"
-              class="journal-of-documents-subheader-first"
+            <template
+              slot="body.append"
             >
-              Документы на оплату
-            </div>
-            <div>
-              <v-text-field
-                v-model="date"
-                type="date"
-                @input="updateDocoplForPay()"
-              />
-            </div>
-          </v-row>
-        </v-subheader>
+              <tr>
+                <th>Итого</th>
+                <th />
+                <th />
+                <th />
+                <th />
+                <th />
+                <th>{{ totalSumDoc }}</th>
+                <th>{{ totalSumOplach }}</th>
+                <th>{{ totalSumOplat }}</th>
+                <th />
+              </tr>
+            </template>
+          </v-data-table>
 
-        <v-data-table
-          v-model="fromPaySelectedRows"
-          :headers="fromPayHeaders"
-          :items="fromPayData"
-          :show-select="true"
-          :single-select="false"
-          :items-per-page="5"
-          :footer-props="{ itemsPerPageText: 'Количество строк на странице:' }"
-          class="elevation-1 journal-of-payment-docs-docs-from-pay-table"
-          @contextmenu:row="showFromPayMenu"
-        >
-          <template
-            slot="body.append"
+          <v-menu
+            v-model="fromPayMenu"
+            :position-x="xFromPayMenu"
+            :position-y="yFromPayMenu"
+            absolute
+            offset-y
           >
-            <tr>
-              <th>Итого</th>
-              <th />
-              <th />
-              <th />
-              <th />
-              <th />
-              <th>{{ totalSumDoc }}</th>
-              <th>{{ totalSumOplach }}</th>
-              <th>{{ totalSumOplat }}</th>
-              <th />
-            </tr>
-          </template>
-        </v-data-table>
-
-        <v-menu
-          v-model="fromPayMenu"
-          :position-x="xFromPayMenu"
-          :position-y="yFromPayMenu"
-          absolute
-          offset-y
-        >
-          <v-list>
-            <v-list-item @click="historyOfPaymentFromPaymentForContextMenuOnly">
-              <v-list-item-title>
-                История оплат
-              </v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-      </v-col>
-
-      <v-col
-        class="journal-of-payment-docs-buttons-of-payment-docs-table journal-of-payment-docs-col-1"
-      >
-        <v-subheader class="font-weight-medium text-subtitle-1" />
-        <div align="center">
-          <v-btn
-            color="blue"
-            class="mr-2 mb-2"
-            fab
-            dark
-            small
-            @click="newDocument"
-          >
-            <v-icon>mdi-plus</v-icon>
-          </v-btn>
-
-          <br>
-          <v-btn
-            color="blue"
-            class="mr-2 mb-2"
-            fab
-            dark
-            small
-            @click="editDocument"
-          >
-            <v-icon>mdi-file-edit</v-icon>
-          </v-btn>
-
-          <br>
-          <v-btn
-            color="blue"
-            class="mr-2 mb-2"
-            fab
-            dark
-            small
-            @click="copyDocument"
-          >
-            <v-icon>mdi-content-copy</v-icon>
-          </v-btn>
-
-          <br>
-          <v-btn
-            color="blue"
-            class="mr-2 mb-2"
-            fab
-            dark
-            small
-            @click="deleteDocument"
-          >
-            <v-icon>mdi-delete-forever</v-icon>
-          </v-btn>
+            <v-list>
+              <v-list-item @click="historyOfPaymentFromPaymentForContextMenuOnly">
+                <v-list-item-title>
+                  История оплат
+                </v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </div>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="5" />
-      <v-col cols="1" />
-      <v-col cols="6">
-        <v-text-field
-          label="Комментарий"
-        />
-      </v-col>
-    </v-row>
+
+        <div
+          class="journal-of-payment-docs-buttons-of-table-docs-for-pay"
+        >
+          <v-subheader class="font-weight-medium text-subtitle-1" />
+          <div align="center">
+            <v-btn
+              color="blue"
+              class="mr-2 mb-2"
+              fab
+              dark
+              small
+              @click="newDocument"
+            >
+              <v-icon>mdi-plus</v-icon>
+            </v-btn>
+
+            <br>
+            <v-btn
+              color="blue"
+              class="mr-2 mb-2"
+              fab
+              dark
+              small
+              @click="editDocument"
+            >
+              <v-icon>mdi-file-edit</v-icon>
+            </v-btn>
+
+            <br>
+            <v-btn
+              color="blue"
+              class="mr-2 mb-2"
+              fab
+              dark
+              small
+              @click="copyDocument"
+            >
+              <v-icon>mdi-content-copy</v-icon>
+            </v-btn>
+
+            <br>
+            <v-btn
+              color="blue"
+              class="mr-2 mb-2"
+              fab
+              dark
+              small
+              @click="deleteDocument"
+            >
+              <v-icon>mdi-delete-forever</v-icon>
+            </v-btn>
+          </div>
+        </div>
+      </div>
+
+      <div class="journal-of-payment-docs-row">
+        <div class="journal-of-payment-docs-bottom-spacer" />
+        <div class="journal-of-payment-docs-bottom-comment">
+          <v-text-field
+            label="Комментарий"
+          />
+          </v-col>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -822,7 +825,6 @@ export default {
         orgId: this.selectedOrganization
       }
 
-      // TODO поменять на /oper/spDocopl/findSpDocoplForPayBetweenDates
       this.fromPayData = await this.$api.payment.docOplForPay.findSpDocoplForPayBetweenDates(data)
       // $axios.$get('/meridian/oper/spDocopl/findSpDocoplForPay', { params: data })
       let totalSumDoc = 0
@@ -1002,70 +1004,117 @@ export default {
 </script>
 
 <style lang="scss">
-.journal-of-payment-documents-documents-tables{
+
+.v-data-table td {
+    padding: 0 0px !important;
+    height: 0px !important;
+}
+
+.v-data-table th {
+    padding: 0 0px !important;
+    height: 0px !important;
+}
+
+.journal-of-payment-docs-documents-tables{
   margin-top: 20px;
 }
-.journal-of-payment-docs-tables-row{
-  margin-top: 0px;
+
+.journal-of-payment-docs-to-pay-col-5 {
+  flex: 0 0 40%;
+  max-width: 40%;
 }
-.journal-of-payment-docs-docs-to-pay-col{
-  padding-top: 0px;
-  padding-right: 0px;
+
+.journal-of-payment-docs-arrows {
+  padding-left: 5px;
+  padding-right: 5px;
+  flex: 0 0 3%;
+  max-width: 3%;
 }
-.journal-of-payment-docs-docs-from-pay-col{
-  padding-top: 0px;
-  padding-left: 0px;
-  padding-right: 0px;
+
+.journal-of-payment-docs-for-pay-col-5 {
+  flex: 0 0 54.5%;
+  max-width: 54.5%;
 }
+
+.journal-of-payment-docs-buttons-of-table-docs-for-pay {
+  padding-left: 5px;
+  flex: 0 0 2.5%;
+  max-width: 2.5%;
+}
+
+.journal-of-payment-docs-list-of-orgs{
+  flex: 0 0 40%;
+  max-width: 40%;
+}
+
+.journal-of-payment-docs-org-payment-accounts-info{
+  flex: 0 0 60%;
+  max-width: 60%;
+}
+
+.journal-of-payment-docs-list-of-payment-accounts-of-org{
+  flex: 0 0 40%;
+  max-width: 40%;
+}
+
+.journal-of-payment-docs-chousen-payment-account-info{
+  flex: 0 0 60%;
+  max-width: 60%;
+}
+
+.journal-of-payment-docs-row {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  margin: 0px;
+  min-width: 100%;
+}
+
 .journal-of-payment-docs-docs-to-pay-table{
   min-height: 250px;
 }
+
 .journal-of-payment-docs-docs-from-pay-table{
   min-height: 250px;
   max-height: 1000px;
 }
-.journal-of-payment-docs-buttons-of-payment-docs-table{
-  padding-top: 0px;
-  padding-left: 0px;
-  padding-right: 0px;
+
+.journal-of-payment-docs-context-menu {
+  position: fixed;
+  background: white;
+  z-index: 999;
+  outline: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  cursor: pointer;
 }
-.journal-of-payment-docs-arrows{
-  padding-top: 0px;
-  padding-left: 0px;
-  padding-right: 0px;
-}
-.journal-of-payment-docs-col-1 {
-    flex: 0 0 3.5%;
-    max-width: 3.5%;
-}
-.journal-of-payment-docs-to-pay-col-5 {
-    flex: 0 0 40%;
-    max-width: 40%;
-}
-.journal-of-payment-docs-for-pay-col-5 {
-    flex: 0 0 53%;
-    max-width: 53%;
-}
-.journal-of-payment-docs-row {
-    display: flex;
-    flex-wrap: wrap;
-    flex: 1 1 auto;
-    margin: -12px;
-}
-.context-menu {
-    position: fixed;
-    background: white;
-    z-index: 999;
-    outline: none;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-    cursor: pointer;
-}
-.journal-of-documents-subheader-first {
+
+.journal-of-payment-docs-subheader-first {
   padding-top: 12px;
   margin-top: 9px;
   padding-right: 30px;
 }
-.text-danger {
+
+.journal-of-payment-docs-headline {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 1.5rem !important;
+  font-weight: 400;
+  line-height: 2rem;
+  letter-spacing: normal !important;
+  font-family: "Roboto", sans-serif !important;
+}
+
+.journal-of-payment-docs-bottom-spacer{
+  flex: 0 0 55%;
+  max-width: 55%;
+}
+
+.journal-of-payment-docs-bottom-comment{
+  flex: 0 0 45%;
+  max-width: 45%;
+}
+
+.journal-of-payment-docs-text-danger {
   color: red;
 }
+
 </style>

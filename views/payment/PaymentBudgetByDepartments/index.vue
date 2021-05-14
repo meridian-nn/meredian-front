@@ -1,107 +1,100 @@
 <template>
-  <v-card>
-    <v-card-text>
-      <v-container class="payment-budget-by-deps-container">
-        <v-row>
-          <v-col cols="12">
-            <div
-              align="center"
-              class="headline"
-            >
-              Бюджет оплат по подразделениям
-            </div>
-          </v-col>
-        </v-row>
+  <div class="payment-budget-by-deps-main-div">
+    <div class="payment-budget-by-deps-row">
+      <v-col cols="12">
+        <div
+          align="center"
+          class="payment-budget-by-deps-headline"
+        >
+          Бюджет оплат по подразделениям
+        </div>
+      </v-col>
+    </div>
 
-        <v-row>
-          <v-col cols="3" />
+    <div class="payment-budget-by-deps-row">
+      <v-col cols="3" />
 
-          <v-col cols="1">
-            <div
-              align="center"
-              class="headline payment-budget-by-deps-header"
-            >
-              Дата: с
-            </div>
-          </v-col>
+      <v-col cols="1">
+        <div
+          align="center"
+          class="payment-budget-by-deps-header"
+        >
+          Дата: с
+        </div>
+      </v-col>
 
-          <div class="payment-budget-by-dep-col-2">
-            <v-text-field
-              v-model="startDate"
-              type="date"
-            />
-          </div>
+      <div class="payment-budget-by-deps-col-2">
+        <v-text-field
+          v-model="startDate"
+          type="date"
+        />
+      </div>
 
-          <v-col cols="1">
-            <div
-              align="center"
-              class="headline payment-budget-by-deps-header"
-            >
-              по
-            </div>
-          </v-col>
+      <v-col cols="1">
+        <div
+          align="center"
+          class="payment-budget-by-deps-header"
+        >
+          по
+        </div>
+      </v-col>
 
-          <div class="payment-budget-by-dep-col-2">
-            <v-text-field
-              v-model="endDate"
-              type="date"
-            />
-          </div>
+      <div class="payment-budget-by-deps-col-2">
+        <v-text-field
+          v-model="endDate"
+          type="date"
+        />
+      </div>
 
-          <div class="payment-budget-by-dep-col-2">
-            <v-btn
-              class="payment-budget-by-deps-header"
-              @click="findDocOplInPeriod"
-            >
-              Найти
-            </v-btn>
-          </div>
+      <div class="payment-budget-by-deps-col-2">
+        <v-btn
+          class="payment-budget-by-deps-button"
+          @click="findDocOplInPeriod"
+        >
+          Найти
+        </v-btn>
+      </div>
 
-          <v-col cols="1" />
-        </v-row>
+      <v-col cols="1" />
+    </div>
 
-        <v-row>
-          <v-col cols="12">
-            <v-subheader class="font-weight-medium text-subtitle-1">
-              История оплаты
-            </v-subheader>
-            <div id="paymentBudgetByDepGroupByDate">
-              <v-client-table
-                v-model="groupByDate"
-                :columns="groupByDateColumns"
-                :options="groupByDateOptions"
-                @row-click="findGroupByDep"
-              >
-                <!--input
+    <div class="payment-budget-by-deps-row">
+      <v-subheader class="font-weight-medium text-subtitle-1">
+        История оплаты
+      </v-subheader>
+      <div id="paymentBudgetByDepGroupByDate">
+        <v-client-table
+          v-model="groupByDate"
+          :columns="groupByDateColumns"
+          :options="groupByDateOptions"
+          @row-click="findGroupByDep"
+        >
+          <!--input
                   slot="date"
                   v-model="row.date"
                   slot-scope="{row, update}"
                   @input="update(row.date)"
                 -->
-              </v-client-table>
-            </div>
-          </v-col>
-        </v-row>
+        </v-client-table>
+      </div>
+    </div>
 
-        <v-row>
-          <v-col cols="12">
-            <v-subheader class="font-weight-medium text-subtitle-1">
-              История оплаты по подразделениям
-            </v-subheader>
-            <div id="paymentBudgetByDepGroupByDep">
-              <v-client-table
-                v-model="groupByDep"
-                :columns="groupByDepColumns"
-                :options="groupByDepOptions"
-              />
-            </div>
-          </v-col>
-        </v-row>
+    <div class="payment-budget-by-deps-row">
+      <v-subheader class="font-weight-medium text-subtitle-1">
+        История оплаты по подразделениям
+      </v-subheader>
+      <div id="paymentBudgetByDepGroupByDep">
+        <v-client-table
+          v-model="groupByDep"
+          :columns="groupByDepColumns"
+          :options="groupByDepOptions"
+        />
+      </div>
+    </div>
 
-        <user-notification ref="userNotification" />
-      </v-container>
-    </v-card-text>
-  </v-card>
+    <user-notification ref="userNotification" />
+    </v-container>
+  </div>
 </template>
 
 <script>
@@ -250,15 +243,46 @@ export default {
 </script>
 
 <style lang="scss">
-.payment-budget-by-deps-header {
-    padding-top: 12px;
-    margin-top: 9px;
+.payment-budget-by-deps-main-div {
+  padding: 10px
 }
 
-.payment-budget-by-dep-col-2 {
-    padding: 16px;
-    flex: 0 0 12%;
-    max-width: 12%;
+.payment-budget-by-deps-headline {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 1.5rem !important;
+  font-weight: 400;
+  line-height: 2rem;
+  letter-spacing: normal !important;
+  font-family: "Roboto", sans-serif !important;
+}
+
+.payment-budget-by-deps-header {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 1.5rem !important;
+  font-weight: 400;
+  line-height: 2rem;
+  letter-spacing: normal !important;
+  font-family: "Roboto", sans-serif !important;
+  padding-top: 12px;
+  margin-top: 9px;
+}
+
+.payment-budget-by-deps-button {
+  padding-top: 12px;
+  margin-top: 15px;
+}
+
+.payment-budget-by-deps-col-2 {
+  padding: 16px;
+  flex: 0 0 12%;
+  max-width: 12%;
+}
+
+.payment-budget-by-deps-row {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  margin: 0px;
 }
 
 #paymentBudgetByDepGroupByDate {
@@ -270,7 +294,7 @@ export default {
 }
 #paymentBudgetByDepGroupByDate td, #paymentBudgetByDepGroupByDate th {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 0px;
 }
 
 #paymentBudgetByDepGroupByDate tr:nth-child(even){background-color: #f2f2f2;}
@@ -294,7 +318,7 @@ export default {
 }
 #paymentBudgetByDepGroupByDep td, #paymentBudgetByDepGroupByDep th {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 0px;
 }
 
 #paymentBudgetByDepGroupByDep tr:nth-child(even){background-color: #f2f2f2;}
