@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie'
-import { timeout } from '~/utils/helpers'
 import { btoa } from 'isomorphic-base64'
+import { timeout } from '~/utils/helpers'
 export default {
   state: () => ({
     token: Cookies.get('JWTmeredian'),
@@ -13,8 +13,9 @@ export default {
 
   actions: {
     async login({ dispatch, commit }, credentials) {
+      // eslint-disable-next-line no-useless-catch
       try {
-        await this.$axios.$get('http://192.168.1.70:9037/meridian/gtin/findAll?page=0&size=200',{ auth: credentials })
+        await this.$axios.$get('http://192.168.1.70:9037/meridian/gtin/findAll?page=0&size=200', { auth: credentials })
 
         await timeout(500)
 

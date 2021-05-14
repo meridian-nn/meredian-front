@@ -55,7 +55,7 @@
 
         <v-list-item
           link
-          :to="{ name: 'PaymentDocumentPage' }"
+          :to="{ name: 'PaymentMenu' }"
         >
           <v-list-item-action class="pr-1 pl-2 mr-1">
             <v-icon class="blue--text">

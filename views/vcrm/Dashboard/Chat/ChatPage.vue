@@ -181,6 +181,12 @@ export default {
         this.roomsList.push(room)
       }
     })
+
+    this.socket.on('remove room', (roomId) => {
+      this.roomsList = this.roomsList.filter(item => item._id !== roomId)
+
+      this.selectedUser = null
+    })
   },
 
   methods: {

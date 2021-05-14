@@ -18,18 +18,19 @@ export default class HttpClient {
   }
 
   config(method, params = {}) {
+    console.log(this.headers)
     return {
       method,
       ...(method === 'POST' && {
         body: JSON.stringify(params)
       }),
-      headers: this.headers,
-      mode: 'no-cors'
+      headers: this.headers
     }
   }
 
   async call(url, config) {
     const response = await fetch(url, config)
+      // eslint-disable-next-line require-await
       .then(async(res) => {
         const json = res.json()
 

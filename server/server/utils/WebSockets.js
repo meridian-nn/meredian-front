@@ -7,7 +7,7 @@ class WebSockets {
       client.join(roomId)
     })
 
-    client.on('disconnect', (roomId) => {
+    client.on('disc', (roomId) => {
       client.leave(roomId)
     })
 

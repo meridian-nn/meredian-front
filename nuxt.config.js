@@ -1,84 +1,95 @@
+/* eslint-disable */
 import path from 'path'
 require('dotenv').config({
-  path: path.resolve(__dirname, 'config', '.env')
+    path: path.resolve(__dirname, 'config', '.env')
 })
 
 export default {
-  ssr: false,
+    ssr: false,
 
-  env: {
-    USER: process.env.USER,
-    PASSWORD: process.env.PASSWORD,
-    API_HOST_SOCKET: process.env.API_HOST_SOCKET,
-    API_HOST: process.env.API_HOST,
-    YM_ENV: process.env.YM_ENV
-  },
-
-  head: {
-    titleTemplate: '%s - foxPro',
-    title: 'foxPro',
-    htmlAttrs: {
-      lang: 'en'
+    env: {
+        USER: process.env.USER,
+        PASSWORD: process.env.PASSWORD,
+        API_HOST_SOCKET: process.env.API_HOST_SOCKET,
+        API_HOST: process.env.API_HOST,
+        YM_ENV: process.env.YM_ENV
     },
-    meta: [
-      { charset: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: '' }
+
+    head: {
+        titleTemplate: '%s - foxPro',
+        title: 'foxPro',
+        htmlAttrs: {
+            lang: 'en'
+        },
+        meta: [
+            { charset: 'utf-8' },
+            { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+            { hid: 'description', name: 'description', content: '' }
+        ],
+        link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
+    },
+
+    css: [],
+
+    components: true,
+
+    plugins: [
+        '~/plugins/axios',
+        '~/plugins/utils',
+        '~/plugins/custom-compare.js',
+        { src: '~/plugins/api', mode: 'client' },
+        { src: '~/plugins/format-date' },
+        { src: '~plugins/vue-tables-2.js', ssr: false },
+        { src: '~plugins/vue-json-excel.js', ssr: false },
+        { src: '~plugins/vue-html-to-paper.js', ssr: false }
+        // { src: '~/plugins/bootstrap', mode: 'client' }
     ],
-    link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
-  },
 
-  css: [],
+    buildModules: [
+        '@nuxtjs/eslint-module',
+        '@nuxtjs/stylelint-module',
+        '@nuxtjs/vuetify',
+        '@nuxtjs/router',
+        '@nuxt/components'
+    ],
 
-  components: true,
+    modules: [
+        '@nuxtjs/axios',
+        '@nuxtjs/proxy'
+    ],
+    proxy: {
+        // '/meridian': {
+        //   target: 'http://192.168.1.70:9037'
+        // }
+    },
+    server: {
+        host: '0.0.0.0',
+        port: 8000 // default: 3000
+    },
 
-  plugins: [
-    { src: '~/plugins/api', mode: 'client' },
-    { src: '~/plugins/format-date' }
-    // { src: '~/plugins/bootstrap', mode: 'client' }
-  ],
-
-  buildModules: [
-    '@nuxtjs/stylelint-module',
-    '@nuxtjs/vuetify',
-    '@nuxtjs/router'
-  ],
-
-  modules: [
-    '@nuxtjs/axios',
-    '@nuxtjs/proxy'
-  ],
-  proxy: {
-    // '/meridian': {
-    //   target: 'http://192.168.1.70:9037'
-    // }
-  },
-  // server: {
-  //   host: '0.0.0.0',
-  //   port: 8000 // default: 3000
-  // },
-
-  axios: {
-    baseURL: 'http://192.168.1.70:9037/meridian',
-    proxy: true,
-    mode: 'no-cors',
-    auth: {
-      username: 'admin',
-      password: 'Wtrkop45'
-    }
-  },
-
-  vuetify: {
-    customVariables: ['~/assets/variables.scss'],
-    theme: {
-      themes: {
-        light: {
-          blue: '#639db1',
-          secondary: '#eaeaea'
+    axios: {
+        baseURL: 'http://192.168.1.70:9037/meridian',
+        // proxy: true,
+        mode: 'no-cors',
+        auth: {
+            username: 'admin',
+            password: 'Wtrkop45'
         }
-      }
-    }
-  },
+    },
 
-  build: {}
+    vuetify: {
+        customVariables: ['~/assets/variables.scss'],
+        theme: {
+            themes: {
+                light: {
+                    blue: '#639db1',
+                    secondary: '#eaeaea'
+                }
+            }
+        }
+    },
+
+    build: {
+        vendor: ['vue-tables-2', 'vue-json-excel', 'vue-html-to-paper']
+    }
 }
