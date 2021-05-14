@@ -25,7 +25,7 @@
         </v-hover>
       </template>
 
-      <v-list>
+      <v-list v-if="isMy">
         <v-list-item @click="$emit('removeMessage', msg._id)">
           <v-list-item-title>Удалить</v-list-item-title>
         </v-list-item>

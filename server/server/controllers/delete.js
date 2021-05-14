@@ -6,9 +6,10 @@ export default {
   deleteRoomById: async(req, res) => {
     try {
       const { roomId } = req.params
-      console.log(roomId)
       const room = await ChatRoomModel.remove({ _id: roomId })
       const messages = await ChatMessageModel.remove({ chatRoomId: roomId })
+
+      global.io.sockets.emit('remove room', roomId)
 
       return res.status(200).json({
         success: true,

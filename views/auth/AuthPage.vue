@@ -22,9 +22,11 @@ export default {
   layout: 'auth',
 
   middleware: 'auth-redirect',
+
   mounted() {
     this.submit()
   },
+
   methods: {
     async submit() {
       this.loading = true
