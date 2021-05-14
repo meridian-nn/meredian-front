@@ -1,11 +1,8 @@
 /* eslint-disable vue/max-len */
 <template>
-  <v-container
-    class="py-6 px-6"
-    fluid
-  >
+  <div>
     <router-view />
-  </v-container>
+  </div>
 </template>
 
 <script>

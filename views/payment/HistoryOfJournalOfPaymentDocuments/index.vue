@@ -1,187 +1,170 @@
 <template>
-  <div>
-    <v-card>
-      <v-card-text class="journal-of-payment-docs-history-card-text">
-        <v-container
-          class="journal-of-payment-docs-history-container"
+  <div class="history-of-journal-of-docs-main-div">
+    <div class="history-of-journal-of-docs-row">
+      <div
+        align="center"
+        class="history-of-journal-of-docs-main-row-headline"
+      >
+        Журнал документов на оплату (История)
+      </div>
+
+      <div
+        class="history-of-journal-of-docs-date"
+      >
+        <v-text-field
+          v-model="date"
+          type="date"
+          @input="updateAllInfo()"
+        />
+      </div>
+    </div>
+
+    <div class="history-of-journal-of-docs-row">
+      <div>
+        <v-subheader class="font-weight-medium text-subtitle-1">
+          Остатки на расчетных счетах
+        </v-subheader>
+      </div>
+    </div>
+
+    <div class="history-of-journal-of-docs-row">
+      <div
+        class="history-of-journal-of-docs-table-of-accounts-statistics"
+      >
+        <v-data-table
+          :headers="orgAccInfoHeaders"
+          :items="orgAccInfoData"
+          hide-default-footer
+          class="elevation-1"
+        />
+      </div>
+    </div>
+
+    <div class="history-of-journal-of-docs-row">
+      <div class="history-of-journal-of-docs-orgs">
+        <v-autocomplete
+          label="Организация"
+          :loading="loadingType.organizations"
+          :items="organizations"
+          item-value="id"
+          item-text="clName"
+          @change="organizationChange"
+        />
+      </div>
+
+      <div class="history-of-journal-of-docs-orgs-acc-stats">
+        <span class="headline">{{ restPaymentAccountInfo }}</span>
+      </div>
+    </div>
+
+    <div class="history-of-journal-of-docs-row">
+      <div class="history-of-journal-of-docs-acc">
+        <v-autocomplete
+          v-model="accId"
+          label="Расч. счёт"
+          :loading="loadingType.paymentAccounts"
+          :items="paymentAccounts"
+          item-value="id"
+          item-text="shortName"
+          @change="paymentAccountChange"
+        />
+      </div>
+
+      <div class="history-of-journal-of-docs-acc-stat">
+        <span
+          class="headline"
+          :class="{'history-of-journal-of-docs-text-danger': currentPaymentAccountBalanceLessThenZero}"
+        >{{ paymentAccountInfo }}</span>
+      </div>
+    </div>
+
+    <div class="history-of-journal-of-docs-row">
+      <div
+        class="history-of-journal-of-docs-tbl-to-pay"
+      >
+        <v-subheader class="font-weight-medium text-subtitle-1">
+          Документы к оплате
+        </v-subheader>
+
+        <v-data-table
+          v-model="toPaySelectedRows"
+          :headers="toPayHeaders"
+          :items="toPayData"
+          :items-per-page="5"
+          :show-select="true"
+          :single-select="false"
+          class="elevation-1 journal-of-payment-docs-docs-to-pay-table"
+          @contextmenu:row="showPayMenu"
         >
-          <v-row>
-            <v-col cols="10">
-              <div
-                align="center"
-                class="journal-of-payment-main-row headline"
-              >
-                Журнал документов на оплату (История)
-              </div>
-            </v-col>
-            <v-col cols="2">
-              <v-text-field
-                v-model="date"
-                type="date"
-                @input="updateAllInfo()"
-              />
-            </v-col>
-          </v-row>
+          <template slot="body.append">
+            <tr>
+              <th>Итого</th>
+              <th />
+              <th />
+              <th />
+              <th />
+              <th />
+              <th>{{ totalToSumOplat }}</th>
+              <th />
+            </tr>
+          </template>
+        </v-data-table>
+      </div>
 
-          <v-row>
-            <v-col
-              cols="10"
-            >
-              <v-subheader class="font-weight-medium text-subtitle-1">
-                Остатки на расчетных счетах
-              </v-subheader>
-            </v-col>
+      <div
+        class="history-of-journal-of-docs-spacer-btwn-tables"
+      />
 
-            <v-col
-              cols="2"
-              class="journal-of-payment-docs-table-of-accounts-statistics-enter-balances"
-            />
-          </v-row>
+      <div
+        class="history-of-journal-of-docs-tbl-from-pay"
+      >
+        <v-subheader class="font-weight-medium text-subtitle-1">
+          <div
+            align="center"
+            class="journal-of-documents-subheader-first"
+          >
+            Документы на оплату
+          </div>
+        </v-subheader>
 
-          <v-row>
-            <v-col
-              cols="12"
-              class="journal-of-payment-docs-table-of-accounts-statistics"
-            >
-              <v-data-table
-                :headers="orgAccInfoHeaders"
-                :items="orgAccInfoData"
-                hide-default-footer
-                class="elevation-1"
-              />
-            </v-col>
-          </v-row>
+        <v-data-table
+          v-model="fromPaySelectedRows"
+          :headers="fromPayHeaders"
+          :items="fromPayData"
+          :show-select="true"
+          :single-select="false"
+          :items-per-page="5"
+          class="elevation-1 journal-of-payment-docs-docs-from-pay-table"
+        >
+          <template
+            slot="body.append"
+          >
+            <tr>
+              <th>Итого</th>
+              <th />
+              <th />
+              <th />
+              <th />
+              <th />
+              <th>{{ totalSumDoc }}</th>
+              <th>{{ totalSumOplach }}</th>
+              <th>{{ totalSumOplat }}</th>
+              <th />
+            </tr>
+          </template>
+        </v-data-table>
+      </div>
+    </div>
 
-          <v-row>
-            <v-col cols="5">
-              <v-autocomplete
-                label="Организация"
-                :loading="loadingType.organizations"
-                :items="organizations"
-                item-value="id"
-                item-text="clName"
-                @change="organizationChange"
-              />
-            </v-col>
-            <v-col cols="7">
-              <div>
-                <span class="headline">{{ restPaymentAccountInfo }}</span>
-              </div>
-            </v-col>
-          </v-row>
-
-          <v-row>
-            <v-col cols="5">
-              <v-autocomplete
-                v-model="accId"
-                label="Расч. счёт"
-                :loading="loadingType.paymentAccounts"
-                :items="paymentAccounts"
-                item-value="id"
-                item-text="shortName"
-                @change="paymentAccountChange"
-              />
-            </v-col>
-
-            <v-col cols="7">
-              <div>
-                <span
-                  class="headline"
-                  :class="{'text-danger': currentPaymentAccountBalanceLessThenZero}"
-                >{{ paymentAccountInfo }}</span>
-              </div>
-            </v-col>
-          </v-row>
-
-          <v-row class="journal-of-payment-docs-tables-row">
-            <v-col
-              class="journal-of-payment-docs-docs-to-pay-col journal-of-payment-docs-to-pay-history-col-5"
-            >
-              <v-subheader class="font-weight-medium text-subtitle-1">
-                Документы к оплате
-              </v-subheader>
-
-              <v-data-table
-                v-model="toPaySelectedRows"
-                :headers="toPayHeaders"
-                :items="toPayData"
-                :items-per-page="5"
-                :show-select="true"
-                :single-select="false"
-                class="elevation-1 journal-of-payment-docs-docs-to-pay-table"
-                @contextmenu:row="showPayMenu"
-              >
-                <template slot="body.append">
-                  <tr>
-                    <th>Итого</th>
-                    <th />
-                    <th />
-                    <th />
-                    <th />
-                    <th />
-                    <th>{{ totalToSumOplat }}</th>
-                    <th />
-                  </tr>
-                </template>
-              </v-data-table>
-            </v-col>
-
-            <v-col
-              class="journal-of-payment-docs-arrows journal-of-payment-docs-history-col-1"
-            />
-
-            <v-col
-              class="journal-of-payment-docs-docs-from-pay-col journal-of-payment-docs-for-pay-history-col-5"
-            >
-              <v-subheader class="font-weight-medium text-subtitle-1">
-                <div
-                  align="center"
-                  class="journal-of-documents-subheader-first"
-                >
-                  Документы на оплату
-                </div>
-              </v-subheader>
-
-              <v-data-table
-                v-model="fromPaySelectedRows"
-                :headers="fromPayHeaders"
-                :items="fromPayData"
-                :show-select="true"
-                :single-select="false"
-                :items-per-page="5"
-                class="elevation-1 journal-of-payment-docs-docs-from-pay-table"
-              >
-                <template
-                  slot="body.append"
-                >
-                  <tr>
-                    <th>Итого</th>
-                    <th />
-                    <th />
-                    <th />
-                    <th />
-                    <th />
-                    <th>{{ totalSumDoc }}</th>
-                    <th>{{ totalSumOplach }}</th>
-                    <th>{{ totalSumOplat }}</th>
-                    <th />
-                  </tr>
-                </template>
-              </v-data-table>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="5" />
-            <v-col cols="1" />
-            <v-col cols="6">
-              <v-text-field
-                label="Комментарий"
-              />
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-card-text>
-    </v-card>
+    <div class="history-of-journal-of-docs-row">
+      <v-col cols="5" />
+      <v-col cols="1" />
+      <v-col cols="6">
+        <v-text-field
+          label="Комментарий"
+        />
+      </v-col>
+    </div>
   </div>
 </template>
 
@@ -587,94 +570,87 @@ export default {
 </script>
 
 <style lang="scss">
-.journal-of-payment-docs-tables-row{
-  margin-top: 0px;
-}
-.journal-of-payment-docs-history-container{
-  padding-right: 0px;
-  padding-bottom: 0px;
-  max-width: none;
-}
-.journal-of-payment-docs-history-card-text{
-  padding: 0px;
-  max-height: 1000px;
-}
-.journal-of-payment-docs-table-of-accounts-statistics{
-  padding-top: 10px;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-bottom: 0px;
-  flex: 0 0 99%;
-  max-width: 99%;
-}
-.journal-of-payment-docs-table-of-accounts-statistics-enter-balances{
-  padding-left: 0px;
-  padding-right: 5px;
-}
-.journal-of-payment-docs-docs-to-pay-col{
-  padding-top: 0px;
-  padding-right: 0px;
-}
-.journal-of-payment-docs-docs-from-pay-col{
-  padding-top: 0px;
-  padding-left: 0px;
-  padding-right: 0px;
-}
-.journal-of-payment-docs-docs-to-pay-table{
-  min-height: 250px;
-}
-.journal-of-payment-docs-docs-from-pay-table{
-  min-height: 250px;
-  max-height: 1000px;
-}
-.journal-of-payment-docs-buttons-of-payment-docs-table{
-  padding-top: 0px;
-  padding-left: 0px;
-  padding-right: 0px;
-}
-.journal-of-payment-docs-arrows{
-  padding-top: 0px;
-  padding-left: 0px;
-  padding-right: 0px;
-}
-.journal-of-payment-docs-history-col-1 {
-    flex: 0 0 1%;
-    max-width: 1%;
-}
-.journal-of-payment-docs-to-pay-history-col-5 {
-    flex: 0 0 40%;
-    max-width: 40%;
-}
-.journal-of-payment-docs-for-pay-history-col-5 {
-    flex: 0 0 58%;
-    max-width: 58%;
-}
-.journal-of-payment-docs-row {
-    display: flex;
-    flex-wrap: wrap;
-    flex: 1 1 auto;
-    margin: -12px;
-}
-.journal-of-payment-main-row {
-    padding-bottom: 10px;
+.v-data-table td {
+    padding: 0 0px !important;
+    height: 0px !important;
 }
 
-.context-menu {
-    position: fixed;
-    background: white;
-    z-index: 999;
-    outline: none;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-    cursor: pointer;
+.v-data-table th {
+    padding: 0 0px !important;
+    height: 0px !important;
 }
 
-.journal-of-documents-subheader-first {
-  padding-top: 12px;
-  margin-top: 9px;
-  padding-right: 30px;
+.history-of-journal-of-docs-main-div {
+  padding: 10px
 }
 
-.text-danger {
+.history-of-journal-of-docs-row {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  margin: 0px;
+  min-width: 100%;
+}
+
+.history-of-journal-of-docs-main-row-headline {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 1.5rem !important;
+  font-weight: 400;
+  line-height: 2rem;
+  letter-spacing: normal !important;
+  font-family: "Roboto", sans-serif !important;
+  flex: 0 0 90%;
+  max-width: 90%;
+}
+
+.history-of-journal-of-docs-date {
+  flex: 0 0 10%;
+  max-width: 10%;
+}
+
+.history-of-journal-of-docs-table-of-accounts-statistics{
+  flex: 0 0 100%;
+  max-width: 100%;
+}
+
+.history-of-journal-of-docs-orgs{
+  flex: 0 0 40%;
+  max-width: 40%;
+}
+
+.history-of-journal-of-docs-orgs-acc-stats{
+  flex: 0 0 60%;
+  max-width: 60%;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.history-of-journal-of-docs-acc{
+  flex: 0 0 40%;
+  max-width: 40%;
+}
+
+.history-of-journal-of-docs-acc-stat{
+  flex: 0 0 60%;
+  max-width: 60%;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.history-of-journal-of-docs-tbl-to-pay{
+  flex: 0 0 40%;
+  max-width: 40%;
+}
+
+.history-of-journal-of-docs-spacer-btwn-tables{
+  flex: 0 0 2%;
+  max-width: 2%;
+}
+
+.history-of-journal-of-docs-tbl-from-pay{
+  flex: 0 0 58%;
+  max-width: 58%;
+}
+
+.history-of-journal-of-docs-text-danger {
   color: red;
 }
 

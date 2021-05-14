@@ -1,15 +1,15 @@
 <template>
-  <div name="journal-of-payment-document-header">
+  <div name="journal-of-payment-docs-header">
     <v-col cols="12">
       <div
         align="center"
-        class="journal-of-payment-main-row headline"
+        class="journal-of-payment-docs-main-row headline"
       >
         Журнал документов на оплату
       </div>
     </v-col>
 
-    <v-row>
+    <div class="journal-of-payment-docs-row">
       <v-col
         cols="10"
       >
@@ -32,11 +32,10 @@
           </v-btn>
         </div>
       </v-col>
-    </v-row>
+    </div>
 
-    <v-row>
-      <v-col
-        cols="12"
+    <div class="journal-of-payment-docs-row">
+      <div
         class="journal-of-payment-docs-table-of-accounts-statistics"
       >
         <v-data-table
@@ -45,8 +44,8 @@
           hide-default-footer
           class="elevation-1"
         />
-      </v-col>
-    </v-row>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -129,19 +128,24 @@ export default {
 </script>
 
 <style lang="scss">
-.journal-of-payment-main-row {
-    padding-bottom: 10px;
+.journal-of-payment-docs-main-row {
+    color: rgba(0, 0, 0, 0.6);
 }
+.journal-of-payment-docs-row {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+    margin: 0px;
+}
+
 .journal-of-payment-docs-table-of-accounts-statistics-enter-balances{
   padding-left: 0px;
   padding-right: 5px;
 }
+
 .journal-of-payment-docs-table-of-accounts-statistics{
-  padding-top: 10px;
-  padding-left: 10px;
-  padding-right: 10px;
   padding-bottom: 0px;
-  flex: 0 0 99%;
-  max-width: 99%;
+  flex: 0 0 100%;
+  max-width: 100%;
 }
 </style>

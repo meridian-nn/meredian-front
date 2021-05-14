@@ -1,15 +1,7 @@
 <template>
-  <div>
-    <v-card>
-      <v-card-text class="journal-of-payment-docs-card-text">
-        <v-container
-          class="journal-of-payment-docs-container"
-        >
-          <journalOfPaymentDocumentHeader />
-          <journalOfPaymentDocumentsTables />
-        </v-container>
-      </v-card-text>
-    </v-card>
+  <div class="journal-of-payment-docs-main-div">
+    <journalOfPaymentDocumentHeader />
+    <journalOfPaymentDocumentsTables />
   </div>
 </template>
 
@@ -40,14 +32,7 @@ export default {
 </script>
 
 <style lang="scss">
-.journal-of-payment-docs-card-text{
-  padding: 0px;
-  max-height: 1000px;
-}
-.journal-of-payment-docs-container{
-  padding-top: 0px;
-  padding-right: 0px;
-  padding-bottom: 0px;
-  max-width: none;
+.journal-of-payment-docs-main-div {
+  padding: 10px
 }
 </style>

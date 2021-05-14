@@ -1,248 +1,193 @@
 <template>
-  <v-card>
-    <v-card-text class="money-distribution-card-text">
-      <v-container
-        class="money-distribution-container"
+  <div class="money-distribution-main-div">
+    <div class="money-distribution-row">
+      <div
+        align="center"
+        class="money-distribution-main-row-headline"
       >
-        <v-row>
-          <v-col
-            cols="10"
+        Распределение ДС по подразделениям
+      </div>
+
+      <div class="money-distribution-date">
+        <v-text-field
+          v-model="date"
+          type="date"
+          @input="updateAllInfo()"
+        />
+      </div>
+    </div>
+
+    <div class="money-distribution-row-budget-for-distribution-border-bottom">
+      <div class="money-distribution-budget-for-distribution-spacer" />
+
+      <div class="money-distribution-budget-for-distribution-text">
+        Бюджет для распределения
+      </div>
+
+      <div
+        class="money-distribution-budget-for-distribution-sum"
+      >
+        <v-text-field
+          v-model.number="budgetDistributionSum"
+          type="number"
+          hide-details="auto"
+          min="0"
+        />
+      </div>
+
+      <div
+        class="money-distribution-not-allocated-text"
+      >
+        Не распределено
+      </div>
+
+      <div
+        class="money-distribution-not-allocated-sum"
+      >
+        <v-subheader
+          class="font-weight-medium text-subtitle-1"
+        >
+          {{ budgetDistributedSum }}
+        </v-subheader>
+      </div>
+
+      <div class="money-distribution-budget-for-distribution-spacer-menu" />
+    </div>
+
+    <div class="money-distribution-row">
+      <div id="departmentsDataTable">
+        <v-client-table
+          v-model="departmentsDataTable"
+          :loading="loadingType.departments"
+          :columns="departmentsColumns"
+          :options="departmentsOptions"
+        />
+      </div>
+    </div>
+
+    <div class="money-distribution-dep-row">
+      <div class="money-distribution-dep-spacer" />
+
+      <div class="money-distribution-dep-col">
+        <v-autocomplete
+          v-model="selectedDep"
+          label="Отдел"
+          :loading="loadingType.departments"
+          :items="departments"
+          item-value="id"
+          item-text="nameViddoc"
+          hide-details="auto"
+          outlined
+          @change="departmentChange"
+        />
+      </div>
+
+      <div class="money-distribution-dep-second-spacer" />
+
+      <div
+        class="money-distribution-dep-for-distribution-text"
+      >
+        Выделено
+      </div>
+
+      <div
+        class="money-distribution-dep-for-distribution-sum"
+      >
+        <v-text-field
+          v-model.number="depDistributionSum"
+          type="number"
+          hide-details="auto"
+          min="0"
+        />
+      </div>
+
+      <div
+        class="money-distribution-not-allocated-dep-text"
+      >
+        Не распределено
+      </div>
+
+      <div
+        class="money-distribution-not-allocated-dep-sum"
+      >
+        <v-subheader
+          class="font-weight-medium text-subtitle-1"
+        >
+          <div :class=" {'money-distribution-text-danger': notDistributedLessThenZero}">
+            {{ departmentRestDistributionSum }}
+          </div>
+        </v-subheader>
+      </div>
+
+      <div class="money-distribution-dep-end-spacer" />
+    </div>
+
+    <div class="money-distribution-dep-row">
+      <div
+        id="moneyDistributionData"
+      >
+        <v-client-table
+          v-model="moneyDistributionData"
+          :columns="columns"
+          :options="options"
+        >
+          <input
+            slot="distributionSum"
+            v-model.number="row.distributionSum"
+            slot-scope="{row, update}"
+            type="number"
+            min="0"
+            @input="update(row.distributionSum)"
           >
-            <div
-              align="center"
-              class="headline"
-            >
-              Распределение ДС по подразделениям
-            </div>
-          </v-col>
-
-          <v-col cols="2">
-            <v-text-field
-              v-model="date"
-              type="date"
-              @input="updateAllInfo()"
-            />
-          </v-col>
-        </v-row>
-
-        <v-row class="budget-for-distribution-border-bottom">
-          <v-col cols="3" />
-
-          <v-col
-            cols="9"
+          <input
+            slot="note"
+            v-model="row.note"
+            slot-scope="{row, update}"
+            type="text"
+            @input="update(row.note)"
           >
-            <v-row
-              align="center"
-              justify="center"
-            >
-              <v-col
-                cols="3"
-                class="budget-for-distribution-text"
-              >
-                <div
-                  align="left"
-                >
-                  Бюджет для распределения
-                </div>
-              </v-col>
+        </v-client-table>
+      </div>
+    </div>
 
-              <v-col
-                cols="3"
-                class="budget-for-distribution-sum"
-              >
-                <v-text-field
-                  v-model.number="budgetDistributionSum"
-                  type="number"
-                  min="0"
-                />
-              </v-col>
+    <div class="money-distribution-dep-row">
+      <v-col cols="3" />
 
-              <v-col
-                cols="2"
-                class="not-allocated-text"
-              >
-                <div
-                  align="right"
-                >
-                  Не распределено
-                </div>
-              </v-col>
-
-              <v-col
-                cols="4"
-                class="not-allocated-sum"
-              >
-                <v-subheader
-                  class="font-weight-medium text-subtitle-1"
-                >
-                  {{ budgetDistributedSum }}
-                </v-subheader>
-              </v-col>
-            </v-row>
-          </v-col>
-        </v-row>
-
-        <v-row>
-          <v-col cols="12">
-            <div id="departmentsDataTable">
-              <v-client-table
-                v-model="departmentsDataTable"
-                :loading="loadingType.departments"
-                :columns="departmentsColumns"
-                :options="departmentsOptions"
-              />
-            </div>
-          </v-col>
-        </v-row>
-
-        <v-row>
-          <v-col cols="2" />
-
-          <v-col cols="8">
-            <v-row
-              align="center"
-              justify="center"
-            >
-              <v-col
-                class="dep-col"
-                cols="3"
-              >
-                <v-autocomplete
-                  v-model="selectedDep"
-                  label="Отдел"
-                  :loading="loadingType.departments"
-                  :items="departments"
-                  item-value="id"
-                  item-text="nameViddoc"
-                  outlined
-                  hide-details="auto"
-                  @change="departmentChange"
-                />
-              </v-col>
-
-              <v-col
-                cols="2"
-                class="dep-for-distribution-text"
-              >
-                <div
-                  align="right"
-                >
-                  Выделено
-                </div>
-              </v-col>
-
-              <v-col
-                cols="3"
-                class="dep-for-distribution-sum"
-              >
-                <v-text-field
-                  v-model.number="depDistributionSum"
-                  type="number"
-                  min="0"
-                />
-              </v-col>
-
-              <v-col
-                cols="2"
-                class="not-allocated-dep-text"
-              >
-                <div
-                  align="right"
-                >
-                  Не распределено
-                </div>
-              </v-col>
-
-              <v-col
-                cols="2"
-                class="not-allocated-dep-sum"
-              >
-                <v-subheader
-                  class="font-weight-medium text-subtitle-1"
-                >
-                  <div :class=" {'text-danger': notDistributedLessThenZero}">
-                    {{ departmentRestDistributionSum }}
-                  </div>
-                </v-subheader>
-              </v-col>
-            </v-row>
-          </v-col>
-
-          <v-col cols="2" />
-        </v-row>
-
-        <v-row>
-          <v-col cols="12">
-            <div
-              id="moneyDistributionData"
-            >
-              <v-client-table
-                v-model="moneyDistributionData"
-                :columns="columns"
-                :options="options"
-              >
-                <input
-                  slot="distributionSum"
-                  v-model.number="row.distributionSum"
-                  slot-scope="{row, update}"
-                  type="number"
-                  min="0"
-                  @input="update(row.distributionSum)"
-                >
-                <input
-                  slot="note"
-                  v-model="row.note"
-                  slot-scope="{row, update}"
-                  type="text"
-                  @input="update(row.note)"
-                >
-              </v-client-table>
-            </div>
-          </v-col>
-        </v-row>
-
-        <v-row>
-          <v-col cols="3" />
-
-          <v-col
-            cols="3"
-            class="money-distribution-save-button"
+      <v-col
+        cols="3"
+        class="money-distribution-save-button"
+      >
+        <div
+          align="center"
+          class="headline"
+        >
+          <v-btn
+            @click="save"
           >
-            <div
-              align="center"
-              class="headline"
-            >
-              <v-btn
-                @click="save"
-              >
-                Сохранить
-              </v-btn>
-            </div>
-          </v-col>
+            Сохранить
+          </v-btn>
+        </div>
+      </v-col>
 
-          <v-col
-            cols="3"
-            class="money-distribution-cancel-button"
+      <v-col
+        cols="3"
+        class="money-distribution-cancel-button"
+      >
+        <div
+          align="center"
+          class="headline"
+        >
+          <v-btn
+            @click="cancel"
           >
-            <div
-              align="center"
-              class="headline"
-            >
-              <v-btn
-                @click="cancel"
-              >
-                Отмена
-              </v-btn>
-            </div>
-          </v-col>
+            Отмена
+          </v-btn>
+        </div>
+      </v-col>
 
-          <v-col cols="3" />
-        </v-row>
-
-        </v-row>
-      </v-container>
-    </v-card-text>
-  </v-card>
+      <v-col cols="3" />
+    </div>
+  </div>
 </template>
 
 <script>
@@ -510,99 +455,195 @@ export default {
 </script>
 
 <style lang="scss">
-.money-distribution-save-button{
-  padding-left: 0px;
+.money-distribution-main-div {
+  padding: 10px
 }
-.money-distribution-cancel-button{
-  padding-left: 0px;
+
+.money-distribution-main-row-headline {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 1.5rem !important;
+  font-weight: 400;
+  line-height: 2rem;
+  letter-spacing: normal !important;
+  font-family: "Roboto", sans-serif !important;
+  flex: 0 0 90%;
+  max-width: 90%;
 }
-.money-distribution-container{
-  max-width: none;
+
+.money-distribution-date {
+  flex: 0 0 10%;
+  max-width: 10%;
 }
-.money-distribution-table{
-  min-width: 1200px;
+
+.money-distribution-row {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  margin: 0px;
 }
-.budget-for-distribution-text{
-  padding-left: 0px;
-  padding-right: 8px;
-  font-weight: 500 !important;
-  font-size: 1rem !important;
+
+.money-distribution-dep-row{
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  margin: 0px;
+  //padding-bottom: 10px;
 }
-.budget-for-distribution-sum{
-  padding-left: 0px;
-  padding-right: 0px;
+
+.money-distribution-budget-for-distribution-row {
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 80%;
+  max-width: 80%;
 }
-.budget-for-distribution-border-bottom {
+
+.money-distribution-row-budget-for-distribution-border-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  margin: 0px;
   padding-bottom: 15px;
   position: relative;
   flex-wrap: nowrap;
 }
-.budget-for-distribution-border-bottom::after {
-    content: '';
-    position: absolute;
-    bottom: 8px;
-    left: 30px;
-    right: 10px;
-    height: 1px;
-    background-color: rgba(0, 0, 0, 0.4);
-  }
-.dep-for-distribution-text{
+
+.money-distribution-row-budget-for-distribution-border-bottom::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 10px;
+  right: 10px;
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.money-distribution-budget-for-distribution-spacer {
+  flex: 0 0 20%;
+  max-width: 20%;
+}
+
+.money-distribution-budget-for-distribution-text{
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+  flex: 0 0 14%;
+  max-width: 14%;
+  margin-top: 15px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.money-distribution-budget-for-distribution-sum{
   padding-left: 0px;
+  padding-right: 0px;
+  flex: 0 0 20%;
+  max-width: 20%;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.money-distribution-not-allocated-text{
+  padding-left: 0px;
+  padding-right: 0px;
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+  flex: 0 0 10%;
+  max-width: 10%;
+  margin-top: 15px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.money-distribution-not-allocated-sum{
+  padding-left: 0px;
+  padding-right: 0px;
+  flex: 0 0 20%;
+  max-width: 20%;
+  margin-top: 5px;
+}
+
+.money-distribution-budget-for-distribution-spacer-menu {
+  flex: 0 0 16%;
+  max-width: 16%;
+}
+
+.money-distribution-dep-for-distribution-text{
+  flex: 0 0 7%;
+  max-width: 7%;
   padding-right: 16px;
   font-weight: 500 !important;
   font-size: 1rem !important;
+  padding-top:15px;
+  color: rgba(0, 0, 0, 0.6);
 }
-.dep-for-distribution-sum{
-  padding-left: 0px;
-  padding-right: 0px;
+
+.money-distribution-dep-for-distribution-sum{
+  flex: 0 0 13%;
+  max-width: 13%;
+  padding-right: 10px;
 }
-.not-allocated-text{
-  padding-left: 0px;
-  padding-right: 0px;
+
+.money-distribution-not-allocated-dep-text{
+  flex: 0 0 10%;
+  max-width: 10%;
   font-weight: 500 !important;
   font-size: 1rem !important;
+  padding-top:15px;
+  color: rgba(0, 0, 0, 0.6);
 }
-.not-allocated-sum{
-  padding-left: 0px;
-  padding-right: 0px;
+
+.money-distribution-not-allocated-dep-sum{
+  flex: 0 0 20%;
+  max-width: 20%;
+  padding-top: 5px;
 }
-.not-allocated-dep-text{
-  padding-left: 0px;
-  padding-right: 0px;
-  font-weight: 500 !important;
-  font-size: 1rem !important;
-}
-.not-allocated-dep-sum{
-  padding-left: 0px;
-  padding-right: 0px;
-}
+
 .money-distribution-card-text{
   min-height: 750px;
   padding: 0px;
 }
 
-.dep-tree-col{
-  padding-top:0px;
+.money-distribution-dep-spacer {
+  flex: 0 0 5%;
+  max-width: 5%;
 }
-.dep-col{
-  padding-left:0px;
-  padding-top:0px;
+
+.money-distribution-dep-second-spacer {
+  flex: 0 0 10%;
+  max-width: 10%;
 }
-.zero-padding{
+
+.money-distribution-dep-end-spacer {
+  flex: 0 0 20%;
+  max-width: 20%;
+}
+
+.money-distribution-dep-col{
+  flex: 0 0 15%;
+  max-width: 15%;
+}
+
+.money-distribution-save-button{
   padding-left: 0px;
-  padding-right: 0px;
+}
+
+.money-distribution-cancel-button{
+  padding-left: 0px;
+}
+
+.money-distribution-text-danger {
+  color: red;
 }
 
 #moneyDistributionData {
   border-collapse: collapse;
   width: 100%;
 }
+
 #moneyDistributionData table{
   width: 100%
 }
+
 #moneyDistributionData td, #moneyDistributionData th {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 0px;
 }
 
 #moneyDistributionData tr:nth-child(even){background-color: #f2f2f2;}
@@ -621,12 +662,14 @@ export default {
   border-collapse: collapse;
   width: 100%;
 }
+
 #departmentsDataTable table{
   width: 100%
 }
+
 #departmentsDataTable td, #departmentsDataTable th {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 0px;
 }
 
 #departmentsDataTable tr:nth-child(even){background-color: #f2f2f2;}
@@ -640,7 +683,5 @@ export default {
   background-color: #639db1 !important;
   color: white;
 }
-.text-danger {
-  color: red;
-}
+
 </style>

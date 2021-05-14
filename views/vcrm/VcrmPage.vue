@@ -70,57 +70,6 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-list-group no-action>
-          <template #activator>
-            <v-list-item-action class="pr-1 pl-2 mr-1">
-              <v-icon class="blue--text">
-                mdi-credit-card
-              </v-icon>
-            </v-list-item-action>
-
-            <v-list-item-content>
-              <v-list-item-title class="font-weight-medium">
-                Р. оплат (меню)
-              </v-list-item-title>
-            </v-list-item-content>
-          </template>
-          <MenuItemButton
-            title="Журнал документов"
-            link="JournalOfPaymentDocuments"
-            icon="mdi-brightness-5"
-          />
-          <MenuItemButton
-            title="Бюджет оплат по подразделениям"
-            link="PaymentBudgetByDepartments"
-            icon="mdi-brightness-5"
-          />
-          <MenuItemButton
-            title="Журнал рассылки"
-            link="JournalOfEmailSendingPaymentDocuments"
-            icon="mdi-brightness-5"
-          />
-          <MenuItemButton
-            title="Распределение ДС"
-            link="MoneyDistribution"
-            icon="mdi-brightness-5"
-          />
-          <MenuItemButton
-            title="Ввод остатков"
-            link="InputOfBalances"
-            icon="mdi-brightness-5"
-          />
-          <MenuItemButton
-            title="Реестр"
-            link="JournalOfPaymentDocuments"
-            icon="mdi-brightness-5"
-          />
-          <MenuItemButton
-            title="История"
-            link="HistoryOfPaymentDocuments"
-            icon="mdi-brightness-5"
-          />
-        </v-list-group>
-
         <v-list-item
           link
           :to="{ name: 'ChatPage' }"

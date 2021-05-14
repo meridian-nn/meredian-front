@@ -1,139 +1,93 @@
 <template>
-  <div>
-    <v-card>
-      <v-card-text class="journal-of-email-sending-payment-docs-card-text">
-        <v-container
-          class="journal-of-email-sending-payment-docs-container"
+  <div class="journal-of-email-sending-payment-docs-main-div">
+    <div class="journal-of-email-sending-payment-docs-row">
+      <div
+        align="center"
+        class="journal-of-email-sending-payment-docs-main-row-headline"
+      >
+        Журнал рассылки на e-mail документов на оплату
+      </div>
+      <div class="journal-of-email-sending-payment-docs-date">
+        <v-text-field
+          v-model="date"
+          type="date"
+          @input="updateAllInfo()"
         />
-        <v-row>
-          <v-col cols="10">
-            <div
-              align="center"
-              class="journal-of-email-sending-payment-docs-main-row headline"
-            >
-              Журнал рассылки на e-mail документов на оплату
-            </div>
-          </v-col>
-          <v-col cols="2">
-            <v-text-field
-              v-model="date"
-              type="date"
-              @input="updateAllInfo()"
-            />
-          </v-col>
-        </v-row>
+      </div>
+    </div>
 
-        <v-row>
-          <v-col cols="2">
-            <v-autocomplete
-              label="Плательщик"
-              :loading="loadingType.payers"
-              :items="payers"
-              item-value="id"
-              item-text="clName"
-              hide-details="auto"
-              outlined
-              @change="payerChange"
-            />
-          </v-col>
+    <div class="journal-of-email-sending-payment-docs-row-with-btns">
+      <div class="journal-of-email-sending-payment-docs-payer">
+        <v-autocomplete
+          label="Плательщик"
+          :loading="loadingType.payers"
+          :items="payers"
+          item-value="id"
+          item-text="clName"
+          hide-details="auto"
+          outlined
+          @change="payerChange"
+        />
+      </div>
 
-          <v-col cols="2">
-            <!--v-text-field
-              v-model="emailFoSending"
-              type="text"
-              label="Email"
-              outlined
-              hide-details="auto"
-            /-->
-          </v-col>
+      <div class="journal-of-email-sending-payment-docs-spacer">
+        <download-excel
+          :data="documentsForExport"
+          :fields="exportFields"
+          :footer="exportFooter"
+          :name="exportFileName"
+          :before-generate="generateNameForExportFile"
+        >
+          <button
+            ref="downloadExcel"
+          />
+        </download-excel>
+      </div>
 
-          <v-col cols="2">
-            <!--v-subheader class="font-weight-medium text-subtitle-1">
-              файл рассылки
-            </v-subheader-->
-          </v-col>
+      <div class="journal-of-email-sending-payment-docs-dnwld-btn">
+        <v-btn @click="startDownloadExcel">
+          Скачать таблицу
+        </v-btn>
+      </div>
 
-          <v-col cols="2">
-            <!--v-text-field
-              v-model="linkToDocumentForSending"
-              type="text"
-              label="Путь к файлу"
-              outlined
-              hide-details="auto"
-            /-->
-            <download-excel
-              :data="documentsForExport"
-              :fields="exportFields"
-              :footer="exportFooter"
-              :name="exportFileName"
-              :before-generate="generateNameForExportFile"
-            >
-              <!--v-btn ref="downloadExcel">
-                Скачать таблицу
-              </v-btn-->
+      <div class="journal-of-email-sending-payment-docs-spacer-btw-btns" />
 
-              <button
-                ref="downloadExcel"
-              />
-            </download-excel>
-          </v-col>
+      <div class="journal-of-email-sending-payment-docs-print-btn">
+        <v-btn @click="print">
+          Распечатать
+        </v-btn>
+      </div>
 
-          <v-col cols="2">
-            <v-btn @click="startDownloadExcel">
-              Скачать таблицу
-            </v-btn>
-          </v-col>
+      <div class="journal-of-email-sending-payment-docs-spacer-btw-btn-end" />
+    </div>
 
-          <v-col cols="2">
-            <v-btn @click="print">
-              Распечатать
-            </v-btn>
-          </v-col>
-        </v-row>
-
-        <v-row>
-          <v-col>
-            <v-data-table
-              id="dataTable"
-              :headers="documentsFromPayHeaders"
-              :items="documentsFromPayData"
-              :show-select="false"
-              :items-per-page="100"
-              :disable-items-per-page="true"
-              hide-default-footer
-              :footer-props="{ itemsPerPageText: 'Количество строк на странице:' }"
-              class="elevation-1 journal-of-payment-docs-docs-from-pay-table"
-            >
-              <template
-                slot="body.append"
-              >
-                <tr>
-                  <th>Итого</th>
-                  <th />
-                  <th />
-                  <th>{{ totalSumOplat }}</th>
-                  <th />
-                  <th />
-                  <th />
-                </tr>
-              </template>
-            </v-data-table>
-          </v-col>
-        </v-row>
-
-        <!--v-row>
-          <v-col cols="3">
-            <v-btn
-              @click="send"
-            >
-              Отправить
-            </v-btn>
-          </v-col>
-          <v-col cols="3" />
-        </v-row-->
-        </v-container>
-      </v-card-text>
-    </v-card>
+    <div class="journal-of-email-sending-payment-docs-row">
+      <v-data-table
+        id="dataTable"
+        :headers="documentsFromPayHeaders"
+        :items="documentsFromPayData"
+        :show-select="false"
+        :items-per-page="100"
+        :disable-items-per-page="true"
+        hide-default-footer
+        :footer-props="{ itemsPerPageText: 'Количество строк на странице:' }"
+        class="elevation-1 journal-of-email-sending-payment-docs-table"
+      >
+        <template
+          slot="body.append"
+        >
+          <tr>
+            <th>Итого</th>
+            <th />
+            <th />
+            <th>{{ totalSumOplat }}</th>
+            <th />
+            <th />
+            <th />
+          </tr>
+        </template>
+      </v-data-table>
+    </div>
   </div>
 </template>
 
@@ -154,7 +108,7 @@ export default {
       documentsFromPayHeaders: [
         {
           text: 'Дата',
-          value: 'dataCreate'
+          value: 'dataDoc'
         },
         {
           text: 'Номер',
@@ -199,7 +153,7 @@ export default {
 
       // Список колонок таблицы для экспорта в excel
       exportFields: {
-        'Дата': 'dataCreate',
+        'Дата': 'dataDoc',
         'Номер': 'nameDoc',
         'Контрагент': 'namePlat',
         'Сумма оплаты': 'sumOplach',
@@ -312,17 +266,83 @@ export default {
 </script>
 
 <style lang="scss">
-.journal-of-email-sending-payment-docs-card-text{
-  max-height: 1000px;
-}
-.journal-of-email-sending-payment-docs-container{
-  padding-top: 0px;
-  padding-right: 0px;
-  padding-bottom: 0px;
-  max-width: none;
-}
-.journal-of-email-sending-payment-docs-main-row {
-    padding-bottom: 10px;
+.v-data-table td {
+    padding: 0 0px !important;
+    height: 0px !important;
 }
 
+.v-data-table th {
+    padding: 0 0px !important;
+    height: 0px !important;
+}
+
+.journal-of-email-sending-payment-docs-main-div {
+  padding: 10px;
+}
+
+.journal-of-email-sending-payment-docs-row {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  margin: 0px;
+}
+
+.journal-of-email-sending-payment-docs-row-with-btns {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  margin: 0px;
+  padding-bottom: 5px;
+}
+
+.journal-of-email-sending-payment-docs-main-row-headline {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 1.5rem !important;
+  font-weight: 400;
+  line-height: 2rem;
+  letter-spacing: normal !important;
+  font-family: "Roboto", sans-serif !important;
+  flex: 0 0 90%;
+  max-width: 90%;
+}
+
+.journal-of-email-sending-payment-docs-date{
+  flex: 0 0 10%;
+  max-width: 10%;
+}
+
+.journal-of-email-sending-payment-docs-payer{
+  flex: 0 0 20%;
+  max-width: 20%;
+}
+
+.journal-of-email-sending-payment-docs-spacer{
+  flex: 0 0 51%;
+  max-width: 51%;
+}
+
+.journal-of-email-sending-payment-docs-dnwld-btn{
+  flex: 0 0 12%;
+  max-width: 12%;
+}
+
+.journal-of-email-sending-payment-docs-spacer-btw-btns{
+  flex: 0 0 5%;
+  max-width: 5%;
+}
+
+.journal-of-email-sending-payment-docs-print-btn{
+  flex: 0 0 9%;
+  max-width: 9%;
+}
+
+.journal-of-email-sending-payment-docs-spacer-btw-btn-end{
+  flex: 0 0 5%;
+  max-width: 5%;
+}
+
+.journal-of-email-sending-payment-docs-table{
+  flex: 0 0 100%;
+  max-width: 100%;
+}
 </style>

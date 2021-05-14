@@ -80,76 +80,117 @@ const createRouterConst = new Router({
 
     scrollBehavior,
 
-    routes: [   {
-      path: '/meridian',
-      component: VcrmPage,
-      children: [
-        {
-          path: 'dashboard',
-          name: 'Dashboard',
-          component: DashboardPage,
-          children: [
-            {
-              path: 'gtin',
-              name: 'GtinPage',
-              component: GtinPage,
-              meta: {
-                breadcrumb: [
-                  { text: 'Профиль', disabled: false, href: 'Dashboard' },
-                  { text: 'Журнал GTIN', disabled: true, href: 'GtinPage' }
-                ]
-              }
-            },
-            {
-              path: 'mark',
-              name: 'MarkPage',
-              component: MarkPage,
-              meta: {
-                breadcrumb: [
-                  { text: 'Профиль', disabled: false, href: 'Dashboard' },
-                  { text: 'Журнал Кодов Маркировки', disabled: true, href: 'MarkPage' }
-                ]
-              }
-            },
-            {
-              path: 'chat',
-              name: 'ChatPage',
-              component: ChatPage,
-              meta: {
-                breadcrumb: [
-                  { text: 'Профиль', disabled: false, href: 'Dashboard' },
-                  { text: 'Чат', disabled: true, href: 'ChatPage' }
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-        {
-            path: '/meridian/payment_menu',
+    routes: [{
+            path: '/meridian',
             component: VcrmPage,
             children: [{
-                path: '',
-                name: 'PaymentMenu',
-                component: PaymentMenuPage,
-                meta: {
-                    breadcrumb: [
-                        { text: 'Меню реестра оплат', disabled: false }
-                    ]
-                }
+                path: 'dashboard',
+                name: 'Dashboard',
+                component: DashboardPage,
+                children: [{
+                        path: 'gtin',
+                        name: 'GtinPage',
+                        component: GtinPage,
+                        meta: {
+                            breadcrumb: [
+                                { text: 'Профиль', disabled: false, href: 'Dashboard' },
+                                { text: 'Журнал GTIN', disabled: true, href: 'GtinPage' }
+                            ]
+                        }
+                    },
+
+                    {
+                        path: 'mark',
+                        name: 'MarkPage',
+                        component: MarkPage,
+                        meta: {
+                            breadcrumb: [
+                                { text: 'Профиль', disabled: false, href: 'Dashboard' },
+                                { text: 'Журнал Кодов Маркировки', disabled: true, href: 'MarkPage' }
+                            ]
+                        }
+                    },
+
+                    {
+                        path: 'chat',
+                        name: 'ChatPage',
+                        component: ChatPage,
+                        meta: {
+                            breadcrumb: [
+                                { text: 'Профиль', disabled: false, href: 'Dashboard' },
+                                { text: 'Чат', disabled: true, href: 'ChatPage' }
+                            ]
+                        }
+                    },
+
+                    {
+                        path: 'payment_menu',
+                        name: 'PaymentMenu',
+                        component: PaymentMenuPage,
+                        meta: {
+                            breadcrumb: [
+                                { text: 'Меню реестра оплат', disabled: false }
+                            ]
+                        }
+                    },
+
+                    {
+                        path: 'journal_of_payment_documents',
+                        name: 'JournalOfPaymentDocuments',
+                        component: JournalOfPaymentDocumentsPage
+                    },
+
+                    {
+                        path: 'payment_by_cashbox',
+                        name: 'PaymentByCashbox',
+                        component: PaymentByCashboxPage
+                    },
+
+                    {
+                        path: 'internal_payment',
+                        name: 'InternalPayment',
+                        component: InternalPaymentPage
+                    },
+
+                    {
+                        path: 'payment_budget_by_departmens',
+                        name: 'PaymentBudgetByDepartments',
+                        component: PaymentBudgetByDepartmentsPage
+                    },
+
+                    {
+                        path: 'journal_of_email_sending_payment_documents',
+                        name: 'JournalOfEmailSendingPaymentDocuments',
+                        component: JournalOfEmailSendingPaymentDocumentsPage
+                    },
+
+                ]
             }]
         },
-        {
-            path: '/meridian/journal_of_payment_documents',
-            component: VcrmPage,
-            children: [{
-                path: '',
-                name: 'JournalOfPaymentDocuments',
-                component: JournalOfPaymentDocumentsPage
-            }]
-        },
-        {
+        /* {
+                         path: '/meridian/payment_menu',
+                         component: VcrmPage,
+                         children: [{
+                             path: '',
+                             name: 'PaymentMenu',
+                             component: PaymentMenuPage,
+                             meta: {
+                                 breadcrumb: [
+                                     { text: 'Меню реестра оплат', disabled: false }
+                                 ]
+                             }
+                         }]
+                     }, */
+        /* {
+                        path: '/meridian/journal_of_payment_documents',
+                        component: VcrmPage,
+                        children: [{
+                            path: '',
+                            name: 'JournalOfPaymentDocuments',
+                            component: JournalOfPaymentDocumentsPage
+                        }]
+                    }, */
+        /*{
             path: '/meridian/journal_of_email_sending_payment_documents',
             component: VcrmPage,
             children: [{
@@ -175,7 +216,7 @@ const createRouterConst = new Router({
                 name: 'InternalPayment',
                 component: InternalPaymentPage
             }]
-        },
+        },*/
         {
             path: '/meridian/history_of_payment_documents',
             component: VcrmPage,
@@ -203,7 +244,7 @@ const createRouterConst = new Router({
                 component: InputOfBalancesPage
             }]
         },
-        {
+        /*{
             path: '/meridian/payment_budget_by_departmens',
             component: VcrmPage,
             children: [{
@@ -211,7 +252,7 @@ const createRouterConst = new Router({
                 name: 'PaymentBudgetByDepartments',
                 component: PaymentBudgetByDepartmentsPage
             }]
-        },
+        },*/
         {
             path: '/meridian/register_of_documents_to_pay',
             component: VcrmPage,

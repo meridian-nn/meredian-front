@@ -1,121 +1,121 @@
 <template>
-  <v-card>
-    <v-card-text>
-      <v-container class="input-of-balances-container">
-        <v-row>
-          <v-col cols="10">
-            <div
-              align="center"
-              class="headline"
-            >
-              Ввод остатков по Р/С
-            </div>
-          </v-col>
-          <v-col cols="2">
-            <v-text-field
-              v-model="date"
-              type="date"
-              @input="init"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="12">
-            <div id="groupByOrg">
-              <v-client-table
-                v-model="groupByOrgData"
-                :columns="groupByOrgColumns"
-                :options="groupByOrgOptions"
-              />
-            </div>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="5">
-            <v-autocomplete
-              v-model="orgId"
-              label="Организация"
-              :loading="loadingType.organizations"
-              :items="organizations"
-              item-value="id"
-              item-text="clName"
-              @change="findByDataOplatAndMyOrgId"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="12">
-            <div id="oplatData">
-              <v-client-table
-                v-model="oplatData"
-                :columns="oplatDataColumns"
-                :options="oplatDataOptions"
-              >
-                <input
-                  slot="name"
-                  v-model="row.name"
-                  slot-scope="{row, update}"
-                  @input="update(row.name)"
-                >
-                <input
-                  slot="saldo"
-                  v-model="row.saldo"
-                  slot-scope="{row, update}"
-                  type="number"
-                  @input="update(row.saldo)"
-                >
-                <input
-                  slot="nalich"
-                  v-model="row.nalich"
-                  slot-scope="{row, update}"
-                  type="number"
-                  @input="update(row.nalich)"
-                >
-                <input
-                  slot="vnpl"
-                  v-model="row.vnpl"
-                  slot-scope="{row, update}"
-                  type="number"
-                  @input="update(row.vnpl)"
-                >
-                <input
-                  slot="credit"
-                  v-model="row.credit"
-                  slot-scope="{row, update}"
-                  type="number"
-                  @input="update(row.credit)"
-                >
-                <input
-                  slot="endBalance"
-                  v-model="row.endBalance"
-                  slot-scope="{row, update}"
-                  type="number"
-                  @input="update(row.endBalance)"
-                >
-              </v-client-table>
-            </div>
-          </v-col>
-        </v-row>
+  <div class="input-of-balances-main-div">
+    <div class="input-of-balances-row">
+      <div
+        align="center"
+        class="input-of-balances-main-row-headline"
+      >
+        Ввод остатков по Р/С
+      </div>
 
-        <v-row>
-          <v-col cols="3">
-            <v-btn
-              @click="save"
-            >
-              Сохранить
-            </v-btn>
-          </v-col>
-          <v-col cols="3">
-            <v-btn
-              @click="cancel"
-            >
-              Отмена
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-card-text>
-  </v-card>
+      <div class="input-of-balances-date">
+        <v-text-field
+          v-model="date"
+          type="date"
+          @input="init"
+        />
+      </div>
+    </div>
+
+    <div class="input-of-balances-row">
+      <div id="groupByOrg">
+        <v-client-table
+          v-model="groupByOrgData"
+          :columns="groupByOrgColumns"
+          :options="groupByOrgOptions"
+        />
+      </div>
+    </div>
+
+    <div class="input-of-balances-row">
+      <div class="input-of-balances-org">
+        <v-autocomplete
+          v-model="orgId"
+          label="Организация"
+          :loading="loadingType.organizations"
+          :items="organizations"
+          item-value="id"
+          item-text="clName"
+          @change="findByDataOplatAndMyOrgId"
+        />
+      </div>
+    </div>
+
+    <div class="input-of-balances-oplat-data-row">
+      <div id="oplatData">
+        <v-client-table
+          v-model="oplatData"
+          :columns="oplatDataColumns"
+          :options="oplatDataOptions"
+        >
+          <input
+            slot="name"
+            v-model="row.name"
+            slot-scope="{row, update}"
+            @input="update(row.name)"
+          >
+          <input
+            slot="saldo"
+            v-model="row.saldo"
+            slot-scope="{row, update}"
+            type="number"
+            @input="update(row.saldo)"
+          >
+          <input
+            slot="nalich"
+            v-model="row.nalich"
+            slot-scope="{row, update}"
+            type="number"
+            @input="update(row.nalich)"
+          >
+          <input
+            slot="vnpl"
+            v-model="row.vnpl"
+            slot-scope="{row, update}"
+            type="number"
+            @input="update(row.vnpl)"
+          >
+          <input
+            slot="credit"
+            v-model="row.credit"
+            slot-scope="{row, update}"
+            type="number"
+            @input="update(row.credit)"
+          >
+          <input
+            slot="endBalance"
+            v-model="row.endBalance"
+            slot-scope="{row, update}"
+            type="number"
+            @input="update(row.endBalance)"
+          >
+        </v-client-table>
+      </div>
+    </div>
+
+    <div class="input-of-balances-row">
+      <div
+        align="right"
+        class="input-of-balances-save-btn"
+      >
+        <v-btn
+          @click="save"
+        >
+          Сохранить
+        </v-btn>
+      </div>
+
+      <div class="input-of-balances-spacer" />
+
+      <div class="input-of-balances-cancel-btn">
+        <v-btn
+          @click="cancel"
+        >
+          Отмена
+        </v-btn>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -363,8 +363,61 @@ export default {
 </script>
 
 <style lang="scss">
-.input-of-balances-container{
-  max-width: none;
+.input-of-balances-main-div {
+ padding: 10px
+}
+
+.input-of-balances-main-row-headline {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 1.5rem !important;
+  font-weight: 400;
+  line-height: 2rem;
+  letter-spacing: normal !important;
+  font-family: "Roboto", sans-serif !important;
+  flex: 0 0 90%;
+  max-width: 90%;
+}
+
+.input-of-balances-date {
+  flex: 0 0 10%;
+  max-width: 10%;
+}
+
+.input-of-balances-row {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  margin: 0px;
+  min-width: 100%;
+}
+
+.input-of-balances-oplat-data-row {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  margin: 0px;
+  min-width: 100%;
+  padding-bottom:10px
+}
+
+.input-of-balances-org {
+  flex: 0 0 40%;
+  max-width: 40%;
+}
+
+.input-of-balances-save-btn {
+  flex: 0 0 40%;
+  max-width: 40%;
+}
+
+.input-of-balances-spacer {
+  flex: 0 0 10%;
+  max-width: 10%;
+}
+
+.input-of-balances-cancel-btn {
+  flex: 0 0 50%;
+  max-width: 50%;
 }
 
 #groupByOrg {
@@ -376,7 +429,7 @@ export default {
 }
 #groupByOrg td, #groupByOrg th {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 0px;
 }
 
 #groupByOrg tr:nth-child(even){background-color: #f2f2f2;}
@@ -400,7 +453,7 @@ export default {
 }
 #oplatData td, #oplatData th {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 0px;
 }
 
 #oplatData tr:nth-child(even){background-color: #f2f2f2;}
