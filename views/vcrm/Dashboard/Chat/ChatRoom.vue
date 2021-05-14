@@ -81,6 +81,10 @@ export default {
     messageTo: {
       async handler(value) {
         if (value) {
+          if (this.roomInfo) {
+            this.socket.emit('disc', this.roomInfo._id)
+          }
+
           await this.getRoomInfo()
 
           this.socket.emit('init', this.roomInfo._id)

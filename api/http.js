@@ -30,6 +30,7 @@ export default class HttpClient {
 
   async call(url, config) {
     const response = await fetch(url, config)
+      // eslint-disable-next-line require-await
       .then(async(res) => {
         const json = res.json()
 
