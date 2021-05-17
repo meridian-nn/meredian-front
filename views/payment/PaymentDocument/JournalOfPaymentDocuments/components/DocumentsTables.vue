@@ -17,7 +17,16 @@
 
       <div class="journal-of-payment-docs-org-payment-accounts-info">
         <div>
-          <span class="journal-of-payment-docs-headline">{{ restPaymentAccountInfo }}</span>
+          <span class="journal-of-payment-docs-headline">Остаток на Р/Счетах:
+            <vue-numeric
+              v-model="restPaymentAccountInfo"
+              class="journal-of-payment-docs-headline"
+              separator="space"
+              :precision="2"
+              decimal-separator="."
+              :output-type="number"
+              :read-only="true"
+            /></span>
         </div>
         </v-col>
       </div>
@@ -40,7 +49,16 @@
             <span
               class="journal-of-payment-docs-headline"
               :class="{'journal-of-payment-docs-text-danger': currentPaymentAccountBalanceLessThenZero}"
-            >{{ paymentAccountInfo }}</span>
+            >Остаток на Р/С:
+              <vue-numeric
+                v-model="paymentAccountInfo"
+                class="journal-of-payment-docs-headline"
+                separator="space"
+                :precision="2"
+                decimal-separator="."
+                :output-type="number"
+                :read-only="true"
+              /></span>
           </div>
         </div>
       </div>
@@ -68,6 +86,7 @@
           </v-subheader>
 
           <v-data-table
+            id="journal-of-payment-docs-v-data-table-to-pay-docs"
             v-model="toPaySelectedRows"
             :headers="toPayHeaders"
             :items="toPayData"
@@ -86,7 +105,16 @@
                 <th />
                 <th />
                 <th />
-                <th>{{ totalToSumOplat }}</th>
+                <th>
+                  <vue-numeric
+                    v-model="totalToSumOplat"
+                    separator="space"
+                    :precision="2"
+                    decimal-separator="."
+                    :output-type="number"
+                    :read-only="true"
+                  />
+                </th>
                 <th />
               </tr>
             </template>
@@ -215,6 +243,7 @@
           </v-subheader>
 
           <v-data-table
+            id="journal-of-payment-docs-v-data-table-from-pay-docs"
             v-model="fromPaySelectedRows"
             :headers="fromPayHeaders"
             :items="fromPayData"
@@ -225,6 +254,20 @@
             class="elevation-1 journal-of-payment-docs-docs-from-pay-table"
             @contextmenu:row="showFromPayMenu"
           >
+            <!--template #body="{ items }">
+              <tbody>
+                <tr
+                  v-for="item in items"
+                  :key="item.td"
+                >
+                  <td><v-checkbox /></td>
+                  <td>{{ item.depName }}</td>
+                  <td>{{ item.dataDoc }}</td>
+                  <td>{{ item.nameDoc }}</td>
+                </tr>
+              </tbody>
+            </template-->
+
             <template
               slot="body.append"
             >
@@ -235,9 +278,36 @@
                 <th />
                 <th />
                 <th />
-                <th>{{ totalSumDoc }}</th>
-                <th>{{ totalSumOplach }}</th>
-                <th>{{ totalSumOplat }}</th>
+                <th>
+                  <vue-numeric
+                    v-model="totalSumDoc"
+                    separator="space"
+                    :precision="2"
+                    decimal-separator="."
+                    :output-type="number"
+                    :read-only="true"
+                  />
+                </th>
+                <th>
+                  <vue-numeric
+                    v-model="totalSumPaid"
+                    separator="space"
+                    :precision="2"
+                    decimal-separator="."
+                    :output-type="number"
+                    :read-only="true"
+                  />
+                </th>
+                <th>
+                  <vue-numeric
+                    v-model="totalSumOplat"
+                    separator="space"
+                    :precision="2"
+                    decimal-separator="."
+                    :output-type="number"
+                    :read-only="true"
+                  />
+                </th>
                 <th />
               </tr>
             </template>
@@ -251,6 +321,11 @@
             offset-y
           >
             <v-list>
+              <v-list-item @click="payDocumentForContextMenuOnly">
+                <v-list-item-title>
+                  Оплатить
+                </v-list-item-title>
+              </v-list-item>
               <v-list-item @click="historyOfPaymentFromPaymentForContextMenuOnly">
                 <v-list-item-title>
                   История оплат
@@ -315,15 +390,14 @@
         </div>
       </div>
 
-      <div class="journal-of-payment-docs-row">
+      <!--div class="journal-of-payment-docs-row">
         <div class="journal-of-payment-docs-bottom-spacer" />
         <div class="journal-of-payment-docs-bottom-comment">
           <v-text-field
             label="Комментарий"
           />
-          </v-col>
         </div>
-      </div>
+      </div-->
     </div>
   </div>
 </template>
@@ -413,7 +487,7 @@ export default {
         },
         {
           text: 'Плательщик',
-          value: 'namePlat'
+          value: 'myorgName'
         },
         {
           text: 'Дата оплаты',
@@ -425,7 +499,7 @@ export default {
         },
         {
           text: 'Оплачено',
-          value: 'sumOplach'
+          value: 'sumPaid'
         },
         {
           text: 'К оплате',
@@ -443,7 +517,7 @@ export default {
       // Итоговая сумма по колонке "Сумма" документов на оплату
       totalSumDoc: 0,
       // Итоговая сумма по колонке "Оплачено" документов на оплату
-      totalSumOplach: 0,
+      totalSumPaid: 0,
       // Итоговая сумма по колонке "К оплате" документов на оплату
       totalSumOplat: 0,
 
@@ -469,10 +543,11 @@ export default {
       currentRowForContextMenuOfFromPayDocument: null,
 
       // Отображение остатков ден. средств на выбранном расчетном счете
-      paymentAccountInfo: 'Остаток на Р/С:',
+      paymentAccountInfo: 0,
       currentPaymentAccountBalance: 0,
       currentPaymentAccountBalanceLessThenZero: false,
-      restPaymentAccountInfo: 'Остаток на Р/Счетах:'
+      restPaymentAccountInfo: 0,
+      additionalMessage: ''
     }
   },
   mounted() {
@@ -485,6 +560,7 @@ export default {
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
       this.findOrganizatios()
+      this.findSpDocoplForPay()
     },
 
     // Инициализация журнала оплат
@@ -522,7 +598,6 @@ export default {
       this.toPayData = []
       this.totalToSumOplat = 0
       this.findPaymentAccounts(val)
-      this.findSpDocoplForPay()
       // this.updateResPaymentAccountInfo()
     },
 
@@ -562,17 +637,17 @@ export default {
       const responseElement = response.find(el => el.acc.id === accId)
       const saldo = responseElement.saldo
 
-      let additionalMessage = ''
+      this.additionalMessage = ''
       this.currentPaymentAccountBalanceLessThenZero = false
       this.currentPaymentAccountBalance = (saldo - this.totalToSumOplat)
 
       if (this.currentPaymentAccountBalance < 0) {
-        additionalMessage = ' - сумма остатка на расчетном счете меньше нуля!'
+        this.additionalMessage = ' - сумма остатка на расчетном счете меньше нуля!'
         this.currentPaymentAccountBalanceLessThenZero = true
       }
 
       this.currentPaymentAccountBalance = this.currentPaymentAccountBalance.toFixed(2)
-      this.paymentAccountInfo = 'Остаток на Р/С: ' + this.currentPaymentAccountBalance + additionalMessage
+      this.paymentAccountInfo = this.currentPaymentAccountBalance
     },
 
     // Функции поиска остатков ден. средств выбранной организации на тек. дату с учетом документов к оплате по всем расчетным счетам организации
@@ -580,7 +655,9 @@ export default {
       const balanceOfSelectedOrganization = await this.getBalanceOfSelectedOrganization()
       const balanceOfOtherAccounts = await this.getBalanceOfOtherAccounts()
 
-      this.restPaymentAccountInfo = 'Остаток на Р/Счетах: ' + ((balanceOfSelectedOrganization - balanceOfOtherAccounts).toFixed(2))
+      console.log('balance of org' + balanceOfSelectedOrganization)
+      console.log('balance of other accounts' + balanceOfOtherAccounts)
+      this.restPaymentAccountInfo = balanceOfSelectedOrganization - balanceOfOtherAccounts
     },
     async getBalanceOfSelectedOrganization() {
       const data = {
@@ -605,14 +682,9 @@ export default {
       return totalToSumOplat
     },
     async getSumToPayDocsOfOrgByAccId(accId) {
-      const data = {
-        dateDoc: new Date().toLocaleDateString(),
-        accId,
-        orgId: this.selectedOrganization
-      }
-
+      const data = this.createCriteriasForRequestToSearchDocsToPay(accId, this.selectedOrganization)
       let totalToSumOplat = 0
-      const response = await this.$api.payment.docOplToPay.findSpDocoplToPay(data)
+      const response = await this.$api.payment.docOplToPay.findDocumentsByCriterias(data)
       response.forEach((value) => {
         totalToSumOplat += value.sumOplat
       })
@@ -631,7 +703,7 @@ export default {
         accId: val,
         orgId: this.selectedOrganization
       } */
-      const data = this.createCriteriasForRequest(val, this.selectedOrganization)
+      const data = this.createCriteriasForRequestToSearchDocsToPay(val, this.selectedOrganization)
       this.toPayData = await this.$api.payment.docOplToPay.findDocumentsByCriterias(data)
       let totalToSumOplat = 0
       this.toPayData.forEach((value) => {
@@ -640,7 +712,9 @@ export default {
       this.totalToSumOplat = totalToSumOplat.toFixed(2)
       this.updatePaymentAccountInfo(val)
     },
-    createCriteriasForRequest(accId, orgId) {
+
+    // Создает объект с критериями для отбора документов к оплате для запроса на бэк
+    createCriteriasForRequestToSearchDocsToPay(accId, orgId) {
       const secDate = new Date()
       const curDateNum = secDate.getDate()
       secDate.setDate(curDateNum + 1)
@@ -782,6 +856,15 @@ export default {
       console.log('hisoty of payment from payment')
     },
 
+    // Оплата документа на оплату через контекстное меню
+    payDocumentForContextMenuOnly() {
+      this.fromPaySelectedRows = []
+      console.log(this.currentRowForContextMenuOfFromPayDocument)
+      this.fromPaySelectedRows.push(this.currentRowForContextMenuOfFromPayDocument)
+      this.addPaymentDocument()
+      this.fromPaySelectedRows = []
+    },
+
     // Перемещение документа из таблицы "Документы на оплату" в таблицу "Документы к оплате" по нажатию на стрелку
     addPaymentDocument() {
       if (!this.accId) {
@@ -820,31 +903,47 @@ export default {
 
     // Поиск документов для таблицы "Документы на оплату" по выбранной организации
     async findSpDocoplForPay() {
-      const data = {
-        dateDoc: new Date(this.date).toLocaleDateString(),
-        orgId: this.selectedOrganization
-      }
+      const data = this.createCriteriasForRequestToSearchDocsFromPay()
 
-      this.fromPayData = await this.$api.payment.docOplForPay.findSpDocoplForPayBetweenDates(data)
+      this.fromPayData = await this.$api.payment.docOplForPay.findDocumentsByCriteriasForTableInDocumentsJournal(data)
       // $axios.$get('/meridian/oper/spDocopl/findSpDocoplForPay', { params: data })
       let totalSumDoc = 0
       let totalSumOplat = 0
-      let totalSumOplach = 0
+      let totalSumPaid = 0
       this.fromPayData.forEach((value) => {
         totalSumDoc += value.sumDoc
         totalSumOplat += value.sumOplat
-        totalSumOplach += value.sumOplach
+        totalSumPaid += value.sumPaid
+
+        value.sumPaid = value.sumPaid == null ? 0 : value.sumPaid
+        value.sumOplat = value.sumDoc - value.sumPaid
       })
       this.totalSumDoc = totalSumDoc.toFixed(2)
       this.totalSumOplat = totalSumOplat.toFixed(2)
-      this.totalSumOplach = totalSumOplach.toFixed(2)
+      this.totalSumPaid = totalSumPaid.toFixed(2)
+    },
+
+    // Создает объект с критериями отбора документов на оплату для запроса на бэк
+    createCriteriasForRequestToSearchDocsFromPay() {
+      const chousenDate = new Date(this.date)
+      const data = [
+        {
+          'dataType': 'DATE',
+          'key': 'dataDoc',
+          'operation': 'GREATER_THAN',
+          'type': 'AND',
+          'values': [
+            chousenDate.toLocaleDateString()
+          ]
+        }
+
+      ]
+      return data
     },
 
     // Обновление списка документов на оплату при изменении даты
     updateDocoplForPay() {
-      if (this.selectedOrganization) {
-        this.findSpDocoplForPay()
-      }
+      this.findSpDocoplForPay()
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
     },
@@ -858,7 +957,7 @@ export default {
     // Изменение выбранного документа на оплату
     editDocument() {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
-        if (this.fromPaySelectedRows[0].sumOplach !== 0) {
+        if (this.fromPaySelectedRows[0].sumPaid !== 0) {
           this.$refs.userNotification.showUserNotification('error', 'Изменение документа, по которому уже есть оплата, невозможно!')
           return
         }
@@ -887,7 +986,7 @@ export default {
     checkSelectedRowsBeforeDelete(selectedRows) {
       let isDeletionPossible = true
       selectedRows.forEach((row) => {
-        if (row.sumOplach !== 0) {
+        if (row.sumPaid !== 0) {
           isDeletionPossible = false
         }
       })
@@ -1005,12 +1104,22 @@ export default {
 
 <style lang="scss">
 
-.v-data-table td {
+#journal-of-payment-docs-v-data-table-from-pay-docs td {
+    padding: 0 5px !important;
+    height: 0px !important;
+}
+
+#journal-of-payment-docs-v-data-table-from-pay-docs th {
+    padding: 0 5px !important;
+    height: 0px !important;
+}
+
+#journal-of-payment-docs-v-data-table-to-pay-docs td {
     padding: 0 0px !important;
     height: 0px !important;
 }
 
-.v-data-table th {
+#journal-of-payment-docs-v-data-table-to-pay-docs th {
     padding: 0 0px !important;
     height: 0px !important;
 }

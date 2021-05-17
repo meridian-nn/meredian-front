@@ -39,6 +39,7 @@
         class="journal-of-payment-docs-table-of-accounts-statistics"
       >
         <v-data-table
+          id="journal-of-payment-docs-v-data-table-table-of-accounts-statistics"
           :headers="orgAccInfoHeaders"
           :items="orgAccInfoData"
           hide-default-footer
@@ -128,6 +129,16 @@ export default {
 </script>
 
 <style lang="scss">
+#journal-of-payment-docs-v-data-table-table-of-accounts-statistics td {
+    padding: 0 0px !important;
+    height: 0px !important;
+}
+
+#journal-of-payment-docs-v-data-table-table-of-accounts-statistics th {
+    padding: 0 0px !important;
+    height: 0px !important;
+}
+
 .journal-of-payment-docs-main-row {
     color: rgba(0, 0, 0, 0.6);
 }

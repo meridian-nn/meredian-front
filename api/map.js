@@ -239,6 +239,11 @@ export const factory = send => ({
                 return send('POST', `/oper/spDocopl/findBySearchCriterias`, params)
             },
 
+            //Поиск документов с кастомным респонсом для таблицы "Документы на оплату" на форме "Журнал документов на оплату" 
+            findDocumentsByCriteriasForTableInDocumentsJournal(params) {
+                return send('POST', `/oper/spDocoplRead/findBySearchCriterias`, params)
+            },
+
             deleteSelectedPayments(params) {
                 return send('POST', `/oper/spDocopl/deletePayment`, params)
             },

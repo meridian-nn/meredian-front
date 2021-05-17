@@ -673,6 +673,7 @@ export default {
     // функция открытия формы для создания нового документа
     newDocument() {
       this.reset()
+      this.editedItem.paymentStatus = 'BANK'
       this.dialog = true
     },
 
