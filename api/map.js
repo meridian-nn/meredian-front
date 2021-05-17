@@ -37,6 +37,9 @@ export const factory = send => ({
     },
 
     organizations: {
+        findAll() {
+            return send('GET', `/oper/dict/spOrg/findAll`)
+        },
         findByOrgTypeCode(params) {
             return send('GET', `/oper/dict/spOrg/findByOrgTypeCode?${new URLSearchParams(params).toString()}`)
         },
@@ -73,7 +76,7 @@ export const factory = send => ({
         findDocumentTypeById(id) {
             return send('GET', `/oper/dict/spViddocopl/findById/${id}`)
         },
-        findContractsByExecId(params) {
+        findContracts(params) {
             return send('GET', `/oper/dogSelDogSpisSpec/findByMyDescr?${new URLSearchParams(params).toString()}`)
         },
         findGroups() {

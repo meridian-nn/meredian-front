@@ -58,7 +58,7 @@
                 decimal-separator="."
                 :output-type="number"
                 :read-only="true"
-              /></span>
+              /> {{ additionalMessage }} </span>
           </div>
         </div>
       </div>
@@ -626,6 +626,7 @@ export default {
         this.paymentAccountInfo = 'Остаток на Р/С: '
         this.currentPaymentAccountBalance = 0
         this.currentPaymentAccountBalanceLessThenZero = false
+        this.additionalMessage = ''
         return
       }
 
@@ -951,7 +952,11 @@ export default {
     // Функционал кнопок таблицы "Документы на оплату"
     // Добавление нового документа в таблицу "Документы на оплату"
     newDocument() {
-      this.$refs.editPaymentDocument.newDocument()
+      if (this.selectedOrganization == null) {
+        this.$refs.userNotification.showUserNotification('error', 'Выберите организацию!')
+        return
+      }
+      this.$refs.editPaymentDocument.newDocument(this.selectedOrganization)
     },
 
     // Изменение выбранного документа на оплату
