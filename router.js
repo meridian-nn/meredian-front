@@ -64,6 +64,9 @@ const PaymentBudgetByDepartmentsPage = dynamicPage(() =>
 const RegisterOfDocumentsToPayPage = dynamicPage(() =>
     import ('~/views/payment/RegisterOfDocumentsToPay'))
 
+const RegisterOfPaymentsByCashboxPage = dynamicPage(() =>
+    import ('~/views/payment/RegisterOfPaymentsByCashbox'))
+
 const GtinPage = dynamicPage(() =>
     import ('~/views/vcrm/Dashboard/Gtin'))
 
@@ -164,102 +167,37 @@ const createRouterConst = new Router({
                         component: JournalOfEmailSendingPaymentDocumentsPage
                     },
 
+                    {
+                        path: 'history_of_payment_documents',
+                        name: 'HistoryOfPaymentDocuments',
+                        component: HistoryOfPaymentDocumentsPage
+                    },
+
+                    {
+                        path: 'money_distribution',
+                        name: 'MoneyDistribution',
+                        component: MoneyDistributionPage
+                    },
+
+                    {
+                        path: 'input_of_balances',
+                        name: 'InputOfBalances',
+                        component: InputOfBalancesPage
+                    },
+
+                    {
+                        path: 'register_of_documents_to_pay',
+                        name: 'RegisterOfDocumentsToPay',
+                        component: RegisterOfDocumentsToPayPage
+                    },
+
+                    {
+                        path: 'register_of_payments_by_cashbox',
+                        name: 'RegisterOfPaymentsByCashbox',
+                        component: RegisterOfPaymentsByCashboxPage
+                    },
+
                 ]
-            }]
-        },
-        /* {
-                         path: '/meridian/payment_menu',
-                         component: VcrmPage,
-                         children: [{
-                             path: '',
-                             name: 'PaymentMenu',
-                             component: PaymentMenuPage,
-                             meta: {
-                                 breadcrumb: [
-                                     { text: 'Меню реестра оплат', disabled: false }
-                                 ]
-                             }
-                         }]
-                     }, */
-        /* {
-                        path: '/meridian/journal_of_payment_documents',
-                        component: VcrmPage,
-                        children: [{
-                            path: '',
-                            name: 'JournalOfPaymentDocuments',
-                            component: JournalOfPaymentDocumentsPage
-                        }]
-                    }, */
-        /*{
-            path: '/meridian/journal_of_email_sending_payment_documents',
-            component: VcrmPage,
-            children: [{
-                path: '',
-                name: 'JournalOfEmailSendingPaymentDocuments',
-                component: JournalOfEmailSendingPaymentDocumentsPage
-            }]
-        },
-        {
-            path: '/meridian/payment_by_cashbox',
-            component: VcrmPage,
-            children: [{
-                path: '',
-                name: 'PaymentByCashbox',
-                component: PaymentByCashboxPage
-            }]
-        },
-        {
-            path: '/meridian/internal_payment',
-            component: VcrmPage,
-            children: [{
-                path: '',
-                name: 'InternalPayment',
-                component: InternalPaymentPage
-            }]
-        },*/
-        {
-            path: '/meridian/history_of_payment_documents',
-            component: VcrmPage,
-            children: [{
-                path: '',
-                name: 'HistoryOfPaymentDocuments',
-                component: HistoryOfPaymentDocumentsPage
-            }]
-        },
-        {
-            path: '/meridian/money_distribution',
-            component: VcrmPage,
-            children: [{
-                path: '',
-                name: 'MoneyDistribution',
-                component: MoneyDistributionPage
-            }]
-        },
-        {
-            path: '/meridian/input_of_balances',
-            component: VcrmPage,
-            children: [{
-                path: '',
-                name: 'InputOfBalances',
-                component: InputOfBalancesPage
-            }]
-        },
-        /*{
-            path: '/meridian/payment_budget_by_departmens',
-            component: VcrmPage,
-            children: [{
-                path: '',
-                name: 'PaymentBudgetByDepartments',
-                component: PaymentBudgetByDepartmentsPage
-            }]
-        },*/
-        {
-            path: '/meridian/register_of_documents_to_pay',
-            component: VcrmPage,
-            children: [{
-                path: '',
-                name: 'RegisterOfDocumentsToPay',
-                component: RegisterOfDocumentsToPayPage
             }]
         },
         {

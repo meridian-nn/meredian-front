@@ -25,14 +25,12 @@
         <v-container>
           <v-row>
             <v-col cols="12">
-              <v-autocomplete
-                v-model="editedItem.myorgId"
+              <v-text-field
+                v-model="payer.clName"
                 readonly="true"
                 label="Плательщик"
-                :loading="loadingType.payers"
-                :items="payers"
-                item-value="id"
-                item-text="clName"
+                outlined
+                hide-details="auto"
               />
             </v-col>
           </v-row>
@@ -47,43 +45,12 @@
             </v-col>
             <v-col cols="6">
               <v-autocomplete
-                v-model="editedItem.viddocId"
+                v-model="editedItem.typeOfPaymentTransactionId"
                 label="Группа"
                 :loading="loadingType.groups"
                 :items="groups"
                 item-value="id"
-                item-text="nameViddoc"
-              />
-            </v-col>
-          </v-row>
-
-          <v-row>
-            <v-col cols="4">
-              <v-text-field
-                v-model.number="spDocch.hozrasx"
-                type="number"
-                label="Хоз. расходы"
-              />
-            </v-col>
-            <v-col cols="4">
-              <v-text-field
-                v-model.number="spDocch.komand"
-                type="number"
-                label="Командировочные"
-              />
-            </v-col>
-            <v-col cols="4">
-              <v-text-field
-                v-model.number="spDocch.gsm"
-                type="number"
-                label="ГСМ"
-              />
-            </v-col>
-            <v-col cols="4">
-              <v-text-field
-                v-model.number="spDocch.zarpl"
-                type="number"
-                label="Зарплата"
+                item-text="name"
               />
             </v-col>
           </v-row>
@@ -142,7 +109,10 @@ export default {
 
   data() {
     return {
+      // текущая дата
       date: new Date().toLocaleDateString(),
+
+      // признак видимости диалогового окна
       dialog: false,
 
       // объект для отображения загрузки данных для полей
@@ -154,11 +124,11 @@ export default {
       // документ на оплату
       editedItem: {},
 
-      // оплата по кассе (Хозрасходы) - т.е. если выбранная группа = Хозрасходы
-      spDocch: {},
+      // id выбранной организации
+      payerId: null,
 
-      // список плательщиков
-      payers: [],
+      // выбранная организация
+      payer: {},
 
       // список групп
       groups: []
@@ -175,45 +145,32 @@ export default {
 
   methods: {
     init() {
-      this.findPayers()
+      // this.findPayers()
       this.findGroups()
     },
 
     // поиск плательщиков для выбора пользователем на форме(возможно не потребуется)
-    async findPayers() {
-      if (!this.payers.length) {
-        this.loadingType.payers = true
-        this.payers = await this.$api.organizations.findPayers()
-        // $axios.$get('/meridian/oper/dict/spOrg/findPayers')
-        this.loadingType.payers = null
-      }
+    async findPayer() {
+      this.loadingType.payers = true
+      this.payer = await this.$api.organizations.findById(this.payerId)
+      this.loadingType.payers = null
     },
 
     // поиск групп для выбора пользователем на форме
     async findGroups() {
       if (!this.groups.length) {
         this.loadingType.groups = true
-        this.groups = await this.$api.budgetElements.findGroups()
-        // $axios.$get('/meridian/oper/dict/spViddocopl/findGroup')
+        this.groups = await this.$api.payment.typesOfPaymentTransactions.findAll()
         this.loadingType.groups = null
       }
     },
 
-    // открытие формы из журнала документов
-    editDocument(id, accId) {
+    // Открытие формы для создания нового документа "Оплата по кассе"
+    newDocument(selOrgId) {
       this.reset()
-      this.id = id
+      this.payerId = selOrgId
+      this.findPayer()
       this.dialog = true
-      this.findEditedItem(accId)
-    },
-
-    // поиск документа на оплату по id
-    async findEditedItem(accId) {
-      if (this.id) {
-        this.editedItem = await this.$api.payment.docOplForPay.findById(this.id)
-        // $axios.$get('/meridian/oper/spDocopl/findById/' + this.id)
-        this.editedItem.accId = accId
-      }
     },
 
     // функция сохранения оплаты по кассе
@@ -222,27 +179,14 @@ export default {
         return
       }
 
+      const paymentByCashbox = this.createPaymentByCashbox()
       let errorMessage = null
       this.editedItem.dataDoc = this.date
 
-      //  this.$api.payment.docOplForPay.savePayment(this.editedItem)
-      await this.$axios.$post('/oper/spDocopl/savePayment', this.editedItem).catch((error) => {
+      await this.$api.payment.savePaymentByCashbox(paymentByCashbox).catch((error) => {
         errorMessage = error
         alert(errorMessage)
       })
-
-      if (errorMessage == null && this.editedItem.viddocId === 25) {
-        this.spDocch.spDocopl = this.editedItem
-        if (!this.spDocch.id) {
-          this.spDocch.id = 0
-        }
-
-        // this.$api.payment.docOplForPay.saveSpDocch(this.spDocch)
-        await this.$axios.$post('/oper/spDocopl/saveSpDocch', this.spDocch).catch((error) => {
-          errorMessage = error
-          alert(errorMessage)
-        })
-      }
 
       if (errorMessage == null) {
         this.dialog = false
@@ -250,23 +194,36 @@ export default {
       this.$emit('save')
     },
 
+    // Создает документ "Оплата по кассе" для запроса на основе данных, введенных пользователем на форме
+    createPaymentByCashbox() {
+      const paymentByCashbox = {
+        comment: this.editedItem.prim,
+        payer: {
+          id: this.payerId
+        },
+        paymentDate: this.date,
+        paymentOperationSums: [
+          {
+            paymentOperationTypeId: this.editedItem.typeOfPaymentTransactionId,
+            paymentSum: this.editedItem.sumDoc
+          }
+        ],
+        paymentType: {
+          id: 1
+        }
+      }
+      return paymentByCashbox
+    },
+
     // функция проверки заполнения обязательных полей
     checkParamsOfEditedItem() {
       let verificationPassed = true
-      if (this.editedItem.viddocId === 25) {
-        if (!this.spDocch.hozrasx) {
-          this.$refs.userNotification.showUserNotification('error', 'Укажите сумму хоз. расходов!')
-          verificationPassed = false
-        } else if (!this.spDocch.komand) {
-          this.$refs.userNotification.showUserNotification('error', 'Укажите сумму командировочных!')
-          verificationPassed = false
-        } else if (!this.spDocch.gsm) {
-          this.$refs.userNotification.showUserNotification('error', 'Укажите сумму ГСМ!')
-          verificationPassed = false
-        } else if (!this.spDocch.zarpl) {
-          this.$refs.userNotification.showUserNotification('error', 'Укажите сумму зарплаты!')
-          verificationPassed = false
-        }
+      if (!this.editedItem.typeOfPaymentTransactionId) {
+        this.$refs.userNotification.showUserNotification('error', 'Укажите группу!')
+        verificationPassed = false
+      } else if (!this.editedItem.sumDoc) {
+        this.$refs.userNotification.showUserNotification('error', 'Укажите сумму оплаты по кассе!')
+        verificationPassed = false
       }
       return verificationPassed
     },
@@ -284,12 +241,23 @@ export default {
       this.editedItem = {}
       this.spDocch = {}
       this.id = null
-    }
-    /* newDocument() {
-      this.reset()
-      this.dialog = true
-    }, */
+    },
 
+    // открытие формы для редактирования документа "Оплата по кассе"
+    editDocument(id, accId) {
+      this.reset()
+      this.id = id
+      this.dialog = true
+      this.findEditedItem(accId)
+    },
+
+    // поиск документа на оплату по id
+    async findEditedItem(accId) {
+      if (this.id) {
+        this.editedItem = await this.$api.payment.docOplForPay.findById(this.id)
+        this.editedItem.accId = accId
+      }
+    }
   }
 }
 </script>

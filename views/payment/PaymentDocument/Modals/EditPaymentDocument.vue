@@ -104,39 +104,6 @@
             </v-col>
             </v-col>
           </v-row>
-
-          <v-row>
-            <v-col cols="2">
-              <v-subheader class="font-weight-medium text-subtitle-1">
-                Поставщик
-              </v-subheader>
-            </v-col>
-
-            <v-col cols="5">
-              <v-autocomplete
-                v-model="editedItem.ispId"
-                label="Поставщик"
-                :loading="loadingType.executors"
-                :items="executors"
-                item-value="id"
-                item-text="fio"
-                outlined
-                hide-details="auto"
-                @change="findContracts"
-              />
-            </v-col>
-
-            <v-col cols="5">
-              <v-text-field
-                v-model.number="editedItem.sumDoc"
-                type="number"
-                label="Сумма по договору"
-                outlined
-                hide-details="auto"
-                @input="calcSum"
-              />
-            </v-col>
-          </v-row>
         </v-container>
       </v-card-text>
 
@@ -151,7 +118,7 @@
                   </v-subheader>
                 </v-col>
 
-                <v-col cols="6">
+                <v-col cols="5">
                   <v-autocomplete
                     v-model="editedItem.contractId"
                     label="Договор"
@@ -159,13 +126,29 @@
                     :items="contracts"
                     item-value="id"
                     item-text="numDogInt"
+                    clearable="true"
                     outlined
                     hide-details="auto"
                     @change="findSuppliers"
                   />
                 </v-col>
 
-                <v-col cols="3">
+                <v-col cols="4">
+                  <v-text-field
+                    v-model.number="editedItem.sumDoc"
+                    type="number"
+                    label="Сумма по документу"
+                    outlined
+                    hide-details="auto"
+                    @input="calcSum"
+                  />
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-col cols="3" />
+
+                <v-col cols="5">
                   <v-text-field
                     v-model.number="editedItem.sumPaid"
                     readonly="true"
@@ -175,25 +158,8 @@
                     outlined
                   />
                 </v-col>
-              </v-row>
 
-              <v-row>
-                <v-col cols="3" />
-
-                <v-col cols="6">
-                  <v-autocomplete
-                    v-model="editedItem.supplierId"
-                    label="Поставщик"
-                    :loading="loadingType.suppliers"
-                    :items="suppliers"
-                    item-value="id"
-                    item-text="clName"
-                    hide-details="auto"
-                    outlined
-                  />
-                </v-col>
-
-                <v-col cols="3">
+                <v-col cols="4">
                   <v-text-field
                     v-model="editedItem.toPay"
                     readonly="true"
@@ -209,15 +175,12 @@
                 <v-col cols="3" />
 
                 <v-col cols="9">
-                  <v-autocomplete
-                    v-model="editedItem.myorgId"
+                  <v-text-field
+                    v-model="payer.clName"
+                    readonly="true"
                     label="Плательщик"
-                    :loading="loadingType.payers"
-                    :items="payers"
-                    item-value="id"
-                    item-text="clName"
-                    hide-details="auto"
                     outlined
+                    hide-details="auto"
                   />
                 </v-col>
               </v-row>
@@ -374,7 +337,7 @@ export default {
       contracts: [],
 
       // массив плательщиков для выбора пользователем
-      payers: [],
+      payer: '',
 
       // массив клиентов для выбора пользователем
       suppliers: [],
@@ -407,8 +370,10 @@ export default {
       this.findDepartments()
       this.findDocumentType()
       this.findPayers()
+      this.findSuppliers()
       this.findPaymentStatuses()
       this.findDocumentKinds()
+      this.findContracts()
     },
 
     // Поиск документа на оплату для редатирования / создания на основе нового документа
@@ -417,9 +382,10 @@ export default {
         const editedItem = await this.$api.payment.docOplForPay.findById(this.id)
         this.findDocumentType(editedItem.departmentId)
         this.findExecutors(editedItem.departmentId)
-        this.findSuppliers(editedItem.contractId)
-        this.findContracts(editedItem.ispId)
+        // this.findSuppliers(editedItem.contractId)
+        this.findContracts()
         this.editedItem = editedItem
+        this.findPayers()
 
         if (copyDoc) {
           this.id = null
@@ -484,44 +450,41 @@ export default {
           viddocoplId: departmentId
         }
         this.executors = await this.$api.executors.findExecutorsByDepartmentId(data)
-        /* $axios.$get(
-          '/meridian/oper/dict/spIsp/findByViddocopl?viddocoplId=' + departmentId
-        ) */
+
         this.loadingType.executors = null
       } else {
         this.executors = []
       }
     },
 
-    // обновление списка клиентов для выбора пользователем после изменения договора на форме
-    async findSuppliers(dogId) {
+    // обновление списка клиентов для выбора пользователем
+    async findSuppliers() {
       this.loadingType.suppliers = true
 
-      const data = {
-        dogId
-      }
-      this.suppliers = await this.$api.organizations.findByDogId(data)
-      /* $axios.$get(
+      if (this.editedItem.contractId == null) {
+        this.suppliers = await this.$api.organizations.findAll()
+      } else {
+        const data = {
+          dogId: this.editedItem.contractId
+        }
+        this.suppliers = await this.$api.organizations.findByDogId(data)
+        /* $axios.$get(
         '/meridian/oper/dict/spOrg/findByDogId?dogId=' + dogId
       ) */
-      if (this.suppliers.length) {
-        this.editedItem.consumerId = this.suppliers[this.suppliers.length - 1].id
+        if (this.suppliers.length) {
+          this.editedItem.consumerId = this.suppliers[this.suppliers.length - 1].id
+        }
       }
       this.loadingType.suppliers = null
     },
 
     // поиск плательщиков для выбора пользователем
     async findPayers() {
-      if (!this.payers.length) {
-        this.loadingType.payers = true
+      this.loadingType.payer = true
 
-        this.payers = await this.$api.organizations.findPayers()
-        /* $axios.$get(
-          '/meridian/oper/dict/spOrg/findPayers'
-        ) */
+      this.payer = await this.$api.organizations.findById(this.editedItem.myorgId)
 
-        this.loadingType.payers = null
-      }
+      this.loadingType.payer = null
     },
 
     // поиск видов документов для выбора пользователем
@@ -537,12 +500,13 @@ export default {
     },
 
     // обновление списка договоров для выбора пользователем после изменения поставщика на форме
-    async findContracts(executorId) {
+    async findContracts() {
       this.loadingType.contracts = true
+
       const data = {
-        myDescr: executorId
+        myDescr: this.getCurrentUser().email
       }
-      this.contracts = await this.$api.budgetElements.findContractsByExecId(data)
+      this.contracts = await this.$api.budgetElements.findContracts(data)
       /* $axios.$get(
         '/meridian/oper/dogSelDogSpisSpec/findByMyDescr?myDescr=' + executorId
       ) */
@@ -557,17 +521,14 @@ export default {
     // функция отработки события изменения подразделения на форме
     departmentChange(val) {
       // очищаем массивы договоров и поставщиков для выбора пользователем, т.к. они будут изменены выбранным поставщиком
-      this.contracts = []
-      this.suppliers = []
-
-      delete (this.editedItem.ispId)
       delete (this.editedItem.viddocId)
-      delete (this.editedItem.contractId)
-      delete (this.editedItem.supplierId)
-      delete (this.editedItem.consumerId)
 
       this.findDocumentType(val)
       this.findExecutors(val)
+    },
+
+    getCurrentUser() {
+      return this.$store.state.profile.user
     },
 
     // функция отработки события изменения дат на форме
@@ -590,6 +551,7 @@ export default {
       }
 
       let errorMessage = null
+      this.editedItem.ispId = this.editedItem.myorgId
       this.editedItem.dataOplat = new Date(this.editedItem.dataOplat).toLocaleDateString()
       this.editedItem.dataDoc = new Date(this.editedItem.dataDoc).toLocaleDateString()
       await this.$api.payment.docOplForPay.save(this.editedItem)
@@ -623,23 +585,14 @@ export default {
       } else if (!this.editedItem.viddocId) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите тип документа!')
         verificationPassed = false
-      } else if (!this.editedItem.ispId) {
-        this.$refs.userNotification.showUserNotification('error', 'Укажите поставщика!')
-        verificationPassed = false
       } else if (!this.editedItem.sumDoc) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите сумму по договору!')
-        verificationPassed = false
-      } else if (!this.editedItem.contractId) {
-        this.$refs.userNotification.showUserNotification('error', 'Укажите договор плательщика!')
-        verificationPassed = false
-      } else if (!this.editedItem.supplierId) {
-        this.$refs.userNotification.showUserNotification('error', 'Укажите поставщика плательщика!')
         verificationPassed = false
       } else if (!this.editedItem.myorgId) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите плательщика!')
         verificationPassed = false
       } else if (!this.editedItem.consumerId) {
-        this.$refs.userNotification.showUserNotification('error', 'Укажите клиента!')
+        this.$refs.userNotification.showUserNotification('error', 'Укажите клиента документа!')
         verificationPassed = false
       } else if (!this.editedItem.documentKindId) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите вид документа!')
@@ -671,8 +624,10 @@ export default {
     },
 
     // функция открытия формы для создания нового документа
-    newDocument() {
+    newDocument(selOrg) {
       this.reset()
+      this.editedItem.paymentStatus = 'BANK'
+      this.editedItem.myorgId = selOrg
       this.dialog = true
     },
 
