@@ -256,7 +256,7 @@ export default {
 
       const index = this.roomsList.findIndex(item => item.userIds.includes(user.id))
 
-      this.selectRoom(this.roomsList[index])
+      index !== -1 && this.selectRoom(this.roomsList[index])
 
       this.activeChat = index === -1 ? null : index
     },
