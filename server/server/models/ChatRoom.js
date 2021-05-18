@@ -8,8 +8,8 @@ const chatRoomSchema = new mongoose.Schema(
     },
     userIds: Array,
     isNewMessages: {
-      type: Boolean,
-      default: false
+      type: Number,
+      default: 0
     }
   },
   {
