@@ -234,7 +234,6 @@ export default {
     },
 
     findGroupByDep(item) {
-      console.log(item.row)
       const groupByDep = this.arrayForStashAllGroupsByDep.filter(record => record.dataOplat === item.row.dataOplat)
       this.groupByDep = groupByDep
     }
