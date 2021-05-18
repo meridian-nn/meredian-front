@@ -83,7 +83,7 @@ export default {
 
       // Таблица для отображения списка документов оплат по кассе по дням
       groupByDate: [],
-      groupByDateColumns: ['paymentDate', 'orgName', 'operationSum', 'comment'],
+      groupByDateColumns: ['paymentDate', 'orgName', 'operationSum', 'groupName', 'comment'],
       groupByDateOptions: {
         filterable: false,
         pagination: { show: false },
@@ -95,6 +95,7 @@ export default {
           paymentDate: 'Дата оплаты',
           orgName: 'Организация',
           operationSum: 'Сумма оплаты',
+          groupName: 'Группа',
           comment: 'Примечание'
         }
       }
@@ -126,7 +127,7 @@ export default {
       const data = this.createCriteriasForRequest()
 
       const response = await this.$api.payment.findPaymentsByCashboxByCriteria(data)
-      const arrayOfData = this.convertResponseToDataForTable(response)
+      const arrayOfData = await this.convertResponseToDataForTable(response)
 
       if (arrayOfData.length > 0) {
         this.groupByDate = arrayOfData
@@ -136,36 +137,51 @@ export default {
       }
     },
 
-    convertResponseToDataForTable(response) {
+    async convertResponseToDataForTable(response) {
       const arrayOfData = []
       let totalPaymentSumInPeriod = 0
-      response.forEach((item) => {
-        let totalOperationSum = 0
-        item.paymentOperationSums.forEach((operationSum) => {
-          totalOperationSum += operationSum.paymentSum
-        })
+      for (const elem in response) {
+        const item = response[elem]
+        let operationSum = 0
+        let groupName = ''
 
-        totalPaymentSumInPeriod += totalOperationSum
+        if (item.paymentOperationSums.length > 0) {
+          operationSum = item.paymentOperationSums[0].paymentSum
+          groupName = await this.findNameOfOperationTypeById(item.paymentOperationSums[0].paymentOperationTypeId)
+        }
+
+        totalPaymentSumInPeriod += operationSum
 
         const data = {
           paymentDate: item.paymentDate,
           orgName: item.payer.clName,
-          operationSum: totalOperationSum,
+          operationSum,
+          groupName,
           comment: item.comment
         }
 
         arrayOfData.push(data)
-      })
+      }
 
       const data = {
         paymentDate: '',
         orgName: 'Итого',
         operationSum: totalPaymentSumInPeriod,
+        groupName: '',
         comment: ''
       }
       arrayOfData.push(data)
 
       return arrayOfData
+    },
+
+    async findNameOfOperationTypeById(id) {
+      const response = await this.$api.payment.typesOfPaymentTransactions.findById(id)
+      if (Object.prototype.hasOwnProperty.call(response, 'name')) {
+        return response.name
+      } else {
+        return ' '
+      }
     },
 
     createCriteriasForRequest() {
