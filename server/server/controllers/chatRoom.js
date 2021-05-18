@@ -67,6 +67,8 @@ export default {
 
       global.io.sockets.in(roomId).emit('new message', post)
 
+      global.io.sockets.emit('show new message', post)
+
       return res.status(200).json({ success: true, post })
     } catch (error) {
       return res.status(500).json({ success: false, error })
@@ -111,14 +113,14 @@ export default {
     for (const room of rooms) {
       const messages = await ChatMessageModel.getConversationByRoomId(room._id, options)
 
-      const check = messages.find((item) => {
-        return item.readByRecipients.filter((item) => {
-          return Number(item.readByUserId) !== userId
+      const check = messages.filter((item) => {
+        return !item.readByRecipients.find((item) => {
+          return Number(item.readByUserId) === userId
         })
       })
 
-      if (check) {
-        room.isNewMessage = true
+      if (check.length > 0) {
+        room.isNewMessages = check.length
       }
     }
 
