@@ -201,7 +201,9 @@ export default {
   },
 
   computed: {
-    keepOpen() { return this.onClickOutside },
+    keepOpen() {
+      return this.onClickOutside
+    },
 
     user() {
       return this.$store.state.profile.user

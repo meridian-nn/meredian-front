@@ -21,11 +21,31 @@
                   :value="item.id"
                   @click="selectRoom(item)"
                 >
-                  <v-list-item-avatar color="grey lighten-1 white--text">
-                    <v-icon :color="item.active ? 'deep-purple accent-4' : 'white'">
+                  <v-list-item-avatar
+                    v-if="item.isNewMessages === 0"
+                    color="grey lighten-1 white--text"
+                  >
+                    <v-icon color="white">
                       mdi-message-bulleted
                     </v-icon>
                   </v-list-item-avatar>
+
+                  <v-badge
+                    v-else
+                    overlap
+                    offset-x="29"
+                    offset-y="23"
+                    color="green"
+                    :content="item.isNewMessages"
+                  >
+                    <v-list-item-avatar color="grey ml-0 lighten-1 white--text">
+                      <v-icon
+                        color="white"
+                      >
+                        mdi-message-bulleted
+                      </v-icon>
+                    </v-list-item-avatar>
+                  </v-badge>
 
                   <v-list-item-content v-if="item.userInfo">
                     <v-list-item-title v-text="item.userInfo.email " />
@@ -114,6 +134,7 @@
         class="flex-grow-1 flex-shrink-0"
       >
         <chat-room
+          ref="room"
           :socket="socket"
           :active-chat="activeChat"
           :message-to="selectedUser"
@@ -148,7 +169,8 @@ export default {
   data: () => ({
     socket: io(process.env.API_HOST_SOCKET),
     activeChat: null,
-    selectedUser: null
+    selectedUser: null,
+    selectedRoom: null
   }),
 
   computed: {
@@ -160,6 +182,8 @@ export default {
       const { findUserById } = this
 
       return this.roomsList.map((item) => {
+        // eslint-disable-next-line no-unused-expressions
+        item.isNewMessages
         return { ...item, userInfo: findUserById(item)[0] }
       })
     },
@@ -183,9 +207,28 @@ export default {
     })
 
     this.socket.on('remove room', (roomId) => {
-      this.roomsList = this.roomsList.filter(item => item._id !== roomId)
+      if (this.selectedRoom && this.selectedRoom._id === roomId) {
+        this.selectedUser = null
+        this.selectedRoom = null
+      }
 
-      this.selectedUser = null
+      this.roomsList = this.roomsList.filter(item => item._id !== roomId)
+    })
+
+    this.socket.on('show new message', (post) => {
+      const { selectedRoom } = this
+
+      for (const room of this.roomsList) {
+        if (room._id === post.chatRoomId) {
+          if (!selectedRoom) {
+            room.isNewMessages = 1
+          } else if (selectedRoom._id !== room._id) {
+            room.isNewMessages = 1
+          } else if (selectedRoom._id === room._id) {
+            this.$refs.room.markMessageRead(room._id)
+          }
+        }
+      }
     })
   },
 
@@ -198,7 +241,10 @@ export default {
 
       this.removeRoomByIndex(i)
 
-      this.selectedUser = null
+      if (this.selectedRoom && this.selectedRoom._id === id) {
+        this.selectedUser = null
+        this.selectedRoom = null
+      }
     },
 
     removeRoomByIndex(i) {
@@ -210,12 +256,17 @@ export default {
 
       const index = this.roomsList.findIndex(item => item.userIds.includes(user.id))
 
+      this.selectRoom(this.roomsList[index])
+
       this.activeChat = index === -1 ? null : index
     },
 
     selectRoom(room) {
       if (this.socket.connected) {
+        this.selectedRoom = room
         this.selectedUser = this.findUserById(room)[0]
+
+        room.isNewMessages = 0
       }
     },
 
