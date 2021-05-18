@@ -4,7 +4,7 @@
     class="payment-menu"
   >
     <v-row>
-      <div class="payment-menu-col-3" />
+      <div class="payment-menu-col-2" />
 
       <div class="payment-menu-col-2">
         <router-link :to="{ name: 'JournalOfPaymentDocuments' }">
@@ -43,7 +43,7 @@
       </div>
 
       <div class="payment-menu-col-2">
-        <router-link to="/meridian/money_distribution">
+        <router-link :to="{ name: 'MoneyDistribution' }">
           <v-img :src="require('@/assets/img/distribution2.png')" />
         </router-link>
         <div
@@ -55,7 +55,7 @@
       </div>
 
       <div class="payment-menu-col-2">
-        <router-link to="/meridian/input_of_balances">
+        <router-link :to="{ name: 'InputOfBalances' }">
           <v-img :src="require('@/assets/img/bank_acc2.png')" />
         </router-link>
         <div
@@ -67,7 +67,7 @@
       </div>
 
       <div class="payment-menu-col-2">
-        <router-link to="/meridian/history_of_payment_documents">
+        <router-link :to="{ name: 'HistoryOfPaymentDocuments' }">
           <v-img :src="require('@/assets/img/history2.png')" />
         </router-link>
         <div
@@ -79,7 +79,7 @@
       </div>
 
       <div class="payment-menu-col-2">
-        <router-link to="/meridian/register_of_documents_to_pay">
+        <router-link :to="{ name: 'RegisterOfDocumentsToPay' }">
           <v-img :src="require('@/assets/img/registry.png')" />
         </router-link>
         <div
@@ -90,7 +90,19 @@
         </div>
       </div>
 
-      <div class="payment-menu-col-3" />
+      <div class="payment-menu-col-2">
+        <router-link :to="{ name: 'RegisterOfPaymentsByCashbox' }">
+          <v-img :src="require('@/assets/img/registry.png')" />
+        </router-link>
+        <div
+          class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
+          align="center"
+        >
+          Реестр документов оплат по кассе
+        </div>
+      </div>
+
+      <div class="payment-menu-col-2" />
     </v-row>
   </div>
 </template>

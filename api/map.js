@@ -108,6 +108,10 @@ export const factory = send => ({
             return send('POST', `/oper/payment/save`, params)
         },
 
+        findPaymentsByCashboxByCriteria(params) {
+            return send('POST', `/oper/payment/findBySearchCriteria`, params)
+        },
+
         payDocument(params) {
             return send('POST', `/oper/spDocopl/payDocument`, params)
         },
