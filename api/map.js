@@ -104,6 +104,10 @@ export const factory = send => ({
             return send('POST', '/oper/spDocopl/selOplat')
         },
 
+        savePaymentByCashbox(params) {
+            return send('POST', `/oper/payment/save`, params)
+        },
+
         payDocument(params) {
             return send('POST', `/oper/spDocopl/payDocument`, params)
         },
@@ -287,6 +291,26 @@ export const factory = send => ({
             save(params) {
                 return send('POST', `/oper/spOplat/save`, params)
             },
+        },
+
+        typesOfPaymentTransactions: {
+            findAll() {
+                return send('GET', `/oper/dir/paymentOperationType/findAll`)
+            },
+
+            findById(id) {
+                return send('GET', `/oper/dir/paymentOperationType/findById/${id}`)
+            }
+        },
+
+        typesOfPayments: {
+            findAll() {
+                return send('GET', `/oper/dir/paymentType/findAll`)
+            },
+
+            findById(id) {
+                return send('GET', `/oper/dir/paymentType/findById/${id}`)
+            }
         }
     }
 })

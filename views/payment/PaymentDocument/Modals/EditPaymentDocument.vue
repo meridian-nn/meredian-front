@@ -126,6 +126,7 @@
                     :items="contracts"
                     item-value="id"
                     item-text="numDogInt"
+                    clearable="true"
                     outlined
                     hide-details="auto"
                     @change="findSuppliers"

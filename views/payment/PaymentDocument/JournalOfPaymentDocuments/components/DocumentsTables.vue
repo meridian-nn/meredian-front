@@ -85,65 +85,72 @@
             Документы к оплате
           </v-subheader>
 
-          <v-data-table
-            id="journal-of-payment-docs-v-data-table-to-pay-docs"
-            v-model="toPaySelectedRows"
-            :headers="toPayHeaders"
-            :items="toPayData"
-            :items-per-page="5"
-            :show-select="true"
-            :single-select="false"
-            :footer-props="{ itemsPerPageText: 'Количество строк на странице:' }"
-            class="elevation-1 journal-of-payment-docs-docs-to-pay-table"
-            @contextmenu:row="showPayMenu"
+          <div
+            id="journal-of-payment-docs-div-v-data-table"
+            @contextmenu="showPaymentByCashboxMenuOnly"
           >
-            <template slot="body.append">
-              <tr>
-                <th>Итого</th>
-                <th />
-                <th />
-                <th />
-                <th />
-                <th />
-                <th>
-                  <vue-numeric
-                    v-model="totalToSumOplat"
-                    separator="space"
-                    :precision="2"
-                    decimal-separator="."
-                    :output-type="number"
-                    :read-only="true"
-                  />
-                </th>
-                <th />
-              </tr>
-            </template>
-
-            <template #[`item.sumOplat`]="props">
-              <v-edit-dialog
-                :return-value.sync="props.item.sumOplat"
-                large
-                cancel-text="Закрыть"
-                save-text="Сохранить"
-                @save="saveSumOplat(props.item)"
-                @cancel="cancelSumOplat"
+            <v-data-table
+              id="journal-of-payment-docs-v-data-table-to-pay-docs"
+              v-model="toPaySelectedRows"
+              :headers="toPayHeaders"
+              :items="toPayData"
+              :items-per-page="5"
+              :show-select="true"
+              :single-select="false"
+              :footer-props="{ itemsPerPageText: 'Количество строк на странице:' }"
+              class="elevation-1 journal-of-payment-docs-docs-to-pay-table"
+              @contextmenu:row="showPayMenu"
+            >
+              <template
+                slot="body.append"
               >
-                <div>{{ props.item.sumOplat }}</div>
-                <template #input>
-                  <div class="mt-4 title">
-                    Сумма оплаты
-                  </div>
-                  <v-text-field
-                    v-model="props.item.sumOplat"
-                    label="Сумма"
-                    single-line
-                    counter
-                    autofocus
-                  />
-                </template>
-              </v-edit-dialog>
-            </template>
-          </v-data-table>
+                <tr>
+                  <th>Итого</th>
+                  <th />
+                  <th />
+                  <th />
+                  <th />
+                  <th />
+                  <th>
+                    <vue-numeric
+                      v-model="totalToSumOplat"
+                      separator="space"
+                      :precision="2"
+                      decimal-separator="."
+                      :output-type="number"
+                      :read-only="true"
+                    />
+                  </th>
+                  <th />
+                </tr>
+              </template>
+
+              <template #[`item.sumOplat`]="props">
+                <v-edit-dialog
+                  :return-value.sync="props.item.sumOplat"
+                  large
+                  cancel-text="Закрыть"
+                  save-text="Сохранить"
+                  @save="saveSumOplat(props.item)"
+                  @cancel="cancelSumOplat"
+                >
+                  <div>{{ props.item.sumOplat }}</div>
+                  <template #input>
+                    <div class="mt-4 title">
+                      Сумма оплаты
+                    </div>
+                    <v-text-field
+                      v-model="props.item.sumOplat"
+                      label="Сумма"
+                      single-line
+                      counter
+                      autofocus
+                    />
+                  </template>
+                </v-edit-dialog>
+              </template>
+            </v-data-table>
+          </div>
 
           <user-notification ref="userNotification" />
 
@@ -173,6 +180,22 @@
               <v-list-item @click="deleteFromToPayForContextMenuOnly">
                 <v-list-item-title>
                   Удалить из "к оплате"
+                </v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+
+          <v-menu
+            v-model="paymentByCashboxMenuOnly"
+            :position-x="xPaymentByCashboxMenuOnly"
+            :position-y="yPaymentByCashboxMenuOnly"
+            absolute
+            offset-y
+          >
+            <v-list>
+              <v-list-item @click="payedByCashboxForContextMenuOnly">
+                <v-list-item-title>
+                  Оплата по кассе
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -542,6 +565,12 @@ export default {
       yFromPayMenu: 0,
       currentRowForContextMenuOfFromPayDocument: null,
 
+      /* Контекстное меню таблицы документов к оплате только для строки итогов
+         и только для открытия формы создания нового документа "Оплата по кассе" */
+      paymentByCashboxMenuOnly: false,
+      xPaymentByCashboxMenuOnly: 0,
+      yPaymentByCashboxMenuOnly: 0,
+
       // Отображение остатков ден. средств на выбранном расчетном счете
       paymentAccountInfo: 0,
       currentPaymentAccountBalance: 0,
@@ -598,7 +627,6 @@ export default {
       this.toPayData = []
       this.totalToSumOplat = 0
       this.findPaymentAccounts(val)
-      // this.updateResPaymentAccountInfo()
     },
 
     // Функция поиска расчетных счетов выбранной организации
@@ -699,11 +727,6 @@ export default {
 
     // Поиск документов к оплате по выбранному расчетному счету организации
     async findToPay(val) {
-      /* const data = {
-        dateDoc: new Date().toLocaleDateString(),
-        accId: val,
-        orgId: this.selectedOrganization
-      } */
       const data = this.createCriteriasForRequestToSearchDocsToPay(val, this.selectedOrganization)
       this.toPayData = await this.$api.payment.docOplToPay.findDocumentsByCriterias(data)
       let totalToSumOplat = 0
@@ -757,9 +780,10 @@ export default {
     // Вызов контекстного меню таблицы "Документы к оплате"
     showPayMenu(event, item) {
       event.preventDefault()
-      // Закрываем контекстное меню таблицы "Документы на оплату", если оно открыто
+      // Закрываем контекстное меню таблицы "Документы на оплату", контекстное меню "Оплата по кассе",   если они открыты
       this.fromPayMenu = false
       this.currentRowForContextMenuOfFromPayDocument = null
+      this.paymentByCashboxMenuOnly = false
 
       this.payMenu = false
       this.currentRowForContextMenu = null
@@ -771,12 +795,33 @@ export default {
       })
     },
 
+    // Вызов контекстного меню таблицы "Документы к оплате"
+    // Только для создания нового документа "Оплата по кассе"
+    showPaymentByCashboxMenuOnly(event) {
+      // Если открыто контекстное меню строки таблицы "Документы к оплате" - отдаем предпочтение ему
+      if (this.payMenu === true) {
+        return
+      }
+      event.preventDefault()
+      // Закрываем контекстное меню таблицы "Документы на оплату", если оно открыто
+      this.fromPayMenu = false
+      this.currentRowForContextMenuOfFromPayDocument = null
+
+      this.paymentByCashboxMenuOnly = false
+      this.xPaymentByCashboxMenuOnly = event.clientX
+      this.yPaymentByCashboxMenuOnly = event.clientY
+      this.$nextTick(() => {
+        this.paymentByCashboxMenuOnly = true
+      })
+    },
+
     // Вызов контекстного меню таблицы "Документы на оплату"
     showFromPayMenu(event, item) {
       event.preventDefault()
-      // Закрываем контекстное меню таблицы "Документы к оплате", если оно открыто
+      // Закрываем контекстное меню таблицы "Документы к оплате", контекстное меню "Оплата по кассе",  если они открыто
       this.payMenu = false
       this.currentRowForContextMenu = null
+      this.paymentByCashboxMenuOnly = false
 
       this.fromPayMenu = false
       this.currentRowForContextMenuOfFromPayDocument = null
@@ -811,7 +856,12 @@ export default {
     // Функции контекстного меню таблицы документов к оплате
     // Вызов формы "Оплата по кассе"
     payedByCashboxForContextMenuOnly() {
-      this.$refs.paymentByCashbox.editDocument(this.currentRowForContextMenu.docoplId, this.accId)
+      if (this.selectedOrganization == null) {
+        this.$refs.userNotification.showUserNotification('error', 'Выберите организацию!')
+        return
+      }
+
+      this.$refs.paymentByCashbox.newDocument(this.selectedOrganization)
       console.log('payed by cashbox')
     },
 
@@ -839,10 +889,6 @@ export default {
     async deleteSelectedPayments() {
       if (this.toPaySelectedRows && this.toPaySelectedRows.length) {
         const ids = this.toPaySelectedRows.map(value => value.id)
-        /* await this.$api.payment.docOplToPay.deleteSelectedPayments(ids).catch((error) => {
-          const errorMessage = error
-          alert(errorMessage)
-        }) */
         await this.$axios.$post('/oper/spDocopl/deleteSelectedPayments', ids)
 
         this.refreshTables()
