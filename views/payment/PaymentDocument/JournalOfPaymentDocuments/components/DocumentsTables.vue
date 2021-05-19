@@ -19,7 +19,7 @@
         <div>
           <span class="journal-of-payment-docs-headline">Остаток на Р/Счетах:
             <vue-numeric
-              v-model="restPaymentAccountInfo"
+              v-model.number="restPaymentAccountInfo"
               class="journal-of-payment-docs-headline"
               separator="space"
               :precision="2"
@@ -52,14 +52,15 @@
             :class="{'journal-of-payment-docs-text-danger': currentPaymentAccountBalanceLessThenZero}"
           >Остаток на Р/С:
             <vue-numeric
-              v-model="paymentAccountInfo"
+              v-model.number="paymentAccountInfo"
               class="journal-of-payment-docs-headline"
               separator="space"
               :precision="2"
               decimal-separator="."
               :output-type="number"
               :read-only="true"
-            /> {{ additionalMessage }} </span>
+            /> {{ additionalMessage }}
+          </span>
         </div>
       </div>
     </div>
@@ -101,7 +102,7 @@
             :single-select="false"
             disable-pagination
             hide-default-footer
-            class="elevation-1 journal-of-payment-docs-docs-to-pay-table"
+            class="elevation-1"
             @contextmenu:row="showPayMenu"
           >
             <template
@@ -109,7 +110,6 @@
             >
               <tr>
                 <th>Итого</th>
-                <th />
                 <th />
                 <th />
                 <th />
@@ -124,6 +124,7 @@
                     :read-only="true"
                   />
                 </th>
+                <th />
                 <th />
               </tr>
             </template>
@@ -278,7 +279,7 @@
           :single-select="false"
           disable-pagination
           hide-default-footer
-          class="elevation-1 journal-of-payment-docs-docs-from-pay-table"
+          class="elevation-1"
           @contextmenu:row="showFromPayMenu"
           @click:row="fillCommentOfCurrentRow"
         >
@@ -301,7 +302,6 @@
           >
             <tr>
               <th>Итого</th>
-              <th />
               <th />
               <th />
               <th />
@@ -622,8 +622,8 @@ export default {
       this.toPaySelectedRows = []
     },
 
+    // Функция для реализации скроллинга данных в таблице "Документы на оплату"
     fromPayOnScroll(e) {
-      // debounce if scrolling fast
       this.fromPayTimeout && clearTimeout(this.fromPayTimeout)
 
       this.fromPayTimeout = setTimeout(() => {
@@ -640,8 +640,8 @@ export default {
       }, 20)
     },
 
+    // Функция для реализации скроллинга данных в таблице "Документы к оплате"
     toPayOnScroll(e) {
-      // debounce if scrolling fast
       this.toPayTimeout && clearTimeout(this.toPayTimeout)
 
       this.toPayTimeout = setTimeout(() => {
@@ -732,7 +732,7 @@ export default {
       this.paymentAccountInfo = this.currentPaymentAccountBalance
     },
 
-    // Функции поиска остатков ден. средств выбранной организации на тек. дату с учетом документов к оплате по всем расчетным счетам организации
+    // Функции поиска остатков ден. средств выбранной организации на тек. дату с учетом документов к оплате, оплат по кассе по всем расчетным счетам организации
     async updateResPaymentAccountInfo() {
       const balanceOfSelectedOrganization = await this.getBalanceOfSelectedOrganization()
       const balanceOfOtherAccounts = await this.getBalanceOfOtherAccounts()
@@ -753,8 +753,10 @@ export default {
       let totalToSumOplat = 0
       const arrayOfPromises = []
       this.paymentAccounts.forEach((account) => {
-        const promise = this.getSumToPayDocsOfOrgByAccId(account.id)
-        arrayOfPromises.push(promise)
+        const promiseToPay = this.getSumToPayDocsOfOrgByAccId(account.id)
+        const promisePaymentByCashbox = this.getSumOfPaymentByCashboxOfOrgByAccId(account.id)
+        arrayOfPromises.push(promiseToPay)
+        arrayOfPromises.push(promisePaymentByCashbox)
       })
       await Promise.all(arrayOfPromises).then((results) => {
         results.forEach((result) => {
@@ -772,6 +774,17 @@ export default {
       })
       return totalToSumOplat
     },
+    async getSumOfPaymentByCashboxOfOrgByAccId(accId) {
+      const data = this.createCriteriasForRequestToSearchPaymentsByCashbox(accId, this.selectedOrganization)
+      let totalPaymentSum = 0
+      const response = await this.$api.payment.findPaymentsByCashboxByCriterias(data)
+      response.forEach((value) => {
+        if (value.paymentOperationSums.length > 0) {
+          totalPaymentSum += value.paymentOperationSums[0].paymentSum
+        }
+      })
+      return totalPaymentSum
+    },
 
     // Выбор расчетного счета
     paymentAccountChange(val) {
@@ -779,15 +792,90 @@ export default {
     },
 
     // Поиск документов к оплате по выбранному расчетному счету организации
-    async findToPay(val) {
-      const data = this.createCriteriasForRequestToSearchDocsToPay(val, this.selectedOrganization)
-      this.toPayData = await this.$api.payment.docOplToPay.findDocumentsByCriterias(data)
-      let totalToSumOplat = 0
-      this.toPayData.forEach((value) => {
-        totalToSumOplat += value.sumOplat
+    // Данная функция производит поиск документов к оплате и документов оплат по кассе на текущую дату
+    // И добавляет их в таблицу "Документы к оплате"
+    async findToPay(accId) {
+      const dataFromPay = this.createCriteriasForRequestToSearchDocsToPay(accId, this.selectedOrganization)
+      const toPayDataResponse = await this.$api.payment.docOplToPay.findDocumentsByCriterias(dataFromPay)
+
+      const dataPaymentByCashbox = this.createCriteriasForRequestToSearchPaymentsByCashbox(
+        accId, this.selectedOrganization)
+      const paymentByCashboxResponse = await this.$api.payment.findPaymentsByCashboxByCriterias(dataPaymentByCashbox)
+
+      const objFromFunc = this.convertResponsesToDataForToPayTable(paymentByCashboxResponse, toPayDataResponse)
+
+      this.toPayData = objFromFunc.arrayOfData
+      this.totalToSumOplat = objFromFunc.totalPaymentSum.toFixed(2)
+
+      this.updatePaymentAccountInfo(accId)
+    },
+
+    /* Конвертация ответов запросов на получение следующих документов:
+      1.Документы к оплате
+      2.Оплаты по кассе
+      в массив объектов для таблицы "Документы к оплате"
+    */
+    convertResponsesToDataForToPayTable(paymentByCashboxResponse, toPayDataResponse) {
+      const objToReturn = {}
+      let totalPaymentSum = 0
+      const arrayOfDataToReturn = []
+
+      paymentByCashboxResponse.forEach((value) => {
+        let sumPlatFromValue = 0
+
+        if (value.paymentOperationSums.length > 0) {
+          sumPlatFromValue = value.paymentOperationSums[0].paymentSum
+        }
+
+        const item = {
+          dataOplat: value.paymentDate,
+          nameDoc: 'Оплата по кассе',
+          namePlat: value.payer.clName,
+          prCredit: 0,
+          sumOplat: sumPlatFromValue,
+          accId: 0, // value.accId
+          depName: ''
+        }
+
+        totalPaymentSum += sumPlatFromValue
+        arrayOfDataToReturn.push(item)
       })
-      this.totalToSumOplat = totalToSumOplat.toFixed(2)
-      this.updatePaymentAccountInfo(val)
+
+      toPayDataResponse.forEach((value) => {
+        totalPaymentSum += value.sumOplat
+        arrayOfDataToReturn.push(value)
+      })
+
+      objToReturn.totalPaymentSum = totalPaymentSum
+      objToReturn.arrayOfData = arrayOfDataToReturn
+
+      return objToReturn
+    },
+
+    // Создает объект с критериями для отбора документов оплат по кассе для запроса на бэк
+    createCriteriasForRequestToSearchPaymentsByCashbox(accId, orgId) {
+      const data = [
+        {
+          dataType: 'DATE',
+          key: 'paymentDate',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            new Date().toLocaleDateString()
+          ]
+        },
+        {
+          dataType: 'INTEGER',
+          key: 'payer.id',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            orgId
+          ]
+        }
+      ]
+
+      return data
     },
 
     // Создает объект с критериями для отбора документов к оплате для запроса на бэк
@@ -932,6 +1020,7 @@ export default {
       console.log('internal movement')
     },
 
+    // История платежей по документу
     historyOfPaymentForContextMenuOnly() {
       console.log('hisoty of payment')
     },
@@ -1017,8 +1106,8 @@ export default {
       let totalSumPaid = 0
       this.fromPayData.forEach((value) => {
         totalSumDoc += value.sumDoc
-        totalSumOplat += value.sumOplat
         totalSumPaid += value.sumPaid
+        totalSumOplat += (value.sumDoc - value.sumPaid)
 
         value.sumPaid = value.sumPaid == null ? 0 : value.sumPaid
         value.sumOplat = value.sumDoc - value.sumPaid
@@ -1214,7 +1303,7 @@ export default {
 <style lang="scss">
 
 #journal-of-payment-docs-v-data-table-from-pay-docs {
-  max-height: 440px;
+  height: 440px;
   overflow: auto;
 }
 
@@ -1229,7 +1318,7 @@ export default {
 }
 
 #journal-of-payment-docs-v-data-table-to-pay-docs {
-  max-height: 440px;
+  height: 440px;
   overflow: auto;
 }
 
@@ -1296,15 +1385,6 @@ export default {
   flex: 1 1 auto;
   margin: 0px;
   min-width: 100%;
-}
-
-.journal-of-payment-docs-docs-to-pay-table{
-  min-height: 250px;
-}
-
-.journal-of-payment-docs-docs-from-pay-table{
-  min-height: 250px;
-  max-height: 1000px;
 }
 
 .journal-of-payment-docs-context-menu {
