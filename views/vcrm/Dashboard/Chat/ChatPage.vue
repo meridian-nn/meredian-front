@@ -221,9 +221,9 @@ export default {
       for (const room of this.roomsList) {
         if (room._id === post.chatRoomId) {
           if (!selectedRoom) {
-            room.isNewMessages = 1
+            room.isNewMessages += 1
           } else if (selectedRoom._id !== room._id) {
-            room.isNewMessages = 1
+            room.isNewMessages += 1
           } else if (selectedRoom._id === room._id) {
             this.$refs.room.markMessageRead(room._id)
           }
