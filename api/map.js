@@ -37,6 +37,9 @@ export const factory = send => ({
     },
 
     organizations: {
+        findAll() {
+            return send('GET', `/oper/dict/spOrg/findAll`)
+        },
         findByOrgTypeCode(params) {
             return send('GET', `/oper/dict/spOrg/findByOrgTypeCode?${new URLSearchParams(params).toString()}`)
         },
@@ -73,7 +76,7 @@ export const factory = send => ({
         findDocumentTypeById(id) {
             return send('GET', `/oper/dict/spViddocopl/findById/${id}`)
         },
-        findContractsByExecId(params) {
+        findContracts(params) {
             return send('GET', `/oper/dogSelDogSpisSpec/findByMyDescr?${new URLSearchParams(params).toString()}`)
         },
         findGroups() {
@@ -99,6 +102,14 @@ export const factory = send => ({
     payment: {
         selOplat() {
             return send('POST', '/oper/spDocopl/selOplat')
+        },
+
+        savePaymentByCashbox(params) {
+            return send('POST', `/oper/payment/save`, params)
+        },
+
+        findPaymentsByCashboxByCriteria(params) {
+            return send('POST', `/oper/payment/findBySearchCriteria`, params)
         },
 
         payDocument(params) {
@@ -239,6 +250,11 @@ export const factory = send => ({
                 return send('POST', `/oper/spDocopl/findBySearchCriterias`, params)
             },
 
+            //Поиск документов с кастомным респонсом для таблицы "Документы на оплату" на форме "Журнал документов на оплату" 
+            findDocumentsByCriteriasForTableInDocumentsJournal(params) {
+                return send('POST', `/oper/spDocoplRead/findBySearchCriterias`, params)
+            },
+
             deleteSelectedPayments(params) {
                 return send('POST', `/oper/spDocopl/deletePayment`, params)
             },
@@ -279,6 +295,26 @@ export const factory = send => ({
             save(params) {
                 return send('POST', `/oper/spOplat/save`, params)
             },
+        },
+
+        typesOfPaymentTransactions: {
+            findAll() {
+                return send('GET', `/oper/dir/paymentOperationType/findAll`)
+            },
+
+            findById(id) {
+                return send('GET', `/oper/dir/paymentOperationType/findById/${id}`)
+            }
+        },
+
+        typesOfPayments: {
+            findAll() {
+                return send('GET', `/oper/dir/paymentType/findAll`)
+            },
+
+            findById(id) {
+                return send('GET', `/oper/dir/paymentType/findById/${id}`)
+            }
         }
     }
 })

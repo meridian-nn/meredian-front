@@ -23,10 +23,12 @@
         "js2excel": "^1.0.1",
         "nuxt": "^2.14.12",
         "socket.io-client": "^4.0.1",
-        "vue-infinite-loading": "^2.4.5",
-        "xlsx": "^0.16.9",
         "vue-html-to-paper": "^1.3.1",
-        "vue-json-excel": "^0.3.0"
+        "vue-infinite-loading": "^2.4.5",
+        "vue-json-excel": "^0.3.0",
+        "vue-numeric": "^2.4.2",
+        "vue-tables-2": "^2.2.1",
+        "xlsx": "^0.16.9"
     },
     "devDependencies": {
         "@commitlint/cli": "^11.0.0",
@@ -39,19 +41,18 @@
         "babel-eslint": "^10.1.0",
         "eslint": "^7.18.0",
         "eslint-config-prettier": "^7.2.0",
-        "eslint-plugin-nuxt": "^2.0.0",
         "eslint-plugin-cypress": "^2.11.2",
+        "eslint-plugin-nuxt": "^2.0.0",
         "eslint-plugin-prettier": "^3.3.1",
         "eslint-plugin-vue": "^7.5.0",
         "husky": "^4.3.8",
         "lint-staged": "^10.5.3",
+        "node-sass": "^4.14.1",
         "prettier": "^2.2.1",
+        "sass-loader": "^10.0.2",
         "stylelint": "^13.9.0",
         "stylelint-config-prettier": "^8.0.2",
         "stylelint-config-standard": "^20.0.0",
-        "sass-loader": "^10.0.2",
-        "stylelint-webpack-plugin": "^2.1.0",
-        "node-sass": "^4.14.1",
-        "vue-tables-2": "^2.2.1"
+        "stylelint-webpack-plugin": "^2.1.0"
     }
 }
