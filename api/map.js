@@ -63,6 +63,9 @@ export const factory = send => ({
         },
         findByDataOplatAndMyOrgId(params) {
             return send('GET', `/oper/spOplat/findByDataOplatAndMyOrgId?${new URLSearchParams(params).toString()}`)
+        },
+        findById(id) {
+            return send('GET', `/oper/spAcc/findById/${id}`)
         }
     },
 

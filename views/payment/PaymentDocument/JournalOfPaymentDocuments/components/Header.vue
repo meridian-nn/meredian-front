@@ -82,6 +82,7 @@ export default {
         text: '',
         value: 'name'
       })
+
       response.forEach((element) => {
         const columnOrgValueName = 'org' + element.id + 'Value'
         this.orgAccInfoHeaders.push({
@@ -89,6 +90,13 @@ export default {
           orgId: element.id,
           value: columnOrgValueName
         })
+      })
+
+      this.orgAccInfoHeaders.push({
+        text: 'Итого',
+        orgId: '-',
+        value: 'total'
+
       })
       this.findOrgAccInfo()
     },
@@ -107,13 +115,20 @@ export default {
       const orgAccInfoDataCashbox = {}
       orgAccInfoDataCashbox.name = 'Касса'
 
+      let totalSumOfAccounts = 0
+      let totalSumOfCashbox = 0
       this.orgAccInfoHeaders.forEach((orgAccElem) => {
         const responseElem = response.find(el => el.myOrg.id === orgAccElem.orgId)
         if (responseElem) {
           orgAccInfoDataAccounts[orgAccElem.value] = responseElem.saldo
+          totalSumOfAccounts += responseElem.saldo
           orgAccInfoDataCashbox[orgAccElem.value] = 0
+          totalSumOfCashbox += 0
         }
       })
+
+      orgAccInfoDataAccounts.total = totalSumOfAccounts
+      orgAccInfoDataCashbox.total = totalSumOfCashbox
 
       this.orgAccInfoData.push(orgAccInfoDataAccounts)
       this.orgAccInfoData.push(orgAccInfoDataCashbox)

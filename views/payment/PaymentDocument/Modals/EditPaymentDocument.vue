@@ -58,7 +58,7 @@
               />
             </v-col>
 
-            <v-col cols="5">
+            <v-col cols="3">
               <v-autocomplete
                 v-model="editedItem.departmentId"
                 label="Подразделение"
@@ -69,6 +69,18 @@
                 outlined
                 hide-details="auto"
                 @change="departmentChange"
+              />
+            </v-col>
+
+            <v-col cols="2">
+              <v-autocomplete
+                v-model="editedItem.viddocId"
+                label="Тип документа"
+                :loading="loadingType.documentTypes"
+                :items="documentTypes"
+                item-value="id"
+                item-text="nameViddoc"
+                outlined
               />
             </v-col>
           </v-row>
@@ -93,15 +105,16 @@
 
             <v-col cols="5">
               <v-autocomplete
-                v-model="editedItem.viddocId"
-                label="Тип документа"
-                :loading="loadingType.documentTypes"
-                :items="documentTypes"
+                v-model="editedItem.supplierId"
+                label="Поставщик"
+                :loading="loadingType.suppliers"
+                :items="suppliers"
                 item-value="id"
-                item-text="nameViddoc"
+                item-text="clName"
+                hide-details="auto"
+                auto-select-first="true"
                 outlined
               />
-            </v-col>
             </v-col>
           </v-row>
         </v-container>
@@ -129,7 +142,7 @@
                     clearable="true"
                     outlined
                     hide-details="auto"
-                    @change="findSuppliers"
+                    @change="findClients"
                   />
                 </v-col>
 
@@ -148,7 +161,7 @@
               <v-row>
                 <v-col cols="3" />
 
-                <v-col cols="5">
+                <!--v-col cols="5">
                   <v-text-field
                     v-model.number="editedItem.sumPaid"
                     readonly="true"
@@ -157,12 +170,12 @@
                     hide-details="auto"
                     outlined
                   />
-                </v-col>
+                </v-col-->
+                <v-col cols="5" />
 
                 <v-col cols="4">
                   <v-text-field
-                    v-model="editedItem.toPay"
-                    readonly="true"
+                    v-model.number="editedItem.toPay"
                     type="number"
                     label="К оплате"
                     hide-details="auto"
@@ -198,8 +211,8 @@
                   <v-autocomplete
                     v-model="editedItem.consumerId"
                     label="Клиент, для кого поставка"
-                    :loading="loadingType.suppliers"
-                    :items="suppliers"
+                    :loading="loadingType.clients"
+                    :items="clients"
                     item-value="id"
                     item-text="clName"
                     hide-details="auto"
@@ -339,8 +352,11 @@ export default {
       // массив плательщиков для выбора пользователем
       payer: '',
 
-      // массив клиентов для выбора пользователем
+      // массив поставщиков для выбора пользователем
       suppliers: [],
+
+      // массив клиентов для выбора пользователем
+      clients: [],
 
       // массив видов документов для выбора пользователем
       documentKinds: [],
@@ -370,6 +386,7 @@ export default {
       this.findDepartments()
       this.findDocumentType()
       this.findPayers()
+      this.findClients()
       this.findSuppliers()
       this.findPaymentStatuses()
       this.findDocumentKinds()
@@ -458,23 +475,30 @@ export default {
     },
 
     // обновление списка клиентов для выбора пользователем
-    async findSuppliers() {
-      this.loadingType.suppliers = true
+    async findClients() {
+      this.loadingType.clients = true
 
       if (this.editedItem.contractId == null) {
-        this.suppliers = await this.$api.organizations.findAll()
+        this.clients = await this.$api.organizations.findAll()
       } else {
         const data = {
           dogId: this.editedItem.contractId
         }
-        this.suppliers = await this.$api.organizations.findByDogId(data)
-        /* $axios.$get(
-        '/meridian/oper/dict/spOrg/findByDogId?dogId=' + dogId
-      ) */
-        if (this.suppliers.length) {
-          this.editedItem.consumerId = this.suppliers[this.suppliers.length - 1].id
+        this.clients = await this.$api.organizations.findByDogId(data)
+
+        if (this.clients.length) {
+          this.editedItem.consumerId = this.clients[this.clients.length - 1].id
         }
       }
+      this.loadingType.clients = null
+    },
+
+    // обновление списка поставщиков для выбора пользователем
+    async findSuppliers() {
+      this.loadingType.suppliers = true
+
+      this.suppliers = await this.$api.organizations.findAll()
+
       this.loadingType.suppliers = null
     },
 
@@ -555,11 +579,6 @@ export default {
       this.editedItem.dataOplat = new Date(this.editedItem.dataOplat).toLocaleDateString()
       this.editedItem.dataDoc = new Date(this.editedItem.dataDoc).toLocaleDateString()
       await this.$api.payment.docOplForPay.save(this.editedItem)
-      /* await this.$axios.$post(
-        '/oper/spDocopl/save',
-        this.editedItem,
-        this.axiosConfig
-      ) */
         .catch((error) => {
           errorMessage = error
           alert(errorMessage)

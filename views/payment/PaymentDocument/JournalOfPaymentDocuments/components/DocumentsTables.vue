@@ -704,8 +704,8 @@ export default {
     // Функция поиска остатков ден. средств на выбранном расчетном счете
     async updatePaymentAccountInfo(accId) {
       if (!accId) {
-        this.paymentAccountInfo = 'Остаток на Р/С: '
         this.currentPaymentAccountBalance = 0
+        this.paymentAccountInfo = this.currentPaymentAccountBalance
         this.currentPaymentAccountBalanceLessThenZero = false
         this.additionalMessage = ''
         return
@@ -737,8 +737,6 @@ export default {
       const balanceOfSelectedOrganization = await this.getBalanceOfSelectedOrganization()
       const balanceOfOtherAccounts = await this.getBalanceOfOtherAccounts()
 
-      console.log('balance of org' + balanceOfSelectedOrganization)
-      console.log('balance of other accounts' + balanceOfOtherAccounts)
       this.restPaymentAccountInfo = balanceOfSelectedOrganization - balanceOfOtherAccounts
     },
     async getBalanceOfSelectedOrganization() {
@@ -789,6 +787,7 @@ export default {
     // Выбор расчетного счета
     paymentAccountChange(val) {
       this.findToPay(val)
+      this.updateResPaymentAccountInfo()
     },
 
     // Поиск документов к оплате по выбранному расчетному счету организации
@@ -871,6 +870,15 @@ export default {
           type: 'AND',
           values: [
             orgId
+          ]
+        },
+        {
+          dataType: 'INTEGER',
+          key: 'acc.id',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            accId
           ]
         }
       ]
@@ -1007,7 +1015,12 @@ export default {
         return
       }
 
-      this.$refs.paymentByCashbox.newDocument(this.selectedOrganization)
+      if (this.accId == null) {
+        this.$refs.userNotification.showUserNotification('error', 'Выберите расчетный счет!')
+        return
+      }
+
+      this.$refs.paymentByCashbox.newDocument(this.selectedOrganization, this.accId)
       console.log('payed by cashbox')
     },
 
@@ -1053,7 +1066,6 @@ export default {
     // Оплата документа на оплату через контекстное меню
     payDocumentForContextMenuOnly() {
       this.fromPaySelectedRows = []
-      console.log(this.currentRowForContextMenuOfFromPayDocument)
       this.fromPaySelectedRows.push(this.currentRowForContextMenuOfFromPayDocument)
       this.addPaymentDocument()
       this.fromPaySelectedRows = []
@@ -1224,6 +1236,7 @@ export default {
     // Обработка события "Сохранение новой оплаты по кассе"
     savePaymentByCashbox() {
       this.refreshTables()
+      this.updateResPaymentAccountInfo()
     },
 
     // Обработка события "Закрытие модальной формы внутреннего платежа"

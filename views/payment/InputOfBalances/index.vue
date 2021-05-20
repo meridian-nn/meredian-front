@@ -217,7 +217,7 @@ export default {
       for (const element of response) {
         element.name = element.myOrg.shortName
         element.credit = await this.getSumOfDocumentsToPayByOrgId(element.myOrg.id)
-        element.endBalance = element.saldo - element.credit
+        element.endBalance = element.saldo + element.nalich + element.vnpl + element.credit
 
         this.totalSumOfSaldo += element.saldo
         this.totalSumOfNalich += element.nalich
@@ -300,7 +300,7 @@ export default {
       this.oplatData.forEach(async(elem) => {
         elem.shortNameOfAcc = elem.acc.shortName
         elem.credit = await this.getSumToPayDocsOfOrgByAccId(elem.acc.id, elem.myOrg.id)
-        elem.endBalance = elem.saldo - elem.credit
+        elem.endBalance = elem.saldo + elem.nalich + elem.vnpl + elem.credit
       })
       this.oplatData = this.oplatData.sort(this.compare('shortNameOfAcc'))
     },

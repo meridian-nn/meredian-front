@@ -140,8 +140,7 @@ export default {
     async convertResponseToDataForTable(response) {
       const arrayOfData = []
       let totalPaymentSumInPeriod = 0
-      for (const elem in response) {
-        const item = response[elem]
+      for (const item of response) {
         let operationSum = 0
         let groupName = ''
 
