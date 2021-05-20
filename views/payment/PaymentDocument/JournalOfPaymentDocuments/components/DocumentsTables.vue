@@ -136,7 +136,7 @@
                 cancel-text="Закрыть"
                 save-text="Сохранить"
                 @save="saveSumOplat(props.item)"
-                @cancel="cancelSumOplat"
+                @cancel="cancelSumOplat(props.item)"
               >
                 <div>{{ props.item.sumOplat }}</div>
                 <template #input>
@@ -833,7 +833,8 @@ export default {
           prCredit: 0,
           sumOplat: sumPlatFromValue,
           accId: 0, // value.accId
-          depName: ''
+          depName: '',
+          isDoc: false
         }
 
         totalPaymentSum += sumPlatFromValue
@@ -842,6 +843,7 @@ export default {
 
       toPayDataResponse.forEach((value) => {
         totalPaymentSum += value.sumOplat
+        value.isDoc = true
         arrayOfDataToReturn.push(value)
       })
 
@@ -990,6 +992,11 @@ export default {
     // Функции обработки изменения суммы оплаты документа к оплате
     // Сохранение измененной суммы оплаты документа
     async saveSumOplat(selectedDoc) {
+      if (!selectedDoc.isDoc) {
+        this.$refs.userNotification.showUserNotification('warning', 'Изменение суммы оплаты по кассе невозможна!')
+        return
+      }
+
       this.toPaySelectedRows = []
       this.toPaySelectedRows.push(selectedDoc)
 
@@ -1003,7 +1010,11 @@ export default {
     },
 
     // Отмена внесения измененя в сумму оплаты документа
-    cancelSumOplat() {
+    cancelSumOplat(selectedDoc) {
+      if (!selectedDoc.isDoc) {
+        return
+      }
+
       this.$refs.userNotification.showUserNotification('error', 'Сумма оплаты не была изменена')
     },
 
