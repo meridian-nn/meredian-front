@@ -100,6 +100,9 @@ export default {
           sumOplat: 'Сумма оплаты',
           depName: 'Подразделение',
           prim: 'Примечание'
+        },
+        orderBy: {
+          column: 'dataOplat'
         }
       }
 
@@ -134,12 +137,13 @@ export default {
       let totalSumOplat = 0
       response.forEach((value) => {
         totalSumOplat += value.sumOplat
+        value.sumOplat = this.numberToSum(value.sumOplat)
       })
       response.push({
         dataOplat: 'Итого:',
         nameDoc: '',
         namePlat: '',
-        sumOplat: totalSumOplat,
+        sumOplat: this.numberToSum(totalSumOplat),
         depName: '',
         prim: ''
       })

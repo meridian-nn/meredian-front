@@ -68,14 +68,7 @@
           :columns="groupByDateColumns"
           :options="groupByDateOptions"
           @row-click="findGroupByDep"
-        >
-          <!--input
-                  slot="date"
-                  v-model="row.date"
-                  slot-scope="{row, update}"
-                  @input="update(row.date)"
-                -->
-        </v-client-table>
+        />
       </div>
     </div>
 
@@ -122,6 +115,9 @@ export default {
           dataOplat: 'Дата оплаты',
           sumDoc: 'План',
           sumOplach: 'Факт'
+        },
+        orderBy: {
+          column: 'dataOplat'
         }
       },
 
@@ -186,13 +182,17 @@ export default {
         if (record === undefined) {
           record = {
             dataOplat: value.dataOplat,
-            sumDoc: value.sumDoc,
-            sumOplach
+            sumDoc: this.numberToSum(value.sumDoc),
+            sumDocNumber: value.sumDoc,
+            sumOplach: this.numberToSum(sumOplach),
+            sumOplachNumber: sumOplach
           }
           groupByDate.push(record)
         } else {
-          record.sumDoc += value.sumDoc
-          record.sumOplach += sumOplach
+          record.sumDocNumber += value.sumDoc
+          record.sumDoc = this.numberToSum(record.sumDocNumber)
+          record.sumOplachNumber += sumOplach
+          record.sumOplach = this.numberToSum(record.sumOplachNumber)
         }
 
         let recordDep = groupByDep.find(item => item.dataOplat === value.dataOplat && item.dep === depName)
@@ -200,12 +200,14 @@ export default {
           recordDep = {
             dataOplat: value.dataOplat,
             dep: depName,
-            sumFact: sumOplach,
+            sumFact: this.numberToSum(sumOplach),
+            sumFactNumber: sumOplach,
             prim: value.prim
           }
           groupByDep.push(recordDep)
         } else {
-          recordDep.sumFact += sumOplach
+          recordDep.sumFactNumber += sumOplach
+          recordDep.sumFact = this.numberToSum(recordDep.sumFactNumber)
         }
       }
 

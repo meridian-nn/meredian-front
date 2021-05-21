@@ -690,7 +690,7 @@ export default {
         orgId: val
       }
       let paymentAccounts = await this.$api.paymentAccounts.findAccByOrgId(data)
-      paymentAccounts = paymentAccounts.sort(this.compare('shortName'))
+      paymentAccounts = paymentAccounts.sort(this.customCompare('shortName'))
       paymentAccounts.forEach((account) => {
         account.shortName = account.shortName + ' - ' + account.numAcc.slice(account.numAcc.length - 4)
       })
@@ -804,7 +804,7 @@ export default {
       const objFromFunc = this.convertResponsesToDataForToPayTable(paymentByCashboxResponse, toPayDataResponse)
 
       this.toPayData = objFromFunc.arrayOfData
-      this.totalToSumOplat = objFromFunc.totalPaymentSum.toFixed(2)
+      this.totalToSumOplat = objFromFunc.totalPaymentSum
 
       this.updatePaymentAccountInfo(accId)
     },
@@ -831,7 +831,7 @@ export default {
           nameDoc: 'Оплата по кассе',
           namePlat: value.payer.clName,
           prCredit: 0,
-          sumOplat: sumPlatFromValue,
+          sumOplat: this.numberToSum(sumPlatFromValue),
           accId: 0, // value.accId
           depName: '',
           isDoc: false
@@ -843,6 +843,7 @@ export default {
 
       toPayDataResponse.forEach((value) => {
         totalPaymentSum += value.sumOplat
+        value.sumOplat = this.numberToSum(value.sumOplat)
         value.isDoc = true
         arrayOfDataToReturn.push(value)
       })
@@ -1123,7 +1124,6 @@ export default {
       const data = this.createCriteriasForRequestToSearchDocsFromPay()
 
       this.fromPayData = await this.$api.payment.docOplForPay.findDocumentsByCriteriasForTableInDocumentsJournal(data)
-      // $axios.$get('/meridian/oper/spDocopl/findSpDocoplForPay', { params: data })
       let totalSumDoc = 0
       let totalSumOplat = 0
       let totalSumPaid = 0
@@ -1134,6 +1134,10 @@ export default {
 
         value.sumPaid = value.sumPaid == null ? 0 : value.sumPaid
         value.sumOplat = value.sumDoc - value.sumPaid
+
+        value.sumDoc = this.numberToSum(value.sumDoc)
+        value.sumPaid = this.numberToSum(value.sumPaid)
+        value.sumOplat = this.numberToSum(value.sumOplat)
       })
       this.totalSumDoc = totalSumDoc.toFixed(2)
       this.totalSumOplat = totalSumOplat.toFixed(2)
@@ -1259,66 +1263,6 @@ export default {
     saveInternalPayment() {
       this.refreshTables()
       console.log('save internal payment')
-    },
-
-    // Функция для сортировки массивов по переданному полю
-    /* Примеры использования
-    arr.sort(compare()); - Обычная типобезопасная сортировка по возрастанию
-    arr.sort(compare(-1)); - Обычная типобезопасная сортировка по убыванию
-    arr.sort(compare('field')); - Сортировка по свойству field по возрастанию
-    arr.sort(compare('field', -1)); - Сортировка по свойству field по убыванию
-
-    Сортировка сначала по полю field1
-    при совпадении по полю field2, а если и оно совпало, то по полю field3
-    все по возрастанию
-    arr.sort(compare('field1', 'field2', 'field3'));
-
-    Сортировка сначала по полю field1 по возрастанию
-    при совпадении по полю field2 по убыванию
-    arr.sort(compare({
-        field1 : 1,
-        field2 : -1
-    })); */
-    compare(field, order) {
-      let len = arguments.length
-      if (len === 0) {
-        return (a, b) => (a < b && -1) || (a > b && 1) || 0
-      }
-      if (len === 1) {
-        switch (typeof field) {
-          case 'number':
-            return field < 0
-              ? (a, b) => (a < b && 1) || (a > b && -1) || 0
-              : (a, b) => (a < b && -1) || (a > b && 1) || 0
-          case 'string':
-            return (a, b) => (a[field] < b[field] && -1) || (a[field] > b[field] && 1) || 0
-        }
-      }
-      if (len === 2 && typeof order === 'number') {
-        return order < 0
-          ? (a, b) => (a[field] < b[field] && 1) || (a[field] > b[field] && -1) || 0
-          : (a, b) => (a[field] < b[field] && -1) || (a[field] > b[field] && 1) || 0
-      }
-      let fields, orders
-      if (typeof field === 'object') {
-        fields = Object.getOwnPropertyNames(field)
-        orders = fields.map(key => field[key])
-        len = fields.length
-      } else {
-        fields = new Array(len)
-        orders = new Array(len)
-        for (let i = len; i--;) {
-          fields[i] = arguments[i]
-          orders[i] = 1
-        }
-      }
-      return (a, b) => {
-        for (let i = 0; i < len; i++) {
-          if (a[fields[i]] < b[fields[i]]) { return orders[i] }
-          if (a[fields[i]] > b[fields[i]]) { return -orders[i] }
-        }
-        return 0
-      }
     }
   }
 }

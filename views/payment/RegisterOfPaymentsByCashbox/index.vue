@@ -97,6 +97,9 @@ export default {
           operationSum: 'Сумма оплаты',
           groupName: 'Группа',
           comment: 'Примечание'
+        },
+        orderBy: {
+          column: 'paymentDate'
         }
       }
     }
@@ -154,7 +157,7 @@ export default {
         const data = {
           paymentDate: item.paymentDate,
           orgName: item.payer.clName,
-          operationSum,
+          operationSum: this.numberToSum(operationSum),
           groupName,
           comment: item.comment
         }
@@ -163,9 +166,9 @@ export default {
       }
 
       const data = {
-        paymentDate: '',
-        orgName: 'Итого',
-        operationSum: totalPaymentSumInPeriod,
+        paymentDate: 'Итого:',
+        orgName: '',
+        operationSum: this.numberToSum(totalPaymentSumInPeriod),
         groupName: '',
         comment: ''
       }

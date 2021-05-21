@@ -120,24 +120,19 @@ export default {
       this.orgAccInfoHeaders.forEach((orgAccElem) => {
         const responseElem = response.find(el => el.myOrg.id === orgAccElem.orgId)
         if (responseElem) {
-          orgAccInfoDataAccounts[orgAccElem.value] = responseElem.saldo
+          orgAccInfoDataAccounts[orgAccElem.value] = this.numberToSum(responseElem.saldo)
           totalSumOfAccounts += responseElem.saldo
-          orgAccInfoDataCashbox[orgAccElem.value] = 0
+          orgAccInfoDataCashbox[orgAccElem.value] = this.numberToSum(0)
           totalSumOfCashbox += 0
         }
       })
 
-      orgAccInfoDataAccounts.total = totalSumOfAccounts
-      orgAccInfoDataCashbox.total = totalSumOfCashbox
+      orgAccInfoDataAccounts.total = this.numberToSum(totalSumOfAccounts)
+      orgAccInfoDataCashbox.total = this.numberToSum(totalSumOfCashbox)
 
       this.orgAccInfoData.push(orgAccInfoDataAccounts)
       this.orgAccInfoData.push(orgAccInfoDataCashbox)
     }
-    /* async findOrgAccInfo() {
-      if (!this.orgAccInfoData.length) {
-        this.orgAccInfoData = await this.$axios.$get('/meridian/oper/spDocopl/getOrgAccInfo', this.axiosConfig)
-      }
-    }, */
   }
 }
 
