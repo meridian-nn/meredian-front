@@ -129,7 +129,7 @@
               </tr>
             </template>
 
-            <template #[`item.sumOplat`]="props">
+            <template #[`item.sumOplatMask`]="props">
               <v-edit-dialog
                 :return-value.sync="props.item.sumOplat"
                 large
@@ -138,18 +138,21 @@
                 @save="saveSumOplat(props.item)"
                 @cancel="cancelSumOplat(props.item)"
               >
-                <div>{{ props.item.sumOplat }}</div>
+                <div>{{ props.item.sumOplatMask }}</div>
                 <template #input>
                   <div class="mt-4 title">
                     Сумма оплаты
                   </div>
-                  <v-text-field
-                    v-model="props.item.sumOplat"
-                    label="Сумма"
-                    single-line
-                    counter
-                    autofocus
-                  />
+                  <div class="journal-of-payment-docs-brise-input">
+                    <vue-numeric
+                      v-model="props.item.sumOplat"
+                      separator="space"
+                      :precision="2"
+                      decimal-separator="."
+                      :output-type="number"
+                    />
+                    <span class="line" />
+                  </div>
                 </template>
               </v-edit-dialog>
             </template>
@@ -485,7 +488,7 @@ export default {
         },
         {
           text: 'Оплата',
-          value: 'sumOplat'
+          value: 'sumOplatMask'
         },
         {
           text: 'Счёт',
@@ -831,7 +834,7 @@ export default {
           nameDoc: 'Оплата по кассе',
           namePlat: value.payer.clName,
           prCredit: 0,
-          sumOplat: this.numberToSum(sumPlatFromValue),
+          sumOplatMask: this.numberToSum(sumPlatFromValue),
           accId: 0, // value.accId
           depName: '',
           isDoc: false
@@ -843,7 +846,7 @@ export default {
 
       toPayDataResponse.forEach((value) => {
         totalPaymentSum += value.sumOplat
-        value.sumOplat = this.numberToSum(value.sumOplat)
+        value.sumOplatMask = this.numberToSum(value.sumOplat)
         value.isDoc = true
         arrayOfDataToReturn.push(value)
       })
@@ -1135,8 +1138,11 @@ export default {
         value.sumPaid = value.sumPaid == null ? 0 : value.sumPaid
         value.sumOplat = value.sumDoc - value.sumPaid
 
+        value.sumDocNumber = value.sumDoc
         value.sumDoc = this.numberToSum(value.sumDoc)
+        value.sumPaidNumber = value.sumPaid
         value.sumPaid = this.numberToSum(value.sumPaid)
+        value.sumOplatNumber = value.sumOplat
         value.sumOplat = this.numberToSum(value.sumOplat)
       })
       this.totalSumDoc = totalSumDoc.toFixed(2)
@@ -1182,7 +1188,7 @@ export default {
     // Изменение выбранного документа на оплату
     editDocument() {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
-        if (this.fromPaySelectedRows[0].sumPaid !== 0) {
+        if (this.fromPaySelectedRows[0].sumPaidNumber !== 0) {
           this.$refs.userNotification.showUserNotification('error', 'Изменение документа, по которому уже есть оплата, невозможно!')
           return
         }
@@ -1391,6 +1397,57 @@ export default {
 
 .journal-of-payment-docs-text-danger {
   color: red;
+}
+
+.journal-of-payment-docs-brise-input {
+  position: relative;
+  margin: 5px;
+  overflow: hidden;
+}
+
+.journal-of-payment-docs-brise-input input {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  outline: none;
+  border-bottom: 1px solid #999;
+  box-sizing: border-box;
+  font-size: 16px;
+  position: relative;
+  z-index: 5;
+  background: none;
+}
+
+.journal-of-payment-docs-brise-input input:focus ~ label, input:valid ~ label  {
+  top: 0px;
+  transform: scale(0.94) translateX(-2px);
+  color: #639db1;
+}
+
+.journal-of-payment-docs-brise-input .line {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background: #639db1;
+  left: -999px;
+  transition: .25s;
+  opacity: 0;
+  z-index: 6;
+}
+
+.journal-of-payment-docs-brise-input input:focus ~ .line {
+  left: 0;
+  opacity: 1;
+}
+
+.journal-of-payment-docs-brise-input label {
+  position: absolute;
+  left: 10px;
+  top: 45%;
+  transition: ease-out .15s;
+  color: #999;
 }
 
 </style>
