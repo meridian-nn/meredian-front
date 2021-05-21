@@ -54,41 +54,56 @@
             slot-scope="{row, update}"
             @input="update(row.name)"
           >
-          <input
+          <vue-numeric
             slot="saldo"
             v-model.number="row.saldo"
             slot-scope="{row, update}"
-            type="number"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            :output-type="number"
             @input="update(row.saldo)"
-          >
-          <input
+          />
+          <vue-numeric
             slot="nalich"
-            v-model="row.nalich"
+            v-model.number="row.nalich"
             slot-scope="{row, update}"
-            type="number"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            :output-type="number"
             @input="update(row.nalich)"
-          >
-          <input
+          />
+          <vue-numeric
             slot="vnpl"
-            v-model="row.vnpl"
+            v-model.number="row.vnpl"
             slot-scope="{row, update}"
-            type="number"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            :output-type="number"
             @input="update(row.vnpl)"
-          >
-          <input
+          />
+          <vue-numeric
             slot="credit"
-            v-model="row.credit"
+            v-model.number="row.credit"
             slot-scope="{row, update}"
-            type="number"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            :output-type="number"
             @input="update(row.credit)"
-          >
-          <input
+          />
+          <vue-numeric
             slot="endBalance"
-            v-model="row.endBalance"
+            v-model.number="row.endBalance"
             slot-scope="{row, update}"
-            type="number"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            :output-type="number"
             @input="update(row.endBalance)"
-          >
+          />
         </v-client-table>
       </div>
     </div>
@@ -213,7 +228,6 @@ export default {
       }
 
       const response = await this.$api.paymentAccounts.groupByOrg(data)
-      // $axios.$get('/meridian/oper/spOplat/groupByOrg', { params: data })
       for (const element of response) {
         element.name = element.myOrg.shortName
         element.credit = await this.getSumOfDocumentsToPayByOrgId(element.myOrg.id)
@@ -224,15 +238,21 @@ export default {
         this.totalSumOfVNPL += element.vnpl
         this.totalSumOfCredit += element.credit
         this.totalSumOfEndBalance += element.endBalance
+
+        element.saldo = this.numberToSum(element.saldo)
+        element.nalich = this.numberToSum(element.nalich)
+        element.vnpl = this.numberToSum(element.vnpl)
+        element.credit = this.numberToSum(element.credit)
+        element.endBalance = this.numberToSum(element.endBalance)
       }
 
       response.push({
         'name': 'Итого:',
-        'saldo': this.totalSumOfSaldo,
-        'nalich': this.totalSumOfNalich,
-        'vnpl': this.totalSumOfVNPL,
-        'credit': this.totalSumOfCredit,
-        'endBalance': this.totalSumOfEndBalance
+        'saldo': this.numberToSum(this.totalSumOfSaldo),
+        'nalich': this.numberToSum(this.totalSumOfNalich),
+        'vnpl': this.numberToSum(this.totalSumOfVNPL),
+        'credit': this.numberToSum(this.totalSumOfCredit),
+        'endBalance': this.numberToSum(this.totalSumOfEndBalance)
       })
       return response
     },
@@ -241,7 +261,6 @@ export default {
         orgId
       }
       const paymentAccounts = await this.$api.paymentAccounts.findAccByOrgId(data)
-      // $axios.$get('/meridian/oper/spAcc/findByOrgId?orgId=' + orgId)
       const balance = await this.getBalanceOfOtherAccounts(paymentAccounts, orgId)
       return balance
     },
@@ -295,7 +314,6 @@ export default {
         orgId: val || 0
       }
       this.oplatData = await this.$api.paymentAccounts.findByDataOplatAndMyOrgId(data)
-      // $axios.$get('/meridian/oper/spOplat/findByDataOplatAndMyOrgId', { params: data })
       this.oplatData.forEach(async(elem) => {
         elem.shortNameOfAcc = elem.acc.shortName
         elem.credit = await this.getSumToPayDocsOfOrgByAccId(elem.acc.id, elem.myOrg.id)
