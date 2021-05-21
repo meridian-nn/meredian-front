@@ -1,8 +1,9 @@
 <template>
   <div
     name="journal-of-payment-docs-documents-tables"
-    class="journal-of-payment-docs-documents-tables"
   >
+    <journal-of-payment-documents-header ref="journalOfPaymentDocumentsHeader" />
+
     <div class="journal-of-payment-docs-row">
       <div class="journal-of-payment-docs-list-of-orgs">
         <v-autocomplete
@@ -84,7 +85,21 @@
         class="journal-of-payment-docs-to-pay-col-5"
       >
         <v-subheader class="font-weight-medium text-subtitle-1">
-          Документы к оплате
+          <v-row>
+            <div
+              align="center"
+              class="journal-of-payment-docs-subheader-first"
+            >
+              Документы к оплате
+            </div>
+            <div>
+              <v-text-field
+                v-model="date"
+                type="date"
+                @input="updateDocoplForPay()"
+              />
+            </div>
+          </v-row>
         </v-subheader>
 
         <div
@@ -255,21 +270,7 @@
         class="journal-of-payment-docs-for-pay-col-5"
       >
         <v-subheader class="font-weight-medium text-subtitle-1">
-          <v-row>
-            <div
-              align="center"
-              class="journal-of-payment-docs-subheader-first"
-            >
-              Документы на оплату
-            </div>
-            <div>
-              <v-text-field
-                v-model="date"
-                type="date"
-                @input="updateDocoplForPay()"
-              />
-            </div>
-          </v-row>
+          Документы на оплату
         </v-subheader>
 
         <v-data-table
@@ -287,17 +288,21 @@
           @click:row="fillCommentOfCurrentRow"
         >
           <!--template #body="{ items }">
-              <tbody>
-                <tr
-                  v-for="item in items"
-                  :key="item.td"
-                >
-                  <td><v-checkbox /></td>
-                  <td>{{ item.depName }}</td>
-                  <td>{{ item.dataDoc }}</td>
-                  <td>{{ item.nameDoc }}</td>
-                </tr>
-              </tbody>
+            <tbody>
+              <tr
+                v-for="item in items"
+                :key="item.id"
+              >
+                <td>
+                  <v-checkbox :input-value="item.isSelected" />
+                </td>
+                <td>{{ item.dataDoc }}</td>
+                <td class="rower">
+                  {{ item.nameDoc }}
+                </td>
+                <td>{{ item.depName }}</td>
+              </tr>
+            </tbody>
             </template-->
 
           <template
@@ -440,6 +445,7 @@ import PaymentByCashbox from '@/views/payment/PaymentDocument/Modals/PaymentByCa
 import InternalPayment from '@/views/payment/PaymentDocument/Modals/InternalPayment'
 import UserNotification from '@/views/special_components/information_window/UserNotification'
 import PaymentCardByDocument from '@/views/payment/PaymentDocument/Modals/PaymentCardByDocument'
+import JournalOfPaymentDocumentsHeader from './Header'
 
 export default {
   name: 'JournalOfPaymentDocumentsDocumentsTables',
@@ -448,7 +454,8 @@ export default {
     PaymentByCashbox,
     InternalPayment,
     UserNotification,
-    PaymentCardByDocument
+    PaymentCardByDocument,
+    JournalOfPaymentDocumentsHeader
   },
   data() {
     return {
@@ -715,7 +722,7 @@ export default {
       }
 
       const data = {
-        dateOplat: new Date().toLocaleDateString(),
+        dateOplat: new Date(this.date).toLocaleDateString(),
         orgId: this.selectedOrganization
       }
       const response = await this.$api.paymentAccounts.findByDataOplatAndMyOrgId(data)
@@ -744,7 +751,7 @@ export default {
     },
     async getBalanceOfSelectedOrganization() {
       const data = {
-        dateOplat: new Date().toLocaleDateString()
+        dateOplat: new Date(this.date).toLocaleDateString()
       }
       const response = await this.$api.paymentAccounts.groupByOrg(data)
       const responseElement = response.find(el => el.myOrg.id === this.selectedOrganization)
@@ -834,6 +841,7 @@ export default {
           nameDoc: 'Оплата по кассе',
           namePlat: value.payer.clName,
           prCredit: 0,
+          sumOplat: sumPlatFromValue,
           sumOplatMask: this.numberToSum(sumPlatFromValue),
           accId: 0, // value.accId
           depName: '',
@@ -866,7 +874,7 @@ export default {
           operation: 'EQUALS',
           type: 'AND',
           values: [
-            new Date().toLocaleDateString()
+            new Date(this.date).toLocaleDateString()
           ]
         },
         {
@@ -894,10 +902,9 @@ export default {
 
     // Создает объект с критериями для отбора документов к оплате для запроса на бэк
     createCriteriasForRequestToSearchDocsToPay(accId, orgId) {
-      const secDate = new Date()
+      const secDate = new Date(this.date)
       const curDateNum = secDate.getDate()
       secDate.setDate(curDateNum + 1)
-      console.log(secDate)
       const data = [
         {
           'dataType': 'INTEGER',
@@ -925,7 +932,7 @@ export default {
           'operation': 'BETWEEN',
           'type': 'AND',
           'values': [
-            new Date().toLocaleDateString(), secDate.toLocaleDateString()
+            new Date(this.date).toLocaleDateString(), secDate.toLocaleDateString()
           ]
         }
       ]
@@ -1152,7 +1159,6 @@ export default {
 
     // Создает объект с критериями отбора документов на оплату для запроса на бэк
     createCriteriasForRequestToSearchDocsFromPay() {
-      const chousenDate = new Date(this.date)
       const data = [
         {
           'dataType': 'DATE',
@@ -1160,7 +1166,7 @@ export default {
           'operation': 'GREATER_THAN',
           'type': 'AND',
           'values': [
-            chousenDate.toLocaleDateString()
+            new Date().toLocaleDateString()
           ]
         }
 
@@ -1170,7 +1176,11 @@ export default {
 
     // Обновление списка документов на оплату при изменении даты
     updateDocoplForPay() {
-      this.findSpDocoplForPay()
+      this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
+      if (this.accId) {
+        this.findToPay(this.accId)
+        this.updateResPaymentAccountInfo()
+      }
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
     },
@@ -1304,10 +1314,6 @@ export default {
 #journal-of-payment-docs-v-data-table-to-pay-docs th {
     padding: 0 0px !important;
     height: 0px !important;
-}
-
-.journal-of-payment-docs-documents-tables{
-  margin-top: 20px;
 }
 
 .journal-of-payment-docs-to-pay-col-5 {
@@ -1450,4 +1456,7 @@ export default {
   color: #999;
 }
 
+.rower {
+  width: 170px;
+}
 </style>

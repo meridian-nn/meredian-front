@@ -237,7 +237,7 @@ export default {
         }
 
         totalSumOplat += value.sumOplach
-        value.partialPayment = (value.sumDoc !== value.sumOplach)
+        value.partialPayment = (value.sumDoc !== value.sumOplach) ? 'Да' : 'Нет'
         value.sumOplachNumber = value.sumOplach
         value.sumOplach = this.numberToSum(value.sumOplach)
       })

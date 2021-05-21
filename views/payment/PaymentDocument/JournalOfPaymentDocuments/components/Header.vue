@@ -102,9 +102,13 @@ export default {
     },
 
     // Поиск остатков на расчетных счетах найденных организаций
-    async findOrgAccInfo() {
+    async findOrgAccInfo(date) {
+      this.reset()
+      if (date === undefined) {
+        date = new Date()
+      }
       const data = {
-        dateOplat: new Date().toLocaleDateString()
+        dateOplat: new Date(date).toLocaleDateString()
       }
       const response = await this.$api.paymentAccounts.groupByOrg(data)
       this.orgAccInfoData = []
@@ -132,6 +136,10 @@ export default {
 
       this.orgAccInfoData.push(orgAccInfoDataAccounts)
       this.orgAccInfoData.push(orgAccInfoDataCashbox)
+    },
+
+    reset() {
+      this.orgAccInfoData = []
     }
   }
 }
