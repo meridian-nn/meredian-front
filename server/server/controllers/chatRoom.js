@@ -7,9 +7,9 @@ import ChatMessageModel from '../models/ChatMessage.js'
 export default {
   initiate: async(req, res) => {
     try {
-      const { userIds } = req.body
+      const { userIds, owner } = req.body
 
-      const chatRooms = await ChatRoomModel.initiateChat(userIds)
+      const chatRooms = await ChatRoomModel.initiateChat(userIds, owner)
 
       if (chatRooms.new) {
         global.io.sockets.emit('update rooms', chatRooms.data)
@@ -42,6 +42,70 @@ export default {
       const chatRoom = await ChatRoomModel.initiateChat(userIds, projectId)
 
       return res.status(200).json({ success: true, chatRoom })
+    } catch (error) {
+      return res.status(500).json({ success: false, error })
+    }
+  },
+
+  joinRoom: async(req, res) => {
+    try {
+      const validation = makeValidation(types => ({
+        payload: req.body,
+        checks: {
+          roomId: {
+            type: types.string
+          }
+        }
+      }))
+
+      if (!validation.success) { res.status(400).json({ ...validation }) }
+
+      const { userId, roomId } = req.body
+      const chatRoom = await ChatRoomModel.joinRoom(userId, roomId)
+
+      global.io.sockets.emit('update rooms', chatRoom)
+
+      return res.status(200).json({ success: true, chatRoom })
+    } catch (error) {
+      return res.status(500).json({ success: false, error })
+    }
+  },
+
+  createGroupRoom: async(req, res) => {
+    try {
+      const validation = makeValidation(types => ({
+        payload: req.body,
+        checks: {
+          userIds: {
+            type: types.array
+          },
+          title: {
+            type: types.string,
+            options: { empty: true, stringOnly: true }
+          }
+        }
+      }))
+
+      if (!validation.success) { res.status(400).json({ ...validation }) }
+
+      const { userIds, title, ownerId } = req.body
+      const room = await ChatRoomModel.createGroupRoom(userIds, title, ownerId)
+
+      return res.status(200).json({ success: true, room })
+    } catch (error) {
+      return res.status(500).json({ success: false, error })
+    }
+  },
+
+  removeUserOfGroupRoom: async(req, res) => {
+    try {
+      const { userId, roomId } = req.body
+
+      const room = await ChatRoomModel.removeUserOfGroupRoom(userId, roomId)
+
+      global.io.sockets.emit('update rooms', room)
+
+      return res.status(200).json({ success: true, room })
     } catch (error) {
       return res.status(500).json({ success: false, error })
     }

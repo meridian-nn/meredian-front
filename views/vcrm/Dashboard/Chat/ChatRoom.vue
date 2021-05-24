@@ -9,7 +9,112 @@
       class="d-flex flex-column fill-height"
     >
       <v-card-title>
-        {{ messageTo.email }}
+        <div>
+          {{ selectedRoom.title }}
+
+          <v-menu
+            max-width="300"
+            min-width="300"
+            offset-y
+            transition="slide-y-transition"
+            bottom
+          >
+            <template #activator="{ on, attrs }">
+              <div
+                class="grey--text subtitle-2"
+                v-bind="attrs"
+                v-on="on"
+              >
+                {{ selectedRoom.userIds.length }}
+                {{ selectedRoom.userIds.length | pluralize('участник', 'участника', 'участников') }}
+              </div>
+            </template>
+
+            <v-list
+              subheader
+              flat
+              dense
+              class="pa-0"
+            >
+              <v-list-item-group>
+                <template v-for="(item, index) in invitedUsers">
+                  <v-list-item
+                    :key="`parent${index}`"
+                    :value="item._id"
+                  >
+                    <v-list-item-content>
+                      <v-list-item-title v-text="item.email" />
+
+                      <v-list-item-subtitle v-text="item.position" />
+                    </v-list-item-content>
+
+                    <v-list-item-icon
+                      v-if="item.id !== selectedRoom.ownerId && selectedRoom.isGroup && user.id === selectedRoom.ownerId"
+                      @click="removeUserOfRoom(item)"
+                    >
+                      <v-icon>mdi-account-remove</v-icon>
+                    </v-list-item-icon>
+                  </v-list-item>
+
+                  <v-divider
+                    :key="`chatDivider${index}`"
+                    class="my-0"
+                  />
+                </template>
+              </v-list-item-group>
+            </v-list>
+          </v-menu>
+        </div>
+
+        <v-menu
+          v-if="selectedRoom.isGroup"
+          max-width="300"
+          min-width="300"
+          offset-y
+          transition="slide-y-transition"
+          right
+          bottom
+        >
+          <template #activator="{ on, attrs }">
+            <v-btn
+              class="ml-auto"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon>
+                mdi-account-multiple-plus
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <v-list
+            subheader
+            flat
+            dense
+            class="pa-0"
+          >
+            <v-list-item-group>
+              <template v-for="(item, index) in inviteUsers">
+                <v-list-item
+                  :key="`parent${index}`"
+                  :value="item._id"
+                  @click="invateUser(item)"
+                >
+                  <v-list-item-content>
+                    <v-list-item-title v-text="item.email" />
+
+                    <v-list-item-subtitle v-text="item.position" />
+                  </v-list-item-content>
+                </v-list-item>
+
+                <v-divider
+                  :key="`chatDivider${index}`"
+                  class="my-0"
+                />
+              </template>
+            </v-list-item-group>
+          </v-list>
+        </v-menu>
       </v-card-title>
 
       <v-card-text
@@ -59,6 +164,16 @@ export default {
       default: 1
     },
 
+    userList: {
+      type: Array,
+      default: () => []
+    },
+
+    selectedRoom: {
+      type: Object,
+      default: () => {}
+    },
+
     socket: {
       required: true
     },
@@ -77,21 +192,41 @@ export default {
     }
   }),
 
+  computed: {
+    user() {
+      return this.$store.state.profile.user
+    },
+
+    invitedUsers() {
+      const { selectedRoom } = this
+
+      return this.userList.filter((user) => {
+        return selectedRoom.userIds.includes(user.id)
+      })
+    },
+
+    inviteUsers() {
+      const { selectedRoom } = this
+
+      return this.userList.filter((user) => {
+        return !selectedRoom.userIds.includes(user.id)
+      })
+    }
+  },
+
   watch: {
-    messageTo: {
+    selectedRoom: {
       async handler(value) {
         if (value) {
-          if (this.roomInfo) {
-            this.socket.emit('disc', this.roomInfo._id)
+          if (this.selectedRoom) {
+            this.socket.emit('disc', this.selectedRoom._id)
           }
 
-          await this.getRoomInfo()
+          this.socket.emit('init', this.selectedRoom._id)
 
-          this.socket.emit('init', this.roomInfo._id)
+          await this.markMessageRead(this.selectedRoom._id)
 
-          await this.markMessageRead(this.roomInfo._id)
-
-          await this.getMessage(this.roomInfo._id)
+          await this.getMessage(this.selectedRoom._id)
 
           this.$nextTick(() => this.scrollToBottom())
         }
@@ -116,14 +251,28 @@ export default {
   },
 
   methods: {
-    async getRoomInfo() {
-      const room = await this.$apiClient.call(process.env.API_HOST_SOCKET + '/room/initiate', {
-        method: 'POST',
-        body: JSON.stringify({ userIds: [this.user.id, this.messageTo.id] }),
-        headers: this.$apiClient.headers
-      })
+    async removeUserOfRoom(user) {
+      try {
+        await this.$apiClient.call(process.env.API_HOST_SOCKET + '/room/user/remove', {
+          method: 'POST',
+          body: JSON.stringify({ userId: user.id, roomId: this.selectedRoom._id }),
+          headers: this.$apiClient.headers
+        })
+      } catch (error) {
+        console.log(error)
+      }
+    },
 
-      this.roomInfo = room.data
+    async invateUser(user) {
+      try {
+        await this.$apiClient.call(process.env.API_HOST_SOCKET + '/room/invite', {
+          method: 'POST',
+          body: JSON.stringify({ userId: user.id, roomId: this.selectedRoom._id }),
+          headers: this.$apiClient.headers
+        })
+      } catch (error) {
+        console.log(error)
+      }
     },
 
     async markMessageRead(roomId) {
@@ -175,7 +324,7 @@ export default {
     sendMessage: debounce(async function() {
       try {
         this.form.content.length > 0 && await this.$apiClient.call(process.env.API_HOST_SOCKET +
-          `/room/${this.roomInfo._id}/message`, {
+          `/room/${this.selectedRoom._id}/message`, {
           method: 'POST',
           body: JSON.stringify({ messageText: this.form.content, user: this.user }),
           headers: this.$apiClient.headers
@@ -189,7 +338,7 @@ export default {
 
     removeMessage: debounce(async function(id) {
       try {
-        await this.$apiClient.call(process.env.API_HOST_SOCKET + `/delete/message/${id}/${this.roomInfo._id}`, {
+        await this.$apiClient.call(process.env.API_HOST_SOCKET + `/delete/message/${id}/${this.selectedRoom._id}`, {
           method: 'DELETE'
         })
       } catch (e) {
@@ -207,16 +356,6 @@ export default {
       if (scrollbar && scrollbar.scrollHeight >= scrollbar.scrollTop + scrollbar.clientHeight) {
         scrollbar.scrollTop = scrollbar.scrollHeight
       }
-    }
-  },
-
-  destroyed() {
-    this.socket.close()
-  },
-
-  computed: {
-    user() {
-      return this.$store.state.profile.user
     }
   }
 }

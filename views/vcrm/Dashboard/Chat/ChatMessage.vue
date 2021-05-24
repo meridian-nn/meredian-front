@@ -10,6 +10,7 @@
             class="pa-4 mb-2"
             v-on="on"
           >
+            <div>{{ msg.user.fullName }}</div>
             {{ msg.message }}
             <sub
               style="font-size: 0.5rem;"

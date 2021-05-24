@@ -259,6 +259,7 @@ export default {
 
     // Печать таблицы документов на оплату
     print() {
+      console.log(this)
       this.$htmlToPaper('dataTable')
     }
   }

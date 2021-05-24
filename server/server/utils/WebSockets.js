@@ -1,8 +1,8 @@
 class WebSockets {
-  users = []
+  static users = []
+
   connection(client) {
     // event fired when the chat room is disconnected
-
     client.on('init', (roomId) => {
       client.join(roomId)
     })
@@ -13,7 +13,7 @@ class WebSockets {
 
     // add identity of user mapped to the socket id
     client.on('identity', (userId) => {
-      this.users.push({
+      WebSockets.users.push({
         socketId: client.id,
         userId
       })
