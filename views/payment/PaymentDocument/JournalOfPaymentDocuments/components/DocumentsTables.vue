@@ -96,7 +96,7 @@
               <v-text-field
                 v-model="date"
                 type="date"
-                @input="updateDocoplForPay()"
+                @input="updateDocoplToPay()"
               />
             </div>
           </v-row>
@@ -276,76 +276,61 @@
         <v-data-table
           id="journal-of-payment-docs-v-data-table-from-pay-docs"
           v-model="fromPaySelectedRows"
-          v-scroll:#journal-of-payment-docs-v-data-table-from-pay-docs="fromPayOnScroll"
+          height="440"
           :headers="fromPayHeaders"
+          fixed-header
           :items="fromPayData"
           :show-select="true"
           :single-select="false"
           disable-pagination
           hide-default-footer
           class="elevation-1"
-          @contextmenu:row="showFromPayMenu"
-          @click:row="fillCommentOfCurrentRow"
         >
-          <!--template #body="{ items }">
+          <template
+            #body="{ items }"
+          >
             <tbody>
               <tr
                 v-for="item in items"
                 :key="item.id"
+                :value="item"
+                @contextmenu="showFromPayMenu($event, item)"
+                @click="fillCommentOfCurrentRow(item)"
               >
                 <td>
-                  <v-checkbox :input-value="item.isSelected" />
+                  <v-checkbox
+                    v-model="fromPaySelectedRows"
+                    :value="item"
+                    class="journal-of-payment-docs-checkbox"
+                    hide-details
+                  />
                 </td>
-                <td>{{ item.dataDoc }}</td>
-                <td class="rower">
+                <td class="journal-of-payment-docs-data">
+                  {{ item.dataDoc }}
+                </td>
+                <td class="journal-of-payment-docs-rower">
                   {{ item.nameDoc }}
                 </td>
-                <td>{{ item.depName }}</td>
+                <td class="journal-of-payment-docs-rower">
+                  {{ item.myorgName }}
+                </td>
+                <td class="journal-of-payment-docs-data-oplat">
+                  {{ item.dataOplat }}
+                </td>
+                <td class="journal-of-payment-docs-sum-doc">
+                  {{ item.sumDoc }}
+                </td>
+                <td class="journal-of-payment-docs-sum-paid">
+                  {{ item.sumPaid }}
+                </td>
+                <td class="journal-of-payment-docs-sum-oplat">
+                  {{ item.sumOplat }}
+                </td>
+                <td class="journal-of-payment-docs-dep-name">
+                  {{ item.depName }}
+                </td>
               </tr>
             </tbody>
-            </template-->
-
-          <template
-            slot="body.append"
-          >
-            <tr>
-              <th>Итого</th>
-              <th />
-              <th />
-              <th />
-              <th />
-              <th>
-                <vue-numeric
-                  v-model="totalSumDoc"
-                  separator="space"
-                  :precision="2"
-                  decimal-separator="."
-                  :output-type="number"
-                  :read-only="true"
-                />
-              </th>
-              <th>
-                <vue-numeric
-                  v-model="totalSumPaid"
-                  separator="space"
-                  :precision="2"
-                  decimal-separator="."
-                  :output-type="number"
-                  :read-only="true"
-                />
-              </th>
-              <th>
-                <vue-numeric
-                  v-model="totalSumOplat"
-                  separator="space"
-                  :precision="2"
-                  decimal-separator="."
-                  :output-type="number"
-                  :read-only="true"
-                />
-              </th>
-              <th />
-            </tr>
           </template>
         </v-data-table>
 
@@ -422,6 +407,58 @@
           >
             <v-icon>mdi-delete-forever</v-icon>
           </v-btn>
+        </div>
+      </div>
+    </div>
+
+    <div class="journal-of-payment-docs-row">
+      <div class="journal-of-payment-docs-bottom-spacer" />
+      <div class="journal-of-payment-docs-bottom-comment">
+        <div class="journal-of-payment-docs-row">
+          <div>
+            <th>Итого</th>
+          </div>
+
+          <div class="journal-of-payment-docs-bottom-spacer-for-results" />
+
+          <div class="journal-of-payment-docs-result-text">
+            <th>
+              <vue-numeric
+                v-model="totalSumDoc"
+                separator="space"
+                :precision="2"
+                decimal-separator="."
+                :output-type="number"
+                :read-only="true"
+              />
+            </th>
+          </div>
+
+          <div class="journal-of-payment-docs-result-text">
+            <th>
+              <vue-numeric
+                v-model="totalSumPaid"
+                separator="space"
+                :precision="2"
+                decimal-separator="."
+                :output-type="number"
+                :read-only="true"
+              />
+            </th>
+          </div>
+
+          <div class="journal-of-payment-docs-result-text">
+            <th>
+              <vue-numeric
+                v-model="totalSumOplat"
+                separator="space"
+                :precision="2"
+                decimal-separator="."
+                :output-type="number"
+                :read-only="true"
+              />
+            </th>
+          </div>
         </div>
       </div>
     </div>
@@ -514,7 +551,8 @@ export default {
       fromPayHeaders: [
         {
           text: 'Дата',
-          value: 'dataDoc'
+          value: 'dataDoc',
+          cellClass: 'padding:0px; height:0px'
         },
         {
           text: 'Номер',
@@ -626,10 +664,12 @@ export default {
 
     // Обновление таблиц "Документы к оплате" и "Документы на оплату"
     refreshTables() {
-      this.findSpDocoplForPay()
-      this.findToPay(this.accId)
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
+      this.fromPayData = []
+      this.toPayData = []
+      this.findSpDocoplForPay()
+      this.findToPay(this.accId)
     },
 
     // Функция для реализации скроллинга данных в таблице "Документы на оплату"
@@ -991,7 +1031,7 @@ export default {
       this.yFromPayMenu = event.clientY
       this.$nextTick(() => {
         this.fromPayMenu = true
-        this.currentRowForContextMenuOfFromPayDocument = item.item
+        this.currentRowForContextMenuOfFromPayDocument = item
       })
     },
 
@@ -1090,13 +1130,13 @@ export default {
       this.fromPaySelectedRows = []
       this.fromPaySelectedRows.push(this.currentRowForContextMenuOfFromPayDocument)
       this.addPaymentDocument()
-      this.fromPaySelectedRows = []
     },
 
     // Перемещение документа из таблицы "Документы на оплату" в таблицу "Документы к оплате" по нажатию на стрелку
     addPaymentDocument() {
       if (!this.accId) {
         this.$refs.userNotification.showUserNotification('error', 'Выберите расчётный счёт!')
+        this.fromPaySelectedRows = []
         return
       }
       this.addPayments()
@@ -1174,8 +1214,8 @@ export default {
       return data
     },
 
-    // Обновление списка документов на оплату при изменении даты
-    updateDocoplForPay() {
+    // Обновление списка документов к оплату и  остатков на расчетных счетах при изменении даты
+    updateDocoplToPay() {
       this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
       if (this.accId) {
         this.findToPay(this.accId)
@@ -1286,11 +1326,6 @@ export default {
 
 <style lang="scss">
 
-#journal-of-payment-docs-v-data-table-from-pay-docs {
-  height: 440px;
-  overflow: auto;
-}
-
 #journal-of-payment-docs-v-data-table-from-pay-docs td {
     padding: 0 5px !important;
     height: 0px !important;
@@ -1396,6 +1431,11 @@ export default {
   max-width: 43%;
 }
 
+.journal-of-payment-docs-bottom-spacer-for-results{
+  flex: 0 0 52%;
+  max-width: 52%;
+}
+
 .journal-of-payment-docs-bottom-comment{
   flex: 0 0 57%;
   max-width: 57%;
@@ -1456,7 +1496,43 @@ export default {
   color: #999;
 }
 
-.rower {
+.journal-of-payment-docs-rower {
   width: 170px;
 }
+
+.journal-of-payment-docs-checkbox {
+  margin:0px;
+  padding:0px;
+  color:#999 !important
+}
+
+.journal-of-payment-docs-data {
+  width: 80px
+}
+
+.journal-of-payment-docs-data-oplat {
+  width: 100px
+}
+
+.journal-of-payment-docs-sum-doc {
+  width: 84px
+}
+
+.journal-of-payment-docs-sum-paid {
+  width: 84px
+}
+
+.journal-of-payment-docs-sum-oplat {
+  width: 81px
+}
+
+.journal-of-payment-docs-dep-name {
+  width: 123px
+}
+
+.journal-of-payment-docs-result-text{
+  font-size: 0.75rem;
+  padding-right: 15px;
+}
+
 </style>
