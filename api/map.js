@@ -323,5 +323,31 @@ export const factory = send => ({
                 return send('GET', `/oper/dir/paymentType/findById/${id}`)
             }
         }
+    },
+
+    settings: {
+        findAll() {
+            return send('GET', '/uiSetting/findAll')
+        },
+
+        findById(id) {
+            return send('GET', `/uiSetting/findById/${id}`)
+        },
+
+        findBySearchCriteria(params) {
+            return send('POST', `/uiSetting/findBySearchCriteria`, params)
+        },
+
+        findBySearchCriterias(params) {
+            return send('POST', `/uiSetting/findBySearchCriterias`, params)
+        },
+
+        save(entity) {
+            return send('POST', `/uiSetting/save`, entity)
+        },
+
+        saveAll(entities) {
+            return send('POST', `uiSetting/saveAll`, entities)
+        }
     }
 })
