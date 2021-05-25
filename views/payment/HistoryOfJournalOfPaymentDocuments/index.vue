@@ -36,7 +36,28 @@
           :items="orgAccInfoData"
           hide-default-footer
           class="elevation-1"
-        />
+        >
+          <!--template #body="{ items }">
+            <tbody>
+              <tr
+                v-for="item in items"
+                :key="item.id"
+              >
+                <td><vue-numeric
+                  v-model="totalSumOplat"
+                  separator="space"
+                  :precision="2"
+                  decimal-separator="."
+                  :output-type="number"
+                  :read-only="true"
+                /> </td>
+                <td>{{ item }}</td>
+                <td>{{ item.dataDoc }}</td>
+                <td>{{ item.nameDoc }}</td>
+              </tr>
+            </tbody>
+          </template-->
+        </v-data-table>
       </div>
     </div>
 
@@ -171,10 +192,6 @@
 <script>
 
 export default {
-  axiosConfig: {
-    auth: {
-    }
-  },
   name: 'PaymentDocument',
   components: {
   },
@@ -293,7 +310,6 @@ export default {
         typeCode: 1
       }
       const response = await this.$api.organizations.findByOrgTypeCode(data)
-      // $axios.$get('/meridian/oper/dict/spOrg/findByOrgTypeCode', { params: data })
 
       this.orgAccInfoHeaders.push({
         text: '',
@@ -332,7 +348,6 @@ export default {
         dateOplat: new Date(this.date).toLocaleDateString()
       }
       const response = await this.$api.paymentAccounts.groupByOrg(data)
-      // $axios.$get('/meridian/oper/spOplat/groupByOrg', { params: data })
       this.orgAccInfoData = []
 
       const orgAccInfoDataAccounts = {}
@@ -344,8 +359,8 @@ export default {
       this.orgAccInfoHeaders.forEach((orgAccElem) => {
         const responseElem = response.find(el => el.myOrg.id === orgAccElem.orgId)
         if (responseElem) {
-          orgAccInfoDataAccounts[orgAccElem.value] = responseElem.saldo
-          orgAccInfoDataCashbox[orgAccElem.value] = 0
+          orgAccInfoDataAccounts[orgAccElem.value] = this.numberToSum(responseElem.saldo)
+          orgAccInfoDataCashbox[orgAccElem.value] = this.numberToSum(0)
         }
       })
 
@@ -372,11 +387,7 @@ export default {
         this.loadingType.organizations = null
       }
     },
-    /* async findOrgAccInfo() {
-      if (!this.orgAccInfoData.length) {
-        this.orgAccInfoData = await this.$axios.$get('/meridian/oper/spDocopl/getOrgAccInfo', this.axiosConfig)
-      }
-    }, */
+
     async findPaymentAccounts(val) {
       this.loadingType.paymentAccounts = true
 
@@ -384,7 +395,7 @@ export default {
         orgId: val
       }
       let paymentAccounts = await this.$api.paymentAccounts.findAccByOrgId(data)
-      paymentAccounts = paymentAccounts.sort(this.$compare('shortName'))
+      paymentAccounts = paymentAccounts.sort(this.customCompare('shortName'))
       paymentAccounts.forEach((account) => {
         account.shortName = account.shortName + ' - ' + account.numAcc.slice(account.numAcc.length - 4)
       })
@@ -401,7 +412,6 @@ export default {
       }
 
       this.fromPayData = await this.$api.payment.docOplForPay.findSpDocoplForPayBetweenDates(data)
-      // $axios.$get('/meridian/oper/spDocopl/findSpDocoplForPay', { params: data })
       let totalSumDoc = 0
       let totalSumOplat = 0
       let totalSumOplach = 0

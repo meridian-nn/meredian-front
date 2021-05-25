@@ -27,12 +27,16 @@
       <div
         class="money-distribution-budget-for-distribution-sum"
       >
-        <v-text-field
-          v-model.number="budgetDistributionSum"
-          type="number"
-          hide-details="auto"
-          min="0"
-        />
+        <div class="money-distribution-brise-input">
+          <vue-numeric
+            v-model.number="budgetDistributionSum"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            :output-type="number"
+          />
+          <span class="line" />
+        </div>
       </div>
 
       <div
@@ -47,7 +51,14 @@
         <v-subheader
           class="font-weight-medium text-subtitle-1"
         >
-          {{ budgetDistributedSum }}
+          <vue-numeric
+            v-model.number="budgetDistributedSum"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            :output-type="number"
+            :read-only="true"
+          />
         </v-subheader>
       </div>
 
@@ -93,12 +104,16 @@
       <div
         class="money-distribution-dep-for-distribution-sum"
       >
-        <v-text-field
-          v-model.number="depDistributionSum"
-          type="number"
-          hide-details="auto"
-          min="0"
-        />
+        <div class="money-distribution-brise-input">
+          <vue-numeric
+            v-model.number="depDistributionSum"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            :output-type="number"
+          />
+          <span class="line" />
+        </div>
       </div>
 
       <div
@@ -114,7 +129,14 @@
           class="font-weight-medium text-subtitle-1"
         >
           <div :class=" {'money-distribution-text-danger': notDistributedLessThenZero}">
-            {{ departmentRestDistributionSum }}
+            <vue-numeric
+              v-model.number="departmentRestDistributionSum"
+              separator="space"
+              :precision="2"
+              decimal-separator="."
+              :output-type="number"
+              :read-only="true"
+            />
           </div>
         </v-subheader>
       </div>
@@ -131,14 +153,16 @@
           :columns="columns"
           :options="options"
         >
-          <input
+          <vue-numeric
             slot="distributionSum"
             v-model.number="row.distributionSum"
             slot-scope="{row, update}"
-            type="number"
-            min="0"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            :output-type="number"
             @input="update(row.distributionSum)"
-          >
+          />
           <input
             slot="note"
             v-model="row.note"
@@ -202,9 +226,9 @@ export default {
       // объект с информацией о выделенном бюджете на выбранную дату
       budget: {},
       // сумма выделенного бюджета на текущую дату
-      budgetDistributionSum: null,
+      budgetDistributionSum: 0,
       // сумма распределенного бюджета на текущую дату
-      budgetDistributedSum: null,
+      budgetDistributedSum: 0,
 
       // выбранный отдел с информацией по бюджету
       department: {},
@@ -364,13 +388,13 @@ export default {
           const notDistSum = distSum - distributedSum
           departmentsDataTable.push({
             name: result.department.nameViddoc,
-            distributionSum: distSum,
-            notDistributedSum: notDistSum
+            distributionSum: this.numberToSum(distSum),
+            notDistributedSum: this.numberToSum(notDistSum)
           })
         })
         departmentsDataTable.push({
           name: 'Итого:',
-          distributionSum: this.totalSumOfDistributionSum
+          distributionSum: this.numberToSum(this.totalSumOfDistributionSum)
         })
       })
       return departmentsDataTable
@@ -538,6 +562,57 @@ export default {
   max-width: 20%;
   padding-left: 10px;
   padding-right: 10px;
+}
+
+.money-distribution-brise-input {
+  position: relative;
+  margin: 5px;
+  overflow: hidden;
+}
+
+.money-distribution-brise-input input {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  outline: none;
+  border-bottom: 1px solid #999;
+  box-sizing: border-box;
+  font-size: 16px;
+  position: relative;
+  z-index: 5;
+  background: none;
+}
+
+.money-distribution-brise-input input:focus ~ label, input:valid ~ label  {
+  top: 0px;
+  transform: scale(0.94) translateX(-2px);
+  color: #639db1;
+}
+
+.money-distribution-brise-input .line {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background: #639db1;
+  left: -999px;
+  transition: .25s;
+  opacity: 0;
+  z-index: 6;
+}
+
+.money-distribution-brise-input input:focus ~ .line {
+  left: 0;
+  opacity: 1;
+}
+
+.money-distribution-brise-input label {
+  position: absolute;
+  left: 10px;
+  top: 45%;
+  transition: ease-out .15s;
+  color: #999;
 }
 
 .money-distribution-not-allocated-text{
