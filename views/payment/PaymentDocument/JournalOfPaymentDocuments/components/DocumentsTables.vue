@@ -263,6 +263,13 @@
                 Фильтры
               </v-btn>
             </div>
+
+            <span
+              v-if="isFiltersForFromPayDocsUsing"
+              class="journal-of-payment-docs-is-filters-using"
+            >
+              - фильтры применены
+            </span>
           </v-row>
         </v-subheader>
 
@@ -612,6 +619,9 @@ export default {
 
       // Список документов таблицы "Документы на оплату"
       fromPayData: [],
+
+      // Переменная для отображения информационного сообщения, что фильтры для таблицы "Документы на оплату" используются
+      isFiltersForFromPayDocsUsing: false,
 
       // Итоговая сумма по колонке "Сумма" документов на оплату
       totalSumDoc: 0,
@@ -1176,6 +1186,12 @@ export default {
 
       const data = this.createCriteriasForRequestToSearchDocsFromPay(filtersParams)
 
+      if (data.length > 1) {
+        this.isFiltersForFromPayDocsUsing = true
+      } else {
+        this.isFiltersForFromPayDocsUsing = false
+      }
+
       this.fromPayData = await this.$api.payment.docOplForPay.findDocumentsByCriteriasForTableInDocumentsJournal(data)
       let totalSumDoc = 0
       let totalSumOplat = 0
@@ -1346,6 +1362,11 @@ export default {
 
 .journal-of-payment-docs-text-danger {
   color: red;
+}
+
+.journal-of-payment-docs-is-filters-using {
+  margin-left: 10px;
+  color: green;
 }
 
 .journal-of-payment-docs-brise-input {
