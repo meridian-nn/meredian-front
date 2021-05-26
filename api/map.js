@@ -325,7 +325,7 @@ export const factory = send => ({
         }
     },
 
-    settings: {
+    uiSettings: {
         findAll() {
             return send('GET', '/uiSetting/findAll')
         },
