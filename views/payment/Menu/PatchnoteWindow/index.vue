@@ -64,6 +64,21 @@
               </ul>
             </v-col>
           </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <span class="headline">25.05.2021</span>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <ul>
+                <span class="headline">Журнал документов на оплату</span>
+                <li>Добавлены фильтры для таблицы "Документы на оплату"</li>
+              </ul>
+            </v-col>
+          </v-row>
         </v-container>
       </div>
     </v-card>
