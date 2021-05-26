@@ -113,7 +113,6 @@
             :headers="toPayHeaders"
             fixed-header
             :items="toPayData"
-            :items-per-page="15"
             :show-select="true"
             :single-select="false"
             disable-pagination
@@ -273,66 +272,70 @@
           </v-row>
         </v-subheader>
 
-        <v-data-table
-          id="journal-of-payment-docs-v-data-table-from-pay-docs"
-          v-model="fromPaySelectedRows"
-          height="440"
-          :headers="fromPayHeaders"
-          fixed-header
-          :items="fromPayData"
-          :show-select="true"
-          :single-select="false"
-          disable-pagination
-          hide-default-footer
-          class="elevation-1"
+        <div
+          id="journal-of-payment-docs-div-v-data-table-from-pay-docs"
         >
-          <template
-            #body="{ items }"
+          <v-data-table
+            id="journal-of-payment-docs-v-data-table-from-pay-docs"
+            v-model="fromPaySelectedRows"
+            height="440"
+            :headers="fromPayHeaders"
+            fixed-header
+            :items="fromPayData"
+            :show-select="true"
+            :single-select="false"
+            disable-pagination
+            hide-default-footer
+            class="elevation-1"
           >
-            <tbody>
-              <tr
-                v-for="item in items"
-                :key="item.id"
-                :value="item"
-                @contextmenu="showFromPayMenu($event, item)"
-                @click="fillCommentOfCurrentRow(item)"
-              >
-                <td>
-                  <v-checkbox
-                    v-model="fromPaySelectedRows"
-                    :value="item"
-                    class="journal-of-payment-docs-checkbox"
-                    hide-details
-                  />
-                </td>
-                <td class="journal-of-payment-docs-data">
-                  {{ item.dataDoc }}
-                </td>
-                <td class="journal-of-payment-docs-rower">
-                  {{ item.nameDoc }}
-                </td>
-                <td class="journal-of-payment-docs-rower">
-                  {{ item.myorgName }}
-                </td>
-                <td class="journal-of-payment-docs-data-oplat">
-                  {{ item.dataOplat }}
-                </td>
-                <td class="journal-of-payment-docs-sum-doc">
-                  {{ item.sumDoc }}
-                </td>
-                <td class="journal-of-payment-docs-sum-paid">
-                  {{ item.sumPaid }}
-                </td>
-                <td class="journal-of-payment-docs-sum-oplat">
-                  {{ item.sumOplat }}
-                </td>
-                <td class="journal-of-payment-docs-dep-name">
-                  {{ item.depName }}
-                </td>
-              </tr>
-            </tbody>
-          </template>
-        </v-data-table>
+            <template
+              #body="{ items }"
+            >
+              <tbody>
+                <tr
+                  v-for="item in items"
+                  :key="item.id"
+                  :value="item"
+                  @contextmenu="showFromPayMenu($event, item)"
+                  @click="fillCommentOfCurrentRow(item)"
+                >
+                  <td>
+                    <v-checkbox
+                      v-model="fromPaySelectedRows"
+                      :value="item"
+                      class="journal-of-payment-docs-checkbox"
+                      hide-details
+                    />
+                  </td>
+                  <td class="journal-of-payment-docs-data">
+                    {{ item.dataDoc }}
+                  </td>
+                  <td class="journal-of-payment-docs-rower">
+                    {{ item.nameDoc }}
+                  </td>
+                  <td class="journal-of-payment-docs-rower">
+                    {{ item.myorgName }}
+                  </td>
+                  <td class="journal-of-payment-docs-data-oplat">
+                    {{ item.dataOplat }}
+                  </td>
+                  <td class="journal-of-payment-docs-sum-doc">
+                    {{ item.sumDoc }}
+                  </td>
+                  <td class="journal-of-payment-docs-sum-paid">
+                    {{ item.sumPaid }}
+                  </td>
+                  <td class="journal-of-payment-docs-sum-oplat">
+                    {{ item.sumOplat }}
+                  </td>
+                  <td class="journal-of-payment-docs-dep-name">
+                    {{ item.depName }}
+                  </td>
+                </tr>
+              </tbody>
+            </template>
+          </v-data-table>
+        </div>
 
         <v-menu
           v-model="fromPayMenu"
@@ -549,7 +552,8 @@ export default {
       toPayHeaders: [
         {
           text: 'Дата',
-          value: 'dataOplat'
+          value: 'dataOplat',
+          width: '50px'
         },
         {
           text: 'Номер',
@@ -1435,27 +1439,27 @@ export default {
 }
 
 .journal-of-payment-docs-data {
-  width: 80px
+  width: 80px !important
 }
 
 .journal-of-payment-docs-data-oplat {
-  width: 100px
+  width: 100px !important
 }
 
 .journal-of-payment-docs-sum-doc {
-  width: 84px
+  width: 84px !important
 }
 
 .journal-of-payment-docs-sum-paid {
-  width: 84px
+  width: 84px !important
 }
 
 .journal-of-payment-docs-sum-oplat {
-  width: 81px
+  width: 81px !important
 }
 
 .journal-of-payment-docs-dep-name {
-  width: 123px
+  width: 123px !important
 }
 
 </style>

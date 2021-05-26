@@ -24,7 +24,7 @@
     </v-btn>
 
     <v-row>
-      <div class="payment-menu-col-2" />
+      <div class="payment-menu-col-2-spacer" />
 
       <div class="payment-menu-col-2">
         <router-link :to="{ name: 'JournalOfPaymentDocuments' }">
@@ -87,18 +87,6 @@
       </div>
 
       <div class="payment-menu-col-2">
-        <router-link :to="{ name: 'HistoryOfPaymentDocuments' }">
-          <v-img :src="require('@/assets/img/history2.png')" />
-        </router-link>
-        <div
-          class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
-          align="center"
-        >
-          Журнал документов на оплату (История)
-        </div>
-      </div>
-
-      <div class="payment-menu-col-2">
         <router-link :to="{ name: 'RegisterOfDocumentsToPay' }">
           <v-img :src="require('@/assets/img/registry.png')" />
         </router-link>
@@ -122,7 +110,7 @@
         </div>
       </div>
 
-      <div class="payment-menu-col-2" />
+      <div class="payment-menu-col-2-spacer" />
     </v-row>
   </div>
 </template>
@@ -155,6 +143,11 @@ export default {
 .payment-menu-col-2 {
     flex: 0 0 10%;
     max-width: 10%;
+}
+
+.payment-menu-col-2-spacer {
+    flex: 0 0 15%;
+    max-width: 15%;
 }
 
 .payment-menu-col-3 {

@@ -68,10 +68,10 @@ const RegisterOfPaymentsByCashboxPage = dynamicPage(() =>
     import ('~/views/payment/RegisterOfPaymentsByCashbox'))
 
 const GtinPage = dynamicPage(() =>
-    import ('~/views/vcrm/Dashboard/Gtin'))
+    import ('~/views/vcrm/Dashboard/Barcode/Gtin'))
 
 const MarkPage = dynamicPage(() =>
-    import ('~/views/vcrm/Dashboard/Mark'))
+    import ('~/views/vcrm/Dashboard/Barcode/Mark'))
 
 const ChatPage = dynamicPage(() =>
     import ('~/views/vcrm/Dashboard/Chat/ChatPage'))
