@@ -256,20 +256,20 @@
             </div>
             <div>
               <v-btn
+                v-if="isFiltersForFromPayDocsUsing"
                 color="blue"
                 dark
                 @click="openFilterFormForFromPayDocs"
               >
                 Фильтры
               </v-btn>
+              <v-btn
+                v-else
+                @click="openFilterFormForFromPayDocs"
+              >
+                Фильтры
+              </v-btn>
             </div>
-
-            <span
-              v-if="isFiltersForFromPayDocsUsing"
-              class="journal-of-payment-docs-is-filters-using"
-            >
-              - фильтры применены
-            </span>
           </v-row>
         </v-subheader>
 
