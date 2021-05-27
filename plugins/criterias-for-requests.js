@@ -91,10 +91,10 @@ Vue.mixin({
                 ]
             }]
 
-            if (filtersParams !== undefined) {
+            if (filtersParams) {
                 for (const key in filtersParams) {
                     const elemParam = filtersParams[key]
-                    if (elemParam === null) {
+                    if (!elemParam) {
                         continue
                     }
                     const dataType = typeof elemParam === 'number' ? 'INTEGER' : 'VARCHAR'

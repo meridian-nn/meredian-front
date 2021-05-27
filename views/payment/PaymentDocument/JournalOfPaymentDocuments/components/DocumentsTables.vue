@@ -1184,7 +1184,8 @@ export default {
       this.fromPayData = []
       this.fromPaySelectedRows = []
 
-      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name, 'journal-of-payment-docs-from-pay-docs')
+      // eslint-disable-next-line vue/max-len
+      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name, this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs())
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
       let filtersParams
 
