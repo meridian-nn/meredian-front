@@ -180,8 +180,7 @@ export default {
 
     async startDownloadExcel() {
       for (const dep of this.depsInPayData) {
-        const result = await this.downloadDep(dep)
-        console.log(result)
+        await this.downloadDep(dep)
       }
     },
 
@@ -191,13 +190,10 @@ export default {
         let sumOfDocs = 0
         this.documentsForExport = depDocs
         this.documentsForExport.forEach((doc) => {
-          sumOfDocs += doc.sumOplach
+          sumOfDocs += doc.sumOplachNumber
         })
-        this.exportFooter = 'Итого к оплате: ' + sumOfDocs
+        this.exportFooter = 'Итого к оплате: ' + this.numberToSum(sumOfDocs)
         this.currentDep = dep
-
-        console.log(this.documentsForExport)
-        console.log(this.currentDep)
 
         this.$refs.downloadExcel.click()
         resolve('download' + this.currentDep)
@@ -241,10 +237,12 @@ export default {
         }
 
         totalSumOplat += value.sumOplach
-        value.partialPayment = (value.sumDoc !== value.sumOplach)
+        value.partialPayment = (value.sumDoc !== value.sumOplach) ? 'Да' : 'Нет'
+        value.sumOplachNumber = value.sumOplach
+        value.sumOplach = this.numberToSum(value.sumOplach)
       })
 
-      this.totalSumOplat = totalSumOplat
+      this.totalSumOplat = this.numberToSum(totalSumOplat)
     },
 
     // Метод генерации имени для файла выгрузки

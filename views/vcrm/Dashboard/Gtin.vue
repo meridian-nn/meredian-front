@@ -251,6 +251,7 @@
       <template #activator="{ on, attrs }">
         <v-fab-transition>
           <v-btn
+            id="gtin-page-add-new-gtin"
             color="blue"
             class="mr-2 mb-2"
             fab

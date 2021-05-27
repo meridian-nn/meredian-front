@@ -184,7 +184,6 @@ export default {
         typeCode: 1
       }
       this.organizations = await this.$api.organizations.findByOrgTypeCode(data)
-      // $axios.$get('/meridian/oper/dict/spOrg/findByOrgTypeCode', { params: data })
 
       this.loadingType.organizations = null
     },
@@ -194,7 +193,6 @@ export default {
       if (!this.groups.length) {
         this.loadingType.groups = true
         this.groups = await this.$api.budgetElements.findDepartments()
-        // $axios.$get('/meridian/oper/dict/spViddocopl/findDepartments', this.axiosConfig)
         this.loadingType.groups = null
       }
     },
@@ -214,8 +212,7 @@ export default {
         orgId: val
       }
       let paymentAccounts = await this.$api.paymentAccounts.findAccByOrgId(data)
-      // $axios.$get('/meridian/oper/spAcc/findByOrgId?orgId=' + val)
-      paymentAccounts = paymentAccounts.sort(this.$compare('shortName'))
+      paymentAccounts = paymentAccounts.sort(this.customCompare('shortName'))
       paymentAccounts.forEach((account) => {
         account.shortName = account.shortName + ' - ' + account.numAcc.slice(account.numAcc.length - 4)
       })
@@ -224,13 +221,6 @@ export default {
 
       this.loadingType.paymentAccounts = null
     },
-
-    /* newDocument(selectedOrganization) {
-      this.reset()
-      this.findPayerById()
-
-      this.dialog = true
-    }, */
 
     // открытие формы из журнала документов
     editDocument(id, selectedOrganization, accId) {
@@ -247,14 +237,12 @@ export default {
     // поиск организации-плательщика по id
     async findPayerById() {
       this.selectedOrganization = await this.$api.organizations.findById(this.selectedOrganizationId)
-      // $axios.$get('/meridian/oper/dict/spOrg/findById/' + this.selectedOrganizationId)
     },
 
     // поиск документа на оплату по id
     async findEditedItem(accId) {
       if (this.id) {
         const editedItem = await this.$api.payment.docOplForPay.findById(this.id)
-        // $axios.$get('/meridian/oper/spDocopl/findById/' + this.id, this.axiosConfig)
         this.editedItem = editedItem
         this.editedItem.accId = accId
       }

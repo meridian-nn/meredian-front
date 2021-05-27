@@ -37,6 +37,7 @@ export default {
         '~/plugins/axios',
         '~/plugins/utils',
         '~/plugins/custom-compare.js',
+        '~/plugins/number-to-sum',
         { src: '~/plugins/api', mode: 'client' },
         { src: '~/plugins/format-date' },
         { src: '~plugins/vue-tables-2.js', ssr: false },

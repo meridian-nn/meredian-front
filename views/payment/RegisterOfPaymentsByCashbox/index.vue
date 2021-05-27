@@ -97,6 +97,9 @@ export default {
           operationSum: 'Сумма оплаты',
           groupName: 'Группа',
           comment: 'Примечание'
+        },
+        orderBy: {
+          column: 'paymentDate'
         }
       }
     }
@@ -140,8 +143,7 @@ export default {
     async convertResponseToDataForTable(response) {
       const arrayOfData = []
       let totalPaymentSumInPeriod = 0
-      for (const elem in response) {
-        const item = response[elem]
+      for (const item of response) {
         let operationSum = 0
         let groupName = ''
 
@@ -155,7 +157,7 @@ export default {
         const data = {
           paymentDate: item.paymentDate,
           orgName: item.payer.clName,
-          operationSum,
+          operationSum: this.numberToSum(operationSum),
           groupName,
           comment: item.comment
         }
@@ -164,9 +166,9 @@ export default {
       }
 
       const data = {
-        paymentDate: '',
-        orgName: 'Итого',
-        operationSum: totalPaymentSumInPeriod,
+        paymentDate: 'Итого:',
+        orgName: '',
+        operationSum: this.numberToSum(totalPaymentSumInPeriod),
         groupName: '',
         comment: ''
       }

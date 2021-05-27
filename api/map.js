@@ -63,6 +63,9 @@ export const factory = send => ({
         },
         findByDataOplatAndMyOrgId(params) {
             return send('GET', `/oper/spOplat/findByDataOplatAndMyOrgId?${new URLSearchParams(params).toString()}`)
+        },
+        findById(id) {
+            return send('GET', `/oper/spAcc/findById/${id}`)
         }
     },
 
@@ -110,6 +113,10 @@ export const factory = send => ({
 
         findPaymentsByCashboxByCriteria(params) {
             return send('POST', `/oper/payment/findBySearchCriteria`, params)
+        },
+
+        findPaymentsByCashboxByCriterias(params) {
+            return send('POST', `/oper/payment/findBySearchCriterias`, params)
         },
 
         payDocument(params) {
@@ -315,6 +322,32 @@ export const factory = send => ({
             findById(id) {
                 return send('GET', `/oper/dir/paymentType/findById/${id}`)
             }
+        }
+    },
+
+    settings: {
+        findAll() {
+            return send('GET', '/uiSetting/findAll')
+        },
+
+        findById(id) {
+            return send('GET', `/uiSetting/findById/${id}`)
+        },
+
+        findBySearchCriteria(params) {
+            return send('POST', `/uiSetting/findBySearchCriteria`, params)
+        },
+
+        findBySearchCriterias(params) {
+            return send('POST', `/uiSetting/findBySearchCriterias`, params)
+        },
+
+        save(entity) {
+            return send('POST', `/uiSetting/save`, entity)
+        },
+
+        saveAll(entities) {
+            return send('POST', `uiSetting/saveAll`, entities)
         }
     }
 })

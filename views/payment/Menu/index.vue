@@ -3,6 +3,26 @@
     name="PaymentMenu"
     class="payment-menu"
   >
+    <patchnote-window ref="patchnoteWindow" />
+
+    <v-btn
+      id="payment-menu-patchnote-window-btn"
+      color="blue"
+      class="mr-2 mb-2"
+      fab
+      dark
+      small
+      fixed
+      bottom
+      right
+      v-bind="attrs"
+      v-on="on"
+    >
+      <v-icon @click="openPatchnoteWindow">
+        mdi-alert
+      </v-icon>
+    </v-btn>
+
     <v-row>
       <div class="payment-menu-col-2" />
 
@@ -108,10 +128,21 @@
 </template>
 
 <script>
+import PatchnoteWindow from './PatchnoteWindow/index.vue'
 export default {
   name: 'PaymentMenu',
+
+  components: {
+    PatchnoteWindow
+  },
+
   data() {
     return {}
+  },
+  methods: {
+    openPatchnoteWindow() {
+      this.$refs.patchnoteWindow.openWindow()
+    }
   }
 }
 </script>

@@ -36,6 +36,18 @@
           </v-row>
 
           <v-row>
+            <v-col cols="12">
+              <v-text-field
+                v-model="acc.shortName"
+                readonly="true"
+                label="Расчетный счет"
+                outlined
+                hide-details="auto"
+              />
+            </v-col>
+          </v-row>
+
+          <v-row>
             <v-col cols="6">
               <v-text-field
                 v-model.number="editedItem.sumDoc"
@@ -127,8 +139,14 @@ export default {
       // id выбранной организации
       payerId: null,
 
+      // id выбранного расчетного счета
+      accId: null,
+
       // выбранная организация
       payer: {},
+
+      // выбранный расчетный счет
+      acc: {},
 
       // список групп
       groups: []
@@ -149,11 +167,18 @@ export default {
       this.findGroups()
     },
 
-    // поиск плательщиков для выбора пользователем на форме(возможно не потребуется)
+    // поиск плательщика для демонстрации пользователю на форме
     async findPayer() {
-      this.loadingType.payers = true
+      this.loadingType.payer = true
       this.payer = await this.$api.organizations.findById(this.payerId)
-      this.loadingType.payers = null
+      this.loadingType.payer = null
+    },
+
+    // поиск расчетного счета плательщика для демонстрации на форме
+    async findAcc() {
+      this.loadingType.acc = true
+      this.acc = await this.$api.paymentAccounts.findById(this.accId)
+      this.loadingType.acc = null
     },
 
     // поиск групп для выбора пользователем на форме
@@ -166,10 +191,12 @@ export default {
     },
 
     // Открытие формы для создания нового документа "Оплата по кассе"
-    newDocument(selOrgId) {
+    newDocument(selOrgId, selAccId) {
       this.reset()
       this.payerId = selOrgId
+      this.accId = selAccId
       this.findPayer()
+      this.findAcc()
       this.dialog = true
     },
 
@@ -210,6 +237,9 @@ export default {
         ],
         paymentType: {
           id: 1
+        },
+        acc: {
+          id: this.accId
         }
       }
       return paymentByCashbox

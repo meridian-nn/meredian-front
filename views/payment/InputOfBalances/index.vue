@@ -54,41 +54,56 @@
             slot-scope="{row, update}"
             @input="update(row.name)"
           >
-          <input
+          <vue-numeric
             slot="saldo"
-            v-model="row.saldo"
+            v-model.number="row.saldo"
             slot-scope="{row, update}"
-            type="number"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            :output-type="number"
             @input="update(row.saldo)"
-          >
-          <input
+          />
+          <vue-numeric
             slot="nalich"
-            v-model="row.nalich"
+            v-model.number="row.nalich"
             slot-scope="{row, update}"
-            type="number"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            :output-type="number"
             @input="update(row.nalich)"
-          >
-          <input
+          />
+          <vue-numeric
             slot="vnpl"
-            v-model="row.vnpl"
+            v-model.number="row.vnpl"
             slot-scope="{row, update}"
-            type="number"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            :output-type="number"
             @input="update(row.vnpl)"
-          >
-          <input
+          />
+          <vue-numeric
             slot="credit"
-            v-model="row.credit"
+            v-model.number="row.credit"
             slot-scope="{row, update}"
-            type="number"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            :output-type="number"
             @input="update(row.credit)"
-          >
-          <input
+          />
+          <vue-numeric
             slot="endBalance"
-            v-model="row.endBalance"
+            v-model.number="row.endBalance"
             slot-scope="{row, update}"
-            type="number"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            :output-type="number"
             @input="update(row.endBalance)"
-          >
+          />
         </v-client-table>
       </div>
     </div>
@@ -213,26 +228,31 @@ export default {
       }
 
       const response = await this.$api.paymentAccounts.groupByOrg(data)
-      // $axios.$get('/meridian/oper/spOplat/groupByOrg', { params: data })
       for (const element of response) {
         element.name = element.myOrg.shortName
         element.credit = await this.getSumOfDocumentsToPayByOrgId(element.myOrg.id)
-        element.endBalance = element.saldo - element.credit
+        element.endBalance = element.saldo + element.nalich + element.vnpl + element.credit
 
         this.totalSumOfSaldo += element.saldo
         this.totalSumOfNalich += element.nalich
         this.totalSumOfVNPL += element.vnpl
         this.totalSumOfCredit += element.credit
         this.totalSumOfEndBalance += element.endBalance
+
+        element.saldo = this.numberToSum(element.saldo)
+        element.nalich = this.numberToSum(element.nalich)
+        element.vnpl = this.numberToSum(element.vnpl)
+        element.credit = this.numberToSum(element.credit)
+        element.endBalance = this.numberToSum(element.endBalance)
       }
 
       response.push({
         'name': 'Итого:',
-        'saldo': this.totalSumOfSaldo,
-        'nalich': this.totalSumOfNalich,
-        'vnpl': this.totalSumOfVNPL,
-        'credit': this.totalSumOfCredit,
-        'endBalance': this.totalSumOfEndBalance
+        'saldo': this.numberToSum(this.totalSumOfSaldo),
+        'nalich': this.numberToSum(this.totalSumOfNalich),
+        'vnpl': this.numberToSum(this.totalSumOfVNPL),
+        'credit': this.numberToSum(this.totalSumOfCredit),
+        'endBalance': this.numberToSum(this.totalSumOfEndBalance)
       })
       return response
     },
@@ -241,7 +261,6 @@ export default {
         orgId
       }
       const paymentAccounts = await this.$api.paymentAccounts.findAccByOrgId(data)
-      // $axios.$get('/meridian/oper/spAcc/findByOrgId?orgId=' + orgId)
       const balance = await this.getBalanceOfOtherAccounts(paymentAccounts, orgId)
       return balance
     },
@@ -268,7 +287,6 @@ export default {
 
       let totalToSumOplat = 0
       const response = await this.$api.payment.docOplToPay.findSpDocoplToPay(data)
-      // $axios.$get('/meridian/oper/spDocopl/findSpDocoplToPay', { params: data })
       response.forEach((value) => {
         totalToSumOplat += value.sumOplat
       })
@@ -296,54 +314,12 @@ export default {
         orgId: val || 0
       }
       this.oplatData = await this.$api.paymentAccounts.findByDataOplatAndMyOrgId(data)
-      // $axios.$get('/meridian/oper/spOplat/findByDataOplatAndMyOrgId', { params: data })
       this.oplatData.forEach(async(elem) => {
         elem.shortNameOfAcc = elem.acc.shortName
         elem.credit = await this.getSumToPayDocsOfOrgByAccId(elem.acc.id, elem.myOrg.id)
-        elem.endBalance = elem.saldo - elem.credit
+        elem.endBalance = elem.saldo + elem.nalich + elem.vnpl + elem.credit
       })
-      this.oplatData = this.oplatData.sort(this.compare('shortNameOfAcc'))
-    },
-    compare(field, order) {
-      let len = arguments.length
-      if (len === 0) {
-        return (a, b) => (a < b && -1) || (a > b && 1) || 0
-      }
-      if (len === 1) {
-        switch (typeof field) {
-          case 'number':
-            return field < 0
-              ? (a, b) => (a < b && 1) || (a > b && -1) || 0
-              : (a, b) => (a < b && -1) || (a > b && 1) || 0
-          case 'string':
-            return (a, b) => (a[field] < b[field] && -1) || (a[field] > b[field] && 1) || 0
-        }
-      }
-      if (len === 2 && typeof order === 'number') {
-        return order < 0
-          ? (a, b) => (a[field] < b[field] && 1) || (a[field] > b[field] && -1) || 0
-          : (a, b) => (a[field] < b[field] && -1) || (a[field] > b[field] && 1) || 0
-      }
-      let fields, orders
-      if (typeof field === 'object') {
-        fields = Object.getOwnPropertyNames(field)
-        orders = fields.map(key => field[key])
-        len = fields.length
-      } else {
-        fields = new Array(len)
-        orders = new Array(len)
-        for (let i = len; i--;) {
-          fields[i] = arguments[i]
-          orders[i] = 1
-        }
-      }
-      return (a, b) => {
-        for (let i = 0; i < len; i++) {
-          if (a[fields[i]] < b[fields[i]]) { return orders[i] }
-          if (a[fields[i]] > b[fields[i]]) { return -orders[i] }
-        }
-        return 0
-      }
+      this.oplatData = this.oplatData.sort(this.customCompare('shortNameOfAcc'))
     },
 
     // Отмена внесенных изменений и переполучение информации для формы из api

@@ -82,6 +82,7 @@ export default {
         text: '',
         value: 'name'
       })
+
       response.forEach((element) => {
         const columnOrgValueName = 'org' + element.id + 'Value'
         this.orgAccInfoHeaders.push({
@@ -90,13 +91,24 @@ export default {
           value: columnOrgValueName
         })
       })
+
+      this.orgAccInfoHeaders.push({
+        text: 'Итого',
+        orgId: '-',
+        value: 'total'
+
+      })
       this.findOrgAccInfo()
     },
 
     // Поиск остатков на расчетных счетах найденных организаций
-    async findOrgAccInfo() {
+    async findOrgAccInfo(date) {
+      this.reset()
+      if (date === undefined) {
+        date = new Date()
+      }
       const data = {
-        dateOplat: new Date().toLocaleDateString()
+        dateOplat: new Date(date).toLocaleDateString()
       }
       const response = await this.$api.paymentAccounts.groupByOrg(data)
       this.orgAccInfoData = []
@@ -107,22 +119,28 @@ export default {
       const orgAccInfoDataCashbox = {}
       orgAccInfoDataCashbox.name = 'Касса'
 
+      let totalSumOfAccounts = 0
+      let totalSumOfCashbox = 0
       this.orgAccInfoHeaders.forEach((orgAccElem) => {
         const responseElem = response.find(el => el.myOrg.id === orgAccElem.orgId)
         if (responseElem) {
-          orgAccInfoDataAccounts[orgAccElem.value] = responseElem.saldo
-          orgAccInfoDataCashbox[orgAccElem.value] = 0
+          orgAccInfoDataAccounts[orgAccElem.value] = this.numberToSum(responseElem.saldo)
+          totalSumOfAccounts += responseElem.saldo
+          orgAccInfoDataCashbox[orgAccElem.value] = this.numberToSum(0)
+          totalSumOfCashbox += 0
         }
       })
 
+      orgAccInfoDataAccounts.total = this.numberToSum(totalSumOfAccounts)
+      orgAccInfoDataCashbox.total = this.numberToSum(totalSumOfCashbox)
+
       this.orgAccInfoData.push(orgAccInfoDataAccounts)
       this.orgAccInfoData.push(orgAccInfoDataCashbox)
+    },
+
+    reset() {
+      this.orgAccInfoData = []
     }
-    /* async findOrgAccInfo() {
-      if (!this.orgAccInfoData.length) {
-        this.orgAccInfoData = await this.$axios.$get('/meridian/oper/spDocopl/getOrgAccInfo', this.axiosConfig)
-      }
-    }, */
   }
 }
 
