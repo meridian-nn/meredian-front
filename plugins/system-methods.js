@@ -1,5 +1,5 @@
 /* eslint-disable */
-// Плагин с геттерами, которые возвращают id элементов форм
+// Плагин c разными системными методами
 import Vue from 'vue'
 Vue.mixin({
     methods: {
@@ -13,6 +13,11 @@ Vue.mixin({
             if (orgId === 159) {
                 return '#639db1'
             }
+        },
+
+        //Функция возвращает текущего пользователя
+        getCurrentUser() {
+            return this.$store.state.profile.user
         }
     }
 })

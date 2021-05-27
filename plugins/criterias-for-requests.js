@@ -118,7 +118,7 @@ Vue.mixin({
 
         // Создает объект с критериями для отбора значений фильтров для пользователя 
         // для переданной формы и элемента
-        createCriteriasToSearchForFiltersValues(formId, elementId) {
+        createCriteriasToSearchForFiltersValues(formId, elementId, userId) {
             const data = [{
                     'dataType': 'VARCHAR',
                     'key': 'formId',
@@ -135,6 +135,15 @@ Vue.mixin({
                     'type': 'AND',
                     'values': [
                         elementId
+                    ]
+                },
+                {
+                    'dataType': 'VARCHAR',
+                    'key': 'userId',
+                    'operation': 'EQUALS',
+                    'type': 'AND',
+                    'values': [
+                        userId
                     ]
                 },
             ]

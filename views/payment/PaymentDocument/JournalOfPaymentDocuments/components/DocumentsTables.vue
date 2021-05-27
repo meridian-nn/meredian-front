@@ -1155,20 +1155,12 @@ export default {
       this.toPaySelectedRows = []
       this.toPayData = []
 
-      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name, 'journal-of-payment-docs-to-pay-docs')
-      const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
-      let filtersParams
-
-      if (response.length) {
-        filtersParams = JSON.parse(response[0].settingValue)
-      }
-
       const dataFromPay = this.createCriteriasForRequestToSearchDocsToPay(
-        accId, this.selectedOrganization, this.date, filtersParams)
+        accId, this.selectedOrganization, this.date)
       const toPayDataResponse = await this.$api.payment.docOplToPay.findDocumentsByCriterias(dataFromPay)
 
       const dataPaymentByCashbox = this.createCriteriasForRequestToSearchPaymentsByCashbox(
-        accId, this.selectedOrganization, this.date, filtersParams)
+        accId, this.selectedOrganization, this.date)
       const paymentByCashboxResponse = await this.$api.payment.findPaymentsByCashboxByCriterias(dataPaymentByCashbox)
 
       const objFromFunc = this.convertResponsesToDataForToPayTable(paymentByCashboxResponse, toPayDataResponse)
@@ -1184,8 +1176,9 @@ export default {
       this.fromPayData = []
       this.fromPaySelectedRows = []
 
+      const currentUser = this.getCurrentUser()
       // eslint-disable-next-line vue/max-len
-      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name, this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs())
+      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name, this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs(), currentUser.id)
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
       let filtersParams
 

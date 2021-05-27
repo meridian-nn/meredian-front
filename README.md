@@ -35,5 +35,5 @@ For detailed explanation on how things work, check out [Nuxt.js docs](https://nu
 
 - plugins/custom-compare - плагин с кастомной сортировкой
 
-- plugins/id-of-forms-elements - плагин с геттерами айдишников элементов форм для получения пользовательских фильтров из базы
+- plugins/system-methods - плагин c разными системными методами
 
