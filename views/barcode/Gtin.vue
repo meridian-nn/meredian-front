@@ -3,17 +3,35 @@
     class="py-6 px-6"
     fluid
   >
-    <v-layout>
-      <v-flex xs3>
+    <v-row>
+      <v-col cols="2">
         <v-text-field
           v-model="newLeadsSearch"
           append-icon="mdi-magnify"
           label="Поиск"
         />
-      </v-flex>
-    </v-layout>
+      </v-col>
+
+      <v-spacer />
+
+      <v-col cols="4">
+        <div class="barcode-form-gtin-main">
+          <button
+            class="barcode-form-gtin-btn"
+            @click="$router.push({name: 'MarkPage'})"
+          >
+            Маркировка
+          </button>
+        </div>
+      </v-col>
+    </v-row>
 
     <v-data-table
+      id="barcode-form-gtin-table"
+      fixed-header
+      height="760"
+      disable-pagination
+      hide-default-footer
       :headers="headers"
       :items="desserts"
       sort-by="calories"
@@ -1189,5 +1207,32 @@ export default {
 </script>
 
 <style scoped>
+
+.barcode-form-gtin-main {
+  display:flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.barcode-form-gtin-btn {
+  width: 180px;
+  height: 30px;
+  font-size:1.2rem;
+  background: #639db1;
+  border:none;
+  margin:20px;
+  outline:2px solid #639db1;
+  outline-offset:4px;
+  border:2px solid #639db1;
+  cursor: pointer;
+  color: white;
+  transition: all 250ms;
+}
+
+.barcode-form-gtin-btn:hover{
+  outline-offset: -8px;
+  color: rgb(34,34,34);
+  background: none;
+}
 
 </style>

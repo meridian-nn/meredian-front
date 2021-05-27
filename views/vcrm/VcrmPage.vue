@@ -25,30 +25,13 @@
         >
           <v-list-item-action class="pr-1 pl-2 mr-1">
             <v-icon class="blue--text">
-              mdi-domain
+              mdi-barcode-scan
             </v-icon>
           </v-list-item-action>
 
           <v-list-item-content>
             <v-list-item-title class="font-weight-medium">
-              Журнал GTIN
-            </v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-
-        <v-list-item
-          link
-          :to="{ name: 'MarkPage' }"
-        >
-          <v-list-item-action class="pr-1 pl-2 mr-1">
-            <v-icon class="blue--text">
-              mdi-brightness-5
-            </v-icon>
-          </v-list-item-action>
-
-          <v-list-item-content>
-            <v-list-item-title class="font-weight-medium">
-              Журнал Кодов Маркировки
+              Маркировка
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>

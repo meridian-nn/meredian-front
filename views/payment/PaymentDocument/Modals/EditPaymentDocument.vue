@@ -349,7 +349,7 @@ export default {
       // массив договоров для выбора пользователем
       contracts: [],
 
-      // массив плательщиков для выбора пользователем
+      // плательщик документа
       payer: '',
 
       // массив поставщиков для выбора пользователем
@@ -360,9 +360,12 @@ export default {
 
       // массив видов документов для выбора пользователем
       documentKinds: [],
+
       search: null,
 
       select: null,
+
+      // переменная, отвечающая за отображениие модального окна
       dialog: false,
 
       // объект, в котором хранится редактируемый документ
@@ -421,9 +424,6 @@ export default {
       if (!this.departments.length) {
         this.loadingType.departments = true
         this.departments = await this.$api.budgetElements.findDepartments()
-        /* $axios.$get(
-          '/meridian/oper/dict/spViddocopl/findDepartments'
-        ) */
         this.loadingType.departments = null
       }
     },
@@ -433,45 +433,41 @@ export default {
       if (!this.paymentStatuses.length) {
         this.loadingType.paymentStatuses = true
         this.paymentStatuses = await this.$api.payment.findPaymentStatuses()
-        /* $axios.$get(
-          '/meridian/oper/spDocopl/findPaymentStatuses'
-        ) */
         this.loadingType.paymentStatuses = null
       }
     },
 
     // поиск типов документов для выбора пользователем
     async findDocumentType(parentId) {
-      if (parentId) {
-        this.loadingType.documentTypes = true
-
-        const data = {
-          parentId
-        }
-        this.documentTypes = await this.$api.budgetElements.findDocumentTypesByParentId(data)
-        /* $axios.$get(
-          '/meridian/oper/dict/spViddocopl/findByParentId?parentId=' + parentId
-        ) */
-        this.loadingType.documentTypes = null
-      } else {
+      if (!parentId) {
         this.documentTypes = []
+        return
       }
+
+      this.loadingType.documentTypes = true
+
+      const data = {
+        parentId
+      }
+      this.documentTypes = await this.$api.budgetElements.findDocumentTypesByParentId(data)
+      this.loadingType.documentTypes = null
     },
 
     // обновление списка поставщиков для выбора пользователем после изменения подразделения на форме
     async findExecutors(departmentId) {
-      if (departmentId) {
-        this.loadingType.executors = true
-
-        const data = {
-          viddocoplId: departmentId
-        }
-        this.executors = await this.$api.executors.findExecutorsByDepartmentId(data)
-
-        this.loadingType.executors = null
-      } else {
+      if (!departmentId) {
         this.executors = []
+        return
       }
+
+      this.loadingType.executors = true
+
+      const data = {
+        viddocoplId: departmentId
+      }
+      this.executors = await this.$api.executors.findExecutorsByDepartmentId(data)
+
+      this.loadingType.executors = null
     },
 
     // обновление списка клиентов для выбора пользователем
@@ -504,6 +500,11 @@ export default {
 
     // поиск плательщиков для выбора пользователем
     async findPayers() {
+      if (!this.editedItem.myorgId) {
+        this.payer = ''
+        return
+      }
+
       this.loadingType.payer = true
 
       this.payer = await this.$api.organizations.findById(this.editedItem.myorgId)
@@ -516,9 +517,6 @@ export default {
       if (!this.documentKinds.length) {
         this.loadingType.documentKinds = true
         this.documentKinds = await this.$api.typeOfDocuments.findAll()
-        /* $axios.$get(
-          '/meridian/oper/dict/spViddoc/findAll'
-        ) */
         this.loadingType.documentKinds = null
       }
     },
@@ -531,9 +529,6 @@ export default {
         myDescr: this.getCurrentUser().email
       }
       this.contracts = await this.$api.budgetElements.findContracts(data)
-      /* $axios.$get(
-        '/meridian/oper/dogSelDogSpisSpec/findByMyDescr?myDescr=' + executorId
-      ) */
       this.loadingType.contracts = null
     },
 
@@ -625,7 +620,6 @@ export default {
 
     // функция отработки события нажития на кнопку "отмена"
     cancel() {
-      console.log('cancel')
       this.reset()
       this.dialog = false
       this.$emit('cancel')

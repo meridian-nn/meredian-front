@@ -3,30 +3,108 @@
     class="py-6 px-6"
     fluid
   >
-    <v-layout>
-      <v-flex xs3>
-        <v-text-field
-          v-model="newLeadsSearch"
-          append-icon="mdi-magnify"
-          label="Поиск"
-        />
-      </v-flex>
+    <v-row>
+      <v-col cols="4">
+        <div>
+          <v-text-field
+            v-model="newLeadsSearch"
+            append-icon="mdi-magnify"
+            label="Поиск"
+          />
+        </div>
+      </v-col>
 
-      <v-flex offset-7>
-        <v-btn
-          color="blue white--text"
-          @click="saveExelFIle"
+      <v-spacer />
+
+      <v-col cols="4">
+        <div class="barcode-form-mark-main">
+          <button
+            class="barcode-form-mark-btn"
+            @click="saveExelFIle"
+          >
+            Сохранить в xls
+          </button>
+          <button
+            class="barcode-form-mark-btn"
+            @click="$router.push({name: 'GtinPage'})"
+          >
+            GTIN
+          </button>
+        </div>
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <div class="barcode-form-mark-col-2">
+        <v-text-field
+          v-model="numberOfOrder"
+          label="Номер заказа"
+          clearable="true"
+          outlined
+          hide-details="auto"
+        />
+      </div>
+
+      <div class="barcode-form-mark-col-date-order-text">
+        <div
+          align="center"
         >
-          Сохранить таблицу в файл
-        </v-btn>
-      </v-flex>
-    </v-layout>
+          Дата заказа: с
+        </div>
+      </div>
+
+      <div class="barcode-form-mark-col-date">
+        <v-text-field
+          v-model="startDate"
+          type="date"
+        />
+      </div>
+
+      <div class="barcode-form-mark-col-1">
+        <div
+          align="center"
+        >
+          по
+        </div>
+      </div>
+
+      <div class="barcode-form-mark-col-date">
+        <v-text-field
+          v-model="endDate"
+          type="date"
+        />
+      </div>
+
+      <div class="barcode-form-mark-main">
+        <button
+          class="barcode-form-mark-btn-find"
+          @click="findMarkCodeBySearchCriterias"
+        >
+          Найти
+        </button>
+      </div>
+
+      <div class="barcode-form-mark-main">
+        <button
+          class="barcode-form-mark-btn-cancel-filters"
+          @click="cancelFilters"
+        >
+          Сбросить фильтры
+        </button>
+      </div>
+
+      <v-spacer />
+    </v-row>
 
     <v-data-table
+      id="barcode-form-mark-table"
+      height="650"
+      fixed-header
       :headers="headers"
       :items="desserts"
       sort-by="calories"
       calculate-widths
+      :footer-props="footerProps"
       @current-items="getFilteredItem"
     >
       <template
@@ -134,7 +212,8 @@
 
       <template #[`item.code`]="{ item }">
         <span
-          class="dialog-code-btn"
+          class="barcode-form-dialog-code-btn"
+          style="width: 160px"
           @click="openBarCodeDialog(item.code)"
         >{{ item.code }}</span>
       </template>
@@ -144,7 +223,7 @@
       v-model="showDialogBarCode"
       max-width="266px"
     >
-      <div class="dialog-code-wrapp">
+      <div class="barcode-form-dialog-code-wrapp">
         <img
           alt="Barcode Generator"
           :src="`https://barcode.tec-it.com/barcode.ashx?data=${this.barCodeData}&code=DataMatrix&multiplebarcodes=false&translate-esc=false&unit=Fit&dpi=96&imagetype=Jpeg&rotation=0&color=%23000000&bgcolor=%23ffffff&codepage=Default&qunit=Mm&quiet=0&dmsize=300px`"
@@ -176,24 +255,26 @@ export default {
       desserts: [],
       filterDesserts: [],
       activeFilters: {},
-      filters: { 'prodName': [], 'color': [], 'order_id': [], 'sizeValue': [], 'sizeName': [], 'model': [], 'brand': [], 'packType': [], 'packMaterial': [] }
+      filters: { 'prodName': [], 'color': [], 'order_id': [], 'sizeValue': [], 'sizeName': [], 'model': [], 'brand': [], 'packType': [], 'packMaterial': [], 'date_add': [] },
+      footerProps: {
+        'items-per-page-text': 'Количество строк на странице'
+      },
+      numberOfOrder: '',
+      endDate: new Date().toISOString().substr(0, 10),
+      startDate: new Date().toISOString().substr(0, 10)
     }
   },
 
   async fetch() {
-    const { content } = await this.$api.code.markCodeList()
-    // await this.$axios.$get('/meridian/markCode/findAll?page=0&size=200')
-
-    this.fullDesserts = content
+    this.fullDesserts = await this.$api.code.markCodeList()
 
     const code = this.fullDesserts.map(item => item.code)
-
+    const dateAdd = this.fullDesserts.map(item => item.dateAdd)
     const orderId = this.fullDesserts.map(item => item.markOrder.markCodeRequest.productionOrderId)
-
     const table = this.fullDesserts.map(item => item.markOrder.markCodeRequest.gtinRequest)
 
     const mark = table.map((item, i) => {
-      return { ...item, code: code[i], order_id: orderId[i] }
+      return { ...item, code: code[i], date_add: dateAdd[i], order_id: orderId[i] }
     })
 
     this.desserts = mark.map(item => omit(item, ['quantity', 'id', 'categoryId', 'publicationDate', 'trademark', 'tnved', 'manufacturerCode', 'measure', 'gcpclBrick', 'inn', 'country', 'apiExtension', 'rawMaterial', 'companyName']))
@@ -212,9 +293,18 @@ export default {
           }
         },
         {
+          text: 'Дата заказа',
+          value: 'date_add',
+          width: '170px',
+          sortable: true,
+          filter: (value) => {
+            return this.activeFilters.date_add ? this.activeFilters.date_add.includes(value) : true
+          }
+        },
+        {
           text: 'Код маркировки',
+          width: '170px',
           value: 'code',
-          width: '150px',
           sortable: false
         },
         {
@@ -229,6 +319,7 @@ export default {
             }
           }
         },
+
         {
           text: 'Бренд',
           value: 'brand',
@@ -319,7 +410,16 @@ export default {
     }
   },
 
+  mounted() {
+    this.init()
+  },
+
   methods: {
+    init() {
+      const date = new Date()
+      this.startDate = new Date(date.getFullYear(), date.getMonth(), 2).toISOString().substr(0, 10)
+    },
+
     openBarCodeDialog(code) {
       this.barCodeData = code
 
@@ -362,6 +462,27 @@ export default {
 
     clearAll(col) {
       this.activeFilters[col] = []
+    },
+
+    async findMarkCodeBySearchCriterias() {
+      const data = this.createCriteriasForMarkCodeRequest(this.numberOfOrder, this.startDate, this.endDate)
+
+      this.fullDesserts = await this.$api.code.findBySearchCriterias(data)
+
+      const code = this.fullDesserts.map(item => item.code)
+      const dateAdd = this.fullDesserts.map(item => item.dateAdd)
+      const orderId = this.fullDesserts.map(item => item.markOrder.markCodeRequest.productionOrderId)
+      const table = this.fullDesserts.map(item => item.markOrder.markCodeRequest.gtinRequest)
+
+      const mark = table.map((item, i) => {
+        return { ...item, code: code[i], date_add: dateAdd[i], order_id: orderId[i] }
+      })
+
+      this.desserts = mark.map(item => omit(item, ['quantity', 'id', 'categoryId', 'publicationDate', 'trademark', 'tnved', 'manufacturerCode', 'measure', 'gcpclBrick', 'inn', 'country', 'apiExtension', 'rawMaterial', 'companyName']))
+    },
+
+    cancelFilters() {
+      this.$fetch()
     }
   }
 
@@ -369,10 +490,14 @@ export default {
 </script>
 
 <style lang="scss">
-.dialog-code {
+
+#barcode-form-mark-table td {
+    word-break:break-all !important;
+}
+
+.barcode-form-dialog-code {
   &-wrapp {
     background-color: #fff;
-    width: 265px;
 
     img {
       width: 100%;
@@ -384,15 +509,96 @@ export default {
     color: cornflowerblue;
   }
 }
-.v-data-table {
-  &__wrapper {
-    tbody {
-      td:nth-of-type(2) {
-        max-width: 250px;
-        width: 250px;
-        word-wrap: break-word !important;
-      }
-    }
-  }
+
+.barcode-form-mark-main {
+  display:flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.barcode-form-mark-btn {
+  width: 180px;
+  height: 30px;
+  font-size:1rem;
+  background: #639db1;
+  border:none;
+  margin:20px;
+  outline:2px solid #639db1;
+  outline-offset:4px;
+  border:2px solid #639db1;
+  cursor: pointer;
+  color: white;
+  transition: all 250ms;
+}
+
+.barcode-form-mark-btn:hover{
+  outline-offset: -8px;
+  color: rgb(34,34,34);
+  background: none;
+}
+
+.barcode-form-mark-btn-find {
+  width: 70px;
+  height: 30px;
+  font-size:1rem;
+  background: #639db1;
+  border:none;
+  margin:20px;
+  outline:2px solid #639db1;
+  outline-offset:4px;
+  border:2px solid #639db1;
+  cursor: pointer;
+  color: white;
+  transition: all 250ms;
+}
+
+.barcode-form-mark-btn-find:hover{
+  outline-offset: -8px;
+  color: rgb(34,34,34);
+  background: none;
+}
+
+.barcode-form-mark-btn-cancel-filters {
+  width: 150px;
+  height: 30px;
+  font-size:1rem;
+  background: #639db1;
+  border:none;
+  margin:20px;
+  outline:2px solid #639db1;
+  outline-offset:4px;
+  border:2px solid #639db1;
+  cursor: pointer;
+  color: white;
+  transition: all 250ms;
+}
+
+.barcode-form-mark-btn-cancel-filters:hover{
+  outline-offset: -8px;
+  color: rgb(34,34,34);
+  background: none;
+}
+
+.barcode-form-mark-col-2{
+  padding-left: 12px;
+  flex: 0 0 16%;
+  max-width: 16%;
+}
+
+.barcode-form-mark-col-date{
+  flex: 0 0 10%;
+  max-width: 10%;
+}
+
+.barcode-form-mark-col-1{
+  margin-top:20px;
+  flex: 0 0 5%;
+  max-width: 5%;
+}
+
+.barcode-form-mark-col-date-order-text{
+  margin-top:20px;
+  flex: 0 0 10%;
+  max-width: 10%;
 }
 </style>

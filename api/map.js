@@ -33,6 +33,14 @@ export const factory = send => ({
 
         gtinCodeSave(params) {
             return send('POST', `/gtinRequest/saveGtinRequest?${new URLSearchParams(params).toString()}`)
+        },
+
+        findBySearchCriteria(params) {
+            return send('POST', `/markCode/findBySearchCriteria`, params)
+        },
+
+        findBySearchCriterias(params) {
+            return send('POST', `/markCode/findBySearchCriterias`, params)
         }
     },
 
@@ -325,7 +333,7 @@ export const factory = send => ({
         }
     },
 
-    settings: {
+    uiSettings: {
         findAll() {
             return send('GET', '/uiSetting/findAll')
         },
