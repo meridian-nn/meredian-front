@@ -303,32 +303,32 @@
                     <v-checkbox
                       v-model="fromPaySelectedRows"
                       :value="item"
-                      class="journal-of-payment-docs-checkbox"
+                      class="journal-of-payment-docs-from-pay-docs-checkbox"
                       hide-details
                     />
                   </td>
-                  <td class="journal-of-payment-docs-data">
+                  <td class="journal-of-payment-docs-from-pay-docs-dataDoc">
                     {{ item.dataDoc }}
                   </td>
-                  <td class="journal-of-payment-docs-rower">
+                  <td class="journal-of-payment-docs-from-pay-docs-nameDoc">
                     {{ item.nameDoc }}
                   </td>
-                  <td class="journal-of-payment-docs-rower">
+                  <td class="journal-of-payment-docs-from-pay-docs-myorgName">
                     {{ item.myorgName }}
                   </td>
-                  <td class="journal-of-payment-docs-data-oplat">
+                  <td class="journal-of-payment-docs-from-pay-docs-dataOplat">
                     {{ item.dataOplat }}
                   </td>
-                  <td class="journal-of-payment-docs-sum-doc">
+                  <td class="journal-of-payment-docs-from-pay-docs-sumDoc">
                     {{ item.sumDoc }}
                   </td>
-                  <td class="journal-of-payment-docs-sum-paid">
+                  <td class="journal-of-payment-docs-from-pay-docs-sumPaid">
                     {{ item.sumPaid }}
                   </td>
-                  <td class="journal-of-payment-docs-sum-oplat">
+                  <td class="journal-of-payment-docs-from-pay-docs-sumOplat">
                     {{ item.sumOplat }}
                   </td>
-                  <td class="journal-of-payment-docs-dep-name">
+                  <td class="journal-of-payment-docs-from-pay-docs-depName">
                     {{ item.depName }}
                   </td>
                 </tr>
@@ -446,7 +446,7 @@
 
       <div class="journal-of-payment-docs-bottom-spacer-btw-results" />
 
-      <div class="journal-of-payment-docs-bottom-comment">
+      <div class="journal-of-payment-docs-bottom-fromPay-results">
         <div class="journal-of-payment-docs-row">
           <div>
             <th>Итого</th>
@@ -553,23 +553,27 @@ export default {
         {
           text: 'Дата',
           value: 'dataOplat',
-          width: '50px'
+          width: '80px'
         },
         {
           text: 'Номер',
-          value: 'nameDoc'
+          value: 'nameDoc',
+          width: '110px'
         },
         {
           text: 'Плательщик',
-          value: 'namePlat'
+          value: 'namePlat',
+          width: '140px'
         },
         {
           text: 'Кредит',
-          value: 'prCredit'
+          value: 'prCredit',
+          width: '80px'
         },
         {
           text: 'Оплата',
-          value: 'sumOplatMask'
+          value: 'sumOplatMask',
+          width: '100px'
         },
         {
           text: 'Счёт',
@@ -1226,6 +1230,7 @@ export default {
 <style lang="scss">
 
 #journal-of-payment-docs-v-data-table-from-pay-docs td {
+    word-break:break-all !important;
     padding: 0 5px !important;
     height: 0px !important;
 }
@@ -1236,6 +1241,7 @@ export default {
 }
 
 #journal-of-payment-docs-v-data-table-to-pay-docs td {
+    word-break:break-all !important;
     padding: 0 0px !important;
     height: 0px !important;
 }
@@ -1329,14 +1335,14 @@ export default {
   max-width: 43%;
 }
 
-.journal-of-payment-docs-bottom-toPay-results{
-  flex: 0 0 40%;
-  max-width: 40%;
-}
-
 .journal-of-payment-docs-bottom-spacer-for-toPay-results{
   flex: 0 0 56%;
   max-width: 56%;
+}
+
+.journal-of-payment-docs-bottom-toPay-results{
+  flex: 0 0 40%;
+  max-width: 40%;
 }
 
 .journal-of-payment-docs-bottom-spacer-btw-results{
@@ -1350,8 +1356,8 @@ export default {
 }
 
 .journal-of-payment-docs-bottom-spacer-for-fromPay-results{
-  flex: 0 0 52%;
-  max-width: 52%;
+  flex: 0 0 53%;
+  max-width: 53%;
 }
 
 .journal-of-payment-docs-result-text{
@@ -1428,38 +1434,37 @@ export default {
   color: #999;
 }
 
-.journal-of-payment-docs-rower {
-  width: 170px;
-}
-
-.journal-of-payment-docs-checkbox {
+.journal-of-payment-docs-from-pay-docs-checkbox {
   margin:0px;
   padding:0px;
   color:#999 !important
 }
 
-.journal-of-payment-docs-data {
-  width: 80px !important
+.journal-of-payment-docs-from-pay-docs-dataDoc {
+  width: 90px !important
 }
 
-.journal-of-payment-docs-data-oplat {
-  width: 100px !important
+.journal-of-payment-docs-from-pay-docs-nameDoc {
+  width: 170px !important
 }
 
-.journal-of-payment-docs-sum-doc {
+.journal-of-payment-docs-from-pay-docs-dataOplat {
+  width: 110px !important
+}
+
+.journal-of-payment-docs-from-pay-docs-sumDoc {
   width: 84px !important
 }
 
-.journal-of-payment-docs-sum-paid {
+.journal-of-payment-docs-from-pay-docs-sumPaid {
   width: 84px !important
 }
 
-.journal-of-payment-docs-sum-oplat {
+.journal-of-payment-docs-from-pay-docs-sumOplat {
   width: 81px !important
 }
 
-.journal-of-payment-docs-dep-name {
+.journal-of-payment-docs-from-pay-docs-depName {
   width: 123px !important
 }
-
 </style>

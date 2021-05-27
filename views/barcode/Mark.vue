@@ -48,7 +48,6 @@
       <div class="barcode-form-mark-col-date-order-text">
         <div
           align="center"
-          class="payment-budget-by-deps-header"
         >
           Дата заказа: с
         </div>
@@ -64,7 +63,6 @@
       <div class="barcode-form-mark-col-1">
         <div
           align="center"
-          class="payment-budget-by-deps-header"
         >
           по
         </div>
@@ -80,9 +78,18 @@
       <div class="barcode-form-mark-main">
         <button
           class="barcode-form-mark-btn-find"
-          @click="findMarkCode"
+          @click="findMarkCodeBySearchCriterias"
         >
           Найти
+        </button>
+      </div>
+
+      <div class="barcode-form-mark-main">
+        <button
+          class="barcode-form-mark-btn-cancel-filters"
+          @click="cancelFilters"
+        >
+          Сбросить фильтры
         </button>
       </div>
 
@@ -90,6 +97,7 @@
     </v-row>
 
     <v-data-table
+      id="barcode-form-mark-table"
       height="650"
       fixed-header
       :headers="headers"
@@ -204,7 +212,7 @@
 
       <template #[`item.code`]="{ item }">
         <span
-          class="dialog-code-btn"
+          class="barcode-form-dialog-code-btn"
           style="width: 160px"
           @click="openBarCodeDialog(item.code)"
         >{{ item.code }}</span>
@@ -215,7 +223,7 @@
       v-model="showDialogBarCode"
       max-width="266px"
     >
-      <div class="dialog-code-wrapp">
+      <div class="barcode-form-dialog-code-wrapp">
         <img
           alt="Barcode Generator"
           :src="`https://barcode.tec-it.com/barcode.ashx?data=${this.barCodeData}&code=DataMatrix&multiplebarcodes=false&translate-esc=false&unit=Fit&dpi=96&imagetype=Jpeg&rotation=0&color=%23000000&bgcolor=%23ffffff&codepage=Default&qunit=Mm&quiet=0&dmsize=300px`"
@@ -258,16 +266,11 @@ export default {
   },
 
   async fetch() {
-    const { content } = await this.$api.code.markCodeList()
-
-    this.fullDesserts = content
+    this.fullDesserts = await this.$api.code.markCodeList()
 
     const code = this.fullDesserts.map(item => item.code)
-
     const dateAdd = this.fullDesserts.map(item => item.dateAdd)
-
     const orderId = this.fullDesserts.map(item => item.markOrder.markCodeRequest.productionOrderId)
-
     const table = this.fullDesserts.map(item => item.markOrder.markCodeRequest.gtinRequest)
 
     const mark = table.map((item, i) => {
@@ -290,9 +293,18 @@ export default {
           }
         },
         {
-          text: 'Код маркировки',
-          value: 'code',
+          text: 'Дата заказа',
+          value: 'date_add',
           width: '170px',
+          sortable: true,
+          filter: (value) => {
+            return this.activeFilters.date_add ? this.activeFilters.date_add.includes(value) : true
+          }
+        },
+        {
+          text: 'Код маркировки',
+          width: '170px',
+          value: 'code',
           sortable: false
         },
         {
@@ -307,15 +319,7 @@ export default {
             }
           }
         },
-        {
-          text: 'Дата заказа',
-          value: 'date_add',
-          width: '170px',
-          sortable: true,
-          filter: (value) => {
-            return this.activeFilters.date_add ? this.activeFilters.date_add.includes(value) : true
-          }
-        },
+
         {
           text: 'Бренд',
           value: 'brand',
@@ -406,7 +410,16 @@ export default {
     }
   },
 
+  mounted() {
+    this.init()
+  },
+
   methods: {
+    init() {
+      const date = new Date()
+      this.startDate = new Date(date.getFullYear(), date.getMonth(), 2).toISOString().substr(0, 10)
+    },
+
     openBarCodeDialog(code) {
       this.barCodeData = code
 
@@ -439,8 +452,6 @@ export default {
       }
 
       this.activeFilters = Object.assign({}, this.filters)
-      const date = new Date()
-      this.startDate = new Date(date.getFullYear(), date.getMonth(), 2).toISOString().substr(0, 10)
     },
 
     toggleAll(col) {
@@ -453,8 +464,25 @@ export default {
       this.activeFilters[col] = []
     },
 
-    findMarkCode() {
+    async findMarkCodeBySearchCriterias() {
+      const data = this.createCriteriasForMarkCodeRequest(this.numberOfOrder, this.startDate, this.endDate)
 
+      this.fullDesserts = await this.$api.code.findBySearchCriterias(data)
+
+      const code = this.fullDesserts.map(item => item.code)
+      const dateAdd = this.fullDesserts.map(item => item.dateAdd)
+      const orderId = this.fullDesserts.map(item => item.markOrder.markCodeRequest.productionOrderId)
+      const table = this.fullDesserts.map(item => item.markOrder.markCodeRequest.gtinRequest)
+
+      const mark = table.map((item, i) => {
+        return { ...item, code: code[i], date_add: dateAdd[i], order_id: orderId[i] }
+      })
+
+      this.desserts = mark.map(item => omit(item, ['quantity', 'id', 'categoryId', 'publicationDate', 'trademark', 'tnved', 'manufacturerCode', 'measure', 'gcpclBrick', 'inn', 'country', 'apiExtension', 'rawMaterial', 'companyName']))
+    },
+
+    cancelFilters() {
+      this.$fetch()
     }
   }
 
@@ -462,10 +490,14 @@ export default {
 </script>
 
 <style lang="scss">
-.dialog-code {
+
+#barcode-form-mark-table td {
+    word-break:break-all !important;
+}
+
+.barcode-form-dialog-code {
   &-wrapp {
     background-color: #fff;
-    width: 265px;
 
     img {
       width: 100%;
@@ -475,17 +507,6 @@ export default {
   &-btn {
     cursor: pointer;
     color: cornflowerblue;
-  }
-}
-.v-data-table {
-  &__wrapper {
-    tbody {
-      td:nth-of-type(2) {
-        max-width: 250px;
-        width: 250px;
-        word-wrap: break-word !important;
-      }
-    }
   }
 }
 
@@ -532,6 +553,27 @@ export default {
 }
 
 .barcode-form-mark-btn-find:hover{
+  outline-offset: -8px;
+  color: rgb(34,34,34);
+  background: none;
+}
+
+.barcode-form-mark-btn-cancel-filters {
+  width: 150px;
+  height: 30px;
+  font-size:1rem;
+  background: #639db1;
+  border:none;
+  margin:20px;
+  outline:2px solid #639db1;
+  outline-offset:4px;
+  border:2px solid #639db1;
+  cursor: pointer;
+  color: white;
+  transition: all 250ms;
+}
+
+.barcode-form-mark-btn-cancel-filters:hover{
   outline-offset: -8px;
   color: rgb(34,34,34);
   background: none;

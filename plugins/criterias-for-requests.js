@@ -139,6 +139,41 @@ Vue.mixin({
                 },
             ]
             return data
+        },
+
+        // Функция для создания критериев для отбора кодов маркировок по номеру заказа и датам
+        // numberOfOrder - номер заказа
+        // startDate - дата начала периода
+        // endDate - дата конца периода
+        createCriteriasForMarkCodeRequest(numberOfOrder, startDate, endDate) {
+            const data = []
+
+            if (numberOfOrder) {
+                const criteriaByNumber = {
+                    "dataType": "VARCHAR",
+                    "key": "markOrder.markCodeRequest.productionOrderId",
+                    "operation": "EQUALS",
+                    "type": "AND",
+                    "values": [
+                        numberOfOrder
+                    ]
+                }
+                data.push(criteriaByNumber)
+            }
+
+            const criteriaByDates = {
+                "dataType": "DATE",
+                "key": "dateAdd",
+                "operation": "BETWEEN",
+                "type": "AND",
+                "values": [
+                    new Date(startDate).toLocaleDateString(), new Date(endDate).toLocaleDateString()
+                ]
+            }
+
+            data.push(criteriaByDates)
+
+            return data
         }
     }
 })

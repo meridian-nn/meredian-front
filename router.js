@@ -50,7 +50,7 @@ const InternalPaymentPage = dynamicPage(() =>
     import ('~/views/payment/PaymentDocument/Modals/InternalPayment.vue'))
 
 const HistoryOfPaymentDocumentsPage = dynamicPage(() =>
-    import ('~/views/payment/HistoryOfJournalOfPaymentDocuments'))
+    import ('~/views/payment/HistoryOfJournalOfPaymentDocuments-not-using'))
 
 const MoneyDistributionPage = dynamicPage(() =>
     import ('~/views/payment/MoneyDistribution'))
@@ -68,10 +68,10 @@ const RegisterOfPaymentsByCashboxPage = dynamicPage(() =>
     import ('~/views/payment/RegisterOfPaymentsByCashbox'))
 
 const GtinPage = dynamicPage(() =>
-    import ('~/views/vcrm/Dashboard/Barcode/Gtin'))
+    import ('~/views/barcode/Gtin'))
 
 const MarkPage = dynamicPage(() =>
-    import ('~/views/vcrm/Dashboard/Barcode/Mark'))
+    import ('~/views/barcode/Mark'))
 
 const ChatPage = dynamicPage(() =>
     import ('~/views/vcrm/Dashboard/Chat/ChatPage'))

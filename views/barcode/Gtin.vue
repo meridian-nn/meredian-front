@@ -25,7 +25,9 @@
         </div>
       </v-col>
     </v-row>
+
     <v-data-table
+      id="barcode-form-gtin-table"
       fixed-header
       height="760"
       disable-pagination
