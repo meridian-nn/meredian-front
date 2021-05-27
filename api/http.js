@@ -1,4 +1,3 @@
-import { btoa } from 'isomorphic-base64'
 import Cookies from 'js-cookie'
 export default class HttpClient {
   constructor({ url }) {
@@ -18,7 +17,6 @@ export default class HttpClient {
   }
 
   config(method, params = {}) {
-    console.log(this.headers)
     return {
       method,
       ...(method === 'POST' && {
@@ -53,8 +51,8 @@ export default class HttpClient {
       'Content-Type': 'application/json'
     }
 
-    if (process.env.USER) {
-      headers.Authorization = 'Basic ' + btoa(`${process.env.USER}:${process.env.PASSWORD}`)
+    if (window.$nuxt.$store.state.auth.token) {
+      headers.Authorization = 'Basic ' + window.$nuxt.$store.state.auth.token
     }
 
     if (this._token) {
