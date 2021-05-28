@@ -510,11 +510,11 @@
 </template>
 
 <script>
-import EditPaymentDocument from '@/views/payment/PaymentDocument/Modals/EditPaymentDocument'
-import PaymentByCashbox from '@/views/payment/PaymentDocument/Modals/PaymentByCashbox'
-import InternalPayment from '@/views/payment/PaymentDocument/Modals/InternalPayment'
-import UserNotification from '@/views/special_components/information_window/UserNotification'
-import PaymentCardByDocument from '@/views/payment/PaymentDocument/Modals/PaymentCardByDocument'
+import EditPaymentDocument from '@/views/vcrm/Payment/PaymentDocument/Modals/EditPaymentDocument'
+import PaymentByCashbox from '@/views/vcrm/Payment/PaymentDocument/Modals/PaymentByCashbox'
+import InternalPayment from '@/views/vcrm/Payment/PaymentDocument/Modals/InternalPayment'
+import UserNotification from '@/components/information_window/UserNotification'
+import PaymentCardByDocument from '@/views/vcrm/Payment/PaymentDocument/Modals/PaymentCardByDocument'
 import JournalOfPaymentDocumentsHeader from './Header'
 import FiltersFormFromPayDocs from './filters/FiltersFormFromPayDocs'
 
@@ -1155,12 +1155,20 @@ export default {
       this.toPaySelectedRows = []
       this.toPayData = []
 
+      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name, 'journal-of-payment-docs-to-pay-docs')
+      const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
+      let filtersParams
+
+      if (response.length) {
+        filtersParams = JSON.parse(response[0].settingValue)
+      }
+
       const dataFromPay = this.createCriteriasForRequestToSearchDocsToPay(
-        accId, this.selectedOrganization, this.date)
+        accId, this.selectedOrganization, this.date, filtersParams)
       const toPayDataResponse = await this.$api.payment.docOplToPay.findDocumentsByCriterias(dataFromPay)
 
       const dataPaymentByCashbox = this.createCriteriasForRequestToSearchPaymentsByCashbox(
-        accId, this.selectedOrganization, this.date)
+        accId, this.selectedOrganization, this.date, filtersParams)
       const paymentByCashboxResponse = await this.$api.payment.findPaymentsByCashboxByCriterias(dataPaymentByCashbox)
 
       const objFromFunc = this.convertResponsesToDataForToPayTable(paymentByCashboxResponse, toPayDataResponse)

@@ -31,39 +31,38 @@ const AuthLogin = dynamicPage(() =>
 const VcrmPage = dynamicPage(() =>
     import ('~/views/vcrm/VcrmPage'))
 
-
 const PaymentMenuPage = dynamicPage(() =>
-    import ('~/views/vcrm/Payment/Menu'))
+  import ('~/views/vcrm/Payment/Menu'))
 
 const JournalOfPaymentDocumentsPage = dynamicPage(() =>
-    import ('~/views/vcrm/Payment/PaymentDocument/JournalOfPaymentDocuments'))
+  import ('~/views/vcrm/Payment/PaymentDocument/JournalOfPaymentDocuments'))
 
 const JournalOfEmailSendingPaymentDocumentsPage = dynamicPage(() =>
-    import ('~/views/vcrm/Payment/PaymentDocument/JournalOfEmailSendingPaymentDocuments'))
+  import ('~/views/vcrm/Payment/PaymentDocument/JournalOfEmailSendingPaymentDocuments'))
 
 const PaymentByCashboxPage = dynamicPage(() =>
-    import ('~/views/vcrm/Payment/PaymentDocument/Modals/PaymentByCashbox.vue'))
+  import ('~/views/vcrm/Payment/PaymentDocument/Modals/PaymentByCashbox.vue'))
 
 const InternalPaymentPage = dynamicPage(() =>
-    import ('~/views/vcrm/Payment/PaymentDocument/Modals/InternalPayment.vue'))
+  import ('~/views/vcrm/Payment/PaymentDocument/Modals/InternalPayment.vue'))
 
 const HistoryOfPaymentDocumentsPage = dynamicPage(() =>
-    import ('~/views/vcrm/Payment/HistoryOfJournalOfPaymentDocuments'))
+  import ('~/views/vcrm/Payment/HistoryOfJournalOfPaymentDocuments-not-using'))
 
 const MoneyDistributionPage = dynamicPage(() =>
-    import ('~/views/vcrm/Payment/MoneyDistribution'))
+  import ('~/views/vcrm/Payment/MoneyDistribution'))
 
 const InputOfBalancesPage = dynamicPage(() =>
-    import ('~/views/vcrm/Payment/InputOfBalances'))
+  import ('~/views/vcrm/Payment/InputOfBalances'))
 
 const PaymentBudgetByDepartmentsPage = dynamicPage(() =>
-    import ('~/views/vcrm/Payment/PaymentBudgetByDepartments'))
+  import ('~/views/vcrm/Payment/PaymentBudgetByDepartments'))
 
 const RegisterOfDocumentsToPayPage = dynamicPage(() =>
-    import ('~/views/vcrm/Payment/RegisterOfDocumentsToPay'))
+  import ('~/views/vcrm/Payment/RegisterOfDocumentsToPay'))
 
 const RegisterOfPaymentsByCashboxPage = dynamicPage(() =>
-    import ('~/views/vcrm/Payment/RegisterOfPaymentsByCashbox'))
+  import ('~/views/vcrm/Payment/RegisterOfPaymentsByCashbox'))
 
 const GtinPage = dynamicPage(() =>
     import ('~/views/vcrm/Gtin/GtinPage'))
@@ -216,19 +215,19 @@ const createRouterConst = new Router({
             path: 'register_of_payments_by_cashbox',
             name: 'RegisterOfPaymentsByCashbox',
             component: RegisterOfPaymentsByCashboxPage
-          },
-
-          {
-            path: '/meridian/auth',
-            name: 'Auth',
-            component: AuthPage,
-            children: [{
-              path: 'login',
-              name: 'Login',
-              component: AuthLogin
-            }]
           }
         ]
+      },
+
+      {
+        path: '/meridian/auth',
+        name: 'Auth',
+        component: AuthPage,
+        children: [{
+          path: 'login',
+          name: 'Login',
+          component: AuthLogin
+        }]
       }
     ].filter((route) => {
         return process.env.NODE_ENV !== 'production' ? route : !('production' in route)

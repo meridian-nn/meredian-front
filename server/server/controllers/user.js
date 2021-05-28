@@ -1,26 +1,26 @@
 // utils
-import makeValidation from '@withvoid/make-validation';
+import makeValidation from '@withvoid/make-validation'
 // models
-import UserModel, { USER_TYPES } from '../models/User.js';
+import UserModel, { USER_TYPES } from '../models/User.js'
 
 export default {
-  onGetAllUsers: async (req, res) => {
+  onGetAllUsers: async(req, res) => {
     try {
-      const users = await UserModel.getUsers();
+      const users = await UserModel.getUsers()
 
-      return res.status(200).json({ success: true, users });
+      return res.status(200).json({ success: true, users })
     } catch (error) {
-      return res.status(500).json({ success: false, error: error })
+      return res.status(500).json({ success: false, error })
     }
   },
 
-  onGetUserById: async (req, res) => {
+  onGetUserById: async(req, res) => {
     try {
-      const user = await UserModel.getUserById(req.params.id);
+      const user = await UserModel.getUserById(req.params.id)
 
-      return res.status(200).json({ success: true, user });
+      return res.status(200).json({ success: true, user })
     } catch (error) {
-      return res.status(500).json({ success: false, error: error })
+      return res.status(500).json({ success: false, error })
     }
   }
 }

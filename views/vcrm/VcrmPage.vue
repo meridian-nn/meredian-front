@@ -149,7 +149,9 @@
           </v-list>
         </v-menu>
       </v-toolbar>
+
       <router-view />
+
     </v-main>
   </v-app>
 </template>
