@@ -167,21 +167,6 @@ export default {
     },
 
     async findDataAboutFromPayDocForChart() {
-      // eslint-disable-next-line vue/max-len
-      /* const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-      const datasets = [{
-        label: 'Data One',
-        backgroundColor: '#f87979',
-        data: [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11]
-      },
-      {
-        label: 'Data two',
-        backgroundColor: '#f87979',
-        data: [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12]
-      }]
-      this.chartdata.labels = labels
-      this.chartdata.datasets = datasets */
-
       const data = this.createCriteriasForRequestToSearchDocsFromPay()
       const response = await this.$api.payment.docOplForPay.findDocumentsByCriteriasForTableInDocumentsJournal(data)
       const dataForChart = this.convertFromPayDataResponseToDataForChart(response)

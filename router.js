@@ -76,6 +76,27 @@ const MarkPage = dynamicPage(() =>
 const ChatPage = dynamicPage(() =>
     import ('~/views/vcrm/Dashboard/Chat/ChatPage'))
 
+const SupplyMenuPage = dynamicPage(() =>
+    import ('~/views/supply/Menu'))
+
+const CommodityMenuPage = dynamicPage(() =>
+    import ('~/views/supply/Сommodity/Menu'))
+
+const CommodityLogOfSewingPlanPage = dynamicPage(() =>
+    import ('~/views/supply/Сommodity/CommodityLogOfSewingPlan'))
+
+const ListOfCommodityForSewingApplicationPage = dynamicPage(() =>
+    import ('~/views/supply/Сommodity/ListOfCommodityForSewingApplication'))
+
+const RequisitionLogToSupplierPage = dynamicPage(() =>
+    import ('~/views/supply/Сommodity/RequisitionLogToSupplier'))
+
+const StockBalancePage = dynamicPage(() =>
+    import ('~/views/supply/Сommodity/StockBalance'))
+
+const MaterialsPage = dynamicPage(() =>
+    import ('~/views/supply/Materials'))
+
 Vue.use(Router)
 
 const createRouterConst = new Router({
@@ -196,6 +217,58 @@ const createRouterConst = new Router({
                         name: 'RegisterOfPaymentsByCashbox',
                         component: RegisterOfPaymentsByCashboxPage
                     },
+
+                    {
+                        path: 'supply_menu',
+                        name: 'SupplyMenu',
+                        component: SupplyMenuPage,
+                        meta: {
+                            breadcrumb: [
+                                { text: 'АРМ Снабжение', disabled: false }
+                            ]
+                        }
+                    },
+
+                    {
+                        path: 'commodity_menu',
+                        name: 'CommodityMenu',
+                        component: CommodityMenuPage,
+                        meta: {
+                            breadcrumb: [
+                                { text: 'АРМ Снабжение / Сырье (Снабжение)', disabled: false }
+                            ]
+                        }
+                    },
+
+                    {
+                        path: 'commodity_log_of_sewing_plan',
+                        name: 'CommodityLogOfSewingPlan',
+                        component: CommodityLogOfSewingPlanPage,
+                    },
+
+                    {
+                        path: 'list_of_commodity_for_sewing_application',
+                        name: 'ListOfCommodityForSewingApplication',
+                        component: ListOfCommodityForSewingApplicationPage,
+                    },
+
+                    {
+                        path: 'requisition_log_to_supplier',
+                        name: 'RequisitionLogToSupplier',
+                        component: RequisitionLogToSupplierPage,
+                    },
+
+                    {
+                        path: 'stock_balance',
+                        name: 'StockBalance',
+                        component: StockBalancePage,
+                    },
+
+                    {
+                        path: 'materials',
+                        name: 'Materials',
+                        component: MaterialsPage
+                    }
 
                 ]
             }]
