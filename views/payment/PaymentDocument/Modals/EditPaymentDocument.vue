@@ -551,10 +551,6 @@ export default {
       this.findExecutors(val)
     },
 
-    getCurrentUser() {
-      return this.$store.state.profile.user
-    },
-
     // функция отработки события изменения дат на форме
     dataOplatChange(val) {
       if (!this.editedItem.dataDoc) {

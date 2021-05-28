@@ -87,9 +87,6 @@ export default {
   name: 'FiltersFormFromPayDocs',
   data() {
     return {
-      // id элемента, для которого будут сохранены настроики фильтров
-      elementId: 'journal-of-payment-docs-from-pay-docs',
-
       // объект для отображения статусов процесса загрузки данных для полей
       loadingType: {},
 
@@ -147,16 +144,16 @@ export default {
 
     async saveFilters() {
       /* eslint-disable vue/max-len */
-      const filterEntityForSave = this.createFilterEntityForSave(this.elementId, this.$route.name, this.filterItem)
+      const filterEntityForSave = this.createFilterEntityForSave(this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs(), this.$route.name, this.filterItem)
       await this.$api.uiSettings.save(filterEntityForSave)
       this.dialog = false
       this.$emit('saveFilters')
     },
 
     // поиск ранее сохраненных настроек фильтров для текущего пользователя
-    // TODO добавить в параметры запроса id текущего пользователя когда будет готова авторизация
     async findFiltersValues() {
-      const data = this.createCriteriasToSearchForFiltersValues(this.$route.name, this.elementId)
+      const currentUser = this.getCurrentUser()
+      const data = this.createCriteriasToSearchForFiltersValues(this.$route.name, this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs(), currentUser.id)
       const response = await this.$api.uiSettings.findBySearchCriterias(data)
       if (response.length) {
         this.filterItem = JSON.parse(response[0].settingValue)

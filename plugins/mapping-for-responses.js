@@ -48,5 +48,54 @@ Vue.mixin({
 
             return objToReturn
         },
+
+        // Функция конвертации документов на оплату, полученных от бэка 
+        // в объект с данными для графика, который расположен в меню реестра оплат
+        convertFromPayDataResponseToDataForChart(fromPayDataResponse) {
+            const dataForChart = {}
+            const labels = []
+            const datasets = []
+
+            for (const data of fromPayDataResponse) {
+                let record = labels.find(item => item === data.dataDoc)
+
+                if (!record) {
+                    labels.push(data.dataDoc)
+                }
+
+                let recordOfDataset = datasets.find(item => item.label === data.myorgName)
+
+                if (!recordOfDataset) {
+                    let colorOfOrg = ''
+                    if (data.myorgId === 159) {
+                        colorOfOrg = this.getColorForOrganization(data.myorgId)
+                    } else {
+                        colorOfOrg = this.getRandomColor()
+                    }
+                    recordOfDataset = {
+                        label: data.myorgName,
+                        backgroundColor: colorOfOrg,
+                        data: [data.sumDoc]
+                    }
+
+                    datasets.push(recordOfDataset)
+                } else {
+                    recordOfDataset.data.push(data.sumDoc)
+                }
+            }
+
+            dataForChart.labels = labels
+            dataForChart.datasets = datasets
+
+            return dataForChart
+        },
+        getRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
     }
 })
