@@ -28,7 +28,7 @@
 
       <div class="payment-menu-col-2">
         <router-link :to="{ name: 'JournalOfPaymentDocuments' }">
-          <v-img :src="require('@/assets/img/journal3.png')" />
+          <v-img :src="require('@/assets/img/payment/journal.png')" />
         </router-link>
         <div
           class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
@@ -40,7 +40,7 @@
 
       <div class="payment-menu-col-2">
         <router-link :to="{ name: 'PaymentBudgetByDepartments' }">
-          <v-img :src="require('@/assets/img/budget2.png')" />
+          <v-img :src="require('@/assets/img/payment/budget.png')" />
         </router-link>
         <div
           class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
@@ -52,7 +52,7 @@
 
       <div class="payment-menu-col-2">
         <router-link :to="{ name: 'JournalOfEmailSendingPaymentDocuments' }">
-          <v-img :src="require('@/assets/img/email2.png')" />
+          <v-img :src="require('@/assets/img/payment/email.png')" />
         </router-link>
         <div
           class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
@@ -64,7 +64,7 @@
 
       <div class="payment-menu-col-2">
         <router-link :to="{ name: 'MoneyDistribution' }">
-          <v-img :src="require('@/assets/img/distribution2.png')" />
+          <v-img :src="require('@/assets/img/payment/distribution.png')" />
         </router-link>
         <div
           class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
@@ -76,7 +76,7 @@
 
       <div class="payment-menu-col-2">
         <router-link :to="{ name: 'InputOfBalances' }">
-          <v-img :src="require('@/assets/img/bank_acc2.png')" />
+          <v-img :src="require('@/assets/img/payment/bank_acc.png')" />
         </router-link>
         <div
           class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
@@ -88,7 +88,7 @@
 
       <div class="payment-menu-col-2">
         <router-link :to="{ name: 'RegisterOfDocumentsToPay' }">
-          <v-img :src="require('@/assets/img/registry.png')" />
+          <v-img :src="require('@/assets/img/payment/registry.png')" />
         </router-link>
         <div
           class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
@@ -100,7 +100,7 @@
 
       <div class="payment-menu-col-2">
         <router-link :to="{ name: 'RegisterOfPaymentsByCashbox' }">
-          <v-img :src="require('@/assets/img/registry.png')" />
+          <v-img :src="require('@/assets/img/payment/registry.png')" />
         </router-link>
         <div
           class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
@@ -115,7 +115,7 @@
 
     <v-row style="margin-top:150px; width:100%">
       <div class="chart-div">
-        <chart
+        <bar-chart
           v-if="loaded"
           :styles="chartStyles"
           :chartdata="chartdata"
@@ -127,14 +127,14 @@
 </template>
 
 <script>
-import Chart from '@/views/special_components/chart/index'
+import BarChart from '@/views/special_components/charts/Bar.vue'
 import PatchnoteWindow from './PatchnoteWindow/index.vue'
 
 export default {
   name: 'PaymentMenu',
   components: {
     PatchnoteWindow,
-    Chart
+    BarChart
   },
 
   data() {

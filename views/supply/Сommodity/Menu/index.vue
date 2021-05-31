@@ -59,7 +59,7 @@
 
         <div class="supply-menu-col-2">
           <router-link :to="{ name: 'StockBalance'} ">
-            <v-img :src="require('@/assets/img/registry.png')" />
+            <v-img :src="require('@/assets/img/payment/registry.png')" />
           </router-link>
           <div
             class="supply-menu-v-subheader font-weight-medium text-subtitle-1"
