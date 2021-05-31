@@ -28,7 +28,7 @@
 
       <div class="payment-menu-col-2">
         <router-link :to="{ name: 'JournalOfPaymentDocuments' }">
-          <v-img :src="require('@/assets/img/journal3.png')" />
+          <v-img :src="require('@/assets/img/payment/journal.png')" />
         </router-link>
         <div
           class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
@@ -40,7 +40,7 @@
 
       <div class="payment-menu-col-2">
         <router-link :to="{ name: 'PaymentBudgetByDepartments' }">
-          <v-img :src="require('@/assets/img/budget2.png')" />
+          <v-img :src="require('@/assets/img/payment/budget.png')" />
         </router-link>
         <div
           class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
@@ -52,7 +52,7 @@
 
       <div class="payment-menu-col-2">
         <router-link :to="{ name: 'JournalOfEmailSendingPaymentDocuments' }">
-          <v-img :src="require('@/assets/img/email2.png')" />
+          <v-img :src="require('@/assets/img/payment/email.png')" />
         </router-link>
         <div
           class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
@@ -64,7 +64,7 @@
 
       <div class="payment-menu-col-2">
         <router-link :to="{ name: 'MoneyDistribution' }">
-          <v-img :src="require('@/assets/img/distribution2.png')" />
+          <v-img :src="require('@/assets/img/payment/distribution.png')" />
         </router-link>
         <div
           class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
@@ -76,7 +76,7 @@
 
       <div class="payment-menu-col-2">
         <router-link :to="{ name: 'InputOfBalances' }">
-          <v-img :src="require('@/assets/img/bank_acc2.png')" />
+          <v-img :src="require('@/assets/img/payment/bank_acc.png')" />
         </router-link>
         <div
           class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
@@ -88,7 +88,7 @@
 
       <div class="payment-menu-col-2">
         <router-link :to="{ name: 'RegisterOfDocumentsToPay' }">
-          <v-img :src="require('@/assets/img/registry.png')" />
+          <v-img :src="require('@/assets/img/payment/registry.png')" />
         </router-link>
         <div
           class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
@@ -100,7 +100,7 @@
 
       <div class="payment-menu-col-2">
         <router-link :to="{ name: 'RegisterOfPaymentsByCashbox' }">
-          <v-img :src="require('@/assets/img/registry.png')" />
+          <v-img :src="require('@/assets/img/payment/registry.png')" />
         </router-link>
         <div
           class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
@@ -112,24 +112,71 @@
 
       <div class="payment-menu-col-2-spacer" />
     </v-row>
+
+    <v-row style="margin-top:150px; width:100%">
+      <div class="chart-div">
+        <bar-chart
+          v-if="loaded"
+          :styles="chartStyles"
+          :chartdata="chartdata"
+          :options="options"
+        />
+      </div>
+    </v-row>
   </div>
 </template>
 
 <script>
+import BarChart from '@/components/charts/Bar.vue'
 import PatchnoteWindow from './PatchnoteWindow/index.vue'
 export default {
   name: 'PaymentMenu',
 
   components: {
-    PatchnoteWindow
+    PatchnoteWindow,
+    BarChart
   },
 
   data() {
-    return {}
+    return {
+      loaded: false,
+      chartdata: {},
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    }
   },
+
+  computed: {
+    chartStyles() {
+      return {
+        width: '100%',
+        height: '400px'
+      }
+    }
+  },
+  mounted() {
+    this.findDataAboutFromPayDocForChart()
+  },
+
   methods: {
     openPatchnoteWindow() {
       this.$refs.patchnoteWindow.openWindow()
+    },
+
+    async findDataAboutFromPayDocForChart() {
+      const data = this.createCriteriasForRequestToSearchDocsFromPay()
+      const response = await this.$api.payment.docOplForPay.findDocumentsByCriteriasForTableInDocumentsJournal(data)
+      const dataForChart = this.convertFromPayDataResponseToDataForChart(response)
+      this.chartdata.labels = dataForChart.labels
+      this.chartdata.datasets = dataForChart.datasets
+
+      this.loaded = true
+    },
+
+    getRandomInt() {
+      return Math.floor(Math.random() * (50 - 5 + 1)) + 5
     }
   }
 }
@@ -162,5 +209,12 @@ export default {
     font-weight: 400;
     color: rgba(0, 0, 0, 0.6);
     padding: 0 16px 0 16px;
+}
+
+.chart-div{
+  width: 100%;
+  padding-left: 50px;
+  padding-right: 50px;
+  align-items: center;
 }
 </style>

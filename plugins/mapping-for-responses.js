@@ -75,13 +75,37 @@ Vue.mixin({
                     recordOfDataset = {
                         label: data.myorgName,
                         backgroundColor: colorOfOrg,
-                        data: [data.sumDoc]
+                        data: [{
+                            paymentDate: data.dataDoc,
+                            sum: data.sumDoc
+                        }]
                     }
 
                     datasets.push(recordOfDataset)
                 } else {
-                    recordOfDataset.data.push(data.sumDoc)
+                    let recordPaymentSumOfDataSet = recordOfDataset.data.find(item => item.paymentDate === data.dataDoc)
+                    if (!recordPaymentSumOfDataSet) {
+                        const paymentData = {
+                            paymentDate: data.dataDoc,
+                            sum: data.sumDoc
+                        }
+                        recordOfDataset.data.push(paymentData)
+                    } else {
+                        recordPaymentSumOfDataSet.sum = recordPaymentSumOfDataSet.sum + data.sumDoc
+                    }
                 }
+            }
+
+            for (const dataOfDataset of datasets) {
+                let sumData = []
+                sumData.length = labels.length
+
+                for (const dataOfPaymentData of dataOfDataset.data) {
+                    const indexOfDate = labels.indexOf(dataOfPaymentData.paymentDate)
+                    sumData[indexOfDate] = dataOfPaymentData.sum
+                }
+
+                dataOfDataset.data = sumData
             }
 
             dataForChart.labels = labels
