@@ -102,6 +102,26 @@
               </ul>
             </v-col>
           </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <span class="headline">27.05.2021</span>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <ul>
+                <li>
+                  Доработана авторизация пользователей.
+                </li>
+                <span class="headline">Меню реестра оплат</span>
+                <li>
+                  Добавлен график, отображающий информацию о документах на оплату
+                </li>
+              </ul>
+            </v-col>
+          </v-row>
         </v-container>
       </div>
     </v-card>

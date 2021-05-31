@@ -55,6 +55,21 @@
 
         <v-list-item
           link
+          :to="{ name: 'SupplyMenu' }"
+        >
+          <v-list-item-action class="pr-1 pl-2 mr-1">
+            <v-img :src="require('@/assets/img/supply/supply_menu.png')" />
+          </v-list-item-action>
+
+          <v-list-item-content>
+            <v-list-item-title class="font-weight-medium">
+              Снабжение
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-list-item
+          link
           :to="{ name: 'ChatPage' }"
         >
           <v-list-item-action class="pr-1 pl-2 mr-1">
