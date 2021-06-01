@@ -12,25 +12,18 @@ Vue.mixin({
         getColorForOrganization(orgId) {
             if (orgId === 159) {
                 return '#639db1'
+            } else {
+                return this.getRandomColor()
             }
         },
 
-        //Функция возвращает текущего пользователя
-        getCurrentUser() {
-            return this.$store.state.profile.user
-        },
-
-        //Функция проверяет, является ли текущий пользователь администратором
-        //2 - id роли администратор
-        isAdmin() {
-            const currentUser = this.getCurrentUser()
-            const rolesOfCurrentUser = currentUser.roles
-            return rolesOfCurrentUser.find(item => item === 2) ? true : false
-        },
-
-        //Функция возвращает список ролей текущего пользователя из API
-        async getRolesOfCurrentUser(id) {
-            return await this.$api.auth.user.getRolesOfCurrentUser(id)
+        getRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
         }
     }
 })

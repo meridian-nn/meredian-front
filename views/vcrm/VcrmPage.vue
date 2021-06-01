@@ -20,6 +20,7 @@
 
       <v-list @click.native.stop="mini = mini">
         <v-list-item
+          v-if="isHaveGTINRole()"
           link
           :to="{ name: 'GtinPage' }"
         >
@@ -37,6 +38,7 @@
         </v-list-item>
 
         <v-list-item
+          v-if="isHaveBudgetRole()"
           link
           :to="{ name: 'PaymentMenu' }"
         >

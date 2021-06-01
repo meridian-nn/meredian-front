@@ -67,11 +67,7 @@ Vue.mixin({
 
                 if (!recordOfDataset) {
                     let colorOfOrg = ''
-                    if (data.myorgId === 159) {
-                        colorOfOrg = this.getColorForOrganization(data.myorgId)
-                    } else {
-                        colorOfOrg = this.getRandomColor()
-                    }
+                    colorOfOrg = this.getColorForOrganization(data.myorgId)
                     recordOfDataset = {
                         label: data.myorgName,
                         backgroundColor: colorOfOrg,
@@ -112,14 +108,6 @@ Vue.mixin({
             dataForChart.datasets = datasets
 
             return dataForChart
-        },
-        getRandomColor() {
-            var letters = '0123456789ABCDEF';
-            var color = '#';
-            for (var i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
         }
     }
 })
