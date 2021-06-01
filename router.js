@@ -25,6 +25,9 @@ function scrollBehavior(to, from, savedPosition) {
 const AuthPage = dynamicPage(() =>
     import ('~/views/auth/AuthPage'))
 
+const RegistrationPage = dynamicPage(() =>
+    import ('~/components/user_registration'))
+
 const AuthLogin = dynamicPage(() =>
     import ('~/views/auth/Form/FormLogin'))
 
@@ -156,6 +159,18 @@ const createRouterConst = new Router({
                                 href: 'ChatPage'
                             }
                         ]
+                    }
+                },
+
+                {
+                    path: 'registration_page',
+                    name: 'RegistrationPage',
+                    component: RegistrationPage,
+                    meta: {
+                        breadcrumb: [{
+                            text: 'Регистрация нового пользователя',
+                            disabled: false
+                        }]
                     }
                 },
 

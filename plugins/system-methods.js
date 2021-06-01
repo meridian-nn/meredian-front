@@ -18,6 +18,19 @@ Vue.mixin({
         //Функция возвращает текущего пользователя
         getCurrentUser() {
             return this.$store.state.profile.user
+        },
+
+        //Функция проверяет, является ли текущий пользователь администратором
+        //2 - id роли администратор
+        isAdmin() {
+            const currentUser = this.getCurrentUser()
+            const rolesOfCurrentUser = currentUser.roles
+            return rolesOfCurrentUser.find(item => item === 2) ? true : false
+        },
+
+        //Функция возвращает список ролей текущего пользователя из API
+        async getRolesOfCurrentUser(id) {
+            return await this.$api.auth.user.getRolesOfCurrentUser(id)
         }
     }
 })

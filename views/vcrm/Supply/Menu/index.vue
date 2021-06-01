@@ -6,7 +6,7 @@
     <patchnote-window ref="patchnoteWindow" />
 
     <v-btn
-      id="payment-menu-patchnote-window-btn"
+      id="supply-menu-patchnote-window-btn"
       color="blue"
       class="mr-2 mb-2"
       fab
