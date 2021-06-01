@@ -156,11 +156,24 @@
               @click="$router.push({name: 'RegistrationPage'})"
             >
               <v-icon class="mr-2">
-                mdi-account-settings
+                mdi-account-check
               </v-icon>
 
               <v-list-item-title>
                 Регистрация пользователя
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item
+              v-if="isAdmin()"
+              @click="$router.push({name: 'UsersEditingPage'})"
+            >
+              <v-icon class="mr-2">
+                mdi-account-edit
+              </v-icon>
+
+              <v-list-item-title>
+                Редактирование аккаунтов пользователей
               </v-list-item-title>
             </v-list-item>
 

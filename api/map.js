@@ -22,6 +22,10 @@ export const factory = send => ({
         users: {
             get() {
                 return send('GET', '/auth/findUsers')
+            },
+
+            getRoles() {
+                return send('GET', `/auth/findRoles`)
             }
         }
     },

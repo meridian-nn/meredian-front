@@ -108,6 +108,24 @@ Vue.mixin({
             dataForChart.datasets = datasets
 
             return dataForChart
+        },
+
+        // Функция конвертирует полученный список ролей с бэка в список
+        // ролей, где поле "isHave" показывает, есть ли у переданного пользователя роль или нет
+        // resposne - список ролей
+        // userId - id пользователя, для которого требуется найти роли
+        convertListOfRolesResponseToListOfUserRoles(response, userId) {
+            let listOfRoles = []
+            for (const role of response) {
+                const isHaveRole = role.users.find(user => user === userId) ? true : false
+                const roleForList = {
+                    id: role.id,
+                    isHave: isHaveRole,
+                    name: role.name
+                }
+                listOfRoles.push(roleForList)
+            }
+            return listOfRoles
         }
     }
 })

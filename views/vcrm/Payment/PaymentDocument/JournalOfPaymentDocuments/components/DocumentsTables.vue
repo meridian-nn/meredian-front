@@ -29,7 +29,6 @@
               :read-only="true"
             /></span>
         </div>
-        </v-col>
       </div>
     </div>
 
