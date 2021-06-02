@@ -86,7 +86,7 @@ const CommodityMenuPage = dynamicPage(() =>
     import ('~/views/vcrm/supply/Сommodity/Menu'))
 
 const CommodityLogOfSewingPlanPage = dynamicPage(() =>
-    import ('~/views/vcrm/supply/Сommodity/CommodityLogOfSewingPlan'))
+    import('~/views/vcrm/supply/Сommodity/CommodityLogOfSewingPlan/CommodityLogOfSewingPlanPage'))
 
 const ListOfCommodityForSewingApplicationPage = dynamicPage(() =>
     import ('~/views/vcrm/supply/Сommodity/ListOfCommodityForSewingApplication'))
@@ -284,9 +284,9 @@ const createRouterConst = new Router({
                 },
 
                 {
-                    path: 'commodity_log_of_sewing_plan',
-                    name: 'CommodityLogOfSewingPlan',
-                    component: CommodityLogOfSewingPlanPage,
+                  path: 'commodity_log_of_sewing_plan',
+                  name: 'CommodityLogOfSewingPlan',
+                  component: CommodityLogOfSewingPlanPage,
                 },
 
                 {

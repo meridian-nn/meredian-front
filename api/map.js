@@ -162,7 +162,7 @@ export const factory = send => ({
 
             /*
                 Производит поиск документов на оплату по заданным параметрам
-                Пример передаваемых параметров 
+                Пример передаваемых параметров
                 {
                     "dataType": "VARCHAR",
                     "key": "nameDoc",
@@ -179,7 +179,7 @@ export const factory = send => ({
 
             /*
             Производит поиск документов на оплату по заданным параметрам
-            Пример передаваемых параметров 
+            Пример передаваемых параметров
             [
                 {
                     "dataType": "DATE",
@@ -236,7 +236,7 @@ export const factory = send => ({
 
             /*
             Производит поиск документов на оплату по заданным параметрам
-            Пример передаваемых параметров 
+            Пример передаваемых параметров
             {
                 "dataType": "VARCHAR",
                 "key": "nameDoc",
@@ -252,7 +252,7 @@ export const factory = send => ({
 
             /*
             Производит поиск документов на оплату по заданным параметрам
-            Пример передаваемых параметров 
+            Пример передаваемых параметров
             [
                 {
                     "dataType": "DATE",
@@ -277,7 +277,7 @@ export const factory = send => ({
                 return send('POST', `/oper/spDocopl/findBySearchCriterias`, params)
             },
 
-            //Поиск документов с кастомным респонсом для таблицы "Документы на оплату" на форме "Журнал документов на оплату" 
+            //Поиск документов с кастомным респонсом для таблицы "Документы на оплату" на форме "Журнал документов на оплату"
             findDocumentsByCriteriasForTableInDocumentsJournal(params) {
                 return send('POST', `/oper/spDocoplRead/findBySearchCriterias`, params)
             },
@@ -369,5 +369,56 @@ export const factory = send => ({
         saveAll(entities) {
             return send('POST', `uiSetting/saveAll`, entities)
         }
+    },
+
+    supplyElements: {
+        sewingPlan: {
+          findAll() {
+            return send('GET', `/oper/supply/spPlanpsv/findAll`)
+          },
+
+          findById(id) {
+            return send('GET', `/oper/supply/spPlanpsv/findById/${id}`)
+          },
+
+          findBySearchCriteria(params) {
+            return send('POST', `/oper/supply/spPlanpsv/findBySearchCriteria`, params)
+          },
+
+          findBySearchCriterias(params) {
+            return send('POST', `/oper/supply/spPlanpsv/findBySearchCriterias`, params)
+          },
+
+          save(params) {
+            return send('POST', `/oper/supply/spPlanpsv/save`, params)
+          },
+
+          saveAll(params) {
+            return send('POST', `/oper/supply/spPlanpsv/saveAll`, params)
+          }
+        },
+
+        supply: {
+          selPlanpsvZaivk(params) {
+            return send('POST', `/oper/supply/selPlanpsvZaivkOtladka/selPlanpsvZaivk`, params)
+          },
+
+          findAll() {
+            return send('GET', `/oper/supply/selPlanpsvZaivkOtladka/findAll`)
+          },
+
+          findById(id) {
+            return send('GET', `/oper/supply/selPlanpsvZaivkOtladka/findById/${id}`)
+          },
+
+          findBySearchCriteria(params) {
+            return send('POST', `/oper/supply/selPlanpsvZaivkOtladka/findBySearchCriteria`, params)
+          },
+
+          findBySearchCriterias(params) {
+            return send('POST', `/oper/supply/selPlanpsvZaivkOtladka/findBySearchCriterias`, params)
+          }
+        }
     }
+
 })
