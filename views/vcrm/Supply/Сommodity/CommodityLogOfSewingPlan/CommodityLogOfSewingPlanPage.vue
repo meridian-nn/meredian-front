@@ -35,7 +35,7 @@
           style="width: 60px"
           :precision="5"
           decimal-separator=","
-          :output-type="number"
+          output-type="number"
         />
       </div>
 
@@ -366,25 +366,29 @@
         на складе ул. Геологов
       </div>
 
-      <vue-numeric
-        v-model="countOnGeologov"
-        class="commodity-log-of-sewing-plan-numeric-in-bottom"
-        :precision="3"
-        decimal-separator="."
-        :output-type="number"
-      />
+      <div class="commodity-log-of-sewing-plan-numeric-in-bottom">
+        <vue-numeric
+          v-model="countOnGeologov"
+          :precision="3"
+          decimal-separator="."
+          output-type="number"
+          read-only="true"
+        />
+      </div>
 
       <div class="commodity-log-of-sewing-plan-labels-in-bottom-headline">
         Итого
       </div>
 
-      <vue-numeric
-        v-model="amount"
-        class="commodity-log-of-sewing-plan-numeric-in-bottom"
-        :precision="3"
-        decimal-separator="."
-        :output-type="number"
-      />
+      <div class="commodity-log-of-sewing-plan-numeric-in-bottom">
+        <vue-numeric
+          v-model="amount"
+          :precision="3"
+          decimal-separator="."
+          output-type="number"
+          read-only="true"
+        />
+      </div>
     </div>
 
     <div class="commodity-log-of-sewing-plan-row">
@@ -394,43 +398,49 @@
         необходимо купить
       </div>
 
-      <vue-numeric
-        v-model="amountNeedToBuy"
-        class="commodity-log-of-sewing-plan-numeric-in-bottom"
-        :precision="3"
-        decimal-separator="."
-        :output-type="number"
-      />
+      <div class="commodity-log-of-sewing-plan-numeric-in-bottom">
+        <vue-numeric
+          v-model="amountNeedToBuy"
+          :precision="3"
+          decimal-separator="."
+          output-type="number"
+          read-only="true"
+        />
+      </div>
 
       <div class="commodity-log-of-sewing-plan-labels-in-bottom-headline">
         на складах фабрик
       </div>
 
-      <vue-numeric
-        v-model="amountOnStorages"
-        class="commodity-log-of-sewing-plan-numeric-in-bottom"
-        :precision="3"
-        decimal-separator="."
-        :output-type="number"
-      />
+      <div class="commodity-log-of-sewing-plan-numeric-in-bottom">
+        <vue-numeric
+          v-model="amountOnStorages"
+          :precision="3"
+          decimal-separator="."
+          output-type="number"
+          read-only="true"
+        />
+      </div>
 
       <div class="commodity-log-of-sewing-plan-labels-in-bottom-headline">
         раскр.скл.
       </div>
 
-      <vue-numeric
-        v-model="amountOnRaskrStorages"
-        class="commodity-log-of-sewing-plan-numeric-in-bottom"
-        :precision="3"
-        decimal-separator="."
-        :output-type="number"
-      />
+      <div class="commodity-log-of-sewing-plan-numeric-in-bottom">
+        <vue-numeric
+          v-model="amountOnRaskrStorages"
+          :precision="3"
+          decimal-separator="."
+          output-type="number"
+          read-only="true"
+        />
+      </div>
     </div>
 
     <div class="commodity-log-of-sewing-plan-row">
       <v-spacer />
 
-      <div class="commodity-log-of-sewing-plan-name-of-form-headline">
+      <div class="commodity-log-of-sewing-plan-analogs-headline">
         Аналоги
       </div>
 
@@ -438,37 +448,43 @@
         на складе Геологов
       </div>
 
-      <vue-numeric
-        v-model="amountAnalogsOnGeologov"
-        class="commodity-log-of-sewing-plan-numeric-in-bottom"
-        :precision="3"
-        decimal-separator="."
-        :output-type="number"
-      />
+      <div class="commodity-log-of-sewing-plan-numeric-in-bottom">
+        <vue-numeric
+          v-model="amountAnalogsOnGeologov"
+          :precision="3"
+          decimal-separator="."
+          output-type="number"
+          read-only="true"
+        />
+      </div>
 
       <div class="commodity-log-of-sewing-plan-labels-in-bottom-headline">
         на складах фабрик
       </div>
 
-      <vue-numeric
-        v-model="amountAnalogsOnStorages"
-        class="commodity-log-of-sewing-plan-numeric-in-bottom"
-        :precision="3"
-        decimal-separator="."
-        :output-type="number"
-      />
+      <div class="commodity-log-of-sewing-plan-numeric-in-bottom">
+        <vue-numeric
+          v-model="amountAnalogsOnStorages"
+          :precision="3"
+          decimal-separator="."
+          output-type="number"
+          read-only="true"
+        />
+      </div>
 
       <div class="commodity-log-of-sewing-plan-labels-in-bottom-headline">
         раскр.скл.
       </div>
 
-      <vue-numeric
-        v-model="amountAnalogsOnRaskrStorages"
-        class="commodity-log-of-sewing-plan-numeric-in-bottom"
-        :precision="3"
-        decimal-separator="."
-        :output-type="number"
-      />
+      <div class="commodity-log-of-sewing-plan-numeric-in-bottom">
+        <vue-numeric
+          v-model="amountAnalogsOnRaskrStorages"
+          :precision="3"
+          decimal-separator="."
+          output-type="number"
+          read-only="true"
+        />
+      </div>
     </div>
     <user-notification ref="userNotification" />
   </div>
@@ -491,16 +507,16 @@ export default {
         'pr',
         'k',
         'account',
-        'fabr',
+        'factory',
         'date',
         'application',
-        'applicationPostav',
+        'supplierRequest',
         'codeOfCommodity',
         'nameOfCommodity',
-        'edIzmOfCommodity',
+        'unitOfCommodity',
         'countOfCommodity',
         'send',
-        'rezerv',
+        'reserve',
         'need',
         'executor',
         'contractor',
@@ -517,16 +533,16 @@ export default {
           pr: 'ПР',
           k: 'К',
           account: 'Счет',
-          fabr: 'Фабр',
+          factory: 'Фабр',
           date: 'Дата',
           application: 'Заявка',
-          applicationPostav: 'Заявка поставщику',
+          supplierRequest: 'Заявка поставщику',
           codeOfCommodity: 'Код',
           nameOfCommodity: 'Наименование',
-          edIzmOfCommodity: 'Ед.из.',
+          unitOfCommodity: 'Ед.из.',
           countOfCommodity: 'Кол-во',
           send: 'Отправлено',
-          rezerv: 'Резерв',
+          reserve: 'Резерв',
           need: 'Необх.',
           executor: 'Исполнитель',
           contractor: 'Контрагент',
@@ -687,6 +703,16 @@ export default {
   line-height: 2rem;
   letter-spacing: normal !important;
   font-family: "Roboto", sans-serif !important;
+  width: 270px;
+  text-align: center;
+}
+
+.commodity-log-of-sewing-plan-analogs-headline {
+  font-size: 1.5rem !important;
+  font-weight: 400;
+  line-height: 2rem;
+  letter-spacing: normal !important;
+  font-family: "Roboto", sans-serif !important;
   margin-right: 10px;
 }
 
@@ -815,6 +841,7 @@ export default {
 #listOfMaterialsDataTable {
   border-collapse: collapse;
   width: 100%;
+  height: 600px;
 }
 
 #listOfMaterialsDataTable table{
