@@ -419,6 +419,27 @@ export const factory = send => ({
             return send('POST', `/oper/supply/selPlanpsvZaivkOtladka/findBySearchCriterias`, params)
           }
         }
-    }
+    },
 
+    service: {
+      /* в params передавать объект вида
+        {
+          "params": {},
+          "procName": "string"
+        }
+        Пример генерации params в методе 'createParamsForStashedFunctionSrSelPlanPsv'
+       */
+
+      // Функция производит вызов хранимой процедуры в бд
+      // возвращает набор данных
+      executeStashedFunctionWithReturnedDataSet(params) {
+        return send('POST', '/sys/storedProcedure/queryForList', params)
+      },
+
+      // Функция производит вызов хранимой процедуры в бд
+      // без возврата набора данных
+      executedStashedFunction(params) {
+        return send('POST', '/sys/storedProcedure/executeProcedure', params)
+      }
+    }
 })

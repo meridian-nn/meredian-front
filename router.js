@@ -80,25 +80,29 @@ const ChatPage = dynamicPage(() =>
     import ('~/views/vcrm/Chat/ChatPage'))
 
 const SupplyMenuPage = dynamicPage(() =>
-    import ('~/views/vcrm/supply/Menu'))
+    import ('~/views/vcrm/Supply/Menu/MenuPage'))
 
 const CommodityMenuPage = dynamicPage(() =>
-    import ('~/views/vcrm/supply/Сommodity/Menu'))
+    import ('~/views/vcrm/Supply/Сommodity/CommodityMenu/CommodityMenuPage'))
 
 const CommodityLogOfSewingPlanPage = dynamicPage(() =>
-    import('~/views/vcrm/supply/Сommodity/CommodityLogOfSewingPlan/CommodityLogOfSewingPlanPage'))
+    import('~/views/vcrm/Supply/Сommodity/CommodityLogOfSewingPlan/CommodityLogOfSewingPlanPage'))
 
 const ListOfCommodityForSewingApplicationPage = dynamicPage(() =>
-    import ('~/views/vcrm/supply/Сommodity/ListOfCommodityForSewingApplication'))
+    import ('~/views/vcrm/Supply/Сommodity/ListOfCommodityForSewingApplication/ListOfCommodityForSewingApplicationPage'))
 
 const RequisitionLogToSupplierPage = dynamicPage(() =>
-    import ('~/views/vcrm/supply/Сommodity/RequisitionLogToSupplier'))
+    import ('~/views/vcrm/Supply/Сommodity/RequisitionLogToSupplier/RequisitionLogToSupplierPage'))
 
 const StockBalancePage = dynamicPage(() =>
-    import ('~/views/vcrm/supply/Сommodity/StockBalance'))
+    import ('~/views/vcrm/Supply/Сommodity/StockBalance/StockBalancePage'))
 
 const MaterialsPage = dynamicPage(() =>
-    import ('~/views/vcrm/supply/Materials'))
+    import ('~/views/vcrm/Supply/Materials'))
+
+const WarehouseInventoryPage = dynamicPage(() => {
+    import('~/views/vcrm/Supply/Сommodity/WarehouseInventory/WarehouseInventoryPage')
+})
 
 Vue.use(Router)
 
@@ -311,8 +315,13 @@ const createRouterConst = new Router({
                     path: 'materials',
                     name: 'Materials',
                     component: MaterialsPage
-                }
+                },
 
+                {
+                    path: 'warehouse_inventory',
+                    name: 'WarehouseInventory',
+                    component: WarehouseInventoryPage
+                }
             ]
         },
 

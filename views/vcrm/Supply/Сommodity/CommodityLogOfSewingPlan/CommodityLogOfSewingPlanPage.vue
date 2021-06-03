@@ -9,7 +9,7 @@
       </div>
 
       <div class="commodity-log-of-sewing-plan-storage-btn">
-        <v-btn>
+        <v-btn @click="openWarehouseInventoryForm">
           Склад
         </v-btn>
       </div>
@@ -368,11 +368,12 @@
 
       <div class="commodity-log-of-sewing-plan-numeric-in-bottom">
         <vue-numeric
-          v-model="countOnGeologov"
+          v-model="amountOnGeologov"
           :precision="3"
           decimal-separator="."
-          output-type="number"
           read-only="true"
+          :min="0"
+          :empty-value="0"
         />
       </div>
 
@@ -385,8 +386,9 @@
           v-model="amount"
           :precision="3"
           decimal-separator="."
-          output-type="number"
           read-only="true"
+          :min="0"
+          :empty-value="0"
         />
       </div>
     </div>
@@ -403,8 +405,9 @@
           v-model="amountNeedToBuy"
           :precision="3"
           decimal-separator="."
-          output-type="number"
           read-only="true"
+          :min="0"
+          :empty-value="0"
         />
       </div>
 
@@ -417,7 +420,6 @@
           v-model="amountOnStorages"
           :precision="3"
           decimal-separator="."
-          output-type="number"
           read-only="true"
         />
       </div>
@@ -431,8 +433,9 @@
           v-model="amountOnRaskrStorages"
           :precision="3"
           decimal-separator="."
-          output-type="number"
           read-only="true"
+          :min="0"
+          :empty-value="0"
         />
       </div>
     </div>
@@ -453,8 +456,9 @@
           v-model="amountAnalogsOnGeologov"
           :precision="3"
           decimal-separator="."
-          output-type="number"
           read-only="true"
+          :min="0"
+          :empty-value="0"
         />
       </div>
 
@@ -467,8 +471,9 @@
           v-model="amountAnalogsOnStorages"
           :precision="3"
           decimal-separator="."
-          output-type="number"
           read-only="true"
+          :min="0"
+          :empty-value="0"
         />
       </div>
 
@@ -481,21 +486,28 @@
           v-model="amountAnalogsOnRaskrStorages"
           :precision="3"
           decimal-separator="."
-          output-type="number"
           read-only="true"
+          :min="0"
+          :empty-value="0"
         />
       </div>
     </div>
     <user-notification ref="userNotification" />
+    <warehouse-inventory-page
+      ref="warehouseInventory"
+      @close="closeWarehouseInventory"
+    />
   </div>
 </template>
 
 <script>
 import UserNotification from '~/components/information_window/UserNotification'
+import WarehouseInventoryPage from '~/views/vcrm/Supply/Сommodity/WarehouseInventory/WarehouseInventoryPage'
 export default {
   name: 'CommodityLogOfSewingPlan',
 
   components: {
+    WarehouseInventoryPage,
     UserNotification
   },
 
@@ -634,7 +646,7 @@ export default {
       exclude: false,
 
       // на складе ул. Геологов
-      countOnGeologov: 1,
+      amountOnGeologov: 1,
 
       // итого
       amount: 1,
@@ -667,6 +679,7 @@ export default {
     init() {
       this.findSuppliers()
       this.findContractors()
+      this.findAmountOfCommodityInStorages()
     },
 
     async findSuppliers() {
@@ -679,6 +692,29 @@ export default {
       this.loadingType.contractors = true
       this.contractors = await this.$api.organizations.findAll()
       this.loadingType.contractors = null
+    },
+
+    async findAmountOfCommodityInStorages() {
+      const paramsForStashedFunction = this.createParamsForStashedFunctionSrSelPlanPsv('185', '02.06.2021')
+      const response = await this.$api.service.executeStashedFunctionWithReturnedDataSet(paramsForStashedFunction)
+
+      if (!response.length) {
+        return
+      }
+
+      this.amountOnGeologov = response[0].colvo_sklad
+      this.amountOnStorages = response[0].colvo_fabr
+      this.amountOnRaskrStorages = response[0].colvo_raskr
+
+      this.amount = this.amountOnGeologov + this.amountOnStorages + this.amountOnRaskrStorages
+    },
+
+    openWarehouseInventoryForm() {
+      this.$refs.warehouseInventory.openForm()
+    },
+
+    closeWarehouseInventory() {
+      console.log('close warehouse inventory')
     }
   }
 }

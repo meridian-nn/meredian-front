@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import PatchnoteWindow from './PatchnoteWindow/index'
+import PatchnoteWindow from './PatchnoteWindow/PatchnoteWindowPage'
 
 export default {
   name: 'SupplyMenu',
