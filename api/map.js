@@ -415,8 +415,12 @@ export const factory = send => ({
             return send('POST', `/oper/supply/selPlanpsvZaivkOtladka/findBySearchCriteria`, params)
           },
 
-          findBySearchCriterias(params) {
-            return send('POST', `/oper/supply/selPlanpsvZaivkOtladka/findBySearchCriterias`, params)
+          findBySearchCriteriaList(params) {
+            return send('POST', `/oper/supply/selPlanpsvZaivkOtladka/findBySearchCriteriaList`, params)
+          },
+
+          findPageBySearchCriteriaList(params) {
+            return send('POST', `/oper/supply/selPlanpsvZaivkOtladka/findPageBySearchCriteriaList`, params)
           }
         }
     },

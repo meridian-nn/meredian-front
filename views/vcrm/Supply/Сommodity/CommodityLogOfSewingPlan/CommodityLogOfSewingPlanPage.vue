@@ -328,10 +328,16 @@
 
     <div class="commodity-log-of-sewing-plan-row">
       <div id="listOfMaterialsDataTable">
-        <v-client-table
-          v-model="listOfMaterials"
-          :columns="listOfMaterialsColumns"
-          :options="listOfMaterialsOptions"
+        <v-data-table
+          id="commodity-log-of-sewing-plan-list-of-materials"
+          height="600"
+          :headers="listOfMaterialsHeaders"
+          fixed-header
+          :items="listOfMaterials"
+          :show-select="false"
+          disable-pagination
+          hide-default-footer
+          class="elevation-1"
         />
       </div>
     </div>
@@ -515,6 +521,85 @@ export default {
     return {
       // Таблица для отображения списка доступного сырья
       listOfMaterials: [],
+      listOfMaterialsHeaders: [
+        {
+          text: 'ПР',
+          value: 'pr',
+          cellClass: 'padding:0px; height:0px'
+        },
+        {
+          text: 'К',
+          value: 'k'
+        },
+        {
+          text: 'Счет',
+          value: 'account'
+        },
+        {
+          text: 'Фабр',
+          value: 'factory'
+        },
+        {
+          text: 'Дата',
+          value: 'date'
+        },
+        {
+          text: 'Заявка',
+          value: 'application'
+        },
+        {
+          text: 'Заявка поставщику',
+          value: 'supplierRequest'
+        },
+        {
+          text: 'Код',
+          value: 'codeOfCommodity'
+        },
+        {
+          text: 'Наименование',
+          value: 'nameOfCommodity'
+        },
+        {
+          text: 'Ед.из.',
+          value: 'unitOfCommodity'
+        },
+        {
+          text: 'Кол-во',
+          value: 'countOfCommodity'
+        },
+        {
+          text: 'Отправлено',
+          value: 'send'
+        },
+        {
+          text: 'Резерв',
+          value: 'reserve'
+        },
+        {
+          text: 'Необх.',
+          value: 'need'
+        },
+        {
+          text: 'Исполнитель',
+          value: 'executor'
+        },
+        {
+          text: 'Контрагент',
+          value: 'contractor'
+        },
+        {
+          text: 'Изделие',
+          value: 'item'
+        },
+        {
+          text: 'Кол-во',
+          value: 'countOfItem'
+        },
+        {
+          text: 'Коррекция',
+          value: 'correction'
+        }
+      ],
       listOfMaterialsColumns: [
         'pr',
         'k',
@@ -604,9 +689,6 @@ export default {
       embroideriesLogos: false,
 
       // наши фабрики
-      ourFactories: false,
-
-      // обувь
       shoes: false,
 
       // необходимое кол-во > 0
@@ -680,6 +762,7 @@ export default {
       this.findSuppliers()
       this.findContractors()
       this.findAmountOfCommodityInStorages()
+      this.findInformationForListOfMaterials()
     },
 
     async findSuppliers() {
@@ -707,6 +790,13 @@ export default {
       this.amountOnRaskrStorages = response[0].colvo_raskr
 
       this.amount = this.amountOnGeologov + this.amountOnStorages + this.amountOnRaskrStorages
+    },
+
+    async findInformationForListOfMaterials() {
+      const criterias = this.createCriteriasForCommodityLofOfSewingPlan()
+      const response = await this.$api.supplyElements.supply.findPageBySearchCriteriaList(criterias)
+
+      this.listOfMaterials = this.convertResponseFromFindPageBySearchCriteriaListToListOfMaterials(response.content)
     },
 
     openWarehouseInventoryForm() {
@@ -881,7 +971,7 @@ export default {
 }
 
 #listOfMaterialsDataTable table{
-  width: 100%
+  width: 100%;
 }
 #listOfMaterialsDataTable td, #listOfMaterialsDataTable th {
   border: 1px solid #ddd;
@@ -898,5 +988,16 @@ export default {
   text-align: left;
   background-color: #639db1 !important;
   color: white;
+}
+
+#commodity-log-of-sewing-plan-list-of-materials td {
+  word-break:break-all !important;
+  padding: 0 5px !important;
+  height: 0px !important;
+}
+
+#commodity-log-of-sewing-plan-list-of-materials th {
+  padding: 0 5px !important;
+  height: 0px !important;
 }
 </style>

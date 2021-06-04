@@ -116,7 +116,7 @@ Vue.mixin({
             return data
         },
 
-        // Создает объект с критериями для отбора значений фильтров для пользователя 
+        // Создает объект с критериями для отбора значений фильтров для пользователя
         // для переданной формы и элемента
         createCriteriasToSearchForFiltersValues(formId, elementId, userId) {
             const data = [{
@@ -183,6 +183,17 @@ Vue.mixin({
             data.push(criteriaByDates)
 
             return data
+        },
+
+        createCriteriasForCommodityLofOfSewingPlan(params){
+          if(!params) {
+            const criterias = {
+              page: 1,
+              size: 20
+            }
+
+            return criterias
+          }
         }
     }
 })

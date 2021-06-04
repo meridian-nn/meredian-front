@@ -49,7 +49,7 @@ Vue.mixin({
             return objToReturn
         },
 
-        // Функция конвертации документов на оплату, полученных от бэка 
+        // Функция конвертации документов на оплату, полученных от бэка
         // в объект с данными для графика, который расположен в меню реестра оплат
         convertFromPayDataResponseToDataForChart(fromPayDataResponse) {
             const dataForChart = {}
@@ -126,6 +126,36 @@ Vue.mixin({
                 listOfRoles.push(roleForList)
             }
             return listOfRoles
+        },
+
+        convertResponseFromFindPageBySearchCriteriaListToListOfMaterials(response) {
+          let listOfMaterials = []
+          for(const elemOfResponse of response) {
+            const elemForListOfMaterials = {
+              pr: elemOfResponse.prGotov,
+              k: elemOfResponse.prQuality,
+              account: elemOfResponse.sostSr,
+              factory: elemOfResponse.nameProizv,
+              date: elemOfResponse.dataTkan,
+              application: elemOfResponse.numZaivk,
+              supplierRequest: '',
+              codeOfCommodity: elemOfResponse.mcId,
+              nameOfCommodity: elemOfResponse.nameMc,
+              unitOfCommodity: elemOfResponse.socrName,
+              countOfCommodity: elemOfResponse.colvo,
+              send: elemOfResponse.colvoOtpr,
+              reserve: elemOfResponse.colvoReserv,
+              need: elemOfResponse.colvoOst,
+              executor: elemOfResponse.fio_Isp,
+              contractor: elemOfResponse.nameKontr,
+              item: elemOfResponse.tovar,
+              countOfItem: elemOfResponse.colvoPr,
+              correction: ''
+            }
+            listOfMaterials.push(elemForListOfMaterials)
+          }
+
+          return listOfMaterials
         }
     }
 })
