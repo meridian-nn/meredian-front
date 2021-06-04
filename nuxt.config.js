@@ -42,6 +42,7 @@ export default {
         '~/plugins/mapping-for-responses',
         '~/plugins/mapping-for-queryes-params',
         '~/plugins/system-methods',
+        '~/plugins/user-access',
         { src: '~/plugins/api', mode: 'client' },
         { src: '~/plugins/format-date' },
         { src: '~plugins/vue-tables-2.js', ssr: false },

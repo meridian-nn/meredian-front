@@ -86,7 +86,6 @@
     </div>
 
     <user-notification ref="userNotification" />
-    </v-container>
   </div>
 </template>
 
