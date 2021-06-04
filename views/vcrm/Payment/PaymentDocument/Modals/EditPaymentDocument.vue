@@ -120,171 +120,157 @@
         </v-container>
       </v-card-text>
 
-      <v-card-text>
-        <v-container class="container-data">
-          <v-row>
-            <v-col cols="6">
-              <v-row>
-                <v-col cols="3">
-                  <v-subheader class="font-weight-medium text-subtitle-1">
-                    Плательщик
-                  </v-subheader>
-                </v-col>
+      <v-col cols="12">
+        <v-expansion-panels>
+          <v-expansion-panel>
+            <v-expansion-panel-header>
+              <span class="text-h6">Договор</span>
+            </v-expansion-panel-header>
 
-                <v-col cols="5">
-                  <v-autocomplete
-                    v-model="editedItem.contractId"
-                    label="Договор"
-                    :loading="loadingType.contracts"
-                    :items="contracts"
-                    item-value="id"
-                    item-text="numDogInt"
-                    clearable="true"
-                    outlined
-                    hide-details="auto"
-                    @change="findClients"
-                  />
-                </v-col>
+            <v-expansion-panel-content>
+              <v-card-text>
+                <v-container class="container-data">
+                  <v-row>
+                    <v-col cols="5">
+                      <v-row>
+                        <v-col cols="6">
+                          <v-autocomplete
+                            v-model="editedItem.contractId"
+                            label="Договор"
+                            :loading="loadingType.contracts"
+                            :items="contracts"
+                            item-value="id"
+                            item-text="numDogInt"
+                            clearable="true"
+                            outlined
+                            hide-details="auto"
+                            @change="findClients"
+                          />
+                        </v-col>
 
-                <v-col cols="4">
-                  <v-text-field
-                    v-model.number="editedItem.sumDoc"
-                    type="number"
-                    label="Сумма по документу"
-                    outlined
-                    hide-details="auto"
-                    @input="calcSum"
-                  />
-                </v-col>
-              </v-row>
+                        <v-col cols="6">
+                          <v-text-field
+                            v-model.number="editedItem.sumDoc"
+                            type="number"
+                            label="Сумма договора"
+                            outlined
+                            hide-details="auto"
+                            @input="calcSum"
+                          />
+                        </v-col>
+                      </v-row>
 
-              <v-row>
-                <v-col cols="3" />
+                      <v-row>
+                        <v-col cols="6" />
 
-                <!--v-col cols="5">
-                  <v-text-field
-                    v-model.number="editedItem.sumPaid"
-                    readonly="true"
-                    type="number"
-                    label="Оплачено"
-                    hide-details="auto"
-                    outlined
-                  />
-                </v-col-->
-                <v-col cols="5" />
+                        <v-col cols="6">
+                          <v-text-field
+                            v-model.number="editedItem.toPay"
+                            type="number"
+                            label="Сумма док-та"
+                            hide-details="auto"
+                            outlined
+                          />
+                        </v-col>
+                      </v-row>
 
-                <v-col cols="4">
-                  <v-text-field
-                    v-model.number="editedItem.toPay"
-                    type="number"
-                    label="К оплате"
-                    hide-details="auto"
-                    outlined
-                  />
-                </v-col>
-              </v-row>
+                      <v-row>
+                        <v-col cols="12">
+                          <v-text-field
+                            v-model="payer.clName"
+                            readonly="true"
+                            label="Плательщик"
+                            outlined
+                            hide-details="auto"
+                          />
+                        </v-col>
+                      </v-row>
+                    </v-col>
 
-              <v-row>
-                <v-col cols="3" />
+                    <v-col cols="7">
+                      <v-row>
+                        <v-col cols="6">
+                          <v-autocomplete
+                            v-model="editedItem.consumerId"
+                            label="Клиент, для кого поставка"
+                            :loading="loadingType.clients"
+                            :items="clients"
+                            item-value="id"
+                            item-text="clName"
+                            hide-details="auto"
+                            auto-select-first="true"
+                            outlined
+                          />
+                        </v-col>
 
-                <v-col cols="9">
-                  <v-text-field
-                    v-model="payer.clName"
-                    readonly="true"
-                    label="Плательщик"
-                    outlined
-                    hide-details="auto"
-                  />
-                </v-col>
-              </v-row>
-            </v-col>
+                        <v-col cols="3">
+                          <v-autocomplete
+                            v-model="editedItem.documentKindId"
+                            label="Вид документа"
+                            :loading="loadingType.documentKinds"
+                            :items="documentKinds"
+                            item-value="id"
+                            item-text="nameViddoc"
+                            hide-details="auto"
+                            outlined
+                          />
+                        </v-col>
+                      </v-row>
 
-            <v-col cols="6">
-              <v-row>
-                <v-col cols="3">
-                  <v-subheader class="font-weight-medium text-subtitle-1">
-                    Клиент, для кого поставка
-                  </v-subheader>
-                </v-col>
+                      <v-row>
+                        <v-col cols="6">
+                          <v-autocomplete
+                            v-model="editedItem.paymentStatus"
+                            label="Статус платежа"
+                            :loading="loadingType.paymentStatuses"
+                            :items="paymentStatuses"
+                            item-value="name"
+                            item-text="label"
+                            hide-details="auto"
+                            outlined
+                          />
+                        </v-col>
 
-                <v-col cols="6">
-                  <v-autocomplete
-                    v-model="editedItem.consumerId"
-                    label="Клиент, для кого поставка"
-                    :loading="loadingType.clients"
-                    :items="clients"
-                    item-value="id"
-                    item-text="clName"
-                    hide-details="auto"
-                    auto-select-first="true"
-                    outlined
-                  />
-                </v-col>
+                        <v-col cols="3">
+                          <v-checkbox
+                            v-model="editedItem.bnds"
+                            label="Без НДС"
+                            color="primary"
+                            :ripple="false"
+                            dense
+                            hide-details="auto"
+                            outlined
+                          />
+                        </v-col>
+                      </v-row>
 
-                <v-col cols="3">
-                  <v-autocomplete
-                    v-model="editedItem.documentKindId"
-                    label="Вид документа"
-                    :loading="loadingType.documentKinds"
-                    :items="documentKinds"
-                    item-value="id"
-                    item-text="nameViddoc"
-                    hide-details="auto"
-                    outlined
-                  />
-                </v-col>
-              </v-row>
+                      <v-row>
+                        <v-col cols="9">
+                          <v-text-field
+                            v-model="editedItem.prim"
+                            label="Примечание"
+                            auto-grow
+                            hide-details="auto"
+                            outlined
+                          />
+                        </v-col>
+                      </v-row>
+                    </v-col>
+                  </v-row>
 
-              <v-row>
-                <v-col cols="3" />
+                  <user-notification
+                    ref="userNotification"
+                  /></user-notification>
+                </v-container>
+              </v-card-text>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </v-col>
 
-                <v-col cols="6">
-                  <v-autocomplete
-                    v-model="editedItem.paymentStatus"
-                    label="Статус платежа"
-                    :loading="loadingType.paymentStatuses"
-                    :items="paymentStatuses"
-                    item-value="name"
-                    item-text="label"
-                    hide-details="auto"
-                    outlined
-                  />
-                </v-col>
-
-                <v-col cols="3">
-                  <v-checkbox
-                    v-model="editedItem.bnds"
-                    label="Без НДС"
-                    color="primary"
-                    :ripple="false"
-                    dense
-                    hide-details="auto"
-                    outlined
-                  />
-                </v-col>
-              </v-row>
-
-              <v-row>
-                <v-col cols="3" />
-
-                <v-col cols="9">
-                  <v-text-field
-                    v-model="editedItem.prim"
-                    label="Примечание"
-                    auto-grow
-                    hide-details="auto"
-                    outlined
-                  />
-                </v-col>
-              </v-row>
-            </v-col>
-          </v-row>
-
-          <user-notification
-            ref="userNotification"
-          /></user-notification>
-        </v-container>
-      </v-card-text>
+      <v-card-title>
+        <span class="headline text-subtitle-2">Договор не обязателен</span>
+      </v-card-title>
 
       <v-card-actions>
         <v-spacer />

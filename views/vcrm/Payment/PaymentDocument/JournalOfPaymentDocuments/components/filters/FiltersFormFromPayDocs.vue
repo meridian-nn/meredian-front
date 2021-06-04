@@ -2,7 +2,7 @@
   <v-dialog
     v-model="dialog"
     :value="show"
-    max-width="1200px"
+    max-width="500px"
     padding="0px"
     class="filters-for-from-pay-docs-modal"
     @input="$emit('close')"
@@ -57,6 +57,42 @@
               />
             </v-col>
           </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                v-model="filterItem.executor"
+                label="Исполнитель"
+                clearable="true"
+                outlined
+                hide-details="auto"
+              />
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                v-model="filterItem.executorDepartment"
+                label="Отдел исполнителя"
+                clearable="true"
+                outlined
+                hide-details="auto"
+              />
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                v-model="filterItem.pay"
+                label="К уплате"
+                clearable="true"
+                outlined
+                hide-details="auto"
+              />
+            </v-col>
+          </v-row>
         </v-container>
       </v-card-text>
 
@@ -89,18 +125,17 @@ export default {
     return {
       // id элемента, для которого будут сохранены настроики фильтров
       elementId: 'journal-of-payment-docs-from-pay-docs',
-
       // объект для отображения статусов процесса загрузки данных для полей
       loadingType: {},
-
       // объект, в котором храняться фильтры пользователя
       filterItem: {},
-
       // массив плательщиков для выбора пользователем
       payers: [],
-
       // массив подразделений для выбора пользователем
       departments: [],
+      pay: 0,
+      executor: null,
+      executorDepartments: null,
 
       // переменная, отвечающая за отображениие модального окна
       dialog: false

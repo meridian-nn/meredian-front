@@ -33,7 +33,6 @@
             separator="space"
             :precision="2"
             decimal-separator="."
-            :output-type="number"
           />
           <span class="line" />
         </div>
@@ -45,12 +44,8 @@
         Не распределено
       </div>
 
-      <div
-        class="money-distribution-not-allocated-sum"
-      >
-        <v-subheader
-          class="font-weight-medium text-subtitle-1"
-        >
+      <div class="money-distribution-not-allocated-sum">
+        <v-subheader class="font-weight-medium text-subtitle-1">
           <vue-numeric
             v-model.number="budgetDistributedSum"
             separator="space"
@@ -77,8 +72,6 @@
     </div>
 
     <div class="money-distribution-dep-row">
-      <div class="money-distribution-dep-spacer" />
-
       <div class="money-distribution-dep-col">
         <v-autocomplete
           v-model="selectedDep"
@@ -93,11 +86,7 @@
         />
       </div>
 
-      <div class="money-distribution-dep-second-spacer" />
-
-      <div
-        class="money-distribution-dep-for-distribution-text"
-      >
+      <div class="money-distribution-dep-for-distribution-text">
         Выделено
       </div>
 
@@ -116,18 +105,12 @@
         </div>
       </div>
 
-      <div
-        class="money-distribution-not-allocated-dep-text"
-      >
+      <div class="money-distribution-not-allocated-dep-text">
         Не распределено
       </div>
 
-      <div
-        class="money-distribution-not-allocated-dep-sum"
-      >
-        <v-subheader
-          class="font-weight-medium text-subtitle-1"
-        >
+      <div class="money-distribution-not-allocated-dep-sum">
+        <v-subheader class="font-weight-medium text-subtitle-1">
           <div :class=" {'money-distribution-text-danger': notDistributedLessThenZero}">
             <vue-numeric
               v-model.number="departmentRestDistributionSum"
@@ -141,13 +124,32 @@
         </v-subheader>
       </div>
 
-      <div class="money-distribution-dep-end-spacer" />
+      <div
+        v-if="departmentRestDistributionTotal > 0"
+        class="money-distribution-not-allocated-dep-text"
+      >
+        Распределено
+      </div>
+
+      <div
+        v-if="departmentRestDistributionTotal > 0"
+        class="money-distribution-not-allocated-dep-sum"
+      >
+        <v-subheader class="font-weight-medium text-subtitle-1">
+          <vue-numeric
+            v-model.number="departmentRestDistributionTotal"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            :output-type="number"
+            :read-only="true"
+          />
+        </v-subheader>
+      </div>
     </div>
 
     <div class="money-distribution-dep-row">
-      <div
-        id="moneyDistributionData"
-      >
+      <div id="moneyDistributionData">
         <v-client-table
           v-model="moneyDistributionData"
           :columns="columns"
@@ -155,7 +157,8 @@
         >
           <vue-numeric
             slot="distributionSum"
-            v-model.number="row.distributionSum"
+            :key="row.id"
+            v-model="row.distributionSum"
             slot-scope="{row, update}"
             separator="space"
             :precision="2"
@@ -185,9 +188,7 @@
           align="center"
           class="headline"
         >
-          <v-btn
-            @click="save"
-          >
+          <v-btn @click="save">
             Сохранить
           </v-btn>
         </div>
@@ -216,6 +217,8 @@
 
 <script>
 export default {
+  name: 'MoneyDistribution',
+
   data() {
     return {
       date: new Date().toISOString().substr(0, 10),
@@ -292,12 +295,12 @@ export default {
     // функция для расчета суммы не распределенного бюджета на день (пока не используется)
     budgetRestDistributionSum() {
       const budgetDistributedSum = this.budget.restSum < 0 ? Math.abs(this.budget.restSum) - 1 : this.budget.restSum
-
       const budgetRestDistributionSum = parseInt(this.budget.distributionSum
         ? this.budget.distributionSum
         : 0) - budgetDistributedSum
 
       this.budget.distributedSum = budgetRestDistributionSum
+
       return budgetRestDistributionSum
     },
 
@@ -305,7 +308,12 @@ export default {
     departmentRestDistributionSum() {
       const notDistributed = (this.depDistributionSum - this.depDistributedSum)
       this.notDistributedLessThenZero = (notDistributed < 0)
+
       return notDistributed
+    },
+
+    departmentRestDistributionTotal() {
+      return this.depDistributionSum - this.departmentRestDistributionSum
     }
   },
   watch: {
@@ -325,6 +333,7 @@ export default {
   mounted() {
     this.init()
   },
+
   methods: {
     // Расчет распределеной суммы по отделу
     calcDepDistributedSum() {
@@ -332,9 +341,6 @@ export default {
         ? 0
         : this.moneyDistributionData.reduce((acc, item) => { return acc + item.distributionSum || 0 }, 0)
     },
-    /* calcBudgetDistributedSum() {
-      this.budgetDistributedSum = (this.budgetDistributionSum - this.budget.distributedSum) - this.depDistributionSum
-    }, */
 
     init() {
       this.findDepartments()
@@ -345,6 +351,7 @@ export default {
     // Обновление информации на форме при изменении даты
     updateAllInfo() {
       this.init()
+
       if (this.selectedDep) {
         this.departmentChange(this.selectedDep)
       }
@@ -413,6 +420,7 @@ export default {
     async departmentChange(val) {
       await this.findByDepartmentId(val)
       await this.loadMoneyDistribution(val)
+
       this.depDistributedSum = this.department.distributedSum
       this.depDistributionSum = this.department.distributionSum
     },
@@ -432,8 +440,12 @@ export default {
         parentId: val,
         distributionDate: new Date(this.date).toLocaleDateString()
       }
-      this.moneyDistributionData = await this.$api.payment.moneyDistributionByDepartments.findForEdit(data)
-      // this.findBudgetByDate()
+
+      const moneyDistributionByDepartments = await this.$api.payment.moneyDistributionByDepartments.findForEdit(data)
+
+      this.moneyDistributionData = moneyDistributionByDepartments.map((item) => {
+        return { ...item, distributionSum: 0 }
+      })
     },
 
     // Обработка события сохранения распределения бюджетов на форме
@@ -453,7 +465,7 @@ export default {
         // Сохранение распределения бюджета на выбранный отдел
         // await this.$api.payment.moneyDistributionByDepartments.save([this.department])
         await this.$axios.$post('/oper/depMoneyDistribution/save', [this.department])
-        console.log(this.department)
+
         this.findByDepartmentId(this.department.department.id)
 
         // Сохранение распределения бюджета на подразделения отдела
@@ -510,8 +522,8 @@ export default {
   display: flex;
   flex-wrap: wrap;
   flex: 1 1 auto;
-  margin: 0px;
-  //padding-bottom: 10px;
+  margin: 0;
+  padding: 10px 0;
 }
 
 .money-distribution-budget-for-distribution-row {
@@ -542,8 +554,8 @@ export default {
 }
 
 .money-distribution-budget-for-distribution-spacer {
-  flex: 0 0 20%;
-  max-width: 20%;
+  flex: 0 0 15%;
+  max-width: 15%;
 }
 
 .money-distribution-budget-for-distribution-text{
@@ -665,14 +677,14 @@ export default {
 }
 
 .money-distribution-not-allocated-dep-sum{
-  flex: 0 0 20%;
-  max-width: 20%;
+  flex: 0 0 15%;
+  max-width: 15%;
   padding-top: 5px;
 }
 
 .money-distribution-card-text{
   min-height: 750px;
-  padding: 0px;
+  padding: 0;
 }
 
 .money-distribution-dep-spacer {
@@ -693,6 +705,7 @@ export default {
 .money-distribution-dep-col{
   flex: 0 0 15%;
   max-width: 15%;
+  padding-right: 15px;
 }
 
 .money-distribution-save-button{

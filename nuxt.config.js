@@ -45,7 +45,6 @@ export default {
         { src: '~/plugins/api', mode: 'client' },
         { src: '~/plugins/format-date' },
         { src: '~plugins/vue-tables-2.js', ssr: false },
-        { src: '~plugins/vue-numeric.js', ssr: false },
         { src: '~plugins/vue-json-excel.js', ssr: false },
         { src: '~plugins/vue-html-to-paper.js', ssr: false },
         { src: '~/plugins/pluralize', ssr: false }
