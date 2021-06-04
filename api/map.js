@@ -8,12 +8,24 @@ export const factory = send => ({
         user: {
             get() {
                 return send('GET', '/auth/findByCurrentLogin')
+            },
+
+            getRolesOfCurrentUser(id) {
+                return send('GET', `/auth/findRolesByUserId?userId=${id}`)
+            },
+
+            saveNewUser(params) {
+                return send('POST', `/auth/editUser?email=${params.email}&enabled=${params.enabled}&fullName=${params.fullName}&login=${params.login}&organization=${params.organization}&password=${params.password}&phone=${params.phone}&position=${params.position}&${new URLSearchParams('roles[0].id').toString()}7`)
             }
         },
 
         users: {
             get() {
                 return send('GET', '/auth/findUsers')
+            },
+
+            getRoles() {
+                return send('GET', `/auth/findRoles`)
             }
         }
     },
@@ -40,7 +52,7 @@ export const factory = send => ({
         },
 
         findBySearchCriterias(params) {
-            return send('POST', `/markCode/findBySearchCriterias`, params)
+            return send('POST', `/markCode/findBySearchCriteriaList`, params)
         }
     },
 
@@ -124,7 +136,7 @@ export const factory = send => ({
         },
 
         findPaymentsByCashboxByCriterias(params) {
-            return send('POST', `/oper/payment/findBySearchCriterias`, params)
+            return send('POST', `/oper/payment/findBySearchCriteriaList`, params)
         },
 
         payDocument(params) {
@@ -150,7 +162,7 @@ export const factory = send => ({
 
             /*
                 Производит поиск документов на оплату по заданным параметрам
-                Пример передаваемых параметров 
+                Пример передаваемых параметров
                 {
                     "dataType": "VARCHAR",
                     "key": "nameDoc",
@@ -167,7 +179,7 @@ export const factory = send => ({
 
             /*
             Производит поиск документов на оплату по заданным параметрам
-            Пример передаваемых параметров 
+            Пример передаваемых параметров
             [
                 {
                     "dataType": "DATE",
@@ -190,7 +202,7 @@ export const factory = send => ({
             ]
             */
             findDocumentsByCriterias(params) {
-                return send('POST', `/oper/spDocoplToPay/findBySearchCriterias`, params)
+                return send('POST', `/oper/spDocoplToPay/findBySearchCriteriaList`, params)
             },
 
             saveSpDocoplToPay(params) {
@@ -224,7 +236,7 @@ export const factory = send => ({
 
             /*
             Производит поиск документов на оплату по заданным параметрам
-            Пример передаваемых параметров 
+            Пример передаваемых параметров
             {
                 "dataType": "VARCHAR",
                 "key": "nameDoc",
@@ -240,7 +252,7 @@ export const factory = send => ({
 
             /*
             Производит поиск документов на оплату по заданным параметрам
-            Пример передаваемых параметров 
+            Пример передаваемых параметров
             [
                 {
                     "dataType": "DATE",
@@ -262,12 +274,12 @@ export const factory = send => ({
                 }
             ]*/
             findDocumentsByCriterias(params) {
-                return send('POST', `/oper/spDocopl/findBySearchCriterias`, params)
+                return send('POST', `/oper/spDocopl/findBySearchCriteriaList`, params)
             },
 
-            //Поиск документов с кастомным респонсом для таблицы "Документы на оплату" на форме "Журнал документов на оплату" 
+            //Поиск документов с кастомным респонсом для таблицы "Документы на оплату" на форме "Журнал документов на оплату"
             findDocumentsByCriteriasForTableInDocumentsJournal(params) {
-                return send('POST', `/oper/spDocoplRead/findBySearchCriterias`, params)
+                return send('POST', `/oper/spDocoplRead/findBySearchCriteriaList`, params)
             },
 
             deleteSelectedPayments(params) {
@@ -347,7 +359,7 @@ export const factory = send => ({
         },
 
         findBySearchCriterias(params) {
-            return send('POST', `/uiSetting/findBySearchCriterias`, params)
+            return send('POST', `/uiSetting/findBySearchCriteriaList`, params)
         },
 
         save(entity) {
@@ -356,6 +368,82 @@ export const factory = send => ({
 
         saveAll(entities) {
             return send('POST', `uiSetting/saveAll`, entities)
+        }
+    },
+
+    supplyElements: {
+        sewingPlan: {
+            findAll() {
+                return send('GET', `/oper/supply/spPlanpsv/findAll`)
+            },
+
+            findById(id) {
+                return send('GET', `/oper/supply/spPlanpsv/findById/${id}`)
+            },
+
+            findBySearchCriteria(params) {
+                return send('POST', `/oper/supply/spPlanpsv/findBySearchCriteria`, params)
+            },
+
+            findBySearchCriterias(params) {
+                return send('POST', `/oper/supply/spPlanpsv/findBySearchCriteriaList`, params)
+            },
+
+            save(params) {
+                return send('POST', `/oper/supply/spPlanpsv/save`, params)
+            },
+
+            saveAll(params) {
+                return send('POST', `/oper/supply/spPlanpsv/saveAll`, params)
+            }
+        },
+
+        supply: {
+            selPlanpsvZaivk(params) {
+                return send('POST', `/oper/supply/selPlanpsvZaivkOtladka/selPlanpsvZaivk`, params)
+            },
+
+            findAll() {
+                return send('GET', `/oper/supply/selPlanpsvZaivkOtladka/findAll`)
+            },
+
+            findById(id) {
+                return send('GET', `/oper/supply/selPlanpsvZaivkOtladka/findById/${id}`)
+            },
+
+            findBySearchCriteria(params) {
+                return send('POST', `/oper/supply/selPlanpsvZaivkOtladka/findBySearchCriteria`, params)
+            },
+
+            findBySearchCriteriaList(params) {
+                return send('POST', `/oper/supply/selPlanpsvZaivkOtladka/findBySearchCriteriaList`, params)
+            },
+
+            findPageBySearchCriteriaList(params) {
+                return send('POST', `/oper/supply/selPlanpsvZaivkOtladka/findPageBySearchCriteriaList`, params)
+            }
+        }
+    },
+
+    service: {
+        /* в params передавать объект вида
+          {
+            "params": {},
+            "procName": "string"
+          }
+          Пример генерации params в методе 'createParamsForStashedFunctionSrSelPlanPsv'
+         */
+
+        // Функция производит вызов хранимой процедуры в бд
+        // возвращает набор данных
+        executeStashedFunctionWithReturnedDataSet(params) {
+            return send('POST', '/sys/storedProcedure/queryForList', params)
+        },
+
+        // Функция производит вызов хранимой процедуры в бд
+        // без возврата набора данных
+        executedStashedFunction(params) {
+            return send('POST', '/sys/storedProcedure/executeProcedure', params)
         }
     }
 })

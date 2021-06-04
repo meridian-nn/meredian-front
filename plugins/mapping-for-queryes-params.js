@@ -13,5 +13,17 @@ Vue.mixin({
             }
             return filterEntityForSave
         },
+
+        createParamsForStashedFunctionSrSelPlanPsv(mcId, descr) {
+          const params = {
+            params : {
+              'mc_id': mcId,
+              'descr': descr
+            },
+            procName: 'dbo.sr_sel_planpsv_mc_ost'
+          }
+
+          return params
+        }
     }
 })

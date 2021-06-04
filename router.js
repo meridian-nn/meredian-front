@@ -25,6 +25,12 @@ function scrollBehavior(to, from, savedPosition) {
 const AuthPage = dynamicPage(() =>
     import ('~/views/auth/AuthPage'))
 
+const RegistrationPage = dynamicPage(() =>
+    import ('~/components/user_registration/userRegistrationPage.vue'))
+
+const UsersEditingPage = dynamicPage(() =>
+    import ('~/components/users_editing/usersEditingPage.vue'))
+
 const AuthLogin = dynamicPage(() =>
     import ('~/views/auth/Form/FormLogin'))
 
@@ -74,25 +80,29 @@ const ChatPage = dynamicPage(() =>
     import ('~/views/vcrm/Chat/ChatPage'))
 
 const SupplyMenuPage = dynamicPage(() =>
-    import ('~/views/vcrm/supply/Menu'))
+    import ('~/views/vcrm/Supply/Menu/MenuPage'))
 
 const CommodityMenuPage = dynamicPage(() =>
-    import ('~/views/vcrm/supply/Сommodity/Menu'))
+    import ('~/views/vcrm/Supply/Сommodity/CommodityMenu/CommodityMenuPage'))
 
 const CommodityLogOfSewingPlanPage = dynamicPage(() =>
-    import ('~/views/vcrm/supply/Сommodity/CommodityLogOfSewingPlan'))
+    import('~/views/vcrm/Supply/Сommodity/CommodityLogOfSewingPlan/CommodityLogOfSewingPlanPage'))
 
 const ListOfCommodityForSewingApplicationPage = dynamicPage(() =>
-    import ('~/views/vcrm/supply/Сommodity/ListOfCommodityForSewingApplication'))
+    import ('~/views/vcrm/Supply/Сommodity/ListOfCommodityForSewingApplication/ListOfCommodityForSewingApplicationPage'))
 
 const RequisitionLogToSupplierPage = dynamicPage(() =>
-    import ('~/views/vcrm/supply/Сommodity/RequisitionLogToSupplier'))
+    import ('~/views/vcrm/Supply/Сommodity/RequisitionLogToSupplier/RequisitionLogToSupplierPage'))
 
 const StockBalancePage = dynamicPage(() =>
-    import ('~/views/vcrm/supply/Сommodity/StockBalance'))
+    import ('~/views/vcrm/Supply/Сommodity/StockBalance/StockBalancePage'))
 
 const MaterialsPage = dynamicPage(() =>
-    import ('~/views/vcrm/supply/Materials'))
+    import ('~/views/vcrm/Supply/Materials'))
+
+const WarehouseInventoryPage = dynamicPage(() => {
+    import('~/views/vcrm/Supply/Сommodity/WarehouseInventory/WarehouseInventoryPage')
+})
 
 Vue.use(Router)
 
@@ -156,6 +166,30 @@ const createRouterConst = new Router({
                                 href: 'ChatPage'
                             }
                         ]
+                    }
+                },
+
+                {
+                    path: 'registration_page',
+                    name: 'RegistrationPage',
+                    component: RegistrationPage,
+                    meta: {
+                        breadcrumb: [{
+                            text: 'Регистрация нового пользователя',
+                            disabled: false
+                        }]
+                    }
+                },
+
+                {
+                    path: 'users_editing',
+                    name: 'UsersEditingPage',
+                    component: UsersEditingPage,
+                    meta: {
+                        breadcrumb: [{
+                            text: 'Редактирование аккаунтов пользователей',
+                            disabled: false
+                        }]
                     }
                 },
 
@@ -254,9 +288,9 @@ const createRouterConst = new Router({
                 },
 
                 {
-                    path: 'commodity_log_of_sewing_plan',
-                    name: 'CommodityLogOfSewingPlan',
-                    component: CommodityLogOfSewingPlanPage,
+                  path: 'commodity_log_of_sewing_plan',
+                  name: 'CommodityLogOfSewingPlan',
+                  component: CommodityLogOfSewingPlanPage,
                 },
 
                 {
@@ -281,8 +315,13 @@ const createRouterConst = new Router({
                     path: 'materials',
                     name: 'Materials',
                     component: MaterialsPage
-                }
+                },
 
+                {
+                    path: 'warehouse_inventory',
+                    name: 'WarehouseInventory',
+                    component: WarehouseInventoryPage
+                }
             ]
         },
 
