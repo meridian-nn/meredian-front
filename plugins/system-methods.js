@@ -12,12 +12,18 @@ Vue.mixin({
         getColorForOrganization(orgId) {
             if (orgId === 159) {
                 return '#639db1'
+            } else {
+                return this.getRandomColor()
             }
         },
 
-        //Функция возвращает текущего пользователя
-        getCurrentUser() {
-            return this.$store.state.profile.user
+        getRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
         }
     }
 })

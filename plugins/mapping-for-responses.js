@@ -49,7 +49,7 @@ Vue.mixin({
             return objToReturn
         },
 
-        // Функция конвертации документов на оплату, полученных от бэка 
+        // Функция конвертации документов на оплату, полученных от бэка
         // в объект с данными для графика, который расположен в меню реестра оплат
         convertFromPayDataResponseToDataForChart(fromPayDataResponse) {
             const dataForChart = {}
@@ -67,11 +67,7 @@ Vue.mixin({
 
                 if (!recordOfDataset) {
                     let colorOfOrg = ''
-                    if (data.myorgId === 159) {
-                        colorOfOrg = this.getColorForOrganization(data.myorgId)
-                    } else {
-                        colorOfOrg = this.getRandomColor()
-                    }
+                    colorOfOrg = this.getColorForOrganization(data.myorgId)
                     recordOfDataset = {
                         label: data.myorgName,
                         backgroundColor: colorOfOrg,
@@ -113,13 +109,53 @@ Vue.mixin({
 
             return dataForChart
         },
-        getRandomColor() {
-            var letters = '0123456789ABCDEF';
-            var color = '#';
-            for (var i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
+
+        // Функция конвертирует полученный список ролей с бэка в список
+        // ролей, где поле "isHave" показывает, есть ли у переданного пользователя роль или нет
+        // resposne - список ролей
+        // userId - id пользователя, для которого требуется найти роли
+        convertListOfRolesResponseToListOfUserRoles(response, userId) {
+            let listOfRoles = []
+            for (const role of response) {
+                const isHaveRole = role.users.find(user => user === userId) ? true : false
+                const roleForList = {
+                    id: role.id,
+                    isHave: isHaveRole,
+                    name: role.name
+                }
+                listOfRoles.push(roleForList)
             }
-            return color;
+            return listOfRoles
+        },
+
+        convertResponseFromFindPageBySearchCriteriaListToListOfMaterials(response) {
+          let listOfMaterials = []
+          for(const elemOfResponse of response) {
+            const elemForListOfMaterials = {
+              pr: elemOfResponse.prGotov,
+              k: elemOfResponse.prQuality,
+              account: elemOfResponse.sostSr,
+              factory: elemOfResponse.nameProizv,
+              date: elemOfResponse.dataTkan,
+              application: elemOfResponse.numZaivk,
+              supplierRequest: '',
+              codeOfCommodity: elemOfResponse.mcId,
+              nameOfCommodity: elemOfResponse.nameMc,
+              unitOfCommodity: elemOfResponse.socrName,
+              countOfCommodity: elemOfResponse.colvo,
+              send: elemOfResponse.colvoOtpr,
+              reserve: elemOfResponse.colvoReserv,
+              need: elemOfResponse.colvoOst,
+              executor: elemOfResponse.fio_Isp,
+              contractor: elemOfResponse.nameKontr,
+              item: elemOfResponse.tovar,
+              countOfItem: elemOfResponse.colvoPr,
+              correction: ''
+            }
+            listOfMaterials.push(elemForListOfMaterials)
+          }
+
+          return listOfMaterials
         }
     }
 })

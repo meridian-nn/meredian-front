@@ -260,7 +260,7 @@
 
                   <user-notification
                     ref="userNotification"
-                  /></user-notification>
+                  />
                 </v-container>
               </v-card-text>
             </v-expansion-panel-content>

@@ -20,6 +20,7 @@
 
       <v-list @click.native.stop="mini = mini">
         <v-list-item
+          v-if="isHaveGTINRole()"
           link
           :to="{ name: 'GtinPage' }"
         >
@@ -37,6 +38,7 @@
         </v-list-item>
 
         <v-list-item
+          v-if="isHaveBudgetRole()"
           link
           :to="{ name: 'PaymentMenu' }"
         >
@@ -150,6 +152,32 @@
             </v-list-item>
 
             <v-list-item
+              v-if="isAdmin()"
+              @click="$router.push({name: 'RegistrationPage'})"
+            >
+              <v-icon class="mr-2">
+                mdi-account-check
+              </v-icon>
+
+              <v-list-item-title>
+                Регистрация пользователя
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item
+              v-if="isAdmin()"
+              @click="$router.push({name: 'UsersEditingPage'})"
+            >
+              <v-icon class="mr-2">
+                mdi-account-edit
+              </v-icon>
+
+              <v-list-item-title>
+                Редактирование аккаунтов пользователей
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item
               href="#"
               @click="logout"
             >
@@ -166,7 +194,6 @@
       </v-toolbar>
 
       <router-view />
-
     </v-main>
   </v-app>
 </template>
