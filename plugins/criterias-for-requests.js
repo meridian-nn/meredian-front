@@ -72,7 +72,7 @@ Vue.mixin({
                     'operation': 'BETWEEN',
                     'type': 'AND',
                     'values': [
-                        new Date(date).toLocaleDateString(), secDate.toLocaleDateString()
+                        new Date(date).toLocaleDateString(), new Date(secDate).toLocaleDateString()
                     ]
                 }
             ]
@@ -185,15 +185,19 @@ Vue.mixin({
             return data
         },
 
-        createCriteriasForCommodityLofOfSewingPlan(params){
-          if(!params) {
-            const criterias = {
-              page: 1,
-              size: 20
-            }
-
-            return criterias
+        createCriteriasForCommodityLogOfSewingPlan(params){
+          const criterias = {
+            page: 1,
+            size: 20
           }
+
+          if(params){
+            if(params.currentPage) {
+              criterias.page = params.currentPage
+            }
+          }
+
+          return criterias
         }
     }
 })

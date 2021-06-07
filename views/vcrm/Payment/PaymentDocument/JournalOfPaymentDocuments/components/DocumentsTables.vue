@@ -747,9 +747,9 @@ export default {
     },
 
     // Обновление списка документов к оплате, остатков на расчетных счетах выбранной организации и при изменении даты
-    updateInformationOnForm() {
-      this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
-      this.findToPay(this.accId)
+    async updateInformationOnForm() {
+      await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
+      await this.findToPay(this.accId)
       this.updateResPaymentAccountInfo()
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
@@ -808,8 +808,9 @@ export default {
       await this.$axios.$post('/oper/spDocopl/saveSpDocoplToPay', this.toPaySelectedRows)
 
       this.toPaySelectedRows = []
-      this.refreshTables()
-      this.$refs.userNotification.showUserNotification('success', 'Сумма оплаты сохранена')
+      await this.findSpDocoplForPay()
+      await this.findToPay(this.accId)
+      await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
       this.updateResPaymentAccountInfo()
     },
 
@@ -840,13 +841,18 @@ export default {
     },
 
     // Перемещение документа из таблицы "Документы на оплату" в таблицу "Документы к оплате" по нажатию на стрелку
-    addPaymentDocument() {
+    async addPaymentDocument() {
       if (!this.accId) {
         this.$refs.userNotification.showUserNotification('error', 'Выберите расчётный счёт!')
         this.fromPaySelectedRows = []
         return
       }
-      this.addPayments()
+
+      await this.addPayments()
+
+      await this.findSpDocoplForPay()
+      await this.findToPay(this.accId)
+      await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
       this.updateResPaymentAccountInfo()
     },
     async addPayments() {
@@ -864,8 +870,6 @@ export default {
           alert(errorMessage)
         }) */
         await this.$axios.$post('/oper/spDocopl/payDocument', data)
-
-        this.refreshTables()
       }
     },
     countSumOfArrayElements(array) {
@@ -882,7 +886,9 @@ export default {
         const ids = this.toPaySelectedRows.map(value => value.id)
         await this.$axios.$post('/oper/spDocopl/deleteSelectedPayments', ids)
 
-        this.refreshTables()
+        await this.findSpDocoplForPay()
+        await this.findToPay(this.accId)
+        await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
         this.updateResPaymentAccountInfo()
       }
     },
@@ -921,7 +927,7 @@ export default {
     // Вызов формы "История оплат"
     historyOfPaymentFromPaymentForContextMenuOnly() {
       this.$refs.paymentCardByDocument.openForm(this.currentRowForContextMenuOfFromPayDocument.id)
-      console.log('hisoty of payment from payment')
+      console.log('history of payment from payment')
     },
 
     // Функционал кнопок таблицы "Документы на оплату"
@@ -937,10 +943,6 @@ export default {
     // Изменение выбранного документа на оплату
     editDocument() {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
-        if (this.fromPaySelectedRows[0].sumPaidNumber !== 0) {
-          this.$refs.userNotification.showUserNotification('error', 'Изменение документа, по которому уже есть оплата, невозможно!')
-          return
-        }
         this.$refs.editPaymentDocument.editDocument(this.fromPaySelectedRows[0].id)
       }
     },
@@ -960,7 +962,7 @@ export default {
         // await this.$api.payment.DocOplForPay.deleteSelectedPayments(ids)
         await this.$axios.$post('/oper/spDocopl/deletePayment', ids)
 
-        this.findSpDocoplForPay()
+        await this.findSpDocoplForPay()
       }
     },
     checkSelectedRowsBeforeDelete(selectedRows) {
@@ -999,8 +1001,6 @@ export default {
       this.toPaySelectedRows = []
       this.toPaySelectedRows.push(this.currentRowForContextMenu)
       this.deleteSelectedPayments()
-      this.refreshTables()
-      this.updateResPaymentAccountInfo()
     },
 
     // Функция открытия формы фильтров таблицы "Документы на оплату"
@@ -1096,55 +1096,12 @@ export default {
     },
 
     // Функции поиска остатков ден. средств выбранной организации на тек. дату с учетом документов к оплате, оплат по кассе по всем расчетным счетам организации
-    async updateResPaymentAccountInfo() {
-      const balanceOfSelectedOrganization = await this.getBalanceOfSelectedOrganization()
-      const balanceOfOtherAccounts = await this.getBalanceOfOtherAccounts()
-
-      this.restPaymentAccountInfo = balanceOfSelectedOrganization - balanceOfOtherAccounts
-    },
-    async getBalanceOfSelectedOrganization() {
-      const data = {
-        dateOplat: new Date(this.date).toLocaleDateString()
+    updateResPaymentAccountInfo() {
+      if (!this.selectedOrganization) {
+        return
       }
-      const response = await this.$api.paymentAccounts.groupByOrg(data)
-      const responseElement = response.find(el => el.myOrg.id === this.selectedOrganization)
-      return responseElement.saldo
-    },
-    async getBalanceOfOtherAccounts() {
-      let totalToSumOplat = 0
-      const arrayOfPromises = []
-      this.paymentAccounts.forEach((account) => {
-        const promiseToPay = this.getSumToPayDocsOfOrgByAccId(account.id)
-        const promisePaymentByCashbox = this.getSumOfPaymentByCashboxOfOrgByAccId(account.id)
-        arrayOfPromises.push(promiseToPay)
-        arrayOfPromises.push(promisePaymentByCashbox)
-      })
-      await Promise.all(arrayOfPromises).then((results) => {
-        results.forEach((result) => {
-          totalToSumOplat += result
-        })
-      })
-      return totalToSumOplat
-    },
-    async getSumToPayDocsOfOrgByAccId(accId) {
-      const data = this.createCriteriasForRequestToSearchDocsToPay(accId, this.selectedOrganization, this.date)
-      let totalToSumOplat = 0
-      const response = await this.$api.payment.docOplToPay.findDocumentsByCriterias(data)
-      response.forEach((value) => {
-        totalToSumOplat += value.sumOplat
-      })
-      return totalToSumOplat
-    },
-    async getSumOfPaymentByCashboxOfOrgByAccId(accId) {
-      const data = this.createCriteriasForRequestToSearchPaymentsByCashbox(accId, this.selectedOrganization, this.date)
-      let totalPaymentSum = 0
-      const response = await this.$api.payment.findPaymentsByCashboxByCriterias(data)
-      response.forEach((value) => {
-        if (value.paymentOperationSums.length > 0) {
-          totalPaymentSum += value.paymentOperationSums[0].paymentSum
-        }
-      })
-      return totalPaymentSum
+
+      this.restPaymentAccountInfo = this.$refs.journalOfPaymentDocumentsHeader.findSumOfOrg(this.selectedOrganization)
     },
 
     // Поиск документов к оплате по выбранному расчетному счету организации
@@ -1175,7 +1132,7 @@ export default {
       this.toPayData = objFromFunc.arrayOfData
       this.totalToSumOplat = objFromFunc.totalPaymentSum
 
-      this.updatePaymentAccountInfo(accId)
+      await this.updatePaymentAccountInfo(accId)
     },
 
     // Поиск документов для таблицы "Документы на оплату" по выбранной организации
@@ -1183,7 +1140,7 @@ export default {
       this.fromPayData = []
       this.fromPaySelectedRows = []
 
-      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name, 'journal-of-payment-docs-from-pay-docs')
+      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name, 'journal-of-payment-docs-from-pay-docs', this.getCurrentUser().id)
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
       let filtersParams
 

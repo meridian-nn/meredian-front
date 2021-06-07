@@ -88,8 +88,8 @@
           />
 
           <div
-            class="commodity-log-of-sewing-plan-label"
-            style="width: 160px"
+            class="commodity-log-of-sewing-plan-label-checkbox"
+            style="width: 201px"
           >
             с учетом не подписанного плана
           </div>
@@ -99,8 +99,8 @@
           />
 
           <div
-            class="commodity-log-of-sewing-plan-label"
-            style="width: 70px"
+            class="commodity-log-of-sewing-plan-label-checkbox"
+            style="width: 87px"
           >
             сводный план
           </div>
@@ -110,8 +110,8 @@
           />
 
           <div
-            class="commodity-log-of-sewing-plan-label"
-            style="width: 140px"
+            class="commodity-log-of-sewing-plan-label-checkbox"
+            style="width: 158px"
           >
             предварительный расчет
           </div>
@@ -121,8 +121,8 @@
           />
 
           <div
-            class="commodity-log-of-sewing-plan-label"
-            style="width: 60px; padding-top: 10px"
+            class="commodity-log-of-sewing-plan-label-checkbox"
+            style="width: 60px"
           >
             пошив
           </div>
@@ -134,8 +134,8 @@
           />
 
           <div
-            class="commodity-log-of-sewing-plan-label"
-            style="width: 138px"
+            class="commodity-log-of-sewing-plan-label-checkbox"
+            style="width: 158px"
           >
             с учетом журнала заявок
           </div>
@@ -145,8 +145,8 @@
           />
 
           <div
-            class="commodity-log-of-sewing-plan-label"
-            style="width: 60px; padding-top: 10px"
+            class="commodity-log-of-sewing-plan-label-checkbox"
+            style="width: 39px"
           >
             сырье
           </div>
@@ -156,8 +156,8 @@
           />
 
           <div
-            class="commodity-log-of-sewing-plan-label"
-            style="width: 156px; padding-top: 10px"
+            class="commodity-log-of-sewing-plan-label-checkbox"
+            style="width: 125px"
           >
             вышивки, логотипы
           </div>
@@ -167,8 +167,8 @@
           />
 
           <div
-            class="commodity-log-of-sewing-plan-label"
-            style="width: 115px; padding-top: 10px"
+            class="commodity-log-of-sewing-plan-label-checkbox"
+            style="width: 92px"
           >
             наши фабрики
           </div>
@@ -178,8 +178,8 @@
           />
 
           <div
-            class="commodity-log-of-sewing-plan-label"
-            style="width: 60px; padding-top: 10px"
+            class="commodity-log-of-sewing-plan-label-checkbox"
+            style="width: 60px"
           >
             обувь
           </div>
@@ -191,8 +191,8 @@
           />
 
           <div
-            class="commodity-log-of-sewing-plan-label"
-            style="width: 180px"
+            class="commodity-log-of-sewing-plan-label-checkbox"
+            style="width: 157px"
           >
             необходимое кол-во > 0
           </div>
@@ -202,8 +202,8 @@
           />
 
           <div
-            class="commodity-log-of-sewing-plan-label"
-            style="width: 80px"
+            class="commodity-log-of-sewing-plan-label-checkbox"
+            style="width: 65px"
           >
             фурнитура
           </div>
@@ -213,8 +213,8 @@
           />
 
           <div
-            class="commodity-log-of-sewing-plan-label"
-            style="width: 110px; padding-top: 2px"
+            class="commodity-log-of-sewing-plan-label-checkbox"
+            style="width: 100px"
           >
             ГОСКОНТРАКТ
           </div>
@@ -224,8 +224,8 @@
           />
 
           <div
-            class="commodity-log-of-sewing-plan-label"
-            style="width: 80px"
+            class="commodity-log-of-sewing-plan-label-checkbox"
+            style="width: 92px"
           >
             давальцы
           </div>
@@ -235,7 +235,7 @@
           />
 
           <div
-            class="commodity-log-of-sewing-plan-label"
+            class="commodity-log-of-sewing-plan-label-checkbox"
             style="width: 70px"
           >
             вышивка
@@ -330,13 +330,18 @@
       <div id="listOfMaterialsDataTable">
         <v-data-table
           id="commodity-log-of-sewing-plan-list-of-materials"
-          height="600"
+          height="536"
           :headers="listOfMaterialsHeaders"
           fixed-header
           :items="listOfMaterials"
           :show-select="false"
-          disable-pagination
-          hide-default-footer
+          :footer-props="{
+            showFirstLastPage: true,
+            firstIcon: 'mdi-arrow-collapse-left',
+            lastIcon: 'mdi-arrow-collapse-right',
+            prevIcon: 'mdi-minus',
+            nextIcon: 'mdi-plus'
+          }"
           class="elevation-1"
         />
       </div>
@@ -365,6 +370,10 @@
       </div>
 
       <v-spacer />
+
+      <v-btn @click="findInformationForListOfMaterials">
+        На след. страницу
+      </v-btn>
 
       <div
         class="commodity-log-of-sewing-plan-labels-in-bottom-headline"
@@ -600,54 +609,7 @@ export default {
           value: 'correction'
         }
       ],
-      listOfMaterialsColumns: [
-        'pr',
-        'k',
-        'account',
-        'factory',
-        'date',
-        'application',
-        'supplierRequest',
-        'codeOfCommodity',
-        'nameOfCommodity',
-        'unitOfCommodity',
-        'countOfCommodity',
-        'send',
-        'reserve',
-        'need',
-        'executor',
-        'contractor',
-        'item',
-        'countOfItem',
-        'correction'
-      ],
-      listOfMaterialsOptions: {
-        filterable: false,
-        pagination: { show: false },
-        texts: { noResults: '' },
-        filterByColumn: false,
-        headings: {
-          pr: 'ПР',
-          k: 'К',
-          account: 'Счет',
-          factory: 'Фабр',
-          date: 'Дата',
-          application: 'Заявка',
-          supplierRequest: 'Заявка поставщику',
-          codeOfCommodity: 'Код',
-          nameOfCommodity: 'Наименование',
-          unitOfCommodity: 'Ед.из.',
-          countOfCommodity: 'Кол-во',
-          send: 'Отправлено',
-          reserve: 'Резерв',
-          need: 'Необх.',
-          executor: 'Исполнитель',
-          contractor: 'Контрагент',
-          item: 'Изделие',
-          countOfItem: 'Кол-во',
-          correction: 'Коррекция'
-        }
-      },
+      currentPageOfListOfMaterials: 1,
 
       // объект для отображения загрузки данных для полей
       loadingType: {},
@@ -793,8 +755,17 @@ export default {
     },
 
     async findInformationForListOfMaterials() {
-      const criterias = this.createCriteriasForCommodityLofOfSewingPlan()
+      const params = {
+        currentPage: this.currentPageOfListOfMaterials
+      }
+      this.currentPageOfListOfMaterials += 1
+
+      const criterias = this.createCriteriasForCommodityLogOfSewingPlan(params)
       const response = await this.$api.supplyElements.supply.findPageBySearchCriteriaList(criterias)
+
+      if (response.last) {
+        this.currentPageOfListOfMaterials = 1
+      }
 
       this.listOfMaterials = this.convertResponseFromFindPageBySearchCriteriaListToListOfMaterials(response.content)
     },
@@ -897,6 +868,13 @@ export default {
   color: rgba(0, 0, 0, 0.6);
 }
 
+.commodity-log-of-sewing-plan-label-checkbox{
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 13px;
+  padding-top: 1px;
+  font-weight: bold;
+}
+
 .commodity-log-of-sewing-plan-material-change{
   margin-top:10px;
   margin-left: 10px;
@@ -910,6 +888,7 @@ export default {
 .commodity-log-of-sewing-plan-checkboxes-col {
   flex: 0 0 45%;
   max-width: 45%;
+  margin-top: 20px;
 }
 
 .commodity-log-of-sewing-plan-filters-col {
@@ -993,11 +972,11 @@ export default {
 #commodity-log-of-sewing-plan-list-of-materials td {
   word-break:break-all !important;
   padding: 0 5px !important;
-  height: 0px !important;
+  height: 0 !important;
 }
 
 #commodity-log-of-sewing-plan-list-of-materials th {
   padding: 0 5px !important;
-  height: 0px !important;
+  height: 0 !important;
 }
 </style>
