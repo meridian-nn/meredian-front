@@ -123,29 +123,6 @@
           </div>
         </v-subheader>
       </div>
-
-      <div
-        v-if="departmentRestDistributionTotal > 0"
-        class="money-distribution-not-allocated-dep-text"
-      >
-        Распределено
-      </div>
-
-      <div
-        v-if="departmentRestDistributionTotal > 0"
-        class="money-distribution-not-allocated-dep-sum"
-      >
-        <v-subheader class="font-weight-medium text-subtitle-1">
-          <vue-numeric
-            v-model.number="departmentRestDistributionTotal"
-            separator="space"
-            :precision="2"
-            decimal-separator="."
-            :output-type="number"
-            :read-only="true"
-          />
-        </v-subheader>
-      </div>
     </div>
 
     <div class="money-distribution-dep-row">
@@ -174,6 +151,27 @@
             @input="update(row.note)"
           >
         </v-client-table>
+      </div>
+
+      <div
+        v-if="moneyDistributionData.length > 0"
+        class="table-total-text"
+      >
+        Итого
+      </div>
+
+      <div
+        v-if="moneyDistributionData.length > 0"
+        class="table-total-val"
+      >
+        <vue-numeric
+          v-model.number="departmentRestDistributionTotal"
+          separator="space"
+          :precision="2"
+          decimal-separator="."
+          :output-type="number"
+          :read-only="true"
+        />
       </div>
     </div>
 
@@ -493,6 +491,10 @@ export default {
 <style lang="scss">
 .money-distribution-main-div {
   padding: 10px
+}
+
+.table-total-text {
+  flex-basis: 398px;
 }
 
 .money-distribution-main-row-headline {

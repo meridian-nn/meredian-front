@@ -57,42 +57,6 @@
               />
             </v-col>
           </v-row>
-
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                v-model="filterItem.executor"
-                label="Исполнитель"
-                clearable="true"
-                outlined
-                hide-details="auto"
-              />
-            </v-col>
-          </v-row>
-
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                v-model="filterItem.executorDepartment"
-                label="Отдел исполнителя"
-                clearable="true"
-                outlined
-                hide-details="auto"
-              />
-            </v-col>
-          </v-row>
-
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                v-model="filterItem.pay"
-                label="К уплате"
-                clearable="true"
-                outlined
-                hide-details="auto"
-              />
-            </v-col>
-          </v-row>
         </v-container>
       </v-card-text>
 
@@ -133,7 +97,7 @@ export default {
       payers: [],
       // массив подразделений для выбора пользователем
       departments: [],
-      pay: 0,
+      sumOplat: 0,
       executor: null,
       executorDepartments: null,
 
@@ -181,9 +145,10 @@ export default {
     },
 
     async saveFilters() {
-      /* eslint-disable vue/max-len */
       const filterEntityForSave = this.createFilterEntityForSave(this.elementId, this.$route.name, this.filterItem)
+
       await this.$api.uiSettings.save(filterEntityForSave)
+
       this.dialog = false
       this.$emit('saveFilters')
     },
@@ -191,8 +156,9 @@ export default {
     // поиск ранее сохраненных настроек фильтров для текущего пользователя
     // TODO добавить в параметры запроса id текущего пользователя когда будет готова авторизация
     async findFiltersValues() {
-      const data = this.createCriteriasToSearchForFiltersValues(this.$route.name, this.elementId)
+      const data = this.createCriteriasToSearchForFiltersValues(this.$route.name, this.elementId, this.getCurrentUser().id)
       const response = await this.$api.uiSettings.findBySearchCriterias(data)
+
       if (response.length) {
         this.filterItem = JSON.parse(response[0].settingValue)
       }

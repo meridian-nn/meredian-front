@@ -1183,7 +1183,7 @@ export default {
       this.fromPayData = []
       this.fromPaySelectedRows = []
 
-      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name, 'journal-of-payment-docs-from-pay-docs')
+      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name, 'journal-of-payment-docs-from-pay-docs', this.getCurrentUser().id)
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
       let filtersParams
 
