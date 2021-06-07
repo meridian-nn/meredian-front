@@ -41,95 +41,98 @@
       </div>
     </div>
 
-    <div class="input-of-balances-oplat-data-row">
-      <div id="oplatData">
-        <v-client-table
-          v-model="oplatData"
-          :columns="oplatDataColumns"
-          :options="oplatDataOptions"
-        >
-          <input
-            slot="name"
-            v-model="row.name"
-            slot-scope="{row, update}"
-            @input="update(row.name)"
+    <form @submit.prevent="save()">
+      <div class="input-of-balances-oplat-data-row">
+        <div id="oplatData">
+          <v-client-table
+            v-model="oplatData"
+            :columns="oplatDataColumns"
+            :options="oplatDataOptions"
           >
-          <vue-numeric
-            slot="saldo"
-            v-model.number="row.saldo"
-            slot-scope="{row, update}"
-            separator="space"
-            :precision="2"
-            decimal-separator="."
-            :output-type="number"
-            @input="update(row.saldo)"
-          />
-          <vue-numeric
-            slot="nalich"
-            v-model.number="row.nalich"
-            slot-scope="{row, update}"
-            separator="space"
-            :precision="2"
-            decimal-separator="."
-            :output-type="number"
-            @input="update(row.nalich)"
-          />
-          <vue-numeric
-            slot="vnpl"
-            v-model.number="row.vnpl"
-            slot-scope="{row, update}"
-            separator="space"
-            :precision="2"
-            decimal-separator="."
-            :output-type="number"
-            @input="update(row.vnpl)"
-          />
-          <vue-numeric
-            slot="credit"
-            v-model.number="row.credit"
-            slot-scope="{row, update}"
-            separator="space"
-            :precision="2"
-            decimal-separator="."
-            :output-type="number"
-            @input="update(row.credit)"
-          />
-          <vue-numeric
-            slot="endBalance"
-            v-model.number="row.endBalance"
-            slot-scope="{row, update}"
-            separator="space"
-            :precision="2"
-            decimal-separator="."
-            :output-type="number"
-            @input="update(row.endBalance)"
-          />
-        </v-client-table>
+            <input
+              slot="name"
+              v-model="row.name"
+              slot-scope="{row, update}"
+              @input="update(row.name)"
+            >
+            <vue-numeric
+              slot="saldo"
+              v-model.number="row.saldo"
+              slot-scope="{row, update}"
+              separator="space"
+              :precision="2"
+              decimal-separator="."
+              :output-type="number"
+              @input="update(row.saldo)"
+            />
+            <vue-numeric
+              slot="nalich"
+              v-model.number="row.nalich"
+              slot-scope="{row, update}"
+              separator="space"
+              :precision="2"
+              decimal-separator="."
+              :output-type="number"
+              @input="update(row.nalich)"
+            />
+            <vue-numeric
+              slot="vnpl"
+              v-model.number="row.vnpl"
+              slot-scope="{row, update}"
+              separator="space"
+              :precision="2"
+              decimal-separator="."
+              :output-type="number"
+              @input="update(row.vnpl)"
+            />
+            <vue-numeric
+              slot="credit"
+              v-model.number="row.credit"
+              slot-scope="{row, update}"
+              separator="space"
+              :precision="2"
+              decimal-separator="."
+              :output-type="number"
+              @input="update(row.credit)"
+            />
+            <vue-numeric
+              slot="endBalance"
+              v-model.number="row.endBalance"
+              slot-scope="{row, update}"
+              separator="space"
+              :precision="2"
+              decimal-separator="."
+              :output-type="number"
+              @input="update(row.endBalance)"
+            />
+          </v-client-table>
+        </div>
       </div>
-    </div>
 
-    <div class="input-of-balances-row">
-      <div
-        align="right"
-        class="input-of-balances-save-btn"
-      >
-        <v-btn
-          @click="save"
+      <div class="input-of-balances-row">
+        <div
+          align="right"
+          class="input-of-balances-save-btn"
         >
-          Сохранить
-        </v-btn>
-      </div>
+          <v-btn
+            type="submit"
+            @click="save"
+          >
+            Сохранить
+          </v-btn>
+        </div>
 
-      <div class="input-of-balances-spacer" />
+        <div class="input-of-balances-spacer" />
 
-      <div class="input-of-balances-cancel-btn">
-        <v-btn
-          @click="cancel"
-        >
-          Отмена
-        </v-btn>
+        <div class="input-of-balances-cancel-btn">
+          <v-btn
+            @click="cancel"
+          >
+            Отмена
+          </v-btn>
+        </div>
       </div>
-    </div>
+    </form>
   </div>
 </template>
 
@@ -313,13 +316,18 @@ export default {
         dateOplat: new Date(this.date).toLocaleDateString(),
         orgId: val || 0
       }
-      this.oplatData = await this.$api.paymentAccounts.findByDataOplatAndMyOrgId(data)
-      this.oplatData.forEach(async(elem) => {
+      let oplata = await this.$api.paymentAccounts.findByDataOplatAndMyOrgId(data)
+      oplata.forEach(async(elem) => {
         elem.shortNameOfAcc = elem.acc.shortName
         elem.credit = await this.getSumToPayDocsOfOrgByAccId(elem.acc.id, elem.myOrg.id)
         elem.endBalance = elem.saldo + elem.nalich + elem.vnpl + elem.credit
       })
-      this.oplatData = this.oplatData.sort(this.customCompare('shortNameOfAcc'))
+
+      oplata.sort(this.customCompare('shortNameOfAcc'))
+
+      oplata = oplata.filter(item => item.shortNameOfAcc.length > 0)
+
+      this.oplatData = oplata
     },
 
     // Отмена внесенных изменений и переполучение информации для формы из api

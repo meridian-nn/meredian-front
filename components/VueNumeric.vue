@@ -19,6 +19,7 @@
 </template>
 
 <script>
+// eslint-disable-next-line import/default
 import accounting from 'accounting-js'
 export default {
   name: 'VueNumeric',
@@ -44,7 +45,7 @@ export default {
      */
     min: {
       type: Number,
-      default: Number.MIN_SAFE_INTEGER || -9007199254740991,
+      default: -9007199254740991,
       required: false
     },
     /**
@@ -52,7 +53,7 @@ export default {
      */
     minus: {
       type: Boolean,
-      default: false,
+      default: true,
       required: false
     },
     /**
