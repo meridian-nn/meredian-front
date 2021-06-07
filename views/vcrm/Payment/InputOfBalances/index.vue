@@ -200,7 +200,7 @@ export default {
   },
   mounted() {
     this.init()
-    this.findOrganizatios()
+    this.findOrganizations()
   },
   methods: {
     init() {
@@ -297,15 +297,18 @@ export default {
     },
 
     // Поиск организаций для выбора пользователем
-    async findOrganizatios() {
+    async findOrganizations() {
       if (!this.organizations.length) {
         this.loadingType.organizations = true
 
         const data = {
           typeCode: 1
         }
-        this.organizations = await this.$api.organizations.findByOrgTypeCode(data)
+        const organizations = await this.$api.organizations.findByOrgTypeCode(data)
 
+        organizations[1] = organizations.splice(0, 1, organizations[1])[0]
+
+        this.organizations = organizations
         this.loadingType.organizations = null
       }
     },

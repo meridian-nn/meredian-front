@@ -684,7 +684,7 @@ export default {
       this.loadingType = {}
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
-      this.findOrganizatios()
+      this.findOrganizations()
       this.findSpDocoplForPay()
     },
 
@@ -1032,15 +1032,18 @@ export default {
     },
 
     // Поиск организаций для выбора пользователем
-    async findOrganizatios() {
+    async findOrganizations() {
       if (!this.organizations.length) {
         this.loadingType.organizations = true
 
         const data = {
           typeCode: 1
         }
-        this.organizations = await this.$api.organizations.findByOrgTypeCode(data)
+        const organizations = await this.$api.organizations.findByOrgTypeCode(data)
 
+        organizations[1] = organizations.splice(0, 1, organizations[1])[0]
+
+        this.organizations = organizations
         this.loadingType.organizations = null
       }
     },
@@ -1188,23 +1191,23 @@ export default {
 #journal-of-payment-docs-v-data-table-from-pay-docs td {
     word-break:break-all !important;
     padding: 0 5px !important;
-    height: 0px !important;
+    height: 0 !important;
 }
 
 #journal-of-payment-docs-v-data-table-from-pay-docs th {
     padding: 0 5px !important;
-    height: 0px !important;
+    height: 0 !important;
 }
 
 #journal-of-payment-docs-v-data-table-to-pay-docs td {
     word-break:break-all !important;
-    padding: 0 0px !important;
-    height: 0px !important;
+    padding: 0 0 !important;
+    height: 0 !important;
 }
 
 #journal-of-payment-docs-v-data-table-to-pay-docs th {
-    padding: 0 0px !important;
-    height: 0px !important;
+    padding: 0 0 !important;
+    height: 0 !important;
 }
 
 .journal-of-payment-docs-to-pay-col-5 {
@@ -1254,7 +1257,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   flex: 1 1 auto;
-  margin: 0px;
+  margin: 0;
   min-width: 100%;
 }
 
@@ -1354,8 +1357,21 @@ export default {
   background: none;
 }
 
-.journal-of-payment-docs-brise-input input:focus ~ label, input:valid ~ label  {
-  top: 0px;
+.journal-of-payment-docs-brise-input label {
+  position: absolute;
+  left: 10px;
+  top: 45%;
+  transition: ease-out .15s;
+  color: #999;
+}
+
+.journal-of-payment-docs-brise-input input:focus ~ .line {
+  left: 0;
+  opacity: 1;
+}
+
+.journal-of-payment-docs-brise-input input:valid ~ label, input:focus ~ label   {
+  top: 0;
   transform: scale(0.94) translateX(-2px);
   color: #639db1;
 }
@@ -1367,7 +1383,6 @@ export default {
   width: 100%;
   height: 3px;
   background: #639db1;
-  left: -999px;
   transition: .25s;
   opacity: 0;
   z-index: 6;
@@ -1377,22 +1392,9 @@ export default {
   background: #639db1;
 }
 
-.journal-of-payment-docs-brise-input input:focus ~ .line {
-  left: 0;
-  opacity: 1;
-}
-
-.journal-of-payment-docs-brise-input label {
-  position: absolute;
-  left: 10px;
-  top: 45%;
-  transition: ease-out .15s;
-  color: #999;
-}
-
 .journal-of-payment-docs-from-pay-docs-checkbox {
-  margin:0px;
-  padding:0px;
+  margin:0;
+  padding:0;
   color:#999 !important
 }
 
