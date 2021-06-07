@@ -703,7 +703,7 @@ export default {
     // Выбор расчетного счета
     paymentAccountChange(val) {
       this.findToPay(val)
-      this.updateResPaymentAccountInfo()
+      // this.updateResPaymentAccountInfo()
     },
 
     // Обработка события "Закрытие формы "Документ на оплату" по нажатию кнопки "Отмена""
@@ -1077,12 +1077,18 @@ export default {
         return
       }
 
-      const data = {
-        dateOplat: new Date(this.date).toLocaleDateString(),
-        orgId: this.selectedOrganization
+      const data = this.createCriteriasToSearchBalanceOfPaymentAccount(this.date, this.selectedOrganization, accId)
+      const response = await this.$api.paymentAccounts.findBySearchCriteriaList(data)
+
+      if (!response.length) {
+        this.currentPaymentAccountBalance = 0
+        this.paymentAccountInfo = this.currentPaymentAccountBalance
+        this.currentPaymentAccountBalanceLessThenZero = false
+        this.additionalMessage = ''
+        return
       }
-      const response = await this.$api.paymentAccounts.findByDataOplatAndMyOrgId(data)
-      const responseElement = response.find(el => el.acc.id === accId)
+
+      const responseElement = response[0]
       const saldo = responseElement.saldo
 
       this.additionalMessage = ''
@@ -1114,20 +1120,12 @@ export default {
       this.toPaySelectedRows = []
       this.toPayData = []
 
-      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name, 'journal-of-payment-docs-to-pay-docs')
-      const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
-      let filtersParams
-
-      if (response.length) {
-        filtersParams = JSON.parse(response[0].settingValue)
-      }
-
       const dataFromPay = this.createCriteriasForRequestToSearchDocsToPay(
-        accId, this.selectedOrganization, this.date, filtersParams)
+        accId, this.selectedOrganization, this.date)
       const toPayDataResponse = await this.$api.payment.docOplToPay.findDocumentsByCriterias(dataFromPay)
 
       const dataPaymentByCashbox = this.createCriteriasForRequestToSearchPaymentsByCashbox(
-        accId, this.selectedOrganization, this.date, filtersParams)
+        accId, this.selectedOrganization, this.date)
       const paymentByCashboxResponse = await this.$api.payment.findPaymentsByCashboxByCriterias(dataPaymentByCashbox)
 
       const objFromFunc = this.convertResponsesToDataForToPayTable(paymentByCashboxResponse, toPayDataResponse)

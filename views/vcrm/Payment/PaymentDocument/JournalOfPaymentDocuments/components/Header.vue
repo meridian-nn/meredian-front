@@ -170,30 +170,13 @@ export default {
     },
 
     async getBalanceOfOtherAccounts(orgId, date) {
-      let totalToSumOplat = 0
-      const arrayOfPromises = []
-
-      const data = {
-        orgId
-      }
-
-      const paymentAccounts = await this.$api.paymentAccounts.findAccByOrgId(data)
-
-      paymentAccounts.forEach((account) => {
-        const promiseToPay = this.getSumToPayDocsOfOrgByAccId(account.id, orgId, date)
-        const promisePaymentByCashbox = this.getSumOfPaymentByCashboxOfOrgByAccId(account.id, orgId, date)
-        arrayOfPromises.push(promiseToPay)
-        arrayOfPromises.push(promisePaymentByCashbox)
-      })
-      await Promise.all(arrayOfPromises).then((results) => {
-        results.forEach((result) => {
-          totalToSumOplat += result
-        })
-      })
-      return totalToSumOplat
+      const sumToPay = await this.getSumToPayDocsOfOrgByAccId(orgId, date)
+      const sumPaymentByCashbox = await this.getSumOfPaymentByCashboxOfOrgByAccId(orgId, date)
+      const totalSumOplat = sumToPay + sumPaymentByCashbox
+      return totalSumOplat
     },
-    async getSumToPayDocsOfOrgByAccId(accId, orgId, date) {
-      const data = this.createCriteriasForRequestToSearchDocsToPay(accId, orgId, date)
+    async getSumToPayDocsOfOrgByAccId(orgId, date) {
+      const data = this.createCriteriasWithoutAccIdForRequestToSearchDocsToPay(orgId, date)
       let totalToSumOplat = 0
       const response = await this.$api.payment.docOplToPay.findDocumentsByCriterias(data)
       response.forEach((value) => {
@@ -201,8 +184,8 @@ export default {
       })
       return totalToSumOplat
     },
-    async getSumOfPaymentByCashboxOfOrgByAccId(accId, orgId, date) {
-      const data = this.createCriteriasForRequestToSearchPaymentsByCashbox(accId, orgId, date)
+    async getSumOfPaymentByCashboxOfOrgByAccId(orgId, date) {
+      const data = this.createCriteriasWithoutAccIdForRequestToSearchPaymentsByCashbox(orgId, date)
       let totalPaymentSum = 0
       const response = await this.$api.payment.findPaymentsByCashboxByCriterias(data)
       response.forEach((value) => {
