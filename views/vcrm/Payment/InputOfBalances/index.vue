@@ -233,7 +233,8 @@ export default {
       const response = await this.$api.paymentAccounts.groupByOrg(data)
       for (const element of response) {
         element.name = element.myOrg.shortName
-        element.credit = await this.getSumOfDocumentsToPayByOrgId(element.myOrg.id)
+        /* const balance = await this.getBalanceOfOtherAccounts(element.myOrg.id)
+        element.credit += balance */
         element.endBalance = element.saldo + element.nalich + element.vnpl + element.credit
 
         this.totalSumOfSaldo += element.saldo
@@ -259,41 +260,43 @@ export default {
       })
       return response
     },
-    async getSumOfDocumentsToPayByOrgId(orgId) {
-      const data = {
-        orgId
-      }
-      const paymentAccounts = await this.$api.paymentAccounts.findAccByOrgId(data)
-      const balance = await this.getBalanceOfOtherAccounts(paymentAccounts, orgId)
-      return balance
+    async getBalanceOfOtherAccounts(orgId, accId) {
+      const sumToPay = await this.getSumToPayDocsOfOrg(orgId, accId)
+      const sumPaymentByCashbox = await this.getSumOfPaymentByCashboxOfOrg(orgId, accId)
+      const totalSumOplat = sumToPay + sumPaymentByCashbox
+      return totalSumOplat
     },
-    async getBalanceOfOtherAccounts(paymentAccounts, orgId) {
-      let totalToSumOplat = 0
-      const arrayOfPromises = []
-      paymentAccounts.forEach((account) => {
-        const promise = this.getSumToPayDocsOfOrgByAccId(account.id, orgId)
-        arrayOfPromises.push(promise)
-      })
-      await Promise.all(arrayOfPromises).then((results) => {
-        results.forEach((result) => {
-          totalToSumOplat += result
-        })
-      })
-      return totalToSumOplat
-    },
-    async getSumToPayDocsOfOrgByAccId(accId, orgId) {
-      const data = {
-        dateDoc: new Date(this.date).toLocaleDateString(),
-        accId,
-        orgId
+    async getSumToPayDocsOfOrg(orgId, accId) {
+      let data
+      if (accId) {
+        data = this.createCriteriasForRequestToSearchDocsToPay(accId, orgId, this.date)
+      } else {
+        data = this.createCriteriasWithoutAccIdForRequestToSearchDocsToPay(orgId, this.date)
       }
 
       let totalToSumOplat = 0
-      const response = await this.$api.payment.docOplToPay.findSpDocoplToPay(data)
+      const response = await this.$api.payment.docOplToPay.findDocumentsByCriterias(data)
       response.forEach((value) => {
         totalToSumOplat += value.sumOplat
       })
       return totalToSumOplat
+    },
+    async getSumOfPaymentByCashboxOfOrg(orgId, accId) {
+      let data
+      if (accId) {
+        data = this.createCriteriasForRequestToSearchPaymentsByCashbox(accId, orgId, this.date)
+      } else {
+        data = this.createCriteriasWithoutAccIdForRequestToSearchPaymentsByCashbox(orgId, this.date)
+      }
+
+      let totalPaymentSum = 0
+      const response = await this.$api.payment.findPaymentsByCashboxByCriterias(data)
+      response.forEach((value) => {
+        if (value.paymentOperationSums.length > 0) {
+          totalPaymentSum += value.paymentOperationSums[0].paymentSum
+        }
+      })
+      return totalPaymentSum
     },
 
     // Поиск организаций для выбора пользователем
@@ -320,11 +323,12 @@ export default {
         orgId: val || 0
       }
       let oplata = await this.$api.paymentAccounts.findByDataOplatAndMyOrgId(data)
-      oplata.forEach(async(elem) => {
+      for (const elem of oplata) {
         elem.shortNameOfAcc = elem.acc.shortName
-        elem.credit = await this.getSumToPayDocsOfOrgByAccId(elem.acc.id, elem.myOrg.id)
+        // const balance = await this.getBalanceOfOtherAccounts(elem.myOrg.id, elem.acc.id)
+        // elem.credit += balance
         elem.endBalance = elem.saldo + elem.nalich + elem.vnpl + elem.credit
-      })
+      }
 
       oplata.sort(this.customCompare('shortNameOfAcc'))
 

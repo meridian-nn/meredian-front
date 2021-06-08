@@ -170,12 +170,12 @@ export default {
     },
 
     async getBalanceOfOtherAccounts(orgId, date) {
-      const sumToPay = await this.getSumToPayDocsOfOrgByAccId(orgId, date)
-      const sumPaymentByCashbox = await this.getSumOfPaymentByCashboxOfOrgByAccId(orgId, date)
+      const sumToPay = await this.getSumToPayDocsOfOrg(orgId, date)
+      const sumPaymentByCashbox = await this.getSumOfPaymentByCashboxOfOrg(orgId, date)
       const totalSumOplat = sumToPay + sumPaymentByCashbox
       return totalSumOplat
     },
-    async getSumToPayDocsOfOrgByAccId(orgId, date) {
+    async getSumToPayDocsOfOrg(orgId, date) {
       const data = this.createCriteriasWithoutAccIdForRequestToSearchDocsToPay(orgId, date)
       let totalToSumOplat = 0
       const response = await this.$api.payment.docOplToPay.findDocumentsByCriterias(data)
@@ -184,7 +184,7 @@ export default {
       })
       return totalToSumOplat
     },
-    async getSumOfPaymentByCashboxOfOrgByAccId(orgId, date) {
+    async getSumOfPaymentByCashboxOfOrg(orgId, date) {
       const data = this.createCriteriasWithoutAccIdForRequestToSearchPaymentsByCashbox(orgId, date)
       let totalPaymentSum = 0
       const response = await this.$api.payment.findPaymentsByCashboxByCriterias(data)
