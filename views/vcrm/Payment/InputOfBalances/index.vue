@@ -342,6 +342,7 @@ export default {
     // Сохранение внесенных пользователем изменений
     async save() {
       // await this.$api.payment.balanceOfPaymentAccount.save(this.oplatData)
+      document.activeElement.blur()
       await this.$axios.$post('/oper/spOplat/saveAll', this.oplatData)
       this.init()
     }
