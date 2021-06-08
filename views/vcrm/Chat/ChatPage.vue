@@ -333,21 +333,26 @@ export default {
       this.roomsList.splice(i, 1)
     },
 
-    selectUser(user) {
+    async selectUser(user) {
       this.selectedUser = user
 
-      const index = this.roomsList.findIndex(item => item.userIds.includes(user.id))
+      const index = this.roomsList.findIndex(item => !item.isGroup && item.userIds.includes(user.id))
 
-      index !== -1 && this.selectRoom(this.roomsList[index])
+      if (index === -1) {
+        const { data } = await this.getRoomInfo(user)
 
-      this.activeChat = index === -1 ? null : index
+        this.selectRoom(data)
+        this.activeChat = null
+      } else {
+        this.selectRoom(this.roomsList[index])
+        this.activeChat = index
+      }
     },
 
     selectRoom(room) {
       if (this.socket.connected) {
         this.selectedUser = this.findUserById(room)[0]
-        this.selectedRoom =
-          this.selectedRoom = { ...room, title: room.title.length > 0 ? room.title : this.selectedUser.fullName }
+        this.selectedRoom = { ...room, title: room.title.length > 0 ? room.title : this.selectedUser.fullName }
 
         room.isNewMessages = 0
       }
@@ -360,6 +365,14 @@ export default {
         const roomUsers = room.userIds.filter(userItem => userItem !== user.id)
 
         return roomUsers.includes(item.id)
+      })
+    },
+
+    getRoomInfo(user) {
+      return this.$apiClient.call(process.env.API_HOST_SOCKET + '/room/initiate', {
+        method: 'POST',
+        body: JSON.stringify({ userIds: [this.user.id, user.id] }),
+        headers: this.$apiClient.headers
       })
     },
 

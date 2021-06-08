@@ -1,6 +1,6 @@
 <template>
   <v-responsive
-    v-if="messageTo"
+    v-if="selectedRoom"
     class="overflow-y-hidden fill-height chat-room"
     height="500"
   >

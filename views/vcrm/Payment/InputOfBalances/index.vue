@@ -114,10 +114,7 @@
           align="right"
           class="input-of-balances-save-btn"
         >
-          <v-btn
-            type="submit"
-            @click="save"
-          >
+          <v-btn type="submit">
             Сохранить
           </v-btn>
         </div>
