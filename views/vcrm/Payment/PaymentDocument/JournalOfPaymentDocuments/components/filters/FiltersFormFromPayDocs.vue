@@ -154,7 +154,6 @@ export default {
     },
 
     // поиск ранее сохраненных настроек фильтров для текущего пользователя
-    // TODO добавить в параметры запроса id текущего пользователя когда будет готова авторизация
     async findFiltersValues() {
       const data = this.createCriteriasToSearchForFiltersValues(this.$route.name, this.elementId, this.getCurrentUser().id)
       const response = await this.$api.uiSettings.findBySearchCriterias(data)

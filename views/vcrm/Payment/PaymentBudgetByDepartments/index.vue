@@ -164,12 +164,8 @@ export default {
       const groupByDate = []
       const groupByDep = []
 
-      const data = {
-        finishDate: new Date(this.endDate).toLocaleDateString(),
-        startDate: new Date(this.startDate).toLocaleDateString()
-      }
-
-      const response = await this.$api.payment.docOplForPay.findByDataOplatBetweenParamDates(data)
+      const data = this.createCriteriasToSearchDocsFromPayBetweenDataOplatDates(this.startDate, this.endDate)
+      const response = await this.$api.payment.docOplForPay.findDocumentsByCriteriasForTableInDocumentsJournal(data)
       for (const value of response) {
         if (value.departmentId === null) {
           continue
@@ -177,7 +173,8 @@ export default {
 
         let record = groupByDate.find(item => item.dataOplat === value.dataOplat)
         const sumOplach = value.sumPaid === null ? 0 : value.sumPaid
-        const depName = await this.findDepDocById(value.departmentId)
+        const depName = value.depName
+
         if (record === undefined) {
           record = {
             dataOplat: value.dataOplat,

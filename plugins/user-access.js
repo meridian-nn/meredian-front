@@ -13,7 +13,12 @@ Vue.mixin({
         isAdmin() {
             const currentUser = this.getCurrentUser()
             const rolesOfCurrentUser = currentUser.roles
-            return rolesOfCurrentUser.find(role => role === 2) ? true : false
+
+            if(rolesOfCurrentUser.length === 0) {
+              return true
+            }
+
+            return !!rolesOfCurrentUser.find(role => role === 2)
         },
 
         //Функция возвращает список ролей текущего пользователя из API
@@ -22,7 +27,7 @@ Vue.mixin({
         },
 
         //Функция проверяет наличие у пользователя роли для работы с АРМ "Реестр оплат"
-        //5 - id роли "Бюджет - полный доступ" 
+        //5 - id роли "Бюджет - полный доступ"
         isHaveBudgetRole() {
             if (this.isAdmin()) {
                 return true
@@ -34,7 +39,7 @@ Vue.mixin({
         },
 
         //Функция проверяет наличие у пользователя роли для работы с АРМ "Маркировка"
-        //1 - id роли "роль_Получение_GTIN_KM" 
+        //1 - id роли "роль_Получение_GTIN_KM"
         isHaveGTINRole() {
             if (this.isAdmin()) {
                 return true

@@ -1,6 +1,7 @@
 /* eslint-disable */
 // Плагин для создания критериев для запросов типа "findBySearchCriteria" и "findBySearchCriterias"
 import Vue from 'vue'
+
 Vue.mixin({
     methods: {
 
@@ -40,6 +41,29 @@ Vue.mixin({
             return data
         },
 
+        createCriteriasWithoutAccIdForRequestToSearchPaymentsByCashbox(orgId, date) {
+          const data = [{
+            dataType: 'DATE',
+            key: 'paymentDate',
+            operation: 'EQUALS',
+            type: 'AND',
+            values: [
+              new Date(date).toLocaleDateString()
+            ]
+          },
+            {
+              dataType: 'INTEGER',
+              key: 'payer.id',
+              operation: 'EQUALS',
+              type: 'AND',
+              values: [
+                orgId
+              ]
+            }
+          ]
+          return data
+        },
+
         // Создает объект с критериями для отбора документов к оплате для запроса на бэк
         // date - дата для отбора по полю dataOplat
         // orgId - id организации
@@ -72,11 +96,38 @@ Vue.mixin({
                     'operation': 'BETWEEN',
                     'type': 'AND',
                     'values': [
-                        new Date(date).toLocaleDateString(), secDate.toLocaleDateString()
+                        new Date(date).toLocaleDateString(), new Date(secDate).toLocaleDateString()
                     ]
                 }
             ]
             return data
+        },
+
+        createCriteriasWithoutAccIdForRequestToSearchDocsToPay( orgId, date) {
+          const secDate = new Date(date)
+          const curDateNum = secDate.getDate()
+          secDate.setDate(curDateNum + 1)
+          const data = [
+            {
+              'dataType': 'INTEGER',
+              'key': 'platId',
+              'operation': 'EQUALS',
+              'type': 'AND',
+              'values': [
+                orgId
+              ]
+            },
+            {
+              'dataType': 'DATE',
+              'key': 'dataOplat',
+              'operation': 'BETWEEN',
+              'type': 'AND',
+              'values': [
+                new Date(date).toLocaleDateString(), new Date(secDate).toLocaleDateString()
+              ]
+            }
+          ]
+          return data
         },
 
         // Создает объект с критериями отбора документов на оплату для запроса на бэк
@@ -114,6 +165,29 @@ Vue.mixin({
 
 
             return data
+        },
+
+        createCriteriasToSearchDocsFromPayBetweenDataOplatDates(firstDate, lastDate) {
+          return [
+            {
+              dataType: 'DATE',
+              key: 'dataOplat',
+              operation: 'GREATER_THAN',
+              type: 'AND',
+              values: [
+                new Date(firstDate).toLocaleDateString()
+              ]
+            },
+            {
+              dataType: 'DATE',
+              key: 'dataOplat',
+              operation: 'LESS_THAN',
+              type: 'AND',
+              values: [
+                new Date(lastDate).toLocaleDateString()
+              ]
+            }
+          ]
         },
 
         // Создает объект с критериями для отбора значений фильтров для пользователя
@@ -185,15 +259,66 @@ Vue.mixin({
             return data
         },
 
-        createCriteriasForCommodityLofOfSewingPlan(params){
-          if(!params) {
-            const criterias = {
-              page: 1,
-              size: 20
-            }
-
-            return criterias
+        createCriteriasForCommodityLogOfSewingPlan(params){
+          const criterias = {
+            page: 1,
+            size: 20
           }
+
+          if(params){
+            if(params.currentPage) {
+              criterias.page = params.currentPage
+            }
+          }
+
+          return criterias
+        },
+
+        createCriteriasToSearchBalanceOfPaymentAccount(dateOplat, orgId, accId){
+          const data = [
+            {
+              dataType: 'DATE',
+              key: 'dataOplat',
+              operation: 'EQUALS',
+              type: 'AND',
+              values: [
+                new Date(dateOplat).toLocaleDateString()
+              ]
+            },
+            {
+              dataType: 'VARCHAR',
+              key: 'myOrg.id',
+              operation: 'EQUALS',
+              type: 'AND',
+              values: [
+                orgId
+              ]
+            },
+            {
+              dataType: 'VARCHAR',
+              key: 'acc.id',
+              operation: 'EQUALS',
+              type: 'AND',
+              values: [
+                accId
+              ]
+            },
+          ]
+          return data
+        },
+
+        createCriteriasToSearchDocsToPayOfOrg(orgId,date){
+          const data = [
+            {
+              dataType: 'DATE',
+              key: 'dataOplat',
+              operation: 'EQUALS',
+              type: 'AND',
+              values: [
+                new Date(dateOplat).toLocaleDateString()
+              ]
+            }
+          ]
         }
     }
 })

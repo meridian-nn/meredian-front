@@ -156,7 +156,7 @@
                   <v-text-field
                     v-model.number="editedItem.sumDoc"
                     type="number"
-                    label="Сумма по док-ту"
+                    label="Сумма док-та"
                     outlined
                     hide-details="auto"
                     @input="calcSum"
