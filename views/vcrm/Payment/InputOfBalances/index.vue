@@ -230,8 +230,8 @@ export default {
       const response = await this.$api.paymentAccounts.groupByOrg(data)
       for (const element of response) {
         element.name = element.myOrg.shortName
-        /* const balance = await this.getBalanceOfOtherAccounts(element.myOrg.id)
-        element.credit += balance */
+        const balance = await this.getBalanceOfOtherAccounts(element.myOrg.id)
+        element.credit += balance
         element.endBalance = element.saldo + element.nalich + element.vnpl + element.credit
 
         this.totalSumOfSaldo += element.saldo
