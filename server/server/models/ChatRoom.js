@@ -129,7 +129,7 @@ chatRoomSchema.statics.getChatRoomByRoomId = async function(roomId) {
  */
 chatRoomSchema.statics.initiateChat = async function(userIds, ownerId) {
   try {
-    const availableRoom = await this.findOne({ userIds: { $all: [...userIds] } })
+    const availableRoom = await this.findOne({ userIds: [...userIds] })
 
     if (availableRoom) {
       return { data: availableRoom, new: false }
