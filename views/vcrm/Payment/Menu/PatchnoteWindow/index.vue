@@ -122,6 +122,60 @@
               </ul>
             </v-col>
           </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <span class="headline">01.06.2021</span>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <ul>
+                <li>
+                  Добавлена форма редактирования прав пользователей
+                </li>
+                <li>
+                  Добавлена проверка прав пользователя перед входом в меню АРМов
+                </li>
+                <li>
+                  Добавлена форма добавления нового пользователя
+                </li>
+              </ul>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <span class="headline">02.06.2021 - 08.06.2021</span>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <ul>
+                <li>
+                  Доработки основных форм АРМ Реестр оплат и исправления ошибок
+                </li>
+              </ul>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <span class="headline">09.06.2021</span>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <ul>
+                <li>
+                  Добавлена страница настройки аккаунта для текущего пользователя
+                </li>
+              </ul>
+            </v-col>
+          </v-row>
         </v-container>
       </div>
     </v-card>
