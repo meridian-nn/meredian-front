@@ -16,6 +16,10 @@ export const factory = send => ({
 
             saveNewUser(params) {
                 return send('POST', `/auth/editUser?email=${params.email}&enabled=${params.enabled}&fullName=${params.fullName}&login=${params.login}&organization=${params.organization}&password=${params.password}&phone=${params.phone}&position=${params.position}&${new URLSearchParams('roles[0].id').toString()}7`)
+            },
+
+            editUser(params) {
+                return send('POST', `/auth/editUser?${new URLSearchParams(params)}`)
             }
         },
 

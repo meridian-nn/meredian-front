@@ -29,25 +29,25 @@ Vue.mixin({
         //Функция проверяет наличие у пользователя роли для работы с АРМ "Реестр оплат"
         //5 - id роли "Бюджет - полный доступ"
         isHaveBudgetRole() {
-            if (this.isAdmin()) {
-                return true
-            }
-
             const currentUser = this.getCurrentUser()
             const rolesOfCurrentUser = currentUser.roles
-            return rolesOfCurrentUser.find(role => role === 5) ? true : false
+            return !!rolesOfCurrentUser.find(role => role === 5)
         },
 
         //Функция проверяет наличие у пользователя роли для работы с АРМ "Маркировка"
         //1 - id роли "роль_Получение_GTIN_KM"
         isHaveGTINRole() {
-            if (this.isAdmin()) {
-                return true
-            }
-
             const currentUser = this.getCurrentUser()
             const rolesOfCurrentUser = currentUser.roles
-            return rolesOfCurrentUser.find(role => role === 1) ? true : false
+            return !!rolesOfCurrentUser.find(role => role === 1)
+        },
+
+        //Функция проверяет наличие у пользователя роли для работы с АРМ "Снабжение"
+        //8 - id роли "Снабжение - полный доступ"
+        isHaveSupplyRole() {
+            const currentUser = this.getCurrentUser()
+            const rolesOfCurrentUser = currentUser.roles
+            return !!rolesOfCurrentUser.find(role => role === 8)
         }
     }
 })

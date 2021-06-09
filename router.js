@@ -28,6 +28,9 @@ const AuthPage = dynamicPage(() =>
 const RegistrationPage = dynamicPage(() =>
     import ('~/components/user_registration/userRegistrationPage.vue'))
 
+const CurrentUserEditingPage = dynamicPage( () =>
+     import ('~/components/current_user_editing/currentUserEditingPage'))
+
 const UsersEditingPage = dynamicPage(() =>
     import ('~/components/users_editing/usersEditingPage.vue'))
 
@@ -179,6 +182,18 @@ const createRouterConst = new Router({
                             disabled: false
                         }]
                     }
+                },
+
+                {
+                  path: 'current_user_editing',
+                  name: 'CurrentUserEditingPage',
+                  component: CurrentUserEditingPage,
+                  meta: {
+                    breadcrumb: [{
+                      text: 'Настройка профиля',
+                      disabled: false
+                    }]
+                  }
                 },
 
                 {
