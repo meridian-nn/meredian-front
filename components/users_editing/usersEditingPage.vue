@@ -10,7 +10,7 @@
           v-model="usersDataTable"
           :columns="usersColumns"
           :options="usersOptions"
-          @row-click="findRolesOfChousenUser"
+          @row-click="findRolesOfChosenUser"
         >
           <v-simple-checkbox
             slot="enabled"
@@ -25,7 +25,7 @@
     <span class="users-editing-headline"> {{ currentUser }} </span>
 
     <div class="users-editing-row">
-      <div id="rolesOfUsersDataTable">
+      <div id="rolesOfCurrentUserDataTable">
         <v-client-table
           v-model="rolesOfUsersDataTable"
           :columns="rolesOfUsersColumns"
@@ -126,7 +126,7 @@ export default {
       this.usersDataTable = response
     },
 
-    async findRolesOfChousenUser(user) {
+    async findRolesOfChosenUser(user) {
       if (this.currentUserId && this.currentUserId === user.row.id) {
         return
       }
@@ -231,22 +231,22 @@ export default {
   color: white;
 }
 
-#rolesOfUsersDataTable {
+#rolesOfCurrentUserDataTable {
   border-collapse: collapse;
   width: 100%;
 }
-#rolesOfUsersDataTable table{
+#rolesOfCurrentUserDataTable table{
   width: 100%
 }
-#rolesOfUsersDataTable td, #rolesOfUsersDataTable th {
+#rolesOfCurrentUserDataTable td, #rolesOfCurrentUserDataTable th {
   border: 1px solid #ddd;
 }
 
-#rolesOfUsersDataTable tr:nth-child(even){background-color: #f2f2f2;}
+#rolesOfCurrentUserDataTable tr:nth-child(even){background-color: #f2f2f2;}
 
-#rolesOfUsersDataTable tr:hover {background-color: #ddd;}
+#rolesOfCurrentUserDataTable tr:hover {background-color: #ddd;}
 
-#rolesOfUsersDataTable th {
+#rolesOfCurrentUserDataTable th {
   padding-top: 12px;
   padding-bottom: 12px;
   text-align: left;

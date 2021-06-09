@@ -56,6 +56,7 @@
         </v-list-item>
 
         <v-list-item
+          v-if="isHaveSupplyRole()"
           link
           :to="{ name: 'SupplyMenu' }"
         >
@@ -141,7 +142,9 @@
           </template>
 
           <v-list>
-            <v-list-item>
+            <v-list-item
+              @click="$router.push({name: 'CurrentUserEditingPage'})"
+            >
               <v-icon class="mr-2">
                 mdi-account-settings
               </v-icon>

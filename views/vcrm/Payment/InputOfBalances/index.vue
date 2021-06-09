@@ -228,11 +228,12 @@ export default {
       }
 
       const response = await this.$api.paymentAccounts.groupByOrg(data)
+      response[1] = response.splice(0, 1, response[1])[0]
       for (const element of response) {
         element.name = element.myOrg.shortName
         const balance = await this.getBalanceOfOtherAccounts(element.myOrg.id)
         element.credit += balance
-        element.endBalance = element.saldo + element.nalich + element.vnpl + element.credit
+        element.endBalance = element.saldo + element.nalich + element.vnpl - element.credit
 
         this.totalSumOfSaldo += element.saldo
         this.totalSumOfNalich += element.nalich
@@ -376,7 +377,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   flex: 1 1 auto;
-  margin: 0px;
+  margin: 0;
   min-width: 100%;
 }
 
@@ -384,7 +385,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   flex: 1 1 auto;
-  margin: 0px;
+  margin: 0;
   min-width: 100%;
   padding-bottom:10px
 }
@@ -418,7 +419,7 @@ export default {
 }
 #groupByOrg td, #groupByOrg th {
   border: 1px solid #ddd;
-  padding: 0px;
+  padding: 0;
 }
 
 #groupByOrg tr:nth-child(even){background-color: #f2f2f2;}
@@ -442,7 +443,7 @@ export default {
 }
 #oplatData td, #oplatData th {
   border: 1px solid #ddd;
-  padding: 0px;
+  padding: 0;
 }
 
 #oplatData tr:nth-child(even){background-color: #f2f2f2;}

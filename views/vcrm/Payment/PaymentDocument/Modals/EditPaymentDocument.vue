@@ -127,6 +127,7 @@
               <v-row>
                 <v-col cols="12">
                   <v-text-field
+                    style="margin-left: 16px"
                     v-model="payer.clName"
                     readonly="true"
                     label="Плательщик"
@@ -207,7 +208,7 @@
 
           <v-row>
             <v-col col="12">
-              <v-expansion-panels>
+              <v-expansion-panels style="margin-left: 16px; width: 1116px">
                 <v-expansion-panel>
                   <v-expansion-panel-header>
                     <span class="text-h6">Договор</span>
@@ -585,9 +586,6 @@ export default {
       } else if (!this.editedItem.myorgId) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите плательщика!')
         verificationPassed = false
-      } else if (!this.editedItem.consumerId) {
-        this.$refs.userNotification.showUserNotification('error', 'Укажите клиента документа!')
-        verificationPassed = false
       } else if (!this.editedItem.documentKindId) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите вид документа!')
         verificationPassed = false
@@ -662,7 +660,7 @@ export default {
 
 <style lang="scss">
   .container-data {
-    margin-left: 0px;
+    margin-left: 0;
     max-width: none;
   }
   .modal-card {
@@ -682,12 +680,9 @@ export default {
     background-color: rgba(0, 0, 0, 0.4);
   }
   .v-card-text{
-    padding: 0px;
+    padding: 0;
   }
   .col{
-    padding-top: 10px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 0px;
+    padding: 10px 10px 0;
   }
 </style>
