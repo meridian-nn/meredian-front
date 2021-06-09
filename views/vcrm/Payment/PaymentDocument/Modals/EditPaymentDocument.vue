@@ -127,6 +127,7 @@
               <v-row>
                 <v-col cols="12">
                   <v-text-field
+                    style="margin-left: 16px"
                     v-model="payer.clName"
                     readonly="true"
                     label="Плательщик"
@@ -207,7 +208,7 @@
 
           <v-row>
             <v-col col="12">
-              <v-expansion-panels>
+              <v-expansion-panels style="margin-left: 16px; width: 1116px">
                 <v-expansion-panel>
                   <v-expansion-panel-header>
                     <span class="text-h6">Договор</span>
