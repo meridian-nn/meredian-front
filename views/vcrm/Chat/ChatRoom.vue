@@ -2,7 +2,7 @@
   <v-responsive
     v-if="selectedRoom"
     class="overflow-y-hidden fill-height chat-room"
-    height="500"
+    height="620"
   >
     <v-card
       flat

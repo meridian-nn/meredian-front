@@ -70,22 +70,14 @@
           </v-row>
 
           <v-row>
-            <v-col cols="3">
-              <div class="filters-for-from-pay-docs-modal-label">
-                К оплате >
-              </div>
-            </v-col>
-            <v-col cols="9">
-              <div class="filters-for-from-pay-docs-modal-brise-input">
-                <vue-numeric
-                  v-model="sumToPayValue"
-                  separator="space"
-                  :precision="2"
-                  decimal-separator="."
-                  :output-type="number"
-                />
-                <span class="line" />
-              </div>
+            <v-col cols="12">
+              <v-text-field
+                v-model="filterItem.date"
+                clearable="true"
+                type="date"
+                outlined
+                label="Дата от"
+              />
             </v-col>
           </v-row>
 
@@ -136,9 +128,6 @@ export default {
 
       // объект, в котором храняться фильтры пользователя
       filterItem: {},
-
-      // Значение для фильтра по полю "К оплате"
-      sumToPayValue: 0,
 
       // Признак использования фильтра по полю "К оплате"
       isSumToPayUsed: false,

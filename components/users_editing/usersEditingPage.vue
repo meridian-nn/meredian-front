@@ -97,7 +97,14 @@ export default {
         filterByColumn: false,
         editableColumns: ['isHave'],
         headings: {
-          isHave: 'Есть у пользователя',
+          isHave(h) {
+            return h('h1', {
+              style: {
+                color: 'red',
+                fontSize: '14px'
+              }
+            }, 'test')
+          },
           name: 'Имя роли'
         }
       },

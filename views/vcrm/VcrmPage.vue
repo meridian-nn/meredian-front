@@ -143,7 +143,7 @@
 
           <v-list>
             <v-list-item
-              @click="$router.push({name: 'CurrentUserEditingPage'})"
+              :to="{ name: 'CurrentUserEditingPage' }"
             >
               <v-icon class="mr-2">
                 mdi-account-settings
@@ -156,7 +156,7 @@
 
             <v-list-item
               v-if="isAdmin()"
-              @click="$router.push({name: 'RegistrationPage'})"
+              :to="{ name: 'RegistrationPage' }"
             >
               <v-icon class="mr-2">
                 mdi-account-check
@@ -169,7 +169,7 @@
 
             <v-list-item
               v-if="isAdmin()"
-              @click="$router.push({name: 'UsersEditingPage'})"
+              :to="{ name: 'UsersEditingPage' }"
             >
               <v-icon class="mr-2">
                 mdi-account-edit

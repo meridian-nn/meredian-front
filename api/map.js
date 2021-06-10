@@ -286,7 +286,7 @@ export const factory = send => ({
 
             //Поиск документов с кастомным респонсом для таблицы "Документы на оплату" на форме "Журнал документов на оплату"
             findDocumentsByCriteriasForTableInDocumentsJournal(params) {
-                return send('POST', `/oper/spDocoplRead/findBySearchCriteriaList`, params)
+                return send('POST', `/oper/spDocoplRead/findPageBySearchCriteriaList`, params)
             },
 
             deleteSelectedPayments(params) {

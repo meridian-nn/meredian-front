@@ -136,9 +136,7 @@
         class="history-of-journal-of-docs-spacer-btwn-tables"
       />
 
-      <div
-        class="history-of-journal-of-docs-tbl-from-pay"
-      >
+      <div class="history-of-journal-of-docs-tbl-from-pay">
         <v-subheader class="font-weight-medium text-subtitle-1">
           <div
             align="center"

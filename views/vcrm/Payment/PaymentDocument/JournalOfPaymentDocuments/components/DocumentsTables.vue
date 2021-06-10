@@ -164,16 +164,19 @@
                 Оплата по кассе
               </v-list-item-title>
             </v-list-item>
+
             <v-list-item @click="internalMovementForContextMenuOnly">
               <v-list-item-title>
                 Вн. перемещение
               </v-list-item-title>
             </v-list-item>
+
             <v-list-item @click="historyOfPaymentForContextMenuOnly">
               <v-list-item-title>
                 История оплат
               </v-list-item-title>
             </v-list-item>
+
             <v-list-item @click="deleteFromToPayForContextMenuOnly">
               <v-list-item-title>
                 Удалить из "к оплате"
@@ -241,9 +244,7 @@
         @close="closePaymentCardByDocument"
       />
 
-      <div
-        class="journal-of-payment-docs-for-pay-col-5"
-      >
+      <div class="journal-of-payment-docs-for-pay-col-5">
         <v-subheader class="font-weight-medium text-subtitle-1">
           <v-row>
             <div
@@ -287,9 +288,7 @@
             hide-default-footer
             class="elevation-1"
           >
-            <template
-              #body="{ items }"
-            >
+            <template #body="{ items }">
               <tbody>
                 <tr
                   v-for="item in items"
@@ -331,6 +330,11 @@
                     {{ item.depName }}
                   </td>
                 </tr>
+
+                <infinite-loading
+                  spinner="spiral"
+                  @infinite="findSpDocoplForPay"
+                />
               </tbody>
             </template>
           </v-data-table>
@@ -364,9 +368,7 @@
         @saveFilters="saveFiltersFormFromPayDocs"
       />
 
-      <div
-        class="journal-of-payment-docs-buttons-of-table-docs-for-pay"
-      >
+      <div class="journal-of-payment-docs-buttons-of-table-docs-for-pay">
         <v-subheader class="font-weight-medium text-subtitle-1" />
         <div align="center">
           <v-btn
@@ -514,13 +516,16 @@ import PaymentByCashbox from '@/views/vcrm/Payment/PaymentDocument/Modals/Paymen
 import InternalPayment from '@/views/vcrm/Payment/PaymentDocument/Modals/InternalPayment'
 import UserNotification from '@/components/information_window/UserNotification'
 import PaymentCardByDocument from '@/views/vcrm/Payment/PaymentDocument/Modals/PaymentCardByDocument'
+import InfiniteLoading from 'vue-infinite-loading'
 import JournalOfPaymentDocumentsHeader from './Header'
 import FiltersFormFromPayDocs from './filters/FiltersFormFromPayDocs'
 
 export default {
   name: 'JournalOfPaymentDocumentsDocumentsTables',
+
   components: {
     EditPaymentDocument,
+    InfiniteLoading,
     PaymentByCashbox,
     InternalPayment,
     UserNotification,
@@ -528,6 +533,7 @@ export default {
     JournalOfPaymentDocumentsHeader,
     FiltersFormFromPayDocs
   },
+
   data() {
     return {
       date: new Date().toISOString().substr(0, 10),
@@ -630,13 +636,6 @@ export default {
       // Переменная для отображения информационного сообщения, что фильтры для таблицы "Документы на оплату" используются
       isFiltersForFromPayDocsUsing: false,
 
-      // Итоговая сумма по колонке "Сумма" документов на оплату
-      totalSumDoc: 0,
-      // Итоговая сумма по колонке "Оплачено" документов на оплату
-      totalSumPaid: 0,
-      // Итоговая сумма по колонке "К оплате" документов на оплату
-      totalSumOplat: 0,
-
       // Итоговая сумма по колонке "Оплата" документов к оплате
       totalToSumOplat: 0,
 
@@ -672,9 +671,32 @@ export default {
       currentPaymentAccountBalance: 0,
       currentPaymentAccountBalanceLessThenZero: false,
       restPaymentAccountInfo: 0,
-      additionalMessage: ''
+      additionalMessage: '',
+
+      page: 0
     }
   },
+
+  computed: {
+    totalSumDoc() {
+      return this.fromPayData.reduce((acc, item) => {
+        return acc + item.sumDocNumber
+      }, 0)
+    },
+
+    totalSumPaid() {
+      return this.fromPayData.reduce((acc, item) => {
+        return acc + item.sumPaidNumber
+      }, 0)
+    },
+
+    totalSumOplat() {
+      return this.fromPayData.reduce((acc, item) => {
+        return acc + (item.sumDocNumber - item.sumPaidNumber)
+      }, 0)
+    }
+  },
+
   mounted() {
     this.init()
   },
@@ -685,7 +707,6 @@ export default {
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
       this.findOrganizations()
-      this.findSpDocoplForPay()
     },
 
     // Секция обработки событий на форме
@@ -965,10 +986,12 @@ export default {
         await this.findSpDocoplForPay()
       }
     },
+
     checkSelectedRowsBeforeDelete(selectedRows) {
       let isDeletionPossible = true
+
       selectedRows.forEach((row) => {
-        if (row.sumPaidNumber !== 0) {
+        if (row.sumPaid !== 0) {
           isDeletionPossible = false
         }
       })
@@ -1013,8 +1036,14 @@ export default {
       console.log('close filters for from pay docs')
     },
 
+    clearPageCount() {
+      this.page = 0
+      this.fromPayData = []
+    },
+
     // Функция отбработки события "Закрытие формы фильтров таблицы "Документов на оплату" с сохранением"
     saveFiltersFormFromPayDocs() {
+      this.clearPageCount()
       this.findSpDocoplForPay()
       console.log('save filters for from pay docs')
     },
@@ -1027,6 +1056,7 @@ export default {
 
     // Обновление таблиц "Документы к оплате" и "Документы на оплату"
     refreshTables() {
+      this.clearPageCount()
       this.findSpDocoplForPay()
       this.findToPay(this.accId)
     },
@@ -1040,6 +1070,8 @@ export default {
           typeCode: 1
         }
         const organizations = await this.$api.organizations.findByOrgTypeCode(data)
+
+        console.log(organizations)
 
         organizations[1] = organizations.splice(0, 1, organizations[1])[0]
 
@@ -1137,59 +1169,46 @@ export default {
     },
 
     // Поиск документов для таблицы "Документы на оплату" по выбранной организации
-    async findSpDocoplForPay() {
-      this.fromPayData = []
-      this.fromPaySelectedRows = []
-
+    async findSpDocoplForPay($state) {
       const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name, 'journal-of-payment-docs-from-pay-docs', this.getCurrentUser().id)
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
       let filtersParams
-      let paramSumToPay
 
       if (response.length) {
         filtersParams = JSON.parse(response[0].settingValue)
       }
 
-      const data = this.createCriteriasForRequestToSearchDocsFromPay(filtersParams)
+      const data = { searchCriterias: this.createCriteriasForRequestToSearchDocsFromPay(filtersParams), page: this.page }
 
-      if (filtersParams) {
-        paramSumToPay = filtersParams.sumToPay
-      }
-
-      if (data.length > 1 || (typeof paramSumToPay === 'object' && paramSumToPay.isSumToPayUsed)) {
+      if (data.length > 1) {
         this.isFiltersForFromPayDocsUsing = true
       } else {
         this.isFiltersForFromPayDocsUsing = false
       }
 
-      const responseForPayDocs = await this.$api.payment.docOplForPay.findDocumentsByCriteriasForTableInDocumentsJournal(data)
+      const { content } = await this.$api.payment.docOplForPay.findDocumentsByCriteriasForTableInDocumentsJournal(data)
 
-      if (typeof paramSumToPay === 'object' && paramSumToPay.isSumToPayUsed) {
-        this.fromPayData = responseForPayDocs.filter(item => item.sumToPay > paramSumToPay.sumToPayValue)
+      if (content.length > 0) {
+        this.page += 1
+
+        content.forEach((value) => {
+          value.sumPaid = value.sumPaid == null ? 0 : value.sumPaid
+          value.sumOplat = value.sumDoc - value.sumPaid
+
+          value.sumDocNumber = value.sumDoc
+          value.sumDoc = this.numberToSum(value.sumDoc)
+          value.sumPaidNumber = value.sumPaid
+          value.sumPaid = this.numberToSum(value.sumPaid)
+          value.sumOplatNumber = value.sumOplat
+          value.sumOplat = this.numberToSum(value.sumOplat)
+        })
+
+        this.fromPayData.push(...content)
+
+        $state.loaded()
       } else {
-        this.fromPayData = responseForPayDocs
+        $state.complete()
       }
-
-      let totalSumDoc = 0
-      let totalSumOplat = 0
-      let totalSumPaid = 0
-      this.fromPayData.forEach((value) => {
-        totalSumDoc += value.sumDoc
-        totalSumPaid += value.sumPaid
-        totalSumOplat += value.sumToPay
-
-        value.sumPaid = value.sumPaid == null ? 0 : value.sumPaid
-
-        value.sumDocNumber = value.sumDoc
-        value.sumDoc = this.numberToSum(value.sumDoc)
-        value.sumPaidNumber = value.sumPaid
-        value.sumPaid = this.numberToSum(value.sumPaid)
-        value.sumOplatNumber = value.sumToPay
-        value.sumOplat = this.numberToSum(value.sumToPay)
-      })
-      this.totalSumDoc = totalSumDoc.toFixed(2)
-      this.totalSumOplat = totalSumOplat.toFixed(2)
-      this.totalSumPaid = totalSumPaid.toFixed(2)
     }
   }
 }
@@ -1324,8 +1343,8 @@ export default {
 }
 
 .journal-of-payment-docs-bottom-spacer-for-fromPay-results{
-  flex: 0 0 53%;
-  max-width: 53%;
+  flex: 0 0 49%;
+  max-width: 49%;
 }
 
 .journal-of-payment-docs-result-text{

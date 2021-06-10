@@ -138,14 +138,14 @@ Vue.mixin({
                 'operation': 'GREATER_THAN',
                 'type': 'AND',
                 'values': [
-                    new Date().toLocaleDateString()
+                  filtersParams.date ? new Date(filtersParams.date).toLocaleDateString() : new Date().toLocaleDateString()
                 ]
             }]
 
             if (filtersParams) {
                 for (const key in filtersParams) {
                     const elemParam = filtersParams[key]
-                    if (!elemParam || key === 'sumToPay') {
+                    if (!elemParam || key === 'sumToPay' || key === 'date') {
                         continue
                     }
                     const dataType = typeof elemParam === 'number' ? 'INTEGER' : 'VARCHAR'
