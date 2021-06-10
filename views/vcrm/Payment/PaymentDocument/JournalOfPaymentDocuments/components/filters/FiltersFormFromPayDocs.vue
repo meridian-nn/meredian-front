@@ -78,7 +78,7 @@
             <v-col cols="9">
               <div class="filters-for-from-pay-docs-modal-brise-input">
                 <vue-numeric
-                  v-model="filterItem.sumToPay"
+                  v-model="sumToPayValue"
                   separator="space"
                   :precision="2"
                   decimal-separator="."
@@ -87,6 +87,16 @@
                 <span class="line" />
               </div>
             </v-col>
+          </v-row>
+
+          <v-row>
+            <v-simple-checkbox
+              v-model="isSumToPayUsed"
+              style="padding-left: 12px; padding-top: 12px"
+            />
+            <div class="filters-for-from-pay-docs-modal-label">
+              Фильтр по сумме к оплате используется
+            </div>
           </v-row>
         </v-container>
       </v-card-text>
@@ -120,12 +130,22 @@ export default {
     return {
       // id элемента, для которого будут сохранены настроики фильтров
       elementId: 'journal-of-payment-docs-from-pay-docs',
+
       // объект для отображения статусов процесса загрузки данных для полей
       loadingType: {},
+
       // объект, в котором храняться фильтры пользователя
       filterItem: {},
+
+      // Значение для фильтра по полю "К оплате"
+      sumToPayValue: 0,
+
+      // Признак использования фильтра по полю "К оплате"
+      isSumToPayUsed: false,
+
       // массив плательщиков для выбора пользователем
       payers: [],
+
       // массив подразделений для выбора пользователем
       departments: [],
       sumOplat: 0,
@@ -176,6 +196,11 @@ export default {
     },
 
     async saveFilters() {
+      this.filterItem.sumToPay = {
+        sumToPayValue: this.sumToPayValue,
+        isSumToPayUsed: this.isSumToPayUsed
+      }
+
       const filterEntityForSave = this.createFilterEntityForSave(this.elementId, this.$route.name, this.filterItem)
 
       await this.$api.uiSettings.save(filterEntityForSave)
@@ -191,6 +216,11 @@ export default {
 
       if (response.length) {
         this.filterItem = JSON.parse(response[0].settingValue)
+
+        if (typeof this.filterItem.sumToPay === 'object') {
+          this.sumToPayValue = this.filterItem.sumToPay.sumToPayValue
+          this.isSumToPayUsed = this.filterItem.sumToPay.isSumToPayUsed
+        }
       }
     },
 
@@ -267,6 +297,7 @@ export default {
   color: rgba(0, 0, 0, 0.6);
   font-size: 1rem;
   padding-top: 15px;
+  padding-left: 5px;
 }
 
 </style>

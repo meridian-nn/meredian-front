@@ -1156,7 +1156,7 @@ export default {
         paramSumToPay = filtersParams.sumToPay
       }
 
-      if (data.length > 1 || paramSumToPay) {
+      if (data.length > 1 || (typeof paramSumToPay === 'object' && paramSumToPay.isSumToPayUsed)) {
         this.isFiltersForFromPayDocsUsing = true
       } else {
         this.isFiltersForFromPayDocsUsing = false
@@ -1164,8 +1164,8 @@ export default {
 
       const responseForPayDocs = await this.$api.payment.docOplForPay.findDocumentsByCriteriasForTableInDocumentsJournal(data)
 
-      if (paramSumToPay) {
-        this.fromPayData = responseForPayDocs.filter(item => item.sumToPay >= paramSumToPay)
+      if (typeof paramSumToPay === 'object' && paramSumToPay.isSumToPayUsed) {
+        this.fromPayData = responseForPayDocs.filter(item => item.sumToPay > paramSumToPay.sumToPayValue)
       } else {
         this.fromPayData = responseForPayDocs
       }
