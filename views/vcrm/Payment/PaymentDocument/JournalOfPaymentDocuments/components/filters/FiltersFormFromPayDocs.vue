@@ -2,7 +2,7 @@
   <v-dialog
     v-model="dialog"
     :value="show"
-    max-width="500px"
+    max-width="600px"
     padding="0px"
     class="filters-for-from-pay-docs-modal"
     @input="$emit('close')"
@@ -55,6 +55,37 @@
                 outlined
                 hide-details="auto"
               />
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                v-model="filterItem.creatorName"
+                clearable="true"
+                outlined
+                label="Имя создателя документа"
+              />
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="3">
+              <div class="filters-for-from-pay-docs-modal-label">
+                К оплате >
+              </div>
+            </v-col>
+            <v-col cols="9">
+              <div class="filters-for-from-pay-docs-modal-brise-input">
+                <vue-numeric
+                  v-model="filterItem.sumToPay"
+                  separator="space"
+                  :precision="2"
+                  decimal-separator="."
+                  :output-type="number"
+                />
+                <span class="line" />
+              </div>
             </v-col>
           </v-row>
         </v-container>
@@ -180,3 +211,62 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+.filters-for-from-pay-docs-modal-brise-input {
+  position: relative;
+  margin: 5px;
+  overflow: hidden;
+}
+
+.filters-for-from-pay-docs-modal-brise-input input {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  outline: none;
+  border-bottom: 1px solid #999;
+  box-sizing: border-box;
+  font-size: 16px;
+  position: relative;
+  z-index: 5;
+  background: none;
+}
+
+.filters-for-from-pay-docs-modal-brise-input label {
+  position: absolute;
+  left: 10px;
+  top: 45%;
+  transition: ease-out .15s;
+  color: #999;
+}
+
+.filters-for-from-pay-docs-modal-brise-input input:focus ~ .line {
+  left: 0;
+  opacity: 1;
+}
+
+.filters-for-from-pay-docs-modal-brise-input input:valid ~ label, input:focus ~ label   {
+  top: 0;
+  transform: scale(0.94) translateX(-2px);
+  color: #639db1;
+}
+
+.filters-for-from-pay-docs-modal-brise-input .line {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background: #639db1;
+  transition: .25s;
+  opacity: 0;
+  z-index: 6;
+}
+
+.filters-for-from-pay-docs-modal-label {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 1rem;
+  padding-top: 15px;
+}
+
+</style>

@@ -145,11 +145,11 @@ Vue.mixin({
             if (filtersParams) {
                 for (const key in filtersParams) {
                     const elemParam = filtersParams[key]
-                    if (!elemParam) {
+                    if (!elemParam || key === 'sumToPay') {
                         continue
                     }
                     const dataType = typeof elemParam === 'number' ? 'INTEGER' : 'VARCHAR'
-                    const operation = key === 'nameDoc' ? 'LIKE' : 'EQUALS'
+                    const operation = ( key === 'nameDoc' || key === 'creatorName' ) ? 'LIKE' : 'EQUALS'
                     const dataElem = {
                         dataType,
                         key,

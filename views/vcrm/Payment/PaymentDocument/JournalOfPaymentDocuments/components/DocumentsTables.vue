@@ -968,7 +968,7 @@ export default {
     checkSelectedRowsBeforeDelete(selectedRows) {
       let isDeletionPossible = true
       selectedRows.forEach((row) => {
-        if (row.sumPaid !== 0) {
+        if (row.sumPaidNumber !== 0) {
           isDeletionPossible = false
         }
       })
@@ -1144,6 +1144,7 @@ export default {
       const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name, 'journal-of-payment-docs-from-pay-docs', this.getCurrentUser().id)
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
       let filtersParams
+      let paramSumToPay
 
       if (response.length) {
         filtersParams = JSON.parse(response[0].settingValue)
@@ -1151,30 +1152,40 @@ export default {
 
       const data = this.createCriteriasForRequestToSearchDocsFromPay(filtersParams)
 
-      if (data.length > 1) {
+      if (filtersParams) {
+        paramSumToPay = filtersParams.sumToPay
+      }
+
+      if (data.length > 1 || paramSumToPay) {
         this.isFiltersForFromPayDocsUsing = true
       } else {
         this.isFiltersForFromPayDocsUsing = false
       }
 
-      this.fromPayData = await this.$api.payment.docOplForPay.findDocumentsByCriteriasForTableInDocumentsJournal(data)
+      const responseForPayDocs = await this.$api.payment.docOplForPay.findDocumentsByCriteriasForTableInDocumentsJournal(data)
+
+      if (paramSumToPay) {
+        this.fromPayData = responseForPayDocs.filter(item => item.sumToPay >= paramSumToPay)
+      } else {
+        this.fromPayData = responseForPayDocs
+      }
+
       let totalSumDoc = 0
       let totalSumOplat = 0
       let totalSumPaid = 0
       this.fromPayData.forEach((value) => {
         totalSumDoc += value.sumDoc
         totalSumPaid += value.sumPaid
-        totalSumOplat += (value.sumDoc - value.sumPaid)
+        totalSumOplat += value.sumToPay
 
         value.sumPaid = value.sumPaid == null ? 0 : value.sumPaid
-        value.sumOplat = value.sumDoc - value.sumPaid
 
         value.sumDocNumber = value.sumDoc
         value.sumDoc = this.numberToSum(value.sumDoc)
         value.sumPaidNumber = value.sumPaid
         value.sumPaid = this.numberToSum(value.sumPaid)
-        value.sumOplatNumber = value.sumOplat
-        value.sumOplat = this.numberToSum(value.sumOplat)
+        value.sumOplatNumber = value.sumToPay
+        value.sumOplat = this.numberToSum(value.sumToPay)
       })
       this.totalSumDoc = totalSumDoc.toFixed(2)
       this.totalSumOplat = totalSumOplat.toFixed(2)

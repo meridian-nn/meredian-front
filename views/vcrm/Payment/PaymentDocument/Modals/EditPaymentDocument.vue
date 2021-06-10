@@ -381,16 +381,17 @@ export default {
     async findEditedItem(copyDoc = false) {
       if (this.id) {
         const editedItem = await this.$api.payment.docOplForPay.findById(this.id)
-        this.findDocumentType(editedItem.departmentId)
-        this.findExecutors(editedItem.departmentId)
+        await this.findDocumentType(editedItem.departmentId)
+        await this.findExecutors(editedItem.departmentId)
         // this.findSuppliers(editedItem.contractId)
-        this.findContracts()
+        await this.findContracts()
         this.editedItem = editedItem
-        this.findPayers()
+        await this.findPayers()
 
         if (copyDoc) {
           this.id = null
           this.editedItem.id = null
+          this.editedItem.creatorId = null
           this.editedItem.spDocches = []
           this.editedItem.spDocints = []
         }
@@ -551,6 +552,7 @@ export default {
       }
 
       let errorMessage = null
+      this.editedItem.creatorId = this.getCurrentUser().id
       this.editedItem.ispId = this.editedItem.myorgId
       this.editedItem.dataOplat = new Date(this.editedItem.dataOplat).toLocaleDateString()
       this.editedItem.dataDoc = new Date(this.editedItem.dataDoc).toLocaleDateString()

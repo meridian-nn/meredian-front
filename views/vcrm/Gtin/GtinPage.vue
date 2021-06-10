@@ -1144,8 +1144,11 @@ export default {
       this.loading = true
 
       try {
-        await this.$api.code.gtinCodeList(
+        await this.$api.code.gtinCodeSave(
           this.editedIndex > -1 ? Object.assign(this.fullDesserts[this.editedIndex], this.editedItem) : this.editedItem)
+
+        /* await this.$api.code.gtinCodeList(
+          this.editedIndex > -1 ? Object.assign(this.fullDesserts[this.editedIndex], this.editedItem) : this.editedItem) */
 
         await this.$fetch()
 
