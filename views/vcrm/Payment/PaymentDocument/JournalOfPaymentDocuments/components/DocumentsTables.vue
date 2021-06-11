@@ -1186,7 +1186,7 @@ export default {
         this.isFiltersForFromPayDocsUsing = false
       }
 
-      const { content } = await this.$api.payment.docOplForPay.findDocumentsByCriteriasForTableInDocumentsJournal(data)
+      const { content } = await this.$api.payment.docOplForPay.findDocumentsForPayForJournalTable(data)
 
       if (content.length > 0) {
         this.page += 1

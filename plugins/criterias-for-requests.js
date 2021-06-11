@@ -8,38 +8,38 @@ Vue.mixin({
         // Создает объект с критериями для отбора документов оплат по кассе для запроса на бэк
         // date - дата для отбора по полю paymentDate
         // orgId - id организации
-        // accId - id расчетного счета организации
-        createCriteriasForRequestToSearchPaymentsByCashbox(accId, orgId, date) {
-            const data = [{
-                    dataType: 'DATE',
-                    key: 'paymentDate',
-                    operation: 'EQUALS',
-                    type: 'AND',
-                    values: [
-                        new Date(date).toLocaleDateString()
-                    ]
-                },
-                {
-                    dataType: 'INTEGER',
-                    key: 'payer.id',
-                    operation: 'EQUALS',
-                    type: 'AND',
-                    values: [
-                        orgId
-                    ]
-                },
-                {
-                    dataType: 'INTEGER',
-                    key: 'acc.id',
-                    operation: 'EQUALS',
-                    type: 'AND',
-                    values: [
-                        accId
-                    ]
-                }
-            ]
-            return data
+      // accId - id расчетного счета организации
+      createCriteriasForRequestToSearchPaymentsByCashbox: function(accId, orgId, date) {
+        const data = [{
+          dataType: 'DATE',
+          key: 'paymentDate',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            new Date(date).toLocaleDateString()
+          ]
         },
+          {
+            dataType: 'INTEGER',
+            key: 'payer.id',
+            operation: 'EQUALS',
+            type: 'AND',
+            values: [
+              orgId
+            ]
+          },
+          {
+            dataType: 'INTEGER',
+            key: 'acc.id',
+            operation: 'EQUALS',
+            type: 'AND',
+            values: [
+              accId
+            ]
+          }
+        ]
+        return data
+      },
 
         createCriteriasWithoutAccIdForRequestToSearchPaymentsByCashbox(orgId, date) {
           const data = [{
@@ -138,7 +138,7 @@ Vue.mixin({
                 'operation': 'GREATER_THAN',
                 'type': 'AND',
                 'values': [
-                  filtersParams.date ? new Date(filtersParams.date).toLocaleDateString() : new Date().toLocaleDateString()
+                  (typeof filtersParams === 'object' && filtersParams.date) ? new Date(filtersParams.date).toLocaleDateString() : new Date().toLocaleDateString()
                 ]
             }]
 

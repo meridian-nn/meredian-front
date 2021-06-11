@@ -165,7 +165,7 @@ export default {
       const groupByDep = []
 
       const data = this.createCriteriasToSearchDocsFromPayBetweenDataOplatDates(this.startDate, this.endDate)
-      const response = await this.$api.payment.docOplForPay.findDocumentsByCriteriasForTableInDocumentsJournal(data)
+      const response = await this.$api.payment.docOplForPay.findDocumentsForPayByCriterias(data)
       for (const value of response) {
         if (value.departmentId === null) {
           continue
