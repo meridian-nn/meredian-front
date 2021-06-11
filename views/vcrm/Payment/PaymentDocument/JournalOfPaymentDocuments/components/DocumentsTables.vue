@@ -333,8 +333,11 @@
 
                 <infinite-loading
                   spinner="spiral"
+                  :identifier="infiniteIdOfFromPayData"
                   @infinite="findSpDocoplForPay"
-                />
+                >
+                  <div slot="no-more" />
+                </infinite-loading>
               </tbody>
             </template>
           </v-data-table>
@@ -673,7 +676,11 @@ export default {
       restPaymentAccountInfo: 0,
       additionalMessage: '',
 
-      page: 0
+      // Переменная для реализации пагинации таблицы "Документы на оплату"
+      pageOfFromPayData: 0,
+
+      // Переменная для реализации обновления данных в таблице "Документы на оплату"
+      infiniteIdOfFromPayData: +new Date()
     }
   },
 
@@ -735,7 +742,7 @@ export default {
 
     // Обработка события "Сохранение нового документа на оплату и закрытие формы "Документ на оплату""
     savePaymentDocument() {
-      this.findSpDocoplForPay()
+      this.updateDocsForPay()
       console.log('open')
     },
 
@@ -829,8 +836,7 @@ export default {
       await this.$axios.$post('/oper/spDocopl/saveSpDocoplToPay', this.toPaySelectedRows)
 
       this.toPaySelectedRows = []
-      await this.findSpDocoplForPay()
-      await this.findToPay(this.accId)
+      await this.refreshTables()
       await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
       this.updateResPaymentAccountInfo()
     },
@@ -871,8 +877,7 @@ export default {
 
       await this.addPayments()
 
-      await this.findSpDocoplForPay()
-      await this.findToPay(this.accId)
+      await this.refreshTables()
       await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
       this.updateResPaymentAccountInfo()
     },
@@ -907,8 +912,7 @@ export default {
         const ids = this.toPaySelectedRows.map(value => value.id)
         await this.$axios.$post('/oper/spDocopl/deleteSelectedPayments', ids)
 
-        await this.findSpDocoplForPay()
-        await this.findToPay(this.accId)
+        await this.refreshTables()
         await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
         this.updateResPaymentAccountInfo()
       }
@@ -983,7 +987,7 @@ export default {
         // await this.$api.payment.DocOplForPay.deleteSelectedPayments(ids)
         await this.$axios.$post('/oper/spDocopl/deletePayment', ids)
 
-        await this.findSpDocoplForPay()
+        await this.updateDocsForPay()
       }
     },
 
@@ -991,7 +995,7 @@ export default {
       let isDeletionPossible = true
 
       selectedRows.forEach((row) => {
-        if (row.sumPaid !== 0) {
+        if (row.sumPaidNumber !== 0) {
           isDeletionPossible = false
         }
       })
@@ -1036,15 +1040,9 @@ export default {
       console.log('close filters for from pay docs')
     },
 
-    clearPageCount() {
-      this.page = 0
-      this.fromPayData = []
-    },
-
     // Функция отбработки события "Закрытие формы фильтров таблицы "Документов на оплату" с сохранением"
     saveFiltersFormFromPayDocs() {
-      this.clearPageCount()
-      this.findSpDocoplForPay()
+      this.updateDocsForPay()
       console.log('save filters for from pay docs')
     },
     // Конец Секции обработки событий на форме
@@ -1055,10 +1053,17 @@ export default {
     },
 
     // Обновление таблиц "Документы к оплате" и "Документы на оплату"
-    refreshTables() {
-      this.clearPageCount()
-      this.findSpDocoplForPay()
-      this.findToPay(this.accId)
+    async refreshTables() {
+      this.updateDocsForPay()
+      await this.findToPay(this.accId)
+    },
+
+    // Обновление таблицы "Документы к оплате
+    updateDocsForPay() {
+      this.pageOfFromPayData = 0
+      this.fromPaySelectedRows = []
+      this.fromPayData = []
+      this.infiniteIdOfFromPayData += 1
     },
 
     // Поиск организаций для выбора пользователем
@@ -1178,9 +1183,11 @@ export default {
         filtersParams = JSON.parse(response[0].settingValue)
       }
 
-      const data = { searchCriterias: this.createCriteriasForRequestToSearchDocsFromPay(filtersParams), page: this.page }
+      const searchCriterias = this.createCriteriasForRequestToSearchDocsFromPay(filtersParams)
 
-      if (data.length > 1) {
+      const data = { searchCriterias, page: this.pageOfFromPayData }
+
+      if (searchCriterias.length > 1) {
         this.isFiltersForFromPayDocsUsing = true
       } else {
         this.isFiltersForFromPayDocsUsing = false
@@ -1189,11 +1196,11 @@ export default {
       const { content } = await this.$api.payment.docOplForPay.findDocumentsForPayForJournalTable(data)
 
       if (content.length > 0) {
-        this.page += 1
+        this.pageOfFromPayData += 1
 
         content.forEach((value) => {
           value.sumPaid = value.sumPaid == null ? 0 : value.sumPaid
-          value.sumOplat = value.sumDoc - value.sumPaid
+          value.sumOplat = value.sumToPay
 
           value.sumDocNumber = value.sumDoc
           value.sumDoc = this.numberToSum(value.sumDoc)

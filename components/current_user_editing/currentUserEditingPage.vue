@@ -4,7 +4,7 @@
     class="current-user-editing-main-div"
   >
     <v-row>
-      <v-col cols="6">
+      <v-col cols="4">
         <v-text-field
           v-model="userInformation.fullName"
           label="Полное имя пользователя"
@@ -17,6 +17,19 @@
         <v-text-field
           v-model="userPassword"
           label="Пароль пользователя"
+          outlined
+          hide-details="auto"
+        />
+      </v-col>
+
+      <v-col cols="2">
+        <v-autocomplete
+          v-model="userInformation.departmentId"
+          label="Подразделение"
+          :loading="loadingType.departments"
+          :items="departments"
+          item-value="id"
+          item-text="nameViddoc"
           outlined
           hide-details="auto"
         />
@@ -112,6 +125,8 @@ export default {
       userInformation: {},
       currentUser: {},
       userPassword: '',
+      loadingType: {},
+      departments: [],
 
       // таблица данных по ролям сотрудников
       rolesOfCurrentUserDataTable: [],
@@ -135,12 +150,20 @@ export default {
   },
 
   methods: {
-    init() {
+    async init() {
+      await this.findDepartments()
       this.findInfoAboutCurrentUser()
+    },
+
+    async findDepartments() {
+      this.loadingType.departments = true
+      this.departments = await this.$api.budgetElements.findDepartments()
+      this.loadingType.departments = null
     },
 
     findInfoAboutCurrentUser() {
       this.currentUser = this.getCurrentUser()
+      console.log(this.currentUser)
 
       this.userInformation = {
         id: this.currentUser.id,

@@ -65,6 +65,7 @@
                 clearable="true"
                 outlined
                 label="Имя создателя документа"
+                hide-details="auto"
               />
             </v-col>
           </v-row>
@@ -76,19 +77,35 @@
                 clearable="true"
                 type="date"
                 outlined
-                label="Дата от"
+                label="Дата документа больше"
               />
             </v-col>
           </v-row>
 
           <v-row>
-            <v-simple-checkbox
-              v-model="isSumToPayUsed"
-              style="padding-left: 12px; padding-top: 12px"
-            />
-            <div class="filters-for-from-pay-docs-modal-label">
-              Фильтр по сумме к оплате используется
-            </div>
+            <v-col cols="3">
+              <v-row style="padding-top: 15px">
+                <v-simple-checkbox
+                  v-model="isSumToPayUsed"
+                  style="padding-left: 12px; padding-top: 12px"
+                />
+                <div class="filters-for-from-pay-docs-modal-label">
+                  К оплате >
+                </div>
+              </v-row>
+            </v-col>
+            <v-col cols="9">
+              <div class="filters-for-from-pay-docs-modal-brise-input">
+                <vue-numeric
+                  v-model="sumToPayValue"
+                  separator="space"
+                  :precision="2"
+                  decimal-separator="."
+                  :output-type="number"
+                />
+                <span class="line" />
+              </div>
+            </v-col>
           </v-row>
         </v-container>
       </v-card-text>
@@ -128,6 +145,9 @@ export default {
 
       // объект, в котором храняться фильтры пользователя
       filterItem: {},
+
+      // Значение фильтра по полю "К оплате"
+      sumToPayValue: 0,
 
       // Признак использования фильтра по полю "К оплате"
       isSumToPayUsed: false,

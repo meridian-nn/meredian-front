@@ -144,12 +144,31 @@ Vue.mixin({
 
             if (filtersParams) {
                 for (const key in filtersParams) {
-                    const elemParam = filtersParams[key]
-                    if (!elemParam || key === 'sumToPay' || key === 'date') {
+                    let elemParam = filtersParams[key]
+
+                    if (!elemParam || key === 'date') {
                         continue
                     }
+
+                    if(key === 'sumToPay' && typeof elemParam === 'object') {
+                       const isFilterUsed = elemParam.isSumToPayUsed
+
+                      if(!isFilterUsed){
+                          continue
+                       }
+
+                      elemParam = elemParam.sumToPayValue
+                    }
+
                     const dataType = typeof elemParam === 'number' ? 'INTEGER' : 'VARCHAR'
-                    const operation = ( key === 'nameDoc' || key === 'creatorName' ) ? 'LIKE' : 'EQUALS'
+
+                    let operation
+                     if(key === 'sumToPay') {
+                       operation = 'GREATER_THAN'
+                     } else {
+                       operation= (key === 'nameDoc' || key === 'creatorName') ? 'LIKE' : 'EQUALS'
+                     }
+
                     const dataElem = {
                         dataType,
                         key,
