@@ -15,21 +15,6 @@
           @change="organizationChange"
         />
       </div>
-
-      <div class="journal-of-payment-docs-org-payment-accounts-info">
-        <div>
-          <span class="journal-of-payment-docs-headline">Остаток на Р/Счетах:
-            <vue-numeric
-              v-model.number="restPaymentAccountInfo"
-              class="journal-of-payment-docs-headline"
-              separator="space"
-              :precision="2"
-              decimal-separator="."
-              :output-type="number"
-              :read-only="true"
-            /></span>
-        </div>
-      </div>
     </div>
 
     <div class="journal-of-payment-docs-row">
@@ -559,37 +544,24 @@ export default {
       // Шапка таблицы "Документы к оплате"
       toPayHeaders: [
         {
-          text: 'Дата',
-          value: 'dataOplat',
-          width: '80px'
-        },
-        {
           text: 'Номер',
           value: 'nameDoc',
-          width: '110px'
+          width: '60px'
         },
         {
           text: 'Плательщик',
           value: 'namePlat',
-          width: '140px'
+          width: '70px'
         },
         {
           text: 'Кредит',
           value: 'prCredit',
-          width: '80px'
+          width: '60px'
         },
         {
           text: 'Оплата',
           value: 'sumOplatMask',
-          width: '100px'
-        },
-        {
-          text: 'Счёт',
-          value: 'accId'
-        },
-        {
-          text: 'Подразделение',
-          value: 'depName'
+          width: '60px'
         }
       ],
 
@@ -673,7 +645,6 @@ export default {
       paymentAccountInfo: 0,
       currentPaymentAccountBalance: 0,
       currentPaymentAccountBalanceLessThenZero: false,
-      restPaymentAccountInfo: 0,
       additionalMessage: '',
 
       // Переменная для реализации пагинации таблицы "Документы на оплату"
@@ -719,19 +690,19 @@ export default {
     // Секция обработки событий на форме
 
     // Функция обработки выбора организации
-    organizationChange(val) {
+    async organizationChange(val) {
       this.selectedOrganization = val
       this.accId = null
-      this.updatePaymentAccountInfo(this.accId)
+      await this.updatePaymentAccountInfo(this.accId)
       this.toPayData = []
       this.totalToSumOplat = 0
-      this.findPaymentAccounts(val)
+      await this.findPaymentAccounts(val)
+      this.selectFirstPaymentAccount()
     },
 
     // Выбор расчетного счета
-    paymentAccountChange(val) {
-      this.findToPay(val)
-      // this.updateResPaymentAccountInfo()
+    paymentAccountChange(accId) {
+      this.findToPay(accId)
     },
 
     // Обработка события "Закрытие формы "Документ на оплату" по нажатию кнопки "Отмена""
@@ -760,7 +731,6 @@ export default {
     // Обработка события "Сохранение новой оплаты по кассе"
     savePaymentByCashbox() {
       this.refreshTables()
-      this.updateResPaymentAccountInfo()
     },
 
     // Обработка события "Закрытие модальной формы внутреннего платежа"
@@ -778,7 +748,6 @@ export default {
     async updateInformationOnForm() {
       await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
       await this.findToPay(this.accId)
-      this.updateResPaymentAccountInfo()
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
     },
@@ -838,7 +807,6 @@ export default {
       this.toPaySelectedRows = []
       await this.refreshTables()
       await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
-      this.updateResPaymentAccountInfo()
     },
 
     // Отмена внесения измененя в сумму оплаты документа
@@ -879,7 +847,6 @@ export default {
 
       await this.refreshTables()
       await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
-      this.updateResPaymentAccountInfo()
     },
     async addPayments() {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
@@ -914,7 +881,6 @@ export default {
 
         await this.refreshTables()
         await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
-        this.updateResPaymentAccountInfo()
       }
     },
 
@@ -1101,7 +1067,15 @@ export default {
       this.paymentAccounts = paymentAccounts
 
       this.loadingType.paymentAccounts = null
-      this.updateResPaymentAccountInfo()
+    },
+
+    selectFirstPaymentAccount() {
+      if (!this.paymentAccounts) {
+        return
+      }
+
+      this.accId = this.paymentAccounts[0].id
+      this.paymentAccountChange(this.accId)
     },
 
     // Функция поиска остатков ден. средств на выбранном расчетном счете
@@ -1127,10 +1101,11 @@ export default {
 
       const responseElement = response[0]
       const saldo = responseElement.saldo
+      const nalich = responseElement.nalich
 
       this.additionalMessage = ''
       this.currentPaymentAccountBalanceLessThenZero = false
-      this.currentPaymentAccountBalance = (saldo - this.totalToSumOplat)
+      this.currentPaymentAccountBalance = (saldo + nalich - this.totalToSumOplat)
 
       if (this.currentPaymentAccountBalance < 0) {
         this.additionalMessage = ' - сумма остатка на расчетном счете меньше нуля!'
@@ -1139,15 +1114,6 @@ export default {
 
       this.currentPaymentAccountBalance = this.currentPaymentAccountBalance.toFixed(2)
       this.paymentAccountInfo = this.currentPaymentAccountBalance
-    },
-
-    // Функции поиска остатков ден. средств выбранной организации на тек. дату с учетом документов к оплате, оплат по кассе по всем расчетным счетам организации
-    updateResPaymentAccountInfo() {
-      if (!this.selectedOrganization) {
-        return
-      }
-
-      this.restPaymentAccountInfo = this.$refs.journalOfPaymentDocumentsHeader.findSumOfOrg(this.selectedOrganization)
     },
 
     // Поиск документов к оплате по выбранному расчетному счету организации
@@ -1246,8 +1212,8 @@ export default {
 }
 
 .journal-of-payment-docs-to-pay-col-5 {
-  flex: 0 0 40%;
-  max-width: 40%;
+  flex: 0 0 30%;
+  max-width: 30%;
 }
 
 .journal-of-payment-docs-arrows {
@@ -1258,8 +1224,8 @@ export default {
 }
 
 .journal-of-payment-docs-for-pay-col-5 {
-  flex: 0 0 54.5%;
-  max-width: 54.5%;
+  flex: 0 0 64.5%;
+  max-width: 64.5%;
 }
 
 .journal-of-payment-docs-buttons-of-table-docs-for-pay {
@@ -1269,8 +1235,8 @@ export default {
 }
 
 .journal-of-payment-docs-list-of-orgs{
-  flex: 0 0 40%;
-  max-width: 40%;
+  flex: 0 0 30%;
+  max-width: 30%;
 }
 
 .journal-of-payment-docs-org-payment-accounts-info{
@@ -1279,8 +1245,8 @@ export default {
 }
 
 .journal-of-payment-docs-list-of-payment-accounts-of-org{
-  flex: 0 0 40%;
-  max-width: 40%;
+  flex: 0 0 30%;
+  max-width: 30%;
 }
 
 .journal-of-payment-docs-chousen-payment-account-info{
@@ -1330,13 +1296,13 @@ export default {
 }
 
 .journal-of-payment-docs-bottom-spacer-for-toPay-results{
-  flex: 0 0 56%;
-  max-width: 56%;
+  flex: 0 0 70%;
+  max-width: 70%;
 }
 
 .journal-of-payment-docs-bottom-toPay-results{
-  flex: 0 0 40%;
-  max-width: 40%;
+  flex: 0 0 30%;
+  max-width: 30%;
 }
 
 .journal-of-payment-docs-bottom-spacer-btw-results{
@@ -1345,13 +1311,13 @@ export default {
 }
 
 .journal-of-payment-docs-bottom-fromPay-results{
-  flex: 0 0 57%;
-  max-width: 57%;
+  flex: 0 0 67%;
+  max-width: 67%;
 }
 
 .journal-of-payment-docs-bottom-spacer-for-fromPay-results{
-  flex: 0 0 49%;
-  max-width: 49%;
+  flex: 0 0 62%;
+  max-width: 62%;
 }
 
 .journal-of-payment-docs-result-text{

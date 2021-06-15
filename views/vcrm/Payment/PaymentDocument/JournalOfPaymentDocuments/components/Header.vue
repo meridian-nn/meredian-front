@@ -102,7 +102,7 @@ export default {
         value: 'total'
 
       })
-      this.findOrgAccInfo()
+      await this.findOrgAccInfo()
     },
 
     // Поиск остатков на расчетных счетах найденных организаций
@@ -118,10 +118,10 @@ export default {
       this.orgAccInfoData = []
 
       const orgAccInfoDataAccounts = {}
-      orgAccInfoDataAccounts.name = 'Расч. счёт'
+      orgAccInfoDataAccounts.name = 'р/с'
 
       const orgAccInfoDataCashbox = {}
-      orgAccInfoDataCashbox.name = 'Касса'
+      orgAccInfoDataCashbox.name = 'нал.'
 
       let totalSumOfAccounts = 0
       let totalSumOfCashbox = 0
@@ -211,13 +211,13 @@ export default {
 
 <style lang="scss">
 #journal-of-payment-docs-v-data-table-table-of-accounts-statistics td {
-    padding: 0 0px !important;
-    height: 0px !important;
+    padding: 0 0 !important;
+    height: 0 !important;
 }
 
 #journal-of-payment-docs-v-data-table-table-of-accounts-statistics th {
-    padding: 0 0px !important;
-    height: 0px !important;
+    padding: 0 0 !important;
+    height: 0 !important;
 }
 
 .journal-of-payment-docs-main-row {
@@ -227,16 +227,16 @@ export default {
     display: flex;
     flex-wrap: wrap;
     flex: 1 1 auto;
-    margin: 0px;
+    margin: 0;
 }
 
 .journal-of-payment-docs-table-of-accounts-statistics-enter-balances{
-  padding-left: 0px;
+  padding-left: 0;
   padding-right: 5px;
 }
 
 .journal-of-payment-docs-table-of-accounts-statistics{
-  padding-bottom: 0px;
+  padding-bottom: 0;
   flex: 0 0 100%;
   max-width: 100%;
 }

@@ -52,8 +52,7 @@
             <input
               slot="name"
               v-model="row.name"
-              slot-scope="{row, update}"
-              @input="update(row.name)"
+              slot-scope="{row}"
             >
             <vue-numeric
               slot="saldo"
@@ -78,32 +77,32 @@
             <vue-numeric
               slot="vnpl"
               v-model.number="row.vnpl"
-              slot-scope="{row, update}"
+              slot-scope="{row}"
+              :read-only="true"
               separator="space"
               :precision="2"
               decimal-separator="."
               :output-type="number"
-              @input="update(row.vnpl)"
             />
             <vue-numeric
               slot="credit"
               v-model.number="row.credit"
-              slot-scope="{row, update}"
+              slot-scope="{row}"
+              :read-only="true"
               separator="space"
               :precision="2"
               decimal-separator="."
               :output-type="number"
-              @input="update(row.credit)"
             />
             <vue-numeric
               slot="endBalance"
               v-model.number="row.endBalance"
-              slot-scope="{row, update}"
+              slot-scope="{row}"
+              :read-only="true"
               separator="space"
               :precision="2"
               decimal-separator="."
               :output-type="number"
-              @input="update(row.endBalance)"
             />
           </v-client-table>
         </div>
@@ -183,7 +182,7 @@ export default {
         perPage: 100,
         perPageValues: [100],
         /* filterByColumn: true, */
-        editableColumns: ['distributionSum', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
+        editableColumns: ['saldo', 'nalich'],
         headings: {
           shortNameOfAccWithNumOfAcc: 'Наименование',
           saldo: 'Остаток на р/с',
