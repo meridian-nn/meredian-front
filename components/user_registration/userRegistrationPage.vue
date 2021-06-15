@@ -12,6 +12,18 @@
           hide-details="auto"
         />
       </v-col>
+      <v-col cols="7">
+        <v-autocomplete
+          v-model="userInformation.departmentId"
+          label="Подразделение"
+          :loading="loadingType.departments"
+          :items="departments"
+          item-value="id"
+          item-text="nameViddoc"
+          outlined
+          hide-details="auto"
+        />
+      </v-col>
     </v-row>
 
     <v-row>
@@ -100,11 +112,27 @@ export default {
 
   data() {
     return {
-      userInformation: {}
+      userInformation: {},
+      departments: [],
+      loadingType: {}
     }
   },
 
+  mounted() {
+    this.init()
+  },
+
   methods: {
+    async init() {
+      await this.findDepartments()
+    },
+
+    async findDepartments() {
+      this.loadingType.departments = true
+      this.departments = await this.$api.budgetElements.findDepartments()
+      this.loadingType.departments = null
+    },
+
     async saveNewUser() {
       if (!this.checkNewUserParams()) {
         return

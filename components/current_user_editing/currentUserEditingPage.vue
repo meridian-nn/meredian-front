@@ -13,7 +13,7 @@
         />
       </v-col>
 
-      <v-col cols="6">
+      <v-col cols="4">
         <v-text-field
           v-model="userPassword"
           label="Пароль пользователя"
@@ -22,9 +22,9 @@
         />
       </v-col>
 
-      <v-col cols="2">
+      <v-col cols="4">
         <v-autocomplete
-          v-model="userInformation.departmentId"
+          v-model="departmentId"
           label="Подразделение"
           :loading="loadingType.departments"
           :items="departments"
@@ -32,6 +32,7 @@
           item-text="nameViddoc"
           outlined
           hide-details="auto"
+          @change="departmentChange"
         />
       </v-col>
     </v-row>
@@ -70,7 +71,7 @@
       <v-col cols="4">
         <v-text-field
           v-model="userInformation.organization"
-          label="Должность пользователя"
+          label="Организация пользователя"
           outlined
           hide-details="auto"
           readonly
@@ -123,6 +124,7 @@ export default {
   data() {
     return {
       userInformation: {},
+      departmentId: null,
       currentUser: {},
       userPassword: '',
       loadingType: {},
@@ -163,11 +165,13 @@ export default {
 
     findInfoAboutCurrentUser() {
       this.currentUser = this.getCurrentUser()
-      console.log(this.currentUser)
+      const department = this.currentUser.department ? this.currentUser.department.id : null
+      this.departmentId = department
 
       this.userInformation = {
         id: this.currentUser.id,
         fullName: this.currentUser.fullName,
+        'department.id': department,
         login: this.currentUser.login,
         password: this.currentUser.password,
         email: this.currentUser.email,
@@ -203,8 +207,11 @@ export default {
 
       this.$refs.userNotification.showUserNotification('success', 'Профиль был изменен')
       this.userPassword = ''
-    }
+    },
 
+    departmentChange() {
+      this.userInformation['department.id'] = this.departmentId
+    }
   }
 }
 </script>
