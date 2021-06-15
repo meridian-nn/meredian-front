@@ -174,7 +174,7 @@ export default {
       totalSumOfEndBalance: 0,
 
       // таблица данных по остаткам на р/с выбранной организации
-      oplatDataColumns: ['acc.shortName', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
+      oplatDataColumns: ['shortNameOfAccWithNumOfAcc', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
       oplatData: [],
       oplatDataOptions: {
         filterable: ['acc.shortName'],
@@ -185,7 +185,7 @@ export default {
         /* filterByColumn: true, */
         editableColumns: ['distributionSum', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
         headings: {
-          'acc.shortName': 'Наименование',
+          shortNameOfAccWithNumOfAcc: 'Наименование',
           saldo: 'Остаток на р/с',
           nalich: 'Прочее',
           vnpl: 'ВнПл',
@@ -323,13 +323,13 @@ export default {
       let oplata = await this.$api.paymentAccounts.findByDataOplatAndMyOrgId(data)
       for (const elem of oplata) {
         elem.shortNameOfAcc = elem.acc.shortName
+        elem.shortNameOfAccWithNumOfAcc = elem.acc.shortName + ' - ' + elem.acc.numAcc.slice(elem.acc.numAcc.length - 4)
         // const balance = await this.getBalanceOfOtherAccounts(elem.myOrg.id, elem.acc.id)
         // elem.credit += balance
         elem.endBalance = elem.saldo + elem.nalich + elem.vnpl + elem.credit
       }
 
       oplata.sort(this.customCompare('shortNameOfAcc'))
-
       oplata = oplata.filter(item => item.shortNameOfAcc.length > 0)
 
       this.oplatData = oplata
