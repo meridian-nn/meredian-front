@@ -176,7 +176,7 @@ export default {
       oplatDataColumns: ['shortNameOfAccWithNumOfAcc', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
       oplatData: [],
       oplatDataOptions: {
-        filterable: ['acc.shortName'],
+        filterable: ['shortNameOfAccWithNumOfAcc'],
         pagination: { show: false },
         texts: { noResults: '', filter: 'Фильтр по наим. счета:', filterPlaceholder: '' },
         perPage: 100,
@@ -229,7 +229,7 @@ export default {
       const response = await this.$api.paymentAccounts.groupByOrg(data)
       response[1] = response.splice(0, 1, response[1])[0]
       for (const element of response) {
-        element.name = element.myOrg.shortName
+        element.name = element.myOrg.clName
         const balance = await this.getBalanceOfOtherAccounts(element.myOrg.id)
         element.credit += balance
         element.endBalance = element.saldo + element.nalich + element.vnpl - element.credit
