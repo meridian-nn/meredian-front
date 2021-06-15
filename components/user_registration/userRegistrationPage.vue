@@ -171,6 +171,9 @@ export default {
       } else if (!this.userInformation.organization) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите организацию, в которой работает новый пользователь')
         return false
+      } else if (!this.userInformation.departmentId) {
+        this.$refs.userNotification.showUserNotification('error', 'Укажите подразделение пользователя')
+        return false
       }
 
       return true

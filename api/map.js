@@ -75,6 +75,9 @@ export const factory = send => ({
         },
         findById(id) {
             return send('GET', `/oper/dict/spOrg/findById/${id}`)
+        },
+        findInternalOrganizations() {
+            return send('GET', '/oper/dict/spOrg/findInternalOrg')
         }
     },
 

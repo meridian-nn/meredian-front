@@ -58,7 +58,7 @@
               />
             </v-col>
 
-            <v-col cols="3">
+            <v-col cols="2">
               <v-autocomplete
                 v-model="editedItem.departmentId"
                 label="Подразделение"
@@ -72,14 +72,14 @@
               />
             </v-col>
 
-            <v-col cols="2">
+            <v-col cols="3">
               <v-autocomplete
-                v-model="editedItem.viddocId"
-                label="Тип документа"
-                :loading="loadingType.documentTypes"
-                :items="documentTypes"
+                v-model="editedItem.executorId"
+                label="Исполнитель"
+                :loading="loadingType.executors"
+                :items="executors"
                 item-value="id"
-                item-text="nameViddoc"
+                item-text=""
                 outlined
               />
             </v-col>
@@ -101,7 +101,17 @@
               />
             </v-col>
 
-            <v-col cols="3" />
+            <v-col cols="3">
+              <v-autocomplete
+                v-model="editedItem.viddocId"
+                label="Тип документа"
+                :loading="loadingType.documentTypes"
+                :items="documentTypes"
+                item-value="id"
+                item-text="nameViddoc"
+                outlined
+              />
+            </v-col>
 
             <v-col cols="5">
               <v-autocomplete
@@ -126,13 +136,29 @@
             <v-col cols="6">
               <v-row>
                 <v-col cols="12">
-                  <v-text-field
+                  <v-autocomplete
+                    v-model="editedItem.myorgId"
                     style="margin-left: 16px"
-                    v-model="payer.clName"
-                    readonly="true"
                     label="Плательщик"
-                    outlined
+                    :loading="loadingType.payers"
+                    :items="payers"
+                    item-value="id"
+                    item-text="clName"
                     hide-details="auto"
+                    outlined
+                  />
+                </v-col>
+                <v-col cols="12">
+                  <v-autocomplete
+                    v-model="editedItem.buyerId"
+                    style="margin-left: 16px"
+                    label="Покупатель"
+                    :loading="loadingType.buyers"
+                    :items="buyers"
+                    item-value="id"
+                    item-text="clName"
+                    hide-details="auto"
+                    outlined
                   />
                 </v-col>
               </v-row>
@@ -324,14 +350,17 @@ export default {
       // массив статусов оплаты документов для выбора пользователем
       paymentStatuses: [],
 
-      // массив поставщиков для выбора пользователем
+      // массив исполнителей документа
       executors: [],
 
       // массив договоров для выбора пользователем
       contracts: [],
 
-      // плательщик документа
-      payer: '',
+      // массив плательщиков
+      payers: [],
+
+      // массив покупателей
+      buyers: [],
 
       // массив поставщиков для выбора пользователем
       suppliers: [],
@@ -370,6 +399,7 @@ export default {
       this.findDepartments()
       this.findDocumentType()
       this.findPayers()
+      this.findBuyers()
       this.findClients()
       this.findSuppliers()
       this.findPaymentStatuses()
@@ -435,7 +465,7 @@ export default {
       this.loadingType.documentTypes = null
     },
 
-    // обновление списка поставщиков для выбора пользователем после изменения подразделения на форме
+    // обновление списка исполнителей для выбора пользователем после изменения подразделения на форме
     async findExecutors(departmentId) {
       if (!departmentId) {
         this.executors = []
@@ -482,16 +512,16 @@ export default {
 
     // поиск плательщиков для выбора пользователем
     async findPayers() {
-      if (!this.editedItem.myorgId) {
-        this.payer = ''
-        return
-      }
+      this.loadingType.payers = true
+      this.payers = await this.getBudgetOrganizations()
+      this.loadingType.payers = null
+    },
 
-      this.loadingType.payer = true
-
-      this.payer = await this.$api.organizations.findById(this.editedItem.myorgId)
-
-      this.loadingType.payer = null
+    // поиск покупателей для выбора пользователем
+    async findBuyers() {
+      this.loadingType.buyers = true
+      this.buyers = await this.$api.organizations.findInternalOrganizations()
+      this.loadingType.buyers = null
     },
 
     // поиск видов документов для выбора пользователем
@@ -520,12 +550,12 @@ export default {
     },
 
     // функция отработки события изменения подразделения на форме
-    departmentChange(val) {
+    departmentChange(depId) {
       // очищаем массивы договоров и поставщиков для выбора пользователем, т.к. они будут изменены выбранным поставщиком
       delete (this.editedItem.viddocId)
 
-      this.findDocumentType(val)
-      this.findExecutors(val)
+      this.findDocumentType(depId)
+      this.findExecutors(depId)
     },
 
     getCurrentUser() {
@@ -620,7 +650,15 @@ export default {
     newDocument(selOrg) {
       this.reset()
       this.editedItem.paymentStatus = 'BANK'
-      this.editedItem.myorgId = selOrg
+
+      if (selOrg) {
+        this.editedItem.myorgId = selOrg
+      }
+
+      const date = new Date()
+      this.editedItem.dataDoc = date.toISOString().substr(0, 10)
+      date.setDate(date.getDate() + 3)
+      this.editedItem.dataOplat = date.toISOString().substr(0, 10)
       this.dialog = true
     },
 
