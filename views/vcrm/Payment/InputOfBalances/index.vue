@@ -45,6 +45,7 @@
       <div class="input-of-balances-oplat-data-row">
         <div id="oplatData">
           <v-client-table
+            ref="table"
             v-model="oplatData"
             :columns="oplatDataColumns"
             :options="oplatDataOptions"
@@ -192,14 +193,94 @@ export default {
           credit: 'К оплате',
           endBalance: 'Остаток на конец'
         }
-      }
+      },
+      maxRow: 0,
+      maxCell: 0,
+      rowIndex: null,
+      cellIndex: null
     }
   },
   mounted() {
     this.init()
     this.findOrganizations()
+
+    const table = this.$refs.table.$el.querySelector('table')
+
+    document.addEventListener('keypress', (event) => {
+      if (event.key === 'Enter') {
+        table.querySelector('.select-td input').focus()
+      }
+    })
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight') {
+        event.preventDefault()
+
+        if (this.maxCell > (this.cellIndex + 1)) {
+          this.cellIndex += 1
+        }
+        this.unselect()
+        this.select()
+      }
+
+      if (event.key === 'ArrowUp') {
+        event.preventDefault()
+        if (this.rowIndex > 1) {
+          this.rowIndex -= 1
+        }
+        this.unselect()
+        this.select()
+      }
+
+      if (event.key === 'ArrowDown') {
+        event.preventDefault()
+        if (this.maxRow > this.rowIndex) {
+          this.rowIndex += 1
+        }
+        this.unselect()
+        this.select()
+      }
+
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault()
+        if (this.cellIndex > 1) {
+          this.cellIndex -= 1
+        }
+        this.unselect()
+        this.select()
+      }
+    })
+
+    table.addEventListener('click', (event) => {
+      this.unselect()
+
+      if (event.target.tagName === 'TD') {
+        this.updateCell(event)
+        this.select()
+      }
+    })
   },
+
   methods: {
+    setMaxTable(maxRow) {
+      this.maxRow = maxRow
+      const tmp = this.$refs.table.$el.querySelector('table tbody').querySelector('tr')
+      this.maxCell = tmp.querySelectorAll('td').length
+    },
+    unselect() {
+      [].forEach.call(this.$refs.table.$el.querySelectorAll('td'), function(el) {
+        el.classList.remove('select-td')
+      })
+    },
+    select() {
+      this.$refs.table.$el.querySelector('table').querySelectorAll('tr')[this.rowIndex].querySelectorAll('td')[this.cellIndex].classList.add('select-td')
+    },
+
+    updateCell(event) {
+      this.rowIndex = event.target.closest('tr').rowIndex
+      this.cellIndex = event.target.cellIndex
+    },
+
     init() {
       this.selOplat()
       this.groupByOrg()
@@ -333,6 +414,10 @@ export default {
       oplata = oplata.filter(item => item.shortNameOfAcc.length > 0)
 
       this.oplatData = oplata
+
+      await this.$nextTick()
+
+      this.setMaxTable(this.oplatData.length)
     },
 
     // Отмена внесенных изменений и переполучение информации для формы из api
@@ -353,6 +438,13 @@ export default {
 </script>
 
 <style lang="scss">
+.select-td {
+  background-color: #0085c7;
+
+  > input {
+    color: white !important;
+  }
+}
 .input-of-balances-main-div {
  padding: 10px
 }
@@ -410,6 +502,10 @@ export default {
   max-width: 50%;
 }
 
+table th, td {
+  outline: none;
+}
+
 #groupByOrg {
   border-collapse: collapse;
   width: 100%;
@@ -420,6 +516,7 @@ export default {
 #groupByOrg td, #groupByOrg th {
   border: 1px solid #ddd;
   padding: 0;
+
 }
 
 #groupByOrg tr:nth-child(even){background-color: #f2f2f2;}

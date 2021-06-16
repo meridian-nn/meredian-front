@@ -1,11 +1,10 @@
 <template>
   <v-dialog
-    v-model="dialog"
-    :value="show"
+    :value="value"
     max-width="1200px"
     padding="0px"
+    persistent
     class="edit-payment-document-modal"
-    @input="$emit('close')"
   >
     <!--template #activator="{ on, attrs }">
       <v-fab-transition>
@@ -302,6 +301,10 @@ export default {
     title: {
       type: String,
       default: ''
+    },
+    value: {
+      required: true,
+      validator: () => true
     },
     show: {
       type: Boolean,
@@ -601,8 +604,7 @@ export default {
     // функция отработки события нажития на кнопку "отмена"
     cancel() {
       this.reset()
-      this.dialog = false
-      this.$emit('cancel')
+      this.$emit('close')
     },
 
     // функция обнуления всех переменных формы

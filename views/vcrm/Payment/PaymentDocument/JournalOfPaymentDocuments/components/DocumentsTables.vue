@@ -234,8 +234,8 @@
 
       <edit-payment-document
         ref="editPaymentDocument"
+        :value="editPaymentDocumentDialog"
         @close="closePaymentDocument"
-        @cancel="closePaymentDocument"
         @save="savePaymentDocument"
       />
 
@@ -539,6 +539,8 @@ export default {
 
   data() {
     return {
+      editPaymentDocumentDialog: false,
+
       date: new Date().toISOString().substr(0, 10),
 
       // объект для отображения статусов процесса загрузки данных для полей
@@ -737,7 +739,7 @@ export default {
     // Обработка события "Закрытие формы "Документ на оплату" по нажатию кнопки "Отмена""
     closePaymentDocument() {
       this.fromPaySelectedRows = []
-      console.log('close')
+      this.editPaymentDocumentDialog = false
     },
 
     // Обработка события "Сохранение нового документа на оплату и закрытие формы "Документ на оплату""
@@ -898,6 +900,7 @@ export default {
         await this.$axios.$post('/oper/spDocopl/payDocument', data)
       }
     },
+
     countSumOfArrayElements(array) {
       let sum = 0
       for (let i = 0; i < array.length; i++) {
@@ -962,6 +965,7 @@ export default {
         this.$refs.userNotification.showUserNotification('error', 'Выберите организацию!')
         return
       }
+      this.editPaymentDocumentDialog = true
       this.$refs.editPaymentDocument.newDocument(this.selectedOrganization)
     },
 
