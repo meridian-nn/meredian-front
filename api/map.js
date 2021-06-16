@@ -89,8 +89,8 @@ export const factory = send => ({
         findAccByOrgId(params) {
             return send('GET', `/oper/spAcc/findByOrgId?${new URLSearchParams(params).toString()}`)
         },
-        groupByOrg(params) {
-            return send('GET', `/oper/spOplat/groupByOrg?${new URLSearchParams(params).toString()}`)
+        groupBy(params) {
+          return send('POST', `/oper/spOplat/groupBy`, params)
         },
         findByDataOplatAndMyOrgId(params) {
             return send('GET', `/oper/spOplat/findByDataOplatAndMyOrgId?${new URLSearchParams(params).toString()}`)

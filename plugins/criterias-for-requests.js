@@ -377,6 +377,66 @@ Vue.mixin({
           ]
 
           return data
+        },
+
+        createParamsForRequestPaymentAccGroupByOrg(date, groupFields){
+          const aggregateFunctions = [
+            {
+              "field": "saldo",
+              "function": "SUM"
+            },
+            {
+              "field": "nalich",
+              "function": "SUM"
+            },
+            {
+              "field": "credit",
+              "function": "SUM"
+            },
+            {
+              "field": "vnpl",
+              "function": "SUM"
+            },
+            {
+              "field": "sumToPay",
+              "function": "SUM"
+            }
+          ]
+
+          const searchCriteria = this.createSearchCriteriasForRequestPaymentAccGroupByOrg(date)
+
+          const params = {
+            aggregateFunctions: aggregateFunctions,
+            groupFields: groupFields,
+            searchCriteria: searchCriteria
+          }
+
+          return params
+        },
+
+        createSearchCriteriasForRequestPaymentAccGroupByOrg(date) {
+          const searchCriteria = [
+            {
+              dataType: "DATE",
+              key: "dataOplat",
+              operation: "EQUALS",
+              type: "AND",
+              values: [
+                new Date(date).toLocaleDateString()
+              ]
+            },
+            {
+              dataType: "VARCHAR",
+              key: "myOrg.orgType.code",
+              operation: "EQUALS",
+              type: "AND",
+              values: [
+                "1"
+              ]
+            }
+          ]
+
+          return searchCriteria
         }
     }
 })

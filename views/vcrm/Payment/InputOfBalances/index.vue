@@ -222,28 +222,26 @@ export default {
       this.totalSumOfCredit = 0
       this.totalSumOfEndBalance = 0
 
-      const data = {
-        dateOplat: new Date(this.date).toLocaleDateString()
-      }
+      const data = this.createParamsForRequestPaymentAccGroupByOrg(this.date, ['myOrg.id', 'myOrg.clName'])
+      const response = await this.$api.paymentAccounts.groupBy(data)
 
-      const response = await this.$api.paymentAccounts.groupByOrg(data)
       response[1] = response.splice(0, 1, response[1])[0]
       for (const element of response) {
-        element.name = element.myOrg.clName
-        const balance = await this.getBalanceOfOtherAccounts(element.myOrg.id)
+        element.name = element['myOrg.clName']
+        const balance = await this.getBalanceOfOtherAccounts(element['myOrg.id'])
         element.credit += balance
-        element.endBalance = element.saldo + element.nalich + element.vnpl - element.credit
+        element.endBalance = element.sum_saldo + element.sum_nalich + element.sum_vnpl - element.sum_credit
 
-        this.totalSumOfSaldo += element.saldo
-        this.totalSumOfNalich += element.nalich
-        this.totalSumOfVNPL += element.vnpl
-        this.totalSumOfCredit += element.credit
+        this.totalSumOfSaldo += element.sum_saldo
+        this.totalSumOfNalich += element.sum_nalich
+        this.totalSumOfVNPL += element.sum_vnpl
+        this.totalSumOfCredit += element.sum_credit
         this.totalSumOfEndBalance += element.endBalance
 
-        element.saldo = this.numberToSum(element.saldo)
-        element.nalich = this.numberToSum(element.nalich)
-        element.vnpl = this.numberToSum(element.vnpl)
-        element.credit = this.numberToSum(element.credit)
+        element.saldo = this.numberToSum(element.sum_saldo)
+        element.nalich = this.numberToSum(element.sum_nalich)
+        element.vnpl = this.numberToSum(element.sum_vnpl)
+        element.credit = this.numberToSum(element.sum_credit)
         element.endBalance = this.numberToSum(element.endBalance)
       }
 

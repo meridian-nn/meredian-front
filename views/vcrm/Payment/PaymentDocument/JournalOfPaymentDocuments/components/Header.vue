@@ -111,10 +111,9 @@ export default {
       if (date === undefined) {
         date = new Date()
       }
-      const data = {
-        dateOplat: new Date(date).toLocaleDateString()
-      }
-      const response = await this.$api.paymentAccounts.groupByOrg(data)
+      const data = this.createParamsForRequestPaymentAccGroupByOrg(date, ['myOrg.id'])
+      const response = await this.$api.paymentAccounts.groupBy(data)
+
       this.orgAccInfoData = []
 
       const orgAccInfoDataAccounts = {}
@@ -126,10 +125,10 @@ export default {
       let totalSumOfAccounts = 0
       let totalSumOfCashbox = 0
       for (const orgAccElem of this.orgAccInfoHeaders) {
-        const responseElem = response.find(el => el.myOrg.id === orgAccElem.orgId)
+        const responseElem = response.find(el => el['myOrg.id'] === orgAccElem.orgId)
         if (responseElem) {
           const sumOfOtherAccounts = await this.getBalanceOfOtherAccounts(orgAccElem.orgId, date)
-          const sumOfClearBalance = responseElem.saldo + responseElem.nalich
+          const sumOfClearBalance = responseElem.sum_saldo + responseElem.sum_nalich
           const sumOfOrg = sumOfClearBalance - sumOfOtherAccounts
           orgAccInfoDataAccounts[orgAccElem.clearBalance] = sumOfClearBalance
           orgAccInfoDataAccounts[orgAccElem.valueSum] = sumOfOrg
