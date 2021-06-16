@@ -15,11 +15,15 @@ export const factory = send => ({
             },
 
             saveNewUser(params) {
-                return send('POST', `/auth/editUser?email=${params.email}&enabled=${params.enabled}&fullName=${params.fullName}&login=${params.login}&organization=${params.organization}&password=${params.password}&phone=${params.phone}&position=${params.position}&${new URLSearchParams('roles[0].id').toString()}7`)
+                return send('POST', `/auth/editUser?email=${params.email}&enabled=${params.enabled}&department.id=${params.departmentId}&fullName=${params.fullName}&login=${params.login}&organization=${params.organization}&password=${params.password}&phone=${params.phone}&position=${params.position}&${new URLSearchParams('roles[0].id').toString()}7`)
             },
 
             editUser(params) {
                 return send('POST', `/auth/editUser?${new URLSearchParams(params)}`)
+            },
+
+            getUsersBySearchCriterias(params) {
+                return send('POST', `/auth/findBySearchCriteriaList`, params)
             }
         },
 
@@ -75,6 +79,9 @@ export const factory = send => ({
         },
         findById(id) {
             return send('GET', `/oper/dict/spOrg/findById/${id}`)
+        },
+        findInternalOrganizations() {
+            return send('GET', '/oper/dict/spOrg/findInternalOrg')
         }
     },
 
@@ -82,8 +89,8 @@ export const factory = send => ({
         findAccByOrgId(params) {
             return send('GET', `/oper/spAcc/findByOrgId?${new URLSearchParams(params).toString()}`)
         },
-        groupByOrg(params) {
-            return send('GET', `/oper/spOplat/groupByOrg?${new URLSearchParams(params).toString()}`)
+        groupBy(params) {
+          return send('POST', `/oper/spOplat/groupBy`, params)
         },
         findByDataOplatAndMyOrgId(params) {
             return send('GET', `/oper/spOplat/findByDataOplatAndMyOrgId?${new URLSearchParams(params).toString()}`)
@@ -126,6 +133,9 @@ export const factory = send => ({
     typeOfDocuments: {
         findAll() {
             return send('GET', '/oper/dict/spViddoc/findAll')
+        },
+        findBySearchCriteria(params) {
+            return send('POST', `/oper/dict/spViddoc/findBySearchCriteriaList`, params)
         }
     },
 

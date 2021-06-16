@@ -24,6 +24,18 @@ Vue.mixin({
                 color += letters[Math.floor(Math.random() * 16)];
             }
             return color;
+        },
+
+        //Функция возвращает организации, у которых sp_org_type_id = 1
+        async getBudgetOrganizations() {
+          const data = {
+            typeCode: 1
+          }
+
+          const organizations = await this.$api.organizations.findByOrgTypeCode(data)
+          organizations[1] = organizations.splice(0, 1, organizations[1])[0]
+
+          return organizations
         }
     }
 })

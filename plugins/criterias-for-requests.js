@@ -162,12 +162,7 @@ Vue.mixin({
 
                     const dataType = typeof elemParam === 'number' ? 'INTEGER' : 'VARCHAR'
 
-                    let operation
-                     if(key === 'sumToPay') {
-                       operation = 'GREATER_THAN'
-                     } else {
-                       operation= (key === 'nameDoc' || key === 'creatorName') ? 'LIKE' : 'EQUALS'
-                     }
+                    const operation = this.getOperationTypeForRequestToSearchDocsFromPay(key)
 
                     const dataElem = {
                         dataType,
@@ -184,6 +179,18 @@ Vue.mixin({
 
 
             return data
+        },
+
+        getOperationTypeForRequestToSearchDocsFromPay(key) {
+          if (key === 'nameDoc'
+              || key === 'creatorName'
+              || key === 'executorName') {
+            return 'LIKE'
+          } else if (key === 'sumToPay') {
+            return 'GREATER_THAN'
+          } else {
+            return 'EQUALS'
+          }
         },
 
         createCriteriasToSearchDocsFromPayBetweenDataOplatDates(firstDate, lastDate) {
@@ -338,6 +345,98 @@ Vue.mixin({
               ]
             }
           ]
+
+          return data
+        },
+
+        createCriteriasToSearchUsersByDepartmentId(depId){
+          const data = [
+            {
+              dataType: 'INTEGER',
+              key: 'department.id',
+              operation: 'EQUALS',
+              type: 'AND',
+              values: [
+                depId
+              ]
+            }
+          ]
+          return data
+        },
+
+        createCriteriasToSearchTypeOfDocsForDocsForPay() {
+          const data = [
+            {
+              dataType: 'VARCHAR',
+              key: 'prOplat',
+              type: 'AND',
+              values: [
+                'ON_NEW_DOC_FORM'
+              ]
+            }
+          ]
+
+          return data
+        },
+
+        createParamsForRequestPaymentAccGroupByOrg(date, groupFields){
+          const aggregateFunctions = [
+            {
+              "field": "saldo",
+              "function": "SUM"
+            },
+            {
+              "field": "nalich",
+              "function": "SUM"
+            },
+            {
+              "field": "credit",
+              "function": "SUM"
+            },
+            {
+              "field": "vnpl",
+              "function": "SUM"
+            },
+            {
+              "field": "sumToPay",
+              "function": "SUM"
+            }
+          ]
+
+          const searchCriteria = this.createSearchCriteriasForRequestPaymentAccGroupByOrg(date)
+
+          const params = {
+            aggregateFunctions: aggregateFunctions,
+            groupFields: groupFields,
+            searchCriteria: searchCriteria
+          }
+
+          return params
+        },
+
+        createSearchCriteriasForRequestPaymentAccGroupByOrg(date) {
+          const searchCriteria = [
+            {
+              dataType: "DATE",
+              key: "dataOplat",
+              operation: "EQUALS",
+              type: "AND",
+              values: [
+                new Date(date).toLocaleDateString()
+              ]
+            },
+            {
+              dataType: "VARCHAR",
+              key: "myOrg.orgType.code",
+              operation: "EQUALS",
+              type: "AND",
+              values: [
+                "1"
+              ]
+            }
+          ]
+
+          return searchCriteria
         }
     }
 })

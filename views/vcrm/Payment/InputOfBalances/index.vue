@@ -53,8 +53,7 @@
             <input
               slot="name"
               v-model="row.name"
-              slot-scope="{row, update}"
-              @input="update(row.name)"
+              slot-scope="{row}"
             >
             <vue-numeric
               slot="saldo"
@@ -79,32 +78,32 @@
             <vue-numeric
               slot="vnpl"
               v-model.number="row.vnpl"
-              slot-scope="{row, update}"
+              slot-scope="{row}"
+              :read-only="true"
               separator="space"
               :precision="2"
               decimal-separator="."
               :output-type="number"
-              @input="update(row.vnpl)"
             />
             <vue-numeric
               slot="credit"
               v-model.number="row.credit"
-              slot-scope="{row, update}"
+              slot-scope="{row}"
+              :read-only="true"
               separator="space"
               :precision="2"
               decimal-separator="."
               :output-type="number"
-              @input="update(row.credit)"
             />
             <vue-numeric
               slot="endBalance"
               v-model.number="row.endBalance"
-              slot-scope="{row, update}"
+              slot-scope="{row}"
+              :read-only="true"
               separator="space"
               :precision="2"
               decimal-separator="."
               :output-type="number"
-              @input="update(row.endBalance)"
             />
           </v-client-table>
         </div>
@@ -175,18 +174,18 @@ export default {
       totalSumOfEndBalance: 0,
 
       // таблица данных по остаткам на р/с выбранной организации
-      oplatDataColumns: ['acc.shortName', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
+      oplatDataColumns: ['shortNameOfAccWithNumOfAcc', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
       oplatData: [],
       oplatDataOptions: {
-        filterable: ['acc.shortName'],
+        filterable: ['shortNameOfAccWithNumOfAcc'],
         pagination: { show: false },
         texts: { noResults: '', filter: 'Фильтр по наим. счета:', filterPlaceholder: '' },
         perPage: 100,
         perPageValues: [100],
         /* filterByColumn: true, */
-        editableColumns: ['distributionSum', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
+        editableColumns: ['saldo', 'nalich'],
         headings: {
-          'acc.shortName': 'Наименование',
+          shortNameOfAccWithNumOfAcc: 'Наименование',
           saldo: 'Остаток на р/с',
           nalich: 'Прочее',
           vnpl: 'ВнПл',
@@ -304,28 +303,26 @@ export default {
       this.totalSumOfCredit = 0
       this.totalSumOfEndBalance = 0
 
-      const data = {
-        dateOplat: new Date(this.date).toLocaleDateString()
-      }
+      const data = this.createParamsForRequestPaymentAccGroupByOrg(this.date, ['myOrg.id', 'myOrg.clName'])
+      const response = await this.$api.paymentAccounts.groupBy(data)
 
-      const response = await this.$api.paymentAccounts.groupByOrg(data)
       response[1] = response.splice(0, 1, response[1])[0]
       for (const element of response) {
-        element.name = element.myOrg.shortName
-        const balance = await this.getBalanceOfOtherAccounts(element.myOrg.id)
+        element.name = element['myOrg.clName']
+        const balance = await this.getBalanceOfOtherAccounts(element['myOrg.id'])
         element.credit += balance
-        element.endBalance = element.saldo + element.nalich + element.vnpl - element.credit
+        element.endBalance = element.sum_saldo + element.sum_nalich + element.sum_vnpl - element.sum_credit
 
-        this.totalSumOfSaldo += element.saldo
-        this.totalSumOfNalich += element.nalich
-        this.totalSumOfVNPL += element.vnpl
-        this.totalSumOfCredit += element.credit
+        this.totalSumOfSaldo += element.sum_saldo
+        this.totalSumOfNalich += element.sum_nalich
+        this.totalSumOfVNPL += element.sum_vnpl
+        this.totalSumOfCredit += element.sum_credit
         this.totalSumOfEndBalance += element.endBalance
 
-        element.saldo = this.numberToSum(element.saldo)
-        element.nalich = this.numberToSum(element.nalich)
-        element.vnpl = this.numberToSum(element.vnpl)
-        element.credit = this.numberToSum(element.credit)
+        element.saldo = this.numberToSum(element.sum_saldo)
+        element.nalich = this.numberToSum(element.sum_nalich)
+        element.vnpl = this.numberToSum(element.sum_vnpl)
+        element.credit = this.numberToSum(element.sum_credit)
         element.endBalance = this.numberToSum(element.endBalance)
       }
 
@@ -404,13 +401,13 @@ export default {
       let oplata = await this.$api.paymentAccounts.findByDataOplatAndMyOrgId(data)
       for (const elem of oplata) {
         elem.shortNameOfAcc = elem.acc.shortName
+        elem.shortNameOfAccWithNumOfAcc = elem.acc.shortName + ' - ' + elem.acc.numAcc.slice(elem.acc.numAcc.length - 4)
         // const balance = await this.getBalanceOfOtherAccounts(elem.myOrg.id, elem.acc.id)
         // elem.credit += balance
         elem.endBalance = elem.saldo + elem.nalich + elem.vnpl + elem.credit
       }
 
       oplata.sort(this.customCompare('shortNameOfAcc'))
-
       oplata = oplata.filter(item => item.shortNameOfAcc.length > 0)
 
       this.oplatData = oplata
