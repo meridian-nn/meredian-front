@@ -44,11 +44,39 @@
 
           <v-row>
             <v-col cols="12">
+              <v-text-field
+                v-model="filterItem.executorName"
+                clearable="true"
+                outlined
+                label="Имя исполнителя"
+                hide-details="auto"
+              />
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
               <v-autocomplete
                 v-model="filterItem.myorgId"
                 label="Плательщик"
                 :loading="loadingType.payers"
                 :items="payers"
+                clearable="true"
+                item-value="id"
+                item-text="clName"
+                outlined
+                hide-details="auto"
+              />
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="filterItem['buyer.id']"
+                label="Покупатель"
+                :loading="loadingType.buyers"
+                :items="buyers"
                 clearable="true"
                 item-value="id"
                 item-text="clName"
@@ -77,7 +105,7 @@
                 clearable="true"
                 type="date"
                 outlined
-                label="Дата документа больше"
+                label="Дата документа начиная с"
               />
             </v-col>
           </v-row>
@@ -155,6 +183,9 @@ export default {
       // массив плательщиков для выбора пользователем
       payers: [],
 
+      // массив покупателей для выбора пользователем
+      buyers: [],
+
       // массив подразделений для выбора пользователем
       departments: [],
       sumOplat: 0,
@@ -178,6 +209,7 @@ export default {
     init() {
       this.findDepartments()
       this.findPayers()
+      this.findBuyers()
       this.findFiltersValues()
     },
 
@@ -202,6 +234,12 @@ export default {
       this.payers = await this.$api.organizations.findByOrgTypeCode(data)
 
       this.loadingType.payers = null
+    },
+
+    async findBuyers() {
+      this.loadingType.buyers = true
+      this.buyers = await this.$api.organizations.findInternalOrganizations()
+      this.loadingType.buyers = null
     },
 
     async saveFilters() {

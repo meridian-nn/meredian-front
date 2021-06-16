@@ -20,6 +20,10 @@ export const factory = send => ({
 
             editUser(params) {
                 return send('POST', `/auth/editUser?${new URLSearchParams(params)}`)
+            },
+
+            getUsersBySearchCriterias(params) {
+                return send('POST', `/auth/findBySearchCriteriaList`, params)
             }
         },
 
@@ -129,6 +133,9 @@ export const factory = send => ({
     typeOfDocuments: {
         findAll() {
             return send('GET', '/oper/dict/spViddoc/findAll')
+        },
+        findBySearchCriteria(params) {
+            return send('POST', `/oper/dict/spViddoc/findBySearchCriteriaList`, params)
         }
     },
 

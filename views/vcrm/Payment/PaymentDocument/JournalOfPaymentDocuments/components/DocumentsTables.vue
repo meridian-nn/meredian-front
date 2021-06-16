@@ -304,8 +304,14 @@
                       <td class="journal-of-payment-docs-from-pay-docs-nameDoc">
                         {{ item.nameDoc }}
                       </td>
-                      <td class="journal-of-payment-docs-from-pay-docs-myorgName">
+                      <td class="journal-of-payment-docs-from-pay-docs-payerName">
                         {{ item.myorgName }}
+                      </td>
+                      <td class="journal-of-payment-docs-from-pay-docs-buyerName">
+                        {{ item.buyerName }}
+                      </td>
+                      <td class="journal-of-payment-docs-from-pay-docs-executorName">
+                        {{ item.executorName }}
                       </td>
                       <td class="journal-of-payment-docs-from-pay-docs-dataOplat">
                         {{ item.dataOplat }}
@@ -367,7 +373,7 @@
           <div class="journal-of-payment-docs-buttons-of-table-docs-for-pay">
             <v-subheader class="font-weight-medium text-subtitle-1" />
             <div align="center">
-              <v-btn
+              <!--v-btn
                 color="blue"
                 class="mr-2 mb-2"
                 fab
@@ -376,9 +382,7 @@
                 @click="newDocument"
               >
                 <v-icon>mdi-plus</v-icon>
-              </v-btn>
-
-              <br>
+              </v-btn-->
               <v-btn
                 color="blue"
                 class="mr-2 mb-2"
@@ -413,6 +417,39 @@
               >
                 <v-icon>mdi-delete-forever</v-icon>
               </v-btn>
+
+              <div class="add-group">
+                <label
+                  for="add"
+                  class="add-group__btn"
+                > +
+                </label>
+                <input
+                  id="add"
+                  class="add-group__input"
+                  type="checkbox"
+                >
+                <button
+                  class="add-group__link doc_for_pay"
+                  @click="newDocument"
+                >
+                  опл
+                </button>
+                <button
+                  href=""
+                  class="add-group__link pay_by_cashbox"
+                  @click="payedByCashboxForContextMenuOnly"
+                >
+                  нал
+                </button>
+                <!--button
+                  href=""
+                  class="add-group__link internal_payment"
+                  @click="internalMovementForContextMenuOnly"
+                >
+                  внт
+                </button-->
+              </div>
             </div>
           </div>
         </div>
@@ -590,6 +627,14 @@ export default {
         {
           text: 'Плательщик',
           value: 'myorgName'
+        },
+        {
+          text: 'Покупатель',
+          value: 'buyer.shortName'
+        },
+        {
+          text: 'Исполнитель',
+          value: 'executorName'
         },
         {
           text: 'Дата оплаты',
@@ -829,7 +874,7 @@ export default {
     // Функции контекстного меню таблицы документов к оплате
     // Вызов формы "Оплата по кассе"
     payedByCashboxForContextMenuOnly() {
-      if (this.selectedOrganization == null) {
+      /* if (this.selectedOrganization == null) {
         this.$refs.userNotification.showUserNotification('error', 'Выберите организацию!')
         return
       }
@@ -837,7 +882,7 @@ export default {
       if (this.accId == null) {
         this.$refs.userNotification.showUserNotification('error', 'Выберите расчетный счет!')
         return
-      }
+      } */
 
       this.$refs.paymentByCashbox.newDocument(this.selectedOrganization, this.accId)
       console.log('payed by cashbox')
@@ -1162,6 +1207,12 @@ export default {
           value.sumPaid = value.sumPaid == null ? 0 : value.sumPaid
           value.sumOplat = value.sumToPay
 
+          if (value.buyer) {
+            value.buyerName = value.buyer.shortName
+          } else {
+            value.buyerName = ''
+          }
+
           value.sumDocNumber = value.sumDoc
           value.sumDoc = this.numberToSum(value.sumDoc)
           value.sumPaidNumber = value.sumPaid
@@ -1401,6 +1452,18 @@ export default {
   width: 170px !important
 }
 
+.journal-of-payment-docs-from-pay-docs-payerName {
+  width: 150px !important
+}
+
+.journal-of-payment-docs-from-pay-docs-buyerName {
+  width: 150px !important
+}
+
+.journal-of-payment-docs-from-pay-docs-executorName {
+  width: 110px !important
+}
+
 .journal-of-payment-docs-from-pay-docs-dataOplat {
   width: 110px !important
 }
@@ -1434,5 +1497,65 @@ export default {
 .journal-of-payment-docs-div-v-data-table{
   flex: 0 0 90%;
   max-width: 90%;
+}
+
+.add-group{
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.add-group__input {
+  display: none;
+}
+
+.add-group__btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #639db1;
+  color: #fff;
+  font-size:26px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.6);
+  z-index:2;
+}
+
+.add-group__btn:active {
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 1);
+}
+
+.add-group__link {
+ width: 40px;
+  height: 40px;
+  background: #639db1;
+  border-radius: 50%;
+  color:#fff;
+  font-size: 15px;
+  transition: 0.3s;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  position: absolute;
+}
+
+.add-group input:checked ~ .doc_for_pay {
+  transform: translate(-60px, -30px);
+}
+
+.add-group input:checked ~ .pay_by_cashbox {
+  transform: translate(-60px, 30px);
+  transition-delay: 0.1s;
+}
+
+.social input:checked ~ .internal_payment {
+  transform: translate(0, 65px);
+  transition-delay: 0.2s;
 }
 </style>

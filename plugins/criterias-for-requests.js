@@ -162,12 +162,7 @@ Vue.mixin({
 
                     const dataType = typeof elemParam === 'number' ? 'INTEGER' : 'VARCHAR'
 
-                    let operation
-                     if(key === 'sumToPay') {
-                       operation = 'GREATER_THAN'
-                     } else {
-                       operation= (key === 'nameDoc' || key === 'creatorName') ? 'LIKE' : 'EQUALS'
-                     }
+                    const operation = this.getOperationTypeForRequestToSearchDocsFromPay(key)
 
                     const dataElem = {
                         dataType,
@@ -184,6 +179,18 @@ Vue.mixin({
 
 
             return data
+        },
+
+        getOperationTypeForRequestToSearchDocsFromPay(key) {
+          if (key === 'nameDoc'
+              || key === 'creatorName'
+              || key === 'executorName') {
+            return 'LIKE'
+          } else if (key === 'sumToPay') {
+            return 'GREATER_THAN'
+          } else {
+            return 'EQUALS'
+          }
         },
 
         createCriteriasToSearchDocsFromPayBetweenDataOplatDates(firstDate, lastDate) {
@@ -338,6 +345,38 @@ Vue.mixin({
               ]
             }
           ]
+
+          return data
+        },
+
+        createCriteriasToSearchUsersByDepartmentId(depId){
+          const data = [
+            {
+              dataType: 'INTEGER',
+              key: 'department.id',
+              operation: 'EQUALS',
+              type: 'AND',
+              values: [
+                depId
+              ]
+            }
+          ]
+          return data
+        },
+
+        createCriteriasToSearchTypeOfDocsForDocsForPay() {
+          const data = [
+            {
+              dataType: 'VARCHAR',
+              key: 'prOplat',
+              type: 'AND',
+              values: [
+                'ON_NEW_DOC_FORM'
+              ]
+            }
+          ]
+
+          return data
         }
     }
 })

@@ -25,22 +25,29 @@
         <v-container>
           <v-row>
             <v-col cols="12">
-              <v-text-field
-                v-model="payer.clName"
-                readonly="true"
+              <v-autocomplete
+                v-model="payerId"
                 label="Плательщик"
+                :loading="loadingType.payers"
+                :items="payers"
+                item-value="id"
+                item-text="clName"
                 outlined
                 hide-details="auto"
+                @change="organizationChange"
               />
             </v-col>
           </v-row>
 
           <v-row>
             <v-col cols="12">
-              <v-text-field
-                v-model="acc.shortName"
-                readonly="true"
+              <v-autocomplete
+                v-model="accId"
                 label="Расчетный счет"
+                :loading="loadingType.paymentAccounts"
+                :items="accs"
+                item-value="id"
+                item-text="shortName"
                 outlined
                 hide-details="auto"
               />
@@ -142,11 +149,11 @@ export default {
       // id выбранного расчетного счета
       accId: null,
 
-      // выбранная организация
-      payer: {},
+      // массив организаций для выбора пользователем
+      payers: [],
 
-      // выбранный расчетный счет
-      acc: {},
+      // массив расчетных счетов для выбора пользователем
+      accs: [],
 
       // список групп
       groups: []
@@ -167,18 +174,48 @@ export default {
       this.findGroups()
     },
 
-    // поиск плательщика для демонстрации пользователю на форме
-    async findPayer() {
-      this.loadingType.payer = true
-      this.payer = await this.$api.organizations.findById(this.payerId)
-      this.loadingType.payer = null
+    // поиск плательщиков
+    async findPayers() {
+      this.loadingType.organizations = true
+      this.payers = await this.getBudgetOrganizations()
+      this.loadingType.organizations = null
+
+      if (this.payerId) {
+        await this.findAccsOfChousenOrg()
+      }
     },
 
-    // поиск расчетного счета плательщика для демонстрации на форме
-    async findAcc() {
-      this.loadingType.acc = true
-      this.acc = await this.$api.paymentAccounts.findById(this.accId)
-      this.loadingType.acc = null
+    // Функция обработки выбора организации
+    async organizationChange() {
+      await this.findAccsOfChousenOrg()
+      this.selectFirstPaymentAccount()
+    },
+
+    // выбор первого расчетного счета из массива расчетных счетов
+    selectFirstPaymentAccount() {
+      if (!this.accs) {
+        return
+      }
+
+      this.accId = this.accs[0].id
+    },
+
+    // поиск расчетных счетов выбранной организации
+    async findAccsOfChousenOrg() {
+      this.loadingType.paymentAccounts = true
+
+      const data = {
+        orgId: this.payerId
+      }
+      let paymentAccounts = await this.$api.paymentAccounts.findAccByOrgId(data)
+      paymentAccounts = paymentAccounts.sort(this.customCompare('shortName'))
+      paymentAccounts.forEach((account) => {
+        account.shortName = account.shortName + ' - ' + account.numAcc.slice(account.numAcc.length - 4)
+      })
+
+      this.accs = paymentAccounts
+
+      this.loadingType.paymentAccounts = null
     },
 
     // поиск групп для выбора пользователем на форме
@@ -195,8 +232,7 @@ export default {
       this.reset()
       this.payerId = selOrgId
       this.accId = selAccId
-      this.findPayer()
-      this.findAcc()
+      this.findPayers()
       this.dialog = true
     },
 
@@ -254,6 +290,12 @@ export default {
       } else if (!this.editedItem.sumDoc) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите сумму оплаты по кассе!')
         verificationPassed = false
+      } else if (!this.payerId) {
+        this.$refs.userNotification.showUserNotification('error', 'Укажите плательщика!')
+        verificationPassed = false
+      } else if (!this.accId) {
+        this.$refs.userNotification.showUserNotification('error', 'Укажите расчетный счет!')
+        verificationPassed = false
       }
       return verificationPassed
     },
@@ -267,6 +309,8 @@ export default {
 
     // функция обнуления всех переменных формы
     reset() {
+      this.payers = []
+      this.accs = []
       this.loadingType = {}
       this.editedItem = {}
       this.spDocch = {}

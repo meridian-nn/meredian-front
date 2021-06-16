@@ -79,7 +79,7 @@
                 :loading="loadingType.executors"
                 :items="executors"
                 item-value="id"
-                item-text=""
+                item-text="fullName"
                 outlined
               />
             </v-col>
@@ -416,6 +416,11 @@ export default {
         // this.findSuppliers(editedItem.contractId)
         await this.findContracts()
         this.editedItem = editedItem
+
+        if (this.editedItem.buyer) {
+          this.editedItem.buyerId = this.editedItem.buyer.id
+        }
+
         await this.findPayers()
 
         if (copyDoc) {
@@ -474,10 +479,8 @@ export default {
 
       this.loadingType.executors = true
 
-      const data = {
-        viddocoplId: departmentId
-      }
-      this.executors = await this.$api.executors.findExecutorsByDepartmentId(data)
+      const data = this.createCriteriasToSearchUsersByDepartmentId(departmentId)
+      this.executors = await this.$api.auth.user.getUsersBySearchCriterias(data)
 
       this.loadingType.executors = null
     },
@@ -528,6 +531,8 @@ export default {
     async findDocumentKinds() {
       if (!this.documentKinds.length) {
         this.loadingType.documentKinds = true
+        // const data = this.createCriteriasToSearchTypeOfDocsForDocsForPay()
+        // TODO сделать получение видов документов по параметрам (когда Андрей пришлет изменения)
         this.documentKinds = await this.$api.typeOfDocuments.findAll()
         this.loadingType.documentKinds = null
       }
@@ -586,6 +591,12 @@ export default {
       this.editedItem.ispId = this.editedItem.myorgId
       this.editedItem.dataOplat = new Date(this.editedItem.dataOplat).toLocaleDateString()
       this.editedItem.dataDoc = new Date(this.editedItem.dataDoc).toLocaleDateString()
+
+      this.editedItem.buyer = {
+        id: this.editedItem.buyerId
+      }
+      delete (this.editedItem.buyerId)
+
       await this.$api.payment.docOplForPay.save(this.editedItem)
         .catch((error) => {
           errorMessage = error
