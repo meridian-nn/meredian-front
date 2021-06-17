@@ -36,6 +36,30 @@ Vue.mixin({
           organizations[1] = organizations.splice(0, 1, organizations[1])[0]
 
           return organizations
-        }
+        },
+
+      async changeSumToPayOfPaymentAccount(accId, sumOfPaymentDocs, operationType) {
+          const searchCriterias = this.createCriteriasToFindPaymentAccount(accId)
+          const response = await this.$api.paymentAccounts.findBySearchCriteriaList(searchCriterias)
+          let paymentAccount
+
+          if(!response) {
+            return
+          } else {
+            paymentAccount = response[0]
+          }
+
+          if(operationType === 'SUM') {
+            if(paymentAccount.sumToPay){
+              paymentAccount.sumToPay = paymentAccount.sumToPay + sumOfPaymentDocs
+            } else {
+              paymentAccount.sumToPay = sumOfPaymentDocs
+            }
+          } else if(operationType === 'DEDUCT') {
+            paymentAccount.sumToPay = paymentAccount.sumToPay - sumOfPaymentDocs
+          }
+
+          await this.$api.paymentAccounts.save(paymentAccount)
+       }
     }
 })

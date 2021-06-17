@@ -167,13 +167,17 @@ export default {
       let totalSumOfCashbox = 0
 
       for (const responseElem of response) {
+        if (!responseElem.sum_sumToPay) {
+          responseElem.sum_sumToPay = 0
+        }
+
         const sumOfClearBalance = responseElem.sum_saldo + responseElem.sum_nalich
-        let sumOfOrg = sumOfClearBalance
+        const sumOfOrg = sumOfClearBalance - responseElem.sum_sumToPay
 
         if (responseElem['acc.accType'] === 'COMMON') {
           this.addOrgIntoHeaders(responseElem)
-          const sumOfDocToPay = await this.getBalanceOfDocsToPay(responseElem['myOrg.id'], date)
-          sumOfOrg = sumOfClearBalance - sumOfDocToPay
+          /* const sumOfDocToPay = await this.getBalanceOfDocsToPay(responseElem['myOrg.id'], date)
+          sumOfOrg = sumOfClearBalance - sumOfDocToPay */
 
           orgAccInfoDataAccounts['org' + responseElem['myOrg.id'] + 'ClearBalance'] = sumOfClearBalance
           orgAccInfoDataAccounts['org' + responseElem['myOrg.id'] + 'ValueSum'] = sumOfOrg

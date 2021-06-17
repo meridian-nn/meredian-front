@@ -248,7 +248,7 @@ export default {
         isSumToPayUsed: this.isSumToPayUsed
       }
 
-      const filterEntityForSave = this.createFilterEntityForSave(this.elementId, this.$route.name, this.filterItem)
+      const filterEntityForSave = this.createFilterEntityForSave(this.elementId, this.$route.name, this.filterItem, this.getCurrentUser().id)
 
       await this.$api.uiSettings.save(filterEntityForSave)
 

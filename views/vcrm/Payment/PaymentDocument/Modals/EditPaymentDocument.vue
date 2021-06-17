@@ -138,7 +138,7 @@
               <v-row>
                 <v-col cols="12">
                   <v-autocomplete
-                    v-model="editedItem.myorgId"
+                    v-model="editedItem.payerId"
                     style="margin-left: 16px"
                     label="Плательщик"
                     :loading="loadingType.payers"
@@ -534,13 +534,18 @@ export default {
       }
       let errorMessage = null
       this.editedItem.creatorId = this.getCurrentUser().id
-      this.editedItem.ispId = this.editedItem.myorgId
+      this.editedItem.ispId = this.editedItem.payerId
       this.editedItem.dataOplat = new Date(this.editedItem.dataOplat).toLocaleDateString()
       this.editedItem.dataDoc = new Date(this.editedItem.dataDoc).toLocaleDateString()
       this.editedItem.buyer = {
         id: this.editedItem.buyerId
       }
       delete (this.editedItem.buyerId)
+
+      this.editedItem.myOrg = {
+        id: this.editedItem.payerId
+      }
+      delete (this.editedItem.payerId)
       await this.$api.payment.docOplForPay.save(this.editedItem)
         .catch((error) => {
           errorMessage = error
@@ -569,11 +574,17 @@ export default {
       } else if (!this.editedItem.sumDoc) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите сумму по договору!')
         verificationPassed = false
-      } else if (!this.editedItem.myorgId) {
+      } else if (!this.editedItem.payerId) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите плательщика!')
+        verificationPassed = false
+      } else if (!this.editedItem.buyerId) {
+        this.$refs.userNotification.showUserNotification('error', 'Укажите покупателя!')
         verificationPassed = false
       } else if (!this.editedItem.documentKindId) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите вид документа!')
+        verificationPassed = false
+      } else if (!this.editedItem.executorId) {
+        this.$refs.userNotification.showUserNotification('error', 'Укажите исполнителя!')
         verificationPassed = false
       } else if (!this.editedItem.paymentStatus) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите статус платежа!')
@@ -602,7 +613,7 @@ export default {
       this.reset()
       this.editedItem.paymentStatus = 'BANK'
       if (selOrg) {
-        this.editedItem.myorgId = selOrg
+        this.editedItem.payerId = selOrg
       }
       const date = new Date()
       this.editedItem.dataDoc = date.toISOString().substr(0, 10)

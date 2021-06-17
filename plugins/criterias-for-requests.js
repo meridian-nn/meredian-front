@@ -10,7 +10,7 @@ Vue.mixin({
         // orgId - id организации
       // accId - id расчетного счета организации
       createCriteriasForRequestToSearchPaymentsByCashbox: function(accId, orgId, date) {
-        const data = [{
+        return [{
           dataType: 'DATE',
           key: 'paymentDate',
           operation: 'EQUALS',
@@ -38,11 +38,10 @@ Vue.mixin({
             ]
           }
         ]
-        return data
       },
 
         createCriteriasWithoutAccIdForRequestToSearchPaymentsByCashbox(orgId, date) {
-          const data = [{
+          return [{
             dataType: 'DATE',
             key: 'paymentDate',
             operation: 'EQUALS',
@@ -61,7 +60,6 @@ Vue.mixin({
               ]
             }
           ]
-          return data
         },
 
         // Создает объект с критериями для отбора документов к оплате для запроса на бэк
@@ -72,35 +70,34 @@ Vue.mixin({
             const secDate = new Date(date)
             const curDateNum = secDate.getDate()
             secDate.setDate(curDateNum + 1)
-            const data = [{
-                    'dataType': 'INTEGER',
-                    'key': 'accId',
-                    'operation': 'EQUALS',
-                    'type': 'AND',
-                    'values': [
-                        accId
-                    ]
-                },
-                {
-                    'dataType': 'INTEGER',
-                    'key': 'platId',
-                    'operation': 'EQUALS',
-                    'type': 'AND',
-                    'values': [
-                        orgId
-                    ]
-                },
-                {
-                    'dataType': 'DATE',
-                    'key': 'dataOplat',
-                    'operation': 'BETWEEN',
-                    'type': 'AND',
-                    'values': [
-                        new Date(date).toLocaleDateString(), new Date(secDate).toLocaleDateString()
-                    ]
-                }
+          return [{
+              'dataType': 'INTEGER',
+              'key': 'accId',
+              'operation': 'EQUALS',
+              'type': 'AND',
+              'values': [
+                accId
+              ]
+            },
+              {
+                'dataType': 'INTEGER',
+                'key': 'platId',
+                'operation': 'EQUALS',
+                'type': 'AND',
+                'values': [
+                  orgId
+                ]
+              },
+              {
+                'dataType': 'DATE',
+                'key': 'dataOplat',
+                'operation': 'BETWEEN',
+                'type': 'AND',
+                'values': [
+                  new Date(date).toLocaleDateString(), new Date(secDate).toLocaleDateString()
+                ]
+              }
             ]
-            return data
         },
 
         createCriteriasWithoutAccIdForRequestToSearchDocsToPay( orgId, date) {
@@ -219,35 +216,34 @@ Vue.mixin({
         // Создает объект с критериями для отбора значений фильтров для пользователя
         // для переданной формы и элемента
         createCriteriasToSearchForFiltersValues(formId, elementId, userId) {
-            const data = [{
-                    'dataType': 'VARCHAR',
-                    'key': 'formId',
-                    'operation': 'EQUALS',
-                    'type': 'AND',
-                    'values': [
-                        formId
-                    ]
-                },
-                {
-                    'dataType': 'VARCHAR',
-                    'key': 'elementId',
-                    'operation': 'EQUALS',
-                    'type': 'AND',
-                    'values': [
-                        elementId
-                    ]
-                },
-                {
-                    'dataType': 'VARCHAR',
-                    'key': 'userId',
-                    'operation': 'EQUALS',
-                    'type': 'AND',
-                    'values': [
-                        userId
-                    ]
-                },
+          return [{
+              'dataType': 'VARCHAR',
+              'key': 'formId',
+              'operation': 'EQUALS',
+              'type': 'AND',
+              'values': [
+                formId
+              ]
+            },
+              {
+                'dataType': 'VARCHAR',
+                'key': 'elementId',
+                'operation': 'EQUALS',
+                'type': 'AND',
+                'values': [
+                  elementId
+                ]
+              },
+              {
+                'dataType': 'VARCHAR',
+                'key': 'userId',
+                'operation': 'EQUALS',
+                'type': 'AND',
+                'values': [
+                  userId
+                ]
+              },
             ]
-            return data
         },
 
         // Функция для создания критериев для отбора кодов маркировок по номеру заказа и датам
@@ -301,7 +297,7 @@ Vue.mixin({
         },
 
         createCriteriasToSearchBalanceOfPaymentAccount(dateOplat, orgId, accId){
-          const data = [
+          return [
             {
               dataType: 'DATE',
               key: 'dataOplat',
@@ -330,11 +326,10 @@ Vue.mixin({
               ]
             },
           ]
-          return data
         },
 
         createCriteriasToSearchDocsToPayOfOrg(orgId,date){
-          const data = [
+          return [
             {
               dataType: 'DATE',
               key: 'dataOplat',
@@ -345,12 +340,10 @@ Vue.mixin({
               ]
             }
           ]
-
-          return data
         },
 
         createCriteriasToSearchUsersByDepartmentId(depId){
-          const data = [
+          return [
             {
               dataType: 'INTEGER',
               key: 'department.id',
@@ -361,11 +354,10 @@ Vue.mixin({
               ]
             }
           ]
-          return data
         },
 
         createCriteriasToSearchTypeOfDocsForDocsForPay() {
-          const data = [
+          return [
             {
               dataType: 'VARCHAR',
               key: 'prOplat',
@@ -376,8 +368,6 @@ Vue.mixin({
               ]
             }
           ]
-
-          return data
         },
 
         createParamsForRequestPaymentAccGroupByOrg(date, groupFields){
@@ -406,17 +396,15 @@ Vue.mixin({
 
           const searchCriteria = this.createSearchCriteriasForRequestPaymentAccGroupByOrg(date)
 
-          const params = {
+          return {
             aggregateFunctions: aggregateFunctions,
             groupFields: groupFields,
             searchCriteria: searchCriteria
           }
-
-          return params
         },
 
         createSearchCriteriasForRequestPaymentAccGroupByOrg(date) {
-          const searchCriteria = [
+          return [
             {
               dataType: "DATE",
               key: "dataOplat",
@@ -436,8 +424,29 @@ Vue.mixin({
               ]
             }
           ]
+        },
 
-          return searchCriteria
-        }
+      createCriteriasToFindPaymentAccount(accId) {
+        return [
+          {
+            dataType: "VARCHAR",
+            key: "acc.id",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              accId
+            ]
+          },
+          {
+            dataType: "DATE",
+            key: "dataOplat",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date().toLocaleDateString()
+            ]
+          }
+        ]
+      }
     }
 })

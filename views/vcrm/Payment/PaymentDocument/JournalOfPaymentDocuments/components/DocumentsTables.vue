@@ -9,6 +9,7 @@
         <div class="journal-of-payment-docs-row">
           <div class="journal-of-payment-docs-list-of-orgs">
             <v-autocomplete
+              v-model="selectedOrganization"
               label="Организация"
               :loading="loadingType.organizations"
               :items="organizations"
@@ -715,7 +716,11 @@ export default {
       pageOfFromPayData: 0,
 
       // Переменная для реализации обновления данных в таблице "Документы на оплату"
-      infiniteIdOfFromPayData: +new Date()
+      infiniteIdOfFromPayData: +new Date(),
+
+      elementIdForDefaultOrgAndAcc: 'journal-of-payment-docs-default-org-acc',
+
+      elementIdOfFromPayTable: 'journal-of-payment-docs-from-pay-docs'
     }
   },
 
@@ -743,25 +748,42 @@ export default {
     this.init()
   },
   methods: {
-    init() {
-      this.selOplat()
+    async init() {
+      await this.selOplat()
       this.loadingType = {}
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
-      this.findOrganizations()
+      await this.findDefaultOrgAndAccIdForUser()
+      await this.findOrganizations()
+      if (this.accId && this.selectedOrganization) {
+        await this.findPaymentAccounts(this.selectedOrganization)
+        await this.findToPay(this.accId)
+      }
     },
 
     // Секция обработки событий на форме
 
     // Функция обработки выбора организации
-    async organizationChange(val) {
-      this.selectedOrganization = val
+    async organizationChange(orgId) {
       this.accId = null
       await this.updatePaymentAccountInfo(this.accId)
       this.toPayData = []
       this.totalToSumOplat = 0
-      await this.findPaymentAccounts(val)
+      await this.findPaymentAccounts(orgId)
       this.selectFirstPaymentAccount()
+    },
+
+    async findDefaultOrgAndAccIdForUser() {
+      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
+        this.elementIdForDefaultOrgAndAcc, this.getCurrentUser().id)
+      const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
+      let filtersParams
+
+      if (response.length) {
+        filtersParams = JSON.parse(response[0].settingValue)
+        this.selectedOrganization = filtersParams.orgId
+        this.accId = filtersParams.accId
+      }
     },
 
     // Выбор расчетного счета
@@ -867,10 +889,23 @@ export default {
 
       // await this.$api.payment.docOplToPay.saveSpDocoplToPay(this.toPaySelectedRows)
       await this.$axios.$post('/oper/spDocopl/saveSpDocoplToPay', this.toPaySelectedRows)
+      await this.changeSumToPayOfPaymentAccountOnForm(selectedDoc)
 
       this.toPaySelectedRows = []
       await this.refreshTables()
       await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
+    },
+    changeSumToPayOfPaymentAccountOnForm(selectedDoc) {
+      let sumDoc
+      let typeOfOperation
+      if (selectedDoc.sumOplat < selectedDoc.sumOplatFromRequest) {
+        sumDoc = selectedDoc.sumOplatFromRequest - selectedDoc.sumOplat
+        typeOfOperation = 'DEDUCT'
+      } else {
+        sumDoc = selectedDoc.sumOplat - selectedDoc.sumOplatFromRequest
+        typeOfOperation = 'SUM'
+      }
+      this.changeSumToPayOfPaymentAccount(this.accId, sumDoc, typeOfOperation)
     },
 
     // Отмена внесения измененя в сумму оплаты документа
@@ -885,16 +920,6 @@ export default {
     // Функции контекстного меню таблицы документов к оплате
     // Вызов формы "Оплата по кассе"
     payedByCashboxForContextMenuOnly() {
-      /* if (this.selectedOrganization == null) {
-        this.$refs.userNotification.showUserNotification('error', 'Выберите организацию!')
-        return
-      }
-
-      if (this.accId == null) {
-        this.$refs.userNotification.showUserNotification('error', 'Выберите расчетный счет!')
-        return
-      } */
-
       this.$refs.paymentByCashbox.newDocument(this.selectedOrganization, this.accId)
       console.log('payed by cashbox')
     },
@@ -907,27 +932,30 @@ export default {
         return
       }
 
+      if (!this.fromPaySelectedRows || !this.fromPaySelectedRows.length) {
+        return
+      }
+
+      const sumDocs = this.countSumOfArrayElements(this.fromPaySelectedRows.map(value => value.sumOplatNumber))
+
+      if (sumDocs > this.currentPaymentAccountBalance) {
+        this.$refs.userNotification.showUserNotification('warning', 'Сумма выбранных документов на оплату превышает сумму остатка по выбранному р/с!', 4000)
+      }
+
       await this.addPayments()
+      await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'SUM')
 
       await this.refreshTables()
       await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
     },
     async addPayments() {
-      if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
-        const sumDocs = this.countSumOfArrayElements(this.fromPaySelectedRows.map(value => value.sumDoc))
-
-        if (sumDocs > this.currentPaymentAccountBalance) {
-          this.$refs.userNotification.showUserNotification('warning', 'Сумма выбранных документов на оплату превышает сумму остатка по выбранному р/с!', 4000)
-        }
-
-        const ids = this.fromPaySelectedRows.map(value => value.id)
-        const data = { ids, accId: this.accId }
-        /* await this.$api.payment.payDocument(data).catch((error) => {
+      const ids = this.fromPaySelectedRows.map(value => value.id)
+      const data = { ids, accId: this.accId }
+      /* await this.$api.payment.payDocument(data).catch((error) => {
           const errorMessage = error
           alert(errorMessage)
         }) */
-        await this.$axios.$post('/oper/spDocopl/payDocument', data)
-      }
+      await this.$axios.$post('/oper/spDocopl/payDocument', data)
     },
     countSumOfArrayElements(array) {
       let sum = 0
@@ -939,13 +967,18 @@ export default {
 
     // Удаление документов из таблицы "Документы к оплате"
     async deleteSelectedPayments() {
-      if (this.toPaySelectedRows && this.toPaySelectedRows.length) {
-        const ids = this.toPaySelectedRows.map(value => value.id)
-        await this.$axios.$post('/oper/spDocopl/deleteSelectedPayments', ids)
-
-        await this.refreshTables()
-        await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
+      if (!this.toPaySelectedRows || !this.toPaySelectedRows.length) {
+        return
       }
+
+      const sumDocs = this.countSumOfArrayElements(this.toPaySelectedRows.map(value => value.sumOplat))
+
+      const ids = this.toPaySelectedRows.map(value => value.id)
+      await this.$axios.$post('/oper/spDocopl/deleteSelectedPayments', ids)
+      await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'DEDUCT')
+
+      await this.refreshTables()
+      await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
     },
 
     // Вызов контекстного меню таблицы "Документы на оплату"
@@ -1095,19 +1128,17 @@ export default {
 
     // Поиск организаций для выбора пользователем
     async findOrganizations() {
-      if (!this.organizations.length) {
-        this.loadingType.organizations = true
-        this.organizations = await this.getBudgetOrganizations()
-        this.loadingType.organizations = null
-      }
+      this.loadingType.organizations = true
+      this.organizations = await this.getBudgetOrganizations()
+      this.loadingType.organizations = null
     },
 
     // Функция поиска расчетных счетов выбранной организации
-    async findPaymentAccounts(val) {
+    async findPaymentAccounts(orgId) {
       this.loadingType.paymentAccounts = true
 
       const data = {
-        orgId: val
+        orgId
       }
       let paymentAccounts = await this.$api.paymentAccounts.findAccByOrgId(data)
       paymentAccounts = paymentAccounts.sort(this.customCompare('shortName'))
@@ -1192,7 +1223,8 @@ export default {
 
     // Поиск документов для таблицы "Документы на оплату" по выбранной организации
     async findSpDocoplForPay($state) {
-      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name, 'journal-of-payment-docs-from-pay-docs', this.getCurrentUser().id)
+      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
+        this.elementIdOfFromPayTable, this.getCurrentUser().id)
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
       let filtersParams
 

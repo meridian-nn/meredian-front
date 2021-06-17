@@ -45,6 +45,7 @@ Vue.mixin({
                   value.buyerName = ''
                 }
 
+                value.sumOplatFromRequest = value.sumOplat
                 value.sumOplatMask = this.numberToSum(value.sumOplat)
                 value.isDoc = true
                 arrayOfDataToReturn.push(value)

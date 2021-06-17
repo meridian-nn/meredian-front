@@ -252,6 +252,7 @@ export default {
       })
 
       if (errorMessage == null) {
+        await this.changeSumToPayOfPaymentAccount(this.accId, this.editedItem.sumDoc, 'SUM')
         this.dialog = false
       }
       this.$emit('save')

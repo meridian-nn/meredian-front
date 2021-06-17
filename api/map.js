@@ -100,6 +100,9 @@ export const factory = send => ({
         },
         findById(id) {
             return send('GET', `/oper/spAcc/findById/${id}`)
+        },
+        save(paymentAccount) {
+          return send('POST', `/oper/spOplat/save`, paymentAccount)
         }
     },
 
