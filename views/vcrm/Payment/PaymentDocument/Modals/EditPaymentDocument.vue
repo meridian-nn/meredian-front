@@ -534,9 +534,8 @@ export default {
     async findDocumentKinds() {
       if (!this.documentKinds.length) {
         this.loadingType.documentKinds = true
-        // const data = this.createCriteriasToSearchTypeOfDocsForDocsForPay()
-        // TODO сделать получение видов документов по параметрам (когда Андрей пришлет изменения)
-        this.documentKinds = await this.$api.typeOfDocuments.findAll()
+        const data = this.createCriteriasToSearchTypeOfDocsForDocsForPay()
+        this.documentKinds = await this.$api.typeOfDocuments.findBySearchCriteria(data)
         this.loadingType.documentKinds = null
       }
     },

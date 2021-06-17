@@ -369,6 +369,7 @@ Vue.mixin({
             {
               dataType: 'VARCHAR',
               key: 'prOplat',
+              operation: 'EQUALS',
               type: 'AND',
               values: [
                 'ON_NEW_DOC_FORM'

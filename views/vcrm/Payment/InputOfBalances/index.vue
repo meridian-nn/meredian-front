@@ -62,7 +62,7 @@
               separator="space"
               :precision="2"
               decimal-separator="."
-              :output-type="number"
+              output-type="number"
               @input="update(row.saldo)"
             />
             <vue-numeric
@@ -72,7 +72,7 @@
               separator="space"
               :precision="2"
               decimal-separator="."
-              :output-type="number"
+              output-type="number"
               @input="update(row.nalich)"
             />
             <vue-numeric
@@ -83,7 +83,7 @@
               separator="space"
               :precision="2"
               decimal-separator="."
-              :output-type="number"
+              output-type="number"
             />
             <vue-numeric
               slot="credit"
@@ -93,7 +93,7 @@
               separator="space"
               :precision="2"
               decimal-separator="."
-              :output-type="number"
+              output-type="number"
             />
             <vue-numeric
               slot="endBalance"
@@ -103,7 +103,7 @@
               separator="space"
               :precision="2"
               decimal-separator="."
-              :output-type="number"
+              output-type="number"
             />
           </v-client-table>
         </div>
@@ -289,7 +289,8 @@ export default {
 
     // Инициализация журнала оплат
     async selOplat() {
-      await this.$api.payment.selOplat()
+      await this.$axios.$post('/oper/spDocopl/selOplat')
+      // await this.$api.payment.selOplat()
     },
 
     // Метод получения итоговой суммы документов к оплате по организациям
@@ -305,6 +306,10 @@ export default {
 
       const data = this.createParamsForRequestPaymentAccGroupByOrg(this.date, ['myOrg.id', 'myOrg.clName'])
       const response = await this.$api.paymentAccounts.groupBy(data)
+
+      if (!response.length) {
+        return response
+      }
 
       response[1] = response.splice(0, 1, response[1])[0]
       for (const element of response) {

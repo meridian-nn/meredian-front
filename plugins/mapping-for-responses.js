@@ -38,6 +38,13 @@ Vue.mixin({
 
             toPayDataResponse.forEach((value) => {
                 totalPaymentSum += value.sumOplat
+
+                if(value.buyer) {
+                  value.buyerName = value.buyer.clName8
+                } else {
+                  value.buyerName = ''
+                }
+
                 value.sumOplatMask = this.numberToSum(value.sumOplat)
                 value.isDoc = true
                 arrayOfDataToReturn.push(value)

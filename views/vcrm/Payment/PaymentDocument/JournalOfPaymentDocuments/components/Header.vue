@@ -68,7 +68,8 @@ export default {
   },
   methods: {
     init() {
-      this.findOrganizationsForTotalResults()
+      this.findOrgAccInfoAlter()
+      // this.findOrganizationsForTotalResults()
     },
 
     // Поиск организаций с типом "BUDGET"
@@ -111,7 +112,7 @@ export default {
       if (date === undefined) {
         date = new Date()
       }
-      const data = this.createParamsForRequestPaymentAccGroupByOrg(date, ['myOrg.id'])
+      const data = this.createParamsForRequestPaymentAccGroupByOrg(date, ['myOrg.id', 'myOrg.clName', 'acc.accType'])
       const response = await this.$api.paymentAccounts.groupBy(data)
 
       this.orgAccInfoData = []
@@ -126,17 +127,19 @@ export default {
       let totalSumOfCashbox = 0
       for (const orgAccElem of this.orgAccInfoHeaders) {
         const responseElem = response.find(el => el['myOrg.id'] === orgAccElem.orgId)
-        if (responseElem) {
-          const sumOfOtherAccounts = await this.getBalanceOfOtherAccounts(orgAccElem.orgId, date)
-          const sumOfClearBalance = responseElem.sum_saldo + responseElem.sum_nalich
-          const sumOfOrg = sumOfClearBalance - sumOfOtherAccounts
-          orgAccInfoDataAccounts[orgAccElem.clearBalance] = sumOfClearBalance
-          orgAccInfoDataAccounts[orgAccElem.valueSum] = sumOfOrg
-          orgAccInfoDataAccounts[orgAccElem.value] = this.numberToSum(sumOfOrg)
-          totalSumOfAccounts += sumOfOrg
-          orgAccInfoDataCashbox[orgAccElem.value] = this.numberToSum(0)
-          totalSumOfCashbox += 0
+        if (!responseElem) {
+          continue
         }
+
+        const sumOfOtherAccounts = await this.getBalanceOfDocsToPay(orgAccElem.orgId, date)
+        const sumOfClearBalance = responseElem.sum_saldo + responseElem.sum_nalich
+        const sumOfOrg = sumOfClearBalance - sumOfOtherAccounts
+        orgAccInfoDataAccounts[orgAccElem.clearBalance] = sumOfClearBalance
+        orgAccInfoDataAccounts[orgAccElem.valueSum] = sumOfOrg
+        orgAccInfoDataAccounts[orgAccElem.value] = this.numberToSum(sumOfOrg)
+        totalSumOfAccounts += sumOfOrg
+        orgAccInfoDataCashbox[orgAccElem.value] = this.numberToSum(0)
+        totalSumOfCashbox += 0
       }
 
       orgAccInfoDataAccounts.total = this.numberToSum(totalSumOfAccounts)
@@ -144,6 +147,71 @@ export default {
 
       this.orgAccInfoData.push(orgAccInfoDataAccounts)
       this.orgAccInfoData.push(orgAccInfoDataCashbox)
+    },
+
+    async findOrgAccInfoAlter(date) {
+      this.reset()
+      if (date === undefined) {
+        date = new Date()
+      }
+      const data = this.createParamsForRequestPaymentAccGroupByOrg(date, ['myOrg.id', 'myOrg.shortName', 'acc.accType'])
+      const response = await this.$api.paymentAccounts.groupBy(data)
+
+      const orgAccInfoDataAccounts = {}
+      orgAccInfoDataAccounts.name = 'р/с'
+
+      const orgAccInfoDataCashbox = {}
+      orgAccInfoDataCashbox.name = 'нал.'
+
+      let totalSumOfAccounts = 0
+      let totalSumOfCashbox = 0
+
+      for (const responseElem of response) {
+        const sumOfClearBalance = responseElem.sum_saldo + responseElem.sum_nalich
+        let sumOfOrg = sumOfClearBalance
+
+        if (responseElem['acc.accType'] === 'COMMON') {
+          this.addOrgIntoHeaders(responseElem)
+          const sumOfDocToPay = await this.getBalanceOfDocsToPay(responseElem['myOrg.id'], date)
+          sumOfOrg = sumOfClearBalance - sumOfDocToPay
+
+          orgAccInfoDataAccounts['org' + responseElem['myOrg.id'] + 'ClearBalance'] = sumOfClearBalance
+          orgAccInfoDataAccounts['org' + responseElem['myOrg.id'] + 'ValueSum'] = sumOfOrg
+          orgAccInfoDataAccounts['org' + responseElem['myOrg.id'] + 'Value'] = this.numberToSum(sumOfOrg)
+          totalSumOfAccounts += sumOfOrg
+        } else if (responseElem['acc.accType'] === 'CASH') {
+          orgAccInfoDataCashbox['org' + responseElem['myOrg.id'] + 'ClearBalance'] = sumOfClearBalance
+          orgAccInfoDataCashbox['org' + responseElem['myOrg.id'] + 'ValueSum'] = sumOfOrg
+          orgAccInfoDataCashbox['org' + responseElem['myOrg.id'] + 'Value'] = this.numberToSum(sumOfOrg)
+          totalSumOfCashbox += sumOfOrg
+        }
+      }
+
+      this.orgAccInfoHeaders.push({
+        text: 'Итого',
+        orgId: '-',
+        value: 'total'
+      })
+
+      orgAccInfoDataAccounts.total = this.numberToSum(totalSumOfAccounts)
+      orgAccInfoDataCashbox.total = this.numberToSum(totalSumOfCashbox)
+
+      this.orgAccInfoData.push(orgAccInfoDataAccounts)
+      this.orgAccInfoData.push(orgAccInfoDataCashbox)
+    },
+
+    addOrgIntoHeaders(responseElem) {
+      const columnOrgValueName = 'org' + responseElem['myOrg.id'] + 'Value'
+      const columnOrgClearBalanceName = 'org' + responseElem['myOrg.id'] + 'ClearBalance'
+      const columnOrgValueNumberName = 'org' + responseElem['myOrg.id'] + 'ValueSum'
+
+      this.orgAccInfoHeaders.push({
+        text: responseElem['myOrg.shortName'],
+        orgId: responseElem['myOrg.id'],
+        value: columnOrgValueName,
+        valueSum: columnOrgValueNumberName,
+        clearBalance: columnOrgClearBalanceName
+      })
     },
 
     updateSumOfOrg(orgId, sumOfDocsToPay) {
@@ -168,7 +236,7 @@ export default {
       this.orgAccInfoData[0].total = this.numberToSum(totalSum)
     },
 
-    async getBalanceOfOtherAccounts(orgId, date) {
+    async getBalanceOfDocsToPay(orgId, date) {
       const sumToPay = await this.getSumToPayDocsOfOrg(orgId, date)
       const sumPaymentByCashbox = await this.getSumOfPaymentByCashboxOfOrg(orgId, date)
       const totalSumOplat = sumToPay + sumPaymentByCashbox
@@ -202,6 +270,11 @@ export default {
 
     reset() {
       this.orgAccInfoData = []
+      this.orgAccInfoHeaders = []
+      this.orgAccInfoHeaders.push({
+        text: '',
+        value: 'name'
+      })
     }
   }
 }

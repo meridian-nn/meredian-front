@@ -305,7 +305,7 @@
                         {{ item.nameDoc }}
                       </td>
                       <td class="journal-of-payment-docs-from-pay-docs-payerName">
-                        {{ item.myorgName }}
+                        {{ item.payerName }}
                       </td>
                       <td class="journal-of-payment-docs-from-pay-docs-buyerName">
                         {{ item.buyerName }}
@@ -601,6 +601,16 @@ export default {
           width: '70px'
         },
         {
+          text: 'Покупатель',
+          value: 'buyerName',
+          width: '70px'
+        },
+        {
+          text: 'Исполнитель',
+          value: 'executorName',
+          width: '70px'
+        },
+        {
           text: 'Кредит',
           value: 'prCredit',
           width: '80px'
@@ -801,7 +811,7 @@ export default {
 
     // Обновление списка документов к оплате, остатков на расчетных счетах выбранной организации и при изменении даты
     async updateInformationOnForm() {
-      await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
+      await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfoAlter(this.date)
       await this.findToPay(this.accId)
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
@@ -1066,7 +1076,8 @@ export default {
 
     // Инициализация журнала оплат
     async selOplat() {
-      await this.$api.payment.selOplat()
+      await this.$axios.$post('/oper/spDocopl/selOplat')
+      // await this.$api.payment.selOplat()
     },
 
     // Обновление таблиц "Документы к оплате" и "Документы на оплату"
@@ -1210,9 +1221,15 @@ export default {
           value.sumOplat = value.sumToPay
 
           if (value.buyer) {
-            value.buyerName = value.buyer.shortName
+            value.buyerName = value.buyer.clName8
           } else {
             value.buyerName = ''
+          }
+
+          if (value.myOrg) {
+            value.payerName = value.myOrg.clName8
+          } else {
+            value.payerName = value.myorgName
           }
 
           value.sumDocNumber = value.sumDoc
@@ -1455,11 +1472,11 @@ export default {
 }
 
 .journal-of-payment-docs-from-pay-docs-payerName {
-  width: 150px !important
+  width: 100px !important
 }
 
 .journal-of-payment-docs-from-pay-docs-buyerName {
-  width: 150px !important
+  width: 100px !important
 }
 
 .journal-of-payment-docs-from-pay-docs-executorName {
@@ -1487,13 +1504,13 @@ export default {
 }
 
 .journal-of-payment-docs-left-col {
-  flex: 0 0 30%;
-  max-width: 30%;
+  flex: 0 0 35%;
+  max-width: 35%;
 }
 
 .journal-of-payment-docs-right-col {
-  flex: 0 0 70%;
-  max-width: 70%;
+  flex: 0 0 65%;
+  max-width: 65%;
 }
 
 .journal-of-payment-docs-div-v-data-table{
