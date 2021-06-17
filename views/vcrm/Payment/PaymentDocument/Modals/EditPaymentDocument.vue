@@ -1,10 +1,12 @@
 <template>
   <v-dialog
-    :value="value"
+    v-model="dialog"
+    :value="show"
     max-width="1200px"
     padding="0px"
     persistent
     class="edit-payment-document-modal"
+    @input="$emit('close')"
   >
     <!--template #activator="{ on, attrs }">
       <v-fab-transition>
@@ -315,80 +317,55 @@
 
 <script>
 import UserNotification from '@/components/information_window/UserNotification'
-
 export default {
   name: 'EditPaymentDocument',
-
   components: {
     UserNotification
   },
-
   props: {
     title: {
       type: String,
       default: ''
-    },
-    value: {
-      required: true,
-      validator: () => true
     },
     show: {
       type: Boolean,
       default: false
     }
   },
-
   data() {
     return {
-
       // объект для отображения загрузки данных для полей
       loadingType: {},
-
       // массив подразделений для выбора пользователем
       departments: [],
-
       // массив типов документов для выбора пользователем
       documentTypes: [],
-
       // массив статусов оплаты документов для выбора пользователем
       paymentStatuses: [],
-
       // массив исполнителей документа
       executors: [],
-
       // массив договоров для выбора пользователем
       contracts: [],
-
       // массив плательщиков
       payers: [],
-
       // массив покупателей
       buyers: [],
-
       // массив поставщиков для выбора пользователем
       suppliers: [],
-
       // массив клиентов для выбора пользователем
       clients: [],
-
       // массив видов документов для выбора пользователем
       documentKinds: [],
-
       search: null,
-
       select: null,
-
       // переменная, отвечающая за отображениие модального окна
       dialog: false,
-
       // объект, в котором хранится редактируемый документ
       editedItem: {},
-
       // id редактируемого документа
       id: null
     }
   },
-
   watch: {
     dialog(val) {
       if (val) {
@@ -396,7 +373,6 @@ export default {
       }
     }
   },
-
   methods: {
     init() {
       this.findDepartments()
@@ -409,7 +385,6 @@ export default {
       this.findDocumentKinds()
       this.findContracts()
     },
-
     // Поиск документа на оплату для редатирования / создания на основе нового документа
     async findEditedItem(copyDoc = false) {
       if (this.id) {
@@ -419,13 +394,10 @@ export default {
         // this.findSuppliers(editedItem.contractId)
         await this.findContracts()
         this.editedItem = editedItem
-
         if (this.editedItem.buyer) {
           this.editedItem.buyerId = this.editedItem.buyer.id
         }
-
         await this.findPayers()
-
         if (copyDoc) {
           this.id = null
           this.editedItem.id = null
@@ -433,12 +405,10 @@ export default {
           this.editedItem.spDocches = []
           this.editedItem.spDocints = []
         }
-
         this.fillDatesEditedItem()
         this.calcSum(editedItem.sumDoc)
       }
     },
-
     // поиск подразделений для выбора пользователем
     async findDepartments() {
       if (!this.departments.length) {
@@ -447,7 +417,6 @@ export default {
         this.loadingType.departments = null
       }
     },
-
     // поиск статусов оплаты документа для выбора пользователем
     async findPaymentStatuses() {
       if (!this.paymentStatuses.length) {
@@ -456,42 +425,33 @@ export default {
         this.loadingType.paymentStatuses = null
       }
     },
-
     // поиск типов документов для выбора пользователем
     async findDocumentType(parentId) {
       if (!parentId) {
         this.documentTypes = []
         return
       }
-
       this.loadingType.documentTypes = true
-
       const data = {
         parentId
       }
       this.documentTypes = await this.$api.budgetElements.findDocumentTypesByParentId(data)
       this.loadingType.documentTypes = null
     },
-
     // обновление списка исполнителей для выбора пользователем после изменения подразделения на форме
     async findExecutors(departmentId) {
       if (!departmentId) {
         this.executors = []
         return
       }
-
       this.loadingType.executors = true
-
       const data = this.createCriteriasToSearchUsersByDepartmentId(departmentId)
       this.executors = await this.$api.auth.user.getUsersBySearchCriterias(data)
-
       this.loadingType.executors = null
     },
-
     // обновление списка клиентов для выбора пользователем
     async findClients() {
       this.loadingType.clients = true
-
       if (this.editedItem.contractId == null) {
         this.clients = await this.$api.organizations.findAll()
       } else {
@@ -499,37 +459,30 @@ export default {
           dogId: this.editedItem.contractId
         }
         this.clients = await this.$api.organizations.findByDogId(data)
-
         if (this.clients.length) {
           this.editedItem.consumerId = this.clients[this.clients.length - 1].id
         }
       }
       this.loadingType.clients = null
     },
-
     // обновление списка поставщиков для выбора пользователем
     async findSuppliers() {
       this.loadingType.suppliers = true
-
       this.suppliers = await this.$api.organizations.findAll()
-
       this.loadingType.suppliers = null
     },
-
     // поиск плательщиков для выбора пользователем
     async findPayers() {
       this.loadingType.payers = true
       this.payers = await this.getBudgetOrganizations()
       this.loadingType.payers = null
     },
-
     // поиск покупателей для выбора пользователем
     async findBuyers() {
       this.loadingType.buyers = true
       this.buyers = await this.$api.organizations.findInternalOrganizations()
       this.loadingType.buyers = null
     },
-
     // поиск видов документов для выбора пользователем
     async findDocumentKinds() {
       if (!this.documentKinds.length) {
@@ -539,36 +492,29 @@ export default {
         this.loadingType.documentKinds = null
       }
     },
-
     // обновление списка договоров для выбора пользователем после изменения поставщика на форме
     async findContracts() {
       this.loadingType.contracts = true
-
       const data = {
         myDescr: this.getCurrentUser().email
       }
       this.contracts = await this.$api.budgetElements.findContracts(data)
       this.loadingType.contracts = null
     },
-
     // расчет суммы к оплате документа
     calcSum(val) {
       this.editedItem.toPay = (val || 0) - (this.editedItem.sumPaid || 0)
     },
-
     // функция отработки события изменения подразделения на форме
     departmentChange(depId) {
       // очищаем массивы договоров и поставщиков для выбора пользователем, т.к. они будут изменены выбранным поставщиком
       delete (this.editedItem.viddocId)
-
       this.findDocumentType(depId)
       this.findExecutors(depId)
     },
-
     getCurrentUser() {
       return this.$store.state.profile.user
     },
-
     // функция отработки события изменения дат на форме
     dataOplatChange(val) {
       if (!this.editedItem.dataDoc) {
@@ -581,24 +527,20 @@ export default {
         this.editedItem.dataOplat = null
       }
     },
-
     // функция сохранения документа
     async save() {
       if (!this.checkParamsOfEditedItem()) {
         return
       }
-
       let errorMessage = null
       this.editedItem.creatorId = this.getCurrentUser().id
       this.editedItem.ispId = this.editedItem.myorgId
       this.editedItem.dataOplat = new Date(this.editedItem.dataOplat).toLocaleDateString()
       this.editedItem.dataDoc = new Date(this.editedItem.dataDoc).toLocaleDateString()
-
       this.editedItem.buyer = {
         id: this.editedItem.buyerId
       }
       delete (this.editedItem.buyerId)
-
       await this.$api.payment.docOplForPay.save(this.editedItem)
         .catch((error) => {
           errorMessage = error
@@ -609,7 +551,6 @@ export default {
       }
       this.$emit('save')
     },
-
     // функция проверки заполнения обязательных полей
     checkParamsOfEditedItem() {
       let verificationPassed = true
@@ -640,13 +581,12 @@ export default {
       }
       return verificationPassed
     },
-
     // функция отработки события нажития на кнопку "отмена"
     cancel() {
       this.reset()
-      this.$emit('close')
+      this.dialog = false
+      this.$emit('cancel')
     },
-
     // функция обнуления всех переменных формы
     reset() {
       this.loadingType = {}
@@ -657,23 +597,19 @@ export default {
       this.suppliers = []
       this.id = null
     },
-
     // функция открытия формы для создания нового документа
     newDocument(selOrg) {
       this.reset()
       this.editedItem.paymentStatus = 'BANK'
-
       if (selOrg) {
         this.editedItem.myorgId = selOrg
       }
-
       const date = new Date()
       this.editedItem.dataDoc = date.toISOString().substr(0, 10)
       date.setDate(date.getDate() + 3)
       this.editedItem.dataOplat = date.toISOString().substr(0, 10)
       this.dialog = true
     },
-
     // функция открытия формы для редактирования документа
     editDocument(id) {
       this.reset()
@@ -681,7 +617,6 @@ export default {
       this.dialog = true
       this.findEditedItem()
     },
-
     // функция открытия формы для создания нового документа на основе уже имеющегося документа
     copyDocument(id) {
       this.reset()
@@ -689,7 +624,6 @@ export default {
       this.dialog = true
       this.findEditedItem(true)
     },
-
     // функция заполнения дат документа, если форме был передан уже созданный документ
     fillDatesEditedItem() {
       if (!this.editedItem) {
@@ -698,7 +632,6 @@ export default {
       this.editedItem.dataDoc = new Date(this.parseDate(this.editedItem.dataDoc)).toISOString().substr(0, 10)
       this.editedItem.dataOplat = new Date(this.parseDate(this.editedItem.dataOplat)).toISOString().substr(0, 10)
     },
-
     // функция парсинга дат для сохранения
     parseDate(date) {
       if (!date) { return '' }
@@ -707,34 +640,33 @@ export default {
     }
   }
 }
-
 </script>
 
 <style lang="scss">
-  .container-data {
-    margin-left: 0;
-    max-width: none;
-  }
-  .modal-card {
-    max-width: 1200px;
-  }
-  .border-bottom {
-    position: relative;
-    flex-wrap: nowrap;
-  }
-  .border-bottom::after {
-    content: '';
-    position: absolute;
-    bottom: 8px;
-    left: 30px;
-    right: 10px;
-    height: 1px;
-    background-color: rgba(0, 0, 0, 0.4);
-  }
-  .v-card-text{
-    padding: 0;
-  }
-  .col{
-    padding: 10px 10px 0;
-  }
+.container-data {
+  margin-left: 0;
+  max-width: none;
+}
+.modal-card {
+  max-width: 1200px;
+}
+.border-bottom {
+  position: relative;
+  flex-wrap: nowrap;
+}
+.border-bottom::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 30px;
+  right: 10px;
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+.v-card-text{
+  padding: 0;
+}
+.col{
+  padding: 10px 10px 0;
+}
 </style>

@@ -436,7 +436,6 @@
                   опл
                 </button>
                 <button
-                  href=""
                   class="add-group__link pay_by_cashbox"
                   @click="payedByCashboxForContextMenuOnly"
                 >
@@ -1355,8 +1354,8 @@ export default {
 }
 
 .journal-of-payment-docs-bottom-spacer{
-  flex: 0 0 30%;
-  max-width: 30%;
+  flex: 0 0 35%;
+  max-width: 35%;
 }
 
 .journal-of-payment-docs-bottom-spacer-for-toPay-results{
@@ -1365,8 +1364,8 @@ export default {
 }
 
 .journal-of-payment-docs-bottom-toPay-results{
-  flex: 0 0 30%;
-  max-width: 30%;
+  flex: 0 0 35%;
+  max-width: 35%;
 }
 
 .journal-of-payment-docs-bottom-spacer-btw-results{
@@ -1375,13 +1374,13 @@ export default {
 }
 
 .journal-of-payment-docs-bottom-fromPay-results{
-  flex: 0 0 67%;
-  max-width: 67%;
+  flex: 0 0 65%;
+  max-width: 65%;
 }
 
 .journal-of-payment-docs-bottom-spacer-for-fromPay-results{
-  flex: 0 0 65%;
-  max-width: 65%;
+  flex: 0 0 59%;
+  max-width: 59%;
 }
 
 .journal-of-payment-docs-result-text{
@@ -1390,8 +1389,8 @@ export default {
 }
 
 .journal-of-payment-docs-bottom-comment{
-  flex: 0 0 70%;
-  max-width: 70%;
+  flex: 0 0 65%;
+  max-width: 65%;
 }
 
 .journal-of-payment-docs-text-danger {
