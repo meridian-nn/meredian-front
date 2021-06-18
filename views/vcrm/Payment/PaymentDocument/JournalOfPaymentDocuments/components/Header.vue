@@ -68,88 +68,10 @@ export default {
   },
   methods: {
     init() {
-      this.findOrgAccInfoAlter()
-      // this.findOrganizationsForTotalResults()
+      this.findOrgAccInfo()
     },
 
-    // Поиск организаций с типом "BUDGET"
-    async findOrganizationsForTotalResults() {
-      const data = {
-        typeCode: 1
-      }
-      const response = await this.$api.organizations.findByOrgTypeCode(data)
-
-      this.orgAccInfoHeaders.push({
-        text: '',
-        value: 'name'
-      })
-
-      response.forEach((element) => {
-        const columnOrgValueName = 'org' + element.id + 'Value'
-        const columnOrgClearBalanceName = 'org' + element.id + 'ClearBalance'
-        const columnOrgValueNumberName = 'org' + element.id + 'ValueSum'
-        this.orgAccInfoHeaders.push({
-          text: element.shortName,
-          orgId: element.id,
-          value: columnOrgValueName,
-          valueSum: columnOrgValueNumberName,
-          clearBalance: columnOrgClearBalanceName
-        })
-      })
-
-      this.orgAccInfoHeaders.push({
-        text: 'Итого',
-        orgId: '-',
-        value: 'total'
-
-      })
-      await this.findOrgAccInfo()
-    },
-
-    // Поиск остатков на расчетных счетах найденных организаций
     async findOrgAccInfo(date) {
-      this.reset()
-      if (date === undefined) {
-        date = new Date()
-      }
-      const data = this.createParamsForRequestPaymentAccGroupByOrg(date, ['myOrg.id', 'myOrg.clName', 'acc.accType'])
-      const response = await this.$api.paymentAccounts.groupBy(data)
-
-      this.orgAccInfoData = []
-
-      const orgAccInfoDataAccounts = {}
-      orgAccInfoDataAccounts.name = 'р/с'
-
-      const orgAccInfoDataCashbox = {}
-      orgAccInfoDataCashbox.name = 'нал.'
-
-      let totalSumOfAccounts = 0
-      let totalSumOfCashbox = 0
-      for (const orgAccElem of this.orgAccInfoHeaders) {
-        const responseElem = response.find(el => el['myOrg.id'] === orgAccElem.orgId)
-        if (!responseElem) {
-          continue
-        }
-
-        const sumOfOtherAccounts = await this.getBalanceOfDocsToPay(orgAccElem.orgId, date)
-        const sumOfClearBalance = responseElem.sum_saldo + responseElem.sum_nalich
-        const sumOfOrg = sumOfClearBalance - sumOfOtherAccounts
-        orgAccInfoDataAccounts[orgAccElem.clearBalance] = sumOfClearBalance
-        orgAccInfoDataAccounts[orgAccElem.valueSum] = sumOfOrg
-        orgAccInfoDataAccounts[orgAccElem.value] = this.numberToSum(sumOfOrg)
-        totalSumOfAccounts += sumOfOrg
-        orgAccInfoDataCashbox[orgAccElem.value] = this.numberToSum(0)
-        totalSumOfCashbox += 0
-      }
-
-      orgAccInfoDataAccounts.total = this.numberToSum(totalSumOfAccounts)
-      orgAccInfoDataCashbox.total = this.numberToSum(totalSumOfCashbox)
-
-      this.orgAccInfoData.push(orgAccInfoDataAccounts)
-      this.orgAccInfoData.push(orgAccInfoDataCashbox)
-    },
-
-    async findOrgAccInfoAlter(date) {
       this.reset()
       if (date === undefined) {
         date = new Date()
@@ -176,8 +98,6 @@ export default {
 
         if (responseElem['acc.accType'] === 'COMMON') {
           this.addOrgIntoHeaders(responseElem)
-          /* const sumOfDocToPay = await this.getBalanceOfDocsToPay(responseElem['myOrg.id'], date)
-          sumOfOrg = sumOfClearBalance - sumOfDocToPay */
 
           orgAccInfoDataAccounts['org' + responseElem['myOrg.id'] + 'ClearBalance'] = sumOfClearBalance
           orgAccInfoDataAccounts['org' + responseElem['myOrg.id'] + 'ValueSum'] = sumOfOrg
@@ -238,33 +158,6 @@ export default {
         totalSum += this.orgAccInfoData[0][elem.valueSum]
       }
       this.orgAccInfoData[0].total = this.numberToSum(totalSum)
-    },
-
-    async getBalanceOfDocsToPay(orgId, date) {
-      const sumToPay = await this.getSumToPayDocsOfOrg(orgId, date)
-      const sumPaymentByCashbox = await this.getSumOfPaymentByCashboxOfOrg(orgId, date)
-      const totalSumOplat = sumToPay + sumPaymentByCashbox
-      return totalSumOplat
-    },
-    async getSumToPayDocsOfOrg(orgId, date) {
-      const data = this.createCriteriasWithoutAccIdForRequestToSearchDocsToPay(orgId, date)
-      let totalToSumOplat = 0
-      const response = await this.$api.payment.docOplToPay.findDocumentsByCriterias(data)
-      response.forEach((value) => {
-        totalToSumOplat += value.sumOplat
-      })
-      return totalToSumOplat
-    },
-    async getSumOfPaymentByCashboxOfOrg(orgId, date) {
-      const data = this.createCriteriasWithoutAccIdForRequestToSearchPaymentsByCashbox(orgId, date)
-      let totalPaymentSum = 0
-      const response = await this.$api.payment.findPaymentsByCashboxByCriterias(data)
-      response.forEach((value) => {
-        if (value.paymentOperationSums.length > 0) {
-          totalPaymentSum += value.paymentOperationSums[0].paymentSum
-        }
-      })
-      return totalPaymentSum
     },
 
     findSumOfOrg(orgId) {

@@ -166,7 +166,7 @@ export default {
   data() {
     return {
       // id элемента, для которого будут сохранены настроики фильтров
-      elementId: 'journal-of-payment-docs-from-pay-docs',
+      elementId: null,
 
       // объект для отображения статусов процесса загрузки данных для полей
       loadingType: {},
@@ -207,6 +207,7 @@ export default {
 
   methods: {
     init() {
+      this.elementId = this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs()
       this.findDepartments()
       this.findPayers()
       this.findBuyers()

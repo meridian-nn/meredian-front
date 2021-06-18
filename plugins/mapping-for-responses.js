@@ -25,6 +25,8 @@ Vue.mixin({
                     nameDoc: 'Оплата по кассе',
                     namePlat: value.payer.clName,
                     prCredit: 0,
+                    buyerName: '',
+                    executorName: '',
                     sumOplat: sumPlatFromValue,
                     sumOplatMask: this.numberToSum(sumPlatFromValue),
                     accId: 0, // value.accId

@@ -314,7 +314,6 @@ export default {
       response[1] = response.splice(0, 1, response[1])[0]
       for (const element of response) {
         element.name = element['myOrg.clName']
-        // const balance = await this.getBalanceOfOtherAccounts(element['myOrg.id'])
         if (!element.sum_sumToPay) {
           element.sum_sumToPay = 0
         }
@@ -343,44 +342,6 @@ export default {
         'endBalance': this.numberToSum(this.totalSumOfEndBalance)
       })
       return response
-    },
-    async getBalanceOfOtherAccounts(orgId, accId) {
-      const sumToPay = await this.getSumToPayDocsOfOrg(orgId, accId)
-      const sumPaymentByCashbox = await this.getSumOfPaymentByCashboxOfOrg(orgId, accId)
-      const totalSumOplat = sumToPay + sumPaymentByCashbox
-      return totalSumOplat
-    },
-    async getSumToPayDocsOfOrg(orgId, accId) {
-      let data
-      if (accId) {
-        data = this.createCriteriasForRequestToSearchDocsToPay(accId, orgId, this.date)
-      } else {
-        data = this.createCriteriasWithoutAccIdForRequestToSearchDocsToPay(orgId, this.date)
-      }
-
-      let totalToSumOplat = 0
-      const response = await this.$api.payment.docOplToPay.findDocumentsByCriterias(data)
-      response.forEach((value) => {
-        totalToSumOplat += value.sumOplat
-      })
-      return totalToSumOplat
-    },
-    async getSumOfPaymentByCashboxOfOrg(orgId, accId) {
-      let data
-      if (accId) {
-        data = this.createCriteriasForRequestToSearchPaymentsByCashbox(accId, orgId, this.date)
-      } else {
-        data = this.createCriteriasWithoutAccIdForRequestToSearchPaymentsByCashbox(orgId, this.date)
-      }
-
-      let totalPaymentSum = 0
-      const response = await this.$api.payment.findPaymentsByCashboxByCriterias(data)
-      response.forEach((value) => {
-        if (value.paymentOperationSums.length > 0) {
-          totalPaymentSum += value.paymentOperationSums[0].paymentSum
-        }
-      })
-      return totalPaymentSum
     },
 
     // Поиск организаций для выбора пользователем
@@ -414,8 +375,6 @@ export default {
 
         elem.shortNameOfAcc = elem.acc.shortName
         elem.shortNameOfAccWithNumOfAcc = elem.acc.shortName + ' - ' + elem.acc.numAcc.slice(elem.acc.numAcc.length - 4)
-        // const balance = await this.getBalanceOfOtherAccounts(elem.myOrg.id, elem.acc.id)
-        // elem.credit += balance
         elem.endBalance = elem.saldo + elem.nalich + elem.vnpl - elem.sumToPay
       }
 

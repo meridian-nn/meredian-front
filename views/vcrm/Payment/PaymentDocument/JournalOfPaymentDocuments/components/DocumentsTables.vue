@@ -49,8 +49,8 @@
                   separator="space"
                   :precision="2"
                   decimal-separator="."
-                  :output-type="number"
-                  :read-only="true"
+                  output-type="number"
+                  read-only="true"
                 /> {{ additionalMessage }}
               </span>
             </div>
@@ -129,7 +129,7 @@
                           separator="space"
                           :precision="2"
                           decimal-separator="."
-                          :output-type="number"
+                          output-type="number"
                         />
                         <span class="line" />
                       </div>
@@ -472,7 +472,7 @@
                 separator="space"
                 :precision="2"
                 decimal-separator="."
-                :output-type="number"
+                output-type="number"
                 :read-only="true"
               />
             </th>
@@ -495,7 +495,7 @@
                 separator="space"
                 :precision="2"
                 decimal-separator="."
-                :output-type="number"
+                output-type="number"
                 :read-only="true"
               />
             </th>
@@ -508,7 +508,7 @@
                 separator="space"
                 :precision="2"
                 decimal-separator="."
-                :output-type="number"
+                output-type="number"
                 :read-only="true"
               />
             </th>
@@ -521,7 +521,7 @@
                 separator="space"
                 :precision="2"
                 decimal-separator="."
-                :output-type="number"
+                output-type="number"
                 :read-only="true"
               />
             </th>
@@ -716,11 +716,7 @@ export default {
       pageOfFromPayData: 0,
 
       // Переменная для реализации обновления данных в таблице "Документы на оплату"
-      infiniteIdOfFromPayData: +new Date(),
-
-      elementIdForDefaultOrgAndAcc: 'journal-of-payment-docs-default-org-acc',
-
-      elementIdOfFromPayTable: 'journal-of-payment-docs-from-pay-docs'
+      infiniteIdOfFromPayData: +new Date()
     }
   },
 
@@ -753,7 +749,7 @@ export default {
       this.loadingType = {}
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
-      await this.findDefaultOrgAndAccIdForUser()
+      await this.findDefaultOrgAndAccIdForUserOnForm()
       await this.findOrganizations()
       if (this.accId && this.selectedOrganization) {
         await this.findPaymentAccounts(this.selectedOrganization)
@@ -773,14 +769,9 @@ export default {
       this.selectFirstPaymentAccount()
     },
 
-    async findDefaultOrgAndAccIdForUser() {
-      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
-        this.elementIdForDefaultOrgAndAcc, this.getCurrentUser().id)
-      const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
-      let filtersParams
-
-      if (response.length) {
-        filtersParams = JSON.parse(response[0].settingValue)
+    async findDefaultOrgAndAccIdForUserOnForm() {
+      const filtersParams = await this.findDefaultOrgAndAccIdForUser()
+      if (filtersParams) {
         this.selectedOrganization = filtersParams.orgId
         this.accId = filtersParams.accId
       }
@@ -815,8 +806,9 @@ export default {
     },
 
     // Обработка события "Сохранение новой оплаты по кассе"
-    savePaymentByCashbox() {
-      this.refreshTables()
+    async savePaymentByCashbox() {
+      await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
+      await this.refreshTables()
     },
 
     // Обработка события "Закрытие модальной формы внутреннего платежа"
@@ -832,7 +824,7 @@ export default {
 
     // Обновление списка документов к оплате, остатков на расчетных счетах выбранной организации и при изменении даты
     async updateInformationOnForm() {
-      await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfoAlter(this.date)
+      await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
       await this.findToPay(this.accId)
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
@@ -1224,7 +1216,7 @@ export default {
     // Поиск документов для таблицы "Документы на оплату" по выбранной организации
     async findSpDocoplForPay($state) {
       const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
-        this.elementIdOfFromPayTable, this.getCurrentUser().id)
+        this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs(), this.getCurrentUser().id)
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
       let filtersParams
 

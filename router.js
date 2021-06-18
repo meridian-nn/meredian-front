@@ -55,9 +55,6 @@ const PaymentByCashboxPage = dynamicPage(() =>
 const InternalPaymentPage = dynamicPage(() =>
     import ('~/views/vcrm/Payment/PaymentDocument/Modals/InternalPayment.vue'))
 
-const HistoryOfPaymentDocumentsPage = dynamicPage(() =>
-    import ('~/views/vcrm/Payment/HistoryOfJournalOfPaymentDocuments-not-using'))
-
 const MoneyDistributionPage = dynamicPage(() =>
     import ('~/views/vcrm/Payment/MoneyDistribution'))
 
@@ -248,12 +245,6 @@ const createRouterConst = new Router({
                     path: 'journal_of_email_sending_payment_documents',
                     name: 'JournalOfEmailSendingPaymentDocuments',
                     component: JournalOfEmailSendingPaymentDocumentsPage
-                },
-
-                {
-                    path: 'history_of_payment_documents',
-                    name: 'HistoryOfPaymentDocuments',
-                    component: HistoryOfPaymentDocumentsPage
                 },
 
                 {

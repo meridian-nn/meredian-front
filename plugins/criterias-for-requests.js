@@ -178,6 +178,29 @@ Vue.mixin({
             return data
         },
 
+        createCriteriasToSearchDocsFromPayForEmailSendingForm(date, orgId) {
+          return [
+            {
+              'dataType': 'DATE',
+              'key': 'dataDoc',
+              'operation': 'GREATER_THAN',
+              'type': 'AND',
+              'values': [
+                new Date(date).toLocaleDateString()
+              ]
+            },
+            {
+              'dataType': 'INTEGER',
+              'key': 'myOrg.id',
+              'operation': 'EQUALS',
+              'type': 'AND',
+              'values': [
+                orgId
+              ]
+            }
+          ]
+        },
+
         getOperationTypeForRequestToSearchDocsFromPay(key) {
           if (key === 'nameDoc'
               || key === 'creatorName'

@@ -170,9 +170,9 @@ export default {
 
       selectedAccount: null,
 
-      elementIdForUISetting: 'journal-of-payment-docs-default-org-acc',
+      elementIdOfDefaultOrgAndAccForUISetting: null,
 
-      formIdForUISetting: 'JournalOfPaymentDocuments'
+      formIdOfOrgAndAccForUISetting: null
     }
   },
 
@@ -182,8 +182,15 @@ export default {
 
   methods: {
     init() {
+      this.getValuesForFormIdAndElementIdOfDefaultOrgAndAccIds()
       this.findUsersAccounts()
       this.findOrganizations()
+    },
+
+    getValuesForFormIdAndElementIdOfDefaultOrgAndAccIds() {
+      const formAndElementIds = this.getObjectWithFormIdAndElementIdForDefaultOrgAndAcc()
+      this.formIdOfOrgAndAccForUISetting = formAndElementIds.formId
+      this.elementIdOfDefaultOrgAndAccForUISetting = formAndElementIds.elementId
     },
 
     async findUsersAccounts() {
@@ -236,8 +243,8 @@ export default {
     },
 
     async findDefaultOrgAndAccIdForUser(userId) {
-      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.formIdForUISetting,
-        this.elementIdForUISetting, userId)
+      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.formIdOfOrgAndAccForUISetting,
+        this.elementIdOfDefaultOrgAndAccForUISetting, userId)
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
       let filtersParams
 
@@ -323,7 +330,7 @@ export default {
       }
 
       const filterEntityForSave = this.createFilterEntityForSave(
-        this.elementIdForUISetting, this.formIdForUISetting, uiSettingsValues, this.currentUserId)
+        this.elementIdOfDefaultOrgAndAccForUISetting, this.formIdOfOrgAndAccForUISetting, uiSettingsValues, this.currentUserId)
 
       await this.$api.uiSettings.save(filterEntityForSave)
 

@@ -8,6 +8,28 @@ Vue.mixin({
             return 'journal-of-payment-docs-from-pay-docs'
         },
 
+        //Функция возвращает form id и element id для orgId и accId по умолчанию
+        getObjectWithFormIdAndElementIdForDefaultOrgAndAcc() {
+          return {
+            formId: 'everywhere',
+            elementId: 'everywhere'
+          }
+        },
+
+        async findDefaultOrgAndAccIdForUser() {
+          const formAndElementIdsOfOrgAndAccIds = this.getObjectWithFormIdAndElementIdForDefaultOrgAndAcc()
+          const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(formAndElementIdsOfOrgAndAccIds.formId,
+            formAndElementIdsOfOrgAndAccIds.elementId, this.getCurrentUser().id)
+          const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
+          let filtersParams = {}
+
+          if (response.length) {
+            filtersParams = JSON.parse(response[0].settingValue)
+          }
+
+          return filtersParams
+        },
+
         //Функция возвращает цвет организации по переданному id организации
         getColorForOrganization(orgId) {
             if (orgId === 159) {
