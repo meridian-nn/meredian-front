@@ -102,17 +102,7 @@
               />
             </v-col>
 
-            <v-col cols="3">
-              <v-autocomplete
-                v-model="editedItem.viddocId"
-                label="Тип документа"
-                :loading="loadingType.documentTypes"
-                :items="documentTypes"
-                item-value="id"
-                item-text="nameViddoc"
-                outlined
-              />
-            </v-col>
+            <v-col cols="3" />
 
             <v-col cols="5">
               <v-autocomplete
@@ -138,7 +128,7 @@
               <v-row>
                 <v-col cols="12">
                   <v-autocomplete
-                    v-model="editedItem.payerId"
+                    v-model="editedItem.myorgId"
                     style="margin-left: 16px"
                     label="Плательщик"
                     :loading="loadingType.payers"
@@ -149,17 +139,40 @@
                     outlined
                   />
                 </v-col>
-                <v-col cols="12">
-                  <v-autocomplete
-                    v-model="editedItem.buyerId"
+              </v-row>
+              <v-row>
+                <v-col cols="6">
+                  <v-text-field
+                    v-model.number="editedItem.sumDoc"
+                    type="number"
                     style="margin-left: 16px"
-                    label="Покупатель"
-                    :loading="loadingType.buyers"
-                    :items="buyers"
-                    item-value="id"
-                    item-text="clName"
-                    hide-details="auto"
+                    label="Сумма док-та"
                     outlined
+                    hide-details="auto"
+                    @input="calcSum"
+                  />
+                </v-col>
+                <v-col cols="6">
+                  <v-text-field
+                    v-model.number="editedItem.sumPaid"
+                    type="number"
+                    label="Оплачено"
+                    readonly="true"
+                    outlined
+                    hide-details="auto"
+                  />
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="6">
+                  <v-text-field
+                    v-model.number="editedItem.sumToPay"
+                    type="number"
+                    style="margin-left: 16px"
+                    label="К оплате"
+                    readonly="true"
+                    outlined
+                    hide-details="auto"
                   />
                 </v-col>
               </v-row>
@@ -169,25 +182,14 @@
               <v-row>
                 <v-col cols="6">
                   <v-autocomplete
-                    v-model="editedItem.documentKindId"
+                    v-model="editedItem.viddocId"
                     label="Вид документа"
-                    :loading="loadingType.documentKinds"
-                    :items="documentKinds"
+                    :loading="loadingType.documentTypes"
+                    :items="documentTypes"
                     item-value="id"
                     item-text="nameViddoc"
                     hide-details="auto"
                     outlined
-                  />
-                </v-col>
-
-                <v-col cols="6">
-                  <v-text-field
-                    v-model.number="editedItem.sumDoc"
-                    type="number"
-                    label="Сумма док-та"
-                    outlined
-                    hide-details="auto"
-                    @input="calcSum"
                   />
                 </v-col>
               </v-row>
@@ -272,16 +274,6 @@
                             outlined
                           />
                         </v-col>
-
-                        <v-col cols="3">
-                          <v-text-field
-                            v-model.number="editedItem.toPay"
-                            type="number"
-                            label="Сумма договора"
-                            hide-details="auto"
-                            outlined
-                          />
-                        </v-col>
                       </v-row>
                     </v-container>
                   </v-expansion-panel-content>
@@ -348,14 +340,13 @@ export default {
       contracts: [],
       // массив плательщиков
       payers: [],
-      // массив покупателей
-      buyers: [],
+      // id плательщика документа на оплату
+      myorgId: null,
       // массив поставщиков для выбора пользователем
       suppliers: [],
       // массив клиентов для выбора пользователем
       clients: [],
-      // массив видов документов для выбора пользователем
-      documentKinds: [],
+
       search: null,
       select: null,
       // переменная, отвечающая за отображениие модального окна
@@ -378,36 +369,35 @@ export default {
       this.findDepartments()
       this.findDocumentType()
       this.findPayers()
-      this.findBuyers()
       this.findClients()
       this.findSuppliers()
       this.findPaymentStatuses()
-      this.findDocumentKinds()
       this.findContracts()
     },
     // Поиск документа на оплату для редатирования / создания на основе нового документа
     async findEditedItem(copyDoc = false) {
-      if (this.id) {
-        const editedItem = await this.$api.payment.docOplForPay.findById(this.id)
-        await this.findDocumentType(editedItem.departmentId)
-        await this.findExecutors(editedItem.departmentId)
-        // this.findSuppliers(editedItem.contractId)
-        await this.findContracts()
-        this.editedItem = editedItem
-        if (this.editedItem.buyer) {
-          this.editedItem.buyerId = this.editedItem.buyer.id
-        }
-        await this.findPayers()
-        if (copyDoc) {
-          this.id = null
-          this.editedItem.id = null
-          this.editedItem.creatorId = null
-          this.editedItem.spDocches = []
-          this.editedItem.spDocints = []
-        }
-        this.fillDatesEditedItem()
-        this.calcSum(editedItem.sumDoc)
+      if (!this.id) {
+        return
       }
+      const editedItem = await this.$api.payment.docOplForPay.findByIdRead(this.id)
+      await this.findDocumentType(editedItem.departmentId)
+      await this.findExecutors(editedItem.departmentId)
+      // this.findSuppliers(editedItem.contractId)
+      await this.findContracts()
+      this.editedItem = editedItem
+      if (this.editedItem.buyer) {
+        this.editedItem.buyerId = this.editedItem.buyer.id
+      }
+      await this.findPayers()
+      if (copyDoc) {
+        this.id = null
+        this.editedItem.id = null
+        this.editedItem.creatorId = null
+        this.editedItem.spDocches = []
+        this.editedItem.spDocints = []
+      }
+      this.fillDatesEditedItem()
+      this.calcSum(editedItem.sumDoc)
     },
     // поиск подразделений для выбора пользователем
     async findDepartments() {
@@ -419,23 +409,21 @@ export default {
     },
     // поиск статусов оплаты документа для выбора пользователем
     async findPaymentStatuses() {
-      if (!this.paymentStatuses.length) {
-        this.loadingType.paymentStatuses = true
-        this.paymentStatuses = await this.$api.payment.findPaymentStatuses()
-        this.loadingType.paymentStatuses = null
+      if (this.paymentStatuses.length) {
+        return
       }
+      this.loadingType.paymentStatuses = true
+      this.paymentStatuses = await this.$api.payment.findPaymentStatuses()
+      this.loadingType.paymentStatuses = null
     },
     // поиск типов документов для выбора пользователем
     async findDocumentType(parentId) {
-      if (!parentId) {
+      /* if (!parentId) {
         this.documentTypes = []
         return
-      }
+      } */
       this.loadingType.documentTypes = true
-      const data = {
-        parentId
-      }
-      this.documentTypes = await this.$api.budgetElements.findDocumentTypesByParentId(data)
+      this.documentTypes = await this.$api.budgetElements.findAllDocumentsTypes()
       this.loadingType.documentTypes = null
     },
     // обновление списка исполнителей для выбора пользователем после изменения подразделения на форме
@@ -474,23 +462,8 @@ export default {
     // поиск плательщиков для выбора пользователем
     async findPayers() {
       this.loadingType.payers = true
-      this.payers = await this.getBudgetOrganizations()
+      this.payers = await this.$api.organizations.findInternalOrganizations()
       this.loadingType.payers = null
-    },
-    // поиск покупателей для выбора пользователем
-    async findBuyers() {
-      this.loadingType.buyers = true
-      this.buyers = await this.$api.organizations.findInternalOrganizations()
-      this.loadingType.buyers = null
-    },
-    // поиск видов документов для выбора пользователем
-    async findDocumentKinds() {
-      if (!this.documentKinds.length) {
-        this.loadingType.documentKinds = true
-        const data = this.createCriteriasToSearchTypeOfDocsForDocsForPay()
-        this.documentKinds = await this.$api.typeOfDocuments.findBySearchCriteria(data)
-        this.loadingType.documentKinds = null
-      }
     },
     // обновление списка договоров для выбора пользователем после изменения поставщика на форме
     async findContracts() {
@@ -503,18 +476,19 @@ export default {
     },
     // расчет суммы к оплате документа
     calcSum(val) {
-      this.editedItem.toPay = (val || 0) - (this.editedItem.sumPaid || 0)
+      this.editedItem.sumToPay = (val || 0) - (this.editedItem.sumPaid || 0)
     },
     // функция отработки события изменения подразделения на форме
     departmentChange(depId) {
       // очищаем массивы договоров и поставщиков для выбора пользователем, т.к. они будут изменены выбранным поставщиком
-      delete (this.editedItem.viddocId)
-      this.findDocumentType(depId)
+      // delete (this.editedItem.viddocId)
+      // this.findDocumentType(depId)
       this.findExecutors(depId)
     },
     getCurrentUser() {
       return this.$store.state.profile.user
     },
+
     // функция отработки события изменения дат на форме
     dataOplatChange(val) {
       if (!this.editedItem.dataDoc) {
@@ -527,25 +501,27 @@ export default {
         this.editedItem.dataOplat = null
       }
     },
+
     // функция сохранения документа
     async save() {
-      if (!this.checkParamsOfEditedItem()) {
+      if (!this.checkParamsOfEditedItemAlter()) {
         return
       }
       let errorMessage = null
       this.editedItem.creatorId = this.getCurrentUser().id
-      this.editedItem.ispId = this.editedItem.payerId
+      this.editedItem.ispId = 0
       this.editedItem.dataOplat = new Date(this.editedItem.dataOplat).toLocaleDateString()
       this.editedItem.dataDoc = new Date(this.editedItem.dataDoc).toLocaleDateString()
-      this.editedItem.buyer = {
-        id: this.editedItem.buyerId
-      }
-      delete (this.editedItem.buyerId)
+      // this.editedItem.documentKindId = 100
+
+      /* this.editedItem.buyer = {
+        id: 123
+      } */
 
       this.editedItem.myOrg = {
-        id: this.editedItem.payerId
+        id: this.editedItem.myorgId
       }
-      delete (this.editedItem.payerId)
+
       await this.$api.payment.docOplForPay.save(this.editedItem)
         .catch((error) => {
           errorMessage = error
@@ -574,14 +550,11 @@ export default {
       } else if (!this.editedItem.sumDoc) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите сумму по договору!')
         verificationPassed = false
-      } else if (!this.editedItem.payerId) {
+      } else if (!this.editedItem.myorgId) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите плательщика!')
         verificationPassed = false
       } else if (!this.editedItem.buyerId) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите покупателя!')
-        verificationPassed = false
-      } else if (!this.editedItem.documentKindId) {
-        this.$refs.userNotification.showUserNotification('error', 'Укажите вид документа!')
         verificationPassed = false
       } else if (!this.editedItem.executorId) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите исполнителя!')
@@ -592,6 +565,38 @@ export default {
       }
       return verificationPassed
     },
+
+    checkParamsOfEditedItemAlter() {
+      let verificationPassed = true
+      if (!this.editedItem.dataOplat || !this.editedItem.dataDoc) {
+        this.$refs.userNotification.showUserNotification('error', 'Укажите дату документа и дату оплаты документа!')
+        verificationPassed = false
+        return verificationPassed
+      }
+
+      if (!this.editedItem.nameDoc) {
+        this.editedItem.nameDoc = '-'
+      }
+
+      if (!this.editedItem.myorgId) {
+        this.editedItem.myorgId = 159
+      }
+
+      if (!this.editedItem.buyerId) {
+        this.editedItem.buyerId = 0
+      }
+
+      if (!this.editedItem.viddocId) {
+        this.editedItem.viddocId = 26
+      }
+
+      if (!this.editedItem.sumDoc) {
+        this.editedItem.sumDoc = 0
+      }
+
+      return verificationPassed
+    },
+
     // функция отработки события нажития на кнопку "отмена"
     cancel() {
       this.reset()
@@ -613,7 +618,7 @@ export default {
       this.reset()
       this.editedItem.paymentStatus = 'BANK'
       if (selOrg) {
-        this.editedItem.payerId = selOrg
+        this.editedItem.myorgId = selOrg
       }
       const date = new Date()
       this.editedItem.dataDoc = date.toISOString().substr(0, 10)

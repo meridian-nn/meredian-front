@@ -72,22 +72,6 @@
 
           <v-row>
             <v-col cols="12">
-              <v-autocomplete
-                v-model="filterItem['buyer.id']"
-                label="Покупатель"
-                :loading="loadingType.buyers"
-                :items="buyers"
-                clearable="true"
-                item-value="id"
-                item-text="clName"
-                outlined
-                hide-details="auto"
-              />
-            </v-col>
-          </v-row>
-
-          <v-row>
-            <v-col cols="12">
               <v-text-field
                 v-model="filterItem.creatorName"
                 clearable="true"
@@ -183,9 +167,6 @@ export default {
       // массив плательщиков для выбора пользователем
       payers: [],
 
-      // массив покупателей для выбора пользователем
-      buyers: [],
-
       // массив подразделений для выбора пользователем
       departments: [],
       sumOplat: 0,
@@ -210,7 +191,6 @@ export default {
       this.elementId = this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs()
       this.findDepartments()
       this.findPayers()
-      this.findBuyers()
       this.findFiltersValues()
     },
 
@@ -228,19 +208,8 @@ export default {
     // Поиск плательщиков для выбора пользователем
     async findPayers() {
       this.loadingType.payers = true
-
-      const data = {
-        typeCode: 1
-      }
-      this.payers = await this.$api.organizations.findByOrgTypeCode(data)
-
+      this.payers = await this.$api.organizations.findInternalOrganizations()
       this.loadingType.payers = null
-    },
-
-    async findBuyers() {
-      this.loadingType.buyers = true
-      this.buyers = await this.$api.organizations.findInternalOrganizations()
-      this.loadingType.buyers = null
     },
 
     async saveFilters() {

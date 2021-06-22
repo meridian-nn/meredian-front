@@ -61,15 +61,14 @@
           <v-row>
             <v-col cols="6">
               <v-text-field
-                v-model="editedItem.sumDoc"
+                v-model="docFromPay.sumDoc"
                 type="number"
                 label="Сумма"
-                @input="calcSum"
               />
             </v-col>
             <v-col cols="6">
               <v-autocomplete
-                v-model="editedItem.viddocId"
+                v-model="docFromPay.viddocId"
                 label="Группа"
                 :loading="loadingType.groups"
                 :items="groups"
@@ -81,7 +80,7 @@
           <v-row>
             <v-col cols="12">
               <v-text-field
-                v-model="editedItem.prim"
+                v-model="docFromPay.prim"
                 label="Примечание"
               />
             </v-col>
@@ -149,7 +148,10 @@ export default {
       editedItem: {},
 
       // внутренний платеж
-      spDocint: {},
+      spDocint: {
+        kontrId: null,
+        accId: null
+      },
 
       // список организаций для выбора пользователем
       organizations: [],
@@ -158,7 +160,10 @@ export default {
       paymentAccounts: [],
 
       // список групп для выбора пользователем
-      groups: []
+      groups: [],
+
+      docFromPay: {},
+      selectedAccOfOrg: null
     }
   },
 
@@ -190,26 +195,27 @@ export default {
 
     // поиск групп для выбора пользователем на форме
     async findGroups() {
-      if (!this.groups.length) {
-        this.loadingType.groups = true
-        this.groups = await this.$api.budgetElements.findDepartments()
-        this.loadingType.groups = null
+      if (this.groups.length) {
+        return
       }
+      this.loadingType.groups = true
+      this.groups = await this.$api.budgetElements.findAllDocumentsTypes()
+      this.loadingType.groups = null
     },
 
     // обработка события изменения организации пользователем на форме
     organizationChange(val) {
       delete (this.spDocint.accId)
-      this.editedItem.contractorId = this.spDocint.kontrId
+      this.docFromPay.contractorId = this.spDocint.kontrId
       this.findPaymentAccounts(val)
     },
 
     // Функция поиска расчетных счетов выбранной организации
-    async findPaymentAccounts(val) {
+    async findPaymentAccounts(orgId) {
       this.loadingType.paymentAccounts = true
 
       const data = {
-        orgId: val
+        orgId
       }
       let paymentAccounts = await this.$api.paymentAccounts.findAccByOrgId(data)
       paymentAccounts = paymentAccounts.sort(this.customCompare('shortName'))
@@ -222,30 +228,40 @@ export default {
       this.loadingType.paymentAccounts = null
     },
 
-    // открытие формы из журнала документов
-    editDocument(id, selectedOrganization, accId) {
+    newDocument(selectedOrganization, accId) {
       this.reset()
-
       this.selectedOrganizationId = selectedOrganization
+      this.selectedAccOfOrg = accId
       this.findPayerById()
-
-      this.id = id
+      this.createNewDocFromPay()
       this.dialog = true
-      this.findEditedItem(accId)
+    },
+
+    createNewDocFromPay() {
+      const currentDate = new Date()
+      const dataDoc = currentDate.toISOString().substr(0, 10)
+      currentDate.setDate(currentDate.getDate() + 3)
+      const dataOplat = currentDate.toISOString().substr(0, 10)
+      this.docFromPay = {
+        accId: this.selectedAccOfOrg,
+        creatorId: this.getCurrentUser().id,
+        dataDoc: new Date(dataDoc).toLocaleDateString(),
+        dataOplat: new Date(dataOplat).toLocaleDateString(),
+        ispId: 0,
+        myorgId: this.selectedOrganizationId,
+        myOrg: {
+          id: this.selectedOrganizationId
+        },
+        nameDoc: '-',
+        paymentStatus: 'BANK',
+        spDocches: [],
+        spDocints: []
+      }
     },
 
     // поиск организации-плательщика по id
     async findPayerById() {
       this.selectedOrganization = await this.$api.organizations.findById(this.selectedOrganizationId)
-    },
-
-    // поиск документа на оплату по id
-    async findEditedItem(accId) {
-      if (this.id) {
-        const editedItem = await this.$api.payment.docOplForPay.findById(this.id)
-        this.editedItem = editedItem
-        this.editedItem.accId = accId
-      }
     },
 
     // функция отработки события нажития на кнопку "отмена"
@@ -258,7 +274,7 @@ export default {
     // функция обнуления всех переменных формы
     reset() {
       this.loadingType = {}
-      this.editedItem = {}
+      this.docFromPay = {}
       this.id = null
     },
 
@@ -268,10 +284,11 @@ export default {
         return
       }
 
-      this.editedItem.spDocints.push(this.spDocint)
+      this.docFromPay.descr = this.docFromPay.prim
+      this.docFromPay.spDocints.push(this.spDocint)
+
       let errorMessage = null
-      // await this.$api.payment.saveInternalPayment(this.editedItem)
-      await this.$axios.$post('/oper/spDocopl/saveInternalPayment', this.editedItem).catch((error) => {
+      await this.$axios.$post('/oper/spDocopl/saveInternalPayment', this.docFromPay).catch((error) => {
         errorMessage = error
         alert(errorMessage)
       })
@@ -284,19 +301,19 @@ export default {
     // функция проверки заполнения обязательных полей
     checkParamsOfEditedItem() {
       let verificationPassed = true
-      if (this.spDocint.kontrId === this.selectedOrganizationId) {
+      if (this.docFromPay.contractorId === this.selectedOrganizationId) {
         this.$refs.userNotification.showUserNotification('error', 'В полях "Плательщик" и "Кому" не может быть одна и та же организация!')
         verificationPassed = false
-      } else if (!this.spDocint.kontrId) {
+      } else if (!this.docFromPay.contractorId) {
         this.$refs.userNotification.showUserNotification('error', 'Выберите организацию, которой производится платёж!')
         verificationPassed = false
-      } else if (!this.spDocint.accId) {
+      } else if (!this.docFromPay.accId) {
         this.$refs.userNotification.showUserNotification('error', 'Выберите расчетный счет организации!')
         verificationPassed = false
-      } else if (!this.editedItem.sumDoc) {
+      } else if (!this.docFromPay.sumDoc) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите сумму оплаты!')
         verificationPassed = false
-      } else if (!this.editedItem.viddocId) {
+      } else if (!this.docFromPay.viddocId) {
         this.$refs.userNotification.showUserNotification('error', 'Укажите группу!')
         verificationPassed = false
       }

@@ -201,7 +201,6 @@ export default {
   },
   mounted() {
     this.init()
-    this.findOrganizations()
 
     const table = this.$refs.table.$el.querySelector('table')
 
@@ -280,11 +279,22 @@ export default {
       this.cellIndex = event.target.cellIndex
     },
 
-    init() {
-      this.selOplat()
-      this.groupByOrg()
+    async init() {
+      await this.selOplat()
+      await this.findOrganizations()
+      await this.groupByOrg()
       this.loadingType = {}
-      this.findByDataOplatAndMyOrgId(this.orgId)
+      await this.findDefaultOrgAndAccIdForUserOnForm()
+      if (this.orgId) {
+        await this.findByDataOplatAndMyOrgId()
+      }
+    },
+
+    async findDefaultOrgAndAccIdForUserOnForm() {
+      const filtersParams = await this.findDefaultOrgAndAccIdForUser()
+      if (filtersParams) {
+        this.orgId = filtersParams.orgId
+      }
     },
 
     // Инициализация журнала оплат
@@ -346,28 +356,26 @@ export default {
 
     // Поиск организаций для выбора пользователем
     async findOrganizations() {
-      if (!this.organizations.length) {
-        this.loadingType.organizations = true
-
-        const data = {
-          typeCode: 1
-        }
-        const organizations = await this.$api.organizations.findByOrgTypeCode(data)
-
-        organizations[1] = organizations.splice(0, 1, organizations[1])[0]
-
-        this.organizations = organizations
-        this.loadingType.organizations = null
+      if (this.organizations.length) {
+        return
       }
+      this.loadingType.organizations = true
+
+      const data = {
+        typeCode: 1
+      }
+      const organizations = await this.$api.organizations.findByOrgTypeCode(data)
+
+      organizations[1] = organizations.splice(0, 1, organizations[1])[0]
+
+      this.organizations = organizations
+      this.loadingType.organizations = null
     },
 
     // Получение списка расч. счетов выбранной организации и их сортировка по возрастанию
-    async findByDataOplatAndMyOrgId(val) {
-      const data = {
-        dateOplat: new Date(this.date).toLocaleDateString(),
-        orgId: val || 0
-      }
-      let oplata = await this.$api.paymentAccounts.findByDataOplatAndMyOrgId(data)
+    async findByDataOplatAndMyOrgId() {
+      const data = this.createCriteriasToFindPaymentAccountsByOrgIdAndDataOplat(this.orgId, this.date)
+      let oplata = await this.$api.paymentAccounts.findBySearchCriteriaList(data)
       for (const elem of oplata) {
         if (!elem.sumToPay) {
           elem.sumToPay = 0

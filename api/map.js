@@ -110,6 +110,9 @@ export const factory = send => ({
         findDepartments() {
             return send('GET', '/oper/dict/spViddocopl/findDepartments')
         },
+        findAllDocumentsTypes() {
+          return send('GET', '/oper/dict/spViddocopl/findAll')
+        },
         findDocumentTypesByParentId(params) {
             return send('GET', `/oper/dict/spViddocopl/findByParentId?${new URLSearchParams(params).toString()}`)
         },
@@ -306,12 +309,20 @@ export const factory = send => ({
               return send('POST', `/oper/spDocoplRead/findPageBySearchCriteriaList`, params)
             },
 
+            findDocumentsWithGroupBy(params) {
+              return send('POST', `/oper/spDocoplRead/groupBy`, params)
+            },
+
             deleteSelectedPayments(params) {
                 return send('POST', `/oper/spDocopl/deletePayment`, params)
             },
 
             findById(id) {
                 return send('GET', `/oper/spDocopl/findById/${id}`)
+            },
+
+            findByIdRead(id) {
+              return send('GET', `/oper/spDocoplRead/findById/${id}`)
             },
 
             save(params) {

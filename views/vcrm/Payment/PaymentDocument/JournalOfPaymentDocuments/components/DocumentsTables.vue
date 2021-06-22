@@ -98,7 +98,6 @@
               <v-data-table
                 id="journal-of-payment-docs-v-data-table-to-pay-docs"
                 v-model="toPaySelectedRows"
-                height="452"
                 :headers="toPayHeaders"
                 fixed-header
                 :items="toPayData"
@@ -308,9 +307,6 @@
                       <td class="journal-of-payment-docs-from-pay-docs-payerName">
                         {{ item.payerName }}
                       </td>
-                      <td class="journal-of-payment-docs-from-pay-docs-buyerName">
-                        {{ item.buyerName }}
-                      </td>
                       <td class="journal-of-payment-docs-from-pay-docs-executorName">
                         {{ item.executorName }}
                       </td>
@@ -427,6 +423,7 @@
                 </label>
                 <input
                   id="add"
+                  v-model="addGroupShow"
                   class="add-group__input"
                   type="checkbox"
                 >
@@ -442,13 +439,13 @@
                 >
                   нал
                 </button>
-                <!--button
-                  href=""
+                <button
+                  ref=""
                   class="add-group__link internal_payment"
                   @click="internalMovementForContextMenuOnly"
                 >
                   внт
-                </button-->
+                </button>
               </div>
             </div>
           </div>
@@ -517,7 +514,7 @@
           <div class="journal-of-payment-docs-result-text">
             <th>
               <vue-numeric
-                v-model="totalSumOplat"
+                v-model="totalSumToPay"
                 separator="space"
                 :precision="2"
                 decimal-separator="."
@@ -601,11 +598,6 @@ export default {
           width: '70px'
         },
         {
-          text: 'Покупатель',
-          value: 'buyerName',
-          width: '70px'
-        },
-        {
           text: 'Исполнитель',
           value: 'executorName',
           width: '70px'
@@ -641,10 +633,6 @@ export default {
           value: 'myorgName'
         },
         {
-          text: 'Покупатель',
-          value: 'buyer.shortName'
-        },
-        {
           text: 'Исполнитель',
           value: 'executorName'
         },
@@ -672,6 +660,11 @@ export default {
 
       // Список документов таблицы "Документы на оплату"
       fromPayData: [],
+
+      // Итоги по суммам документов по таблице "Документы на оплату"
+      totalSumDoc: 0,
+      totalSumPaid: 0,
+      totalSumToPay: 0,
 
       // Переменная для отображения информационного сообщения, что фильтры для таблицы "Документы на оплату" используются
       isFiltersForFromPayDocsUsing: false,
@@ -716,11 +709,14 @@ export default {
       pageOfFromPayData: 0,
 
       // Переменная для реализации обновления данных в таблице "Документы на оплату"
-      infiniteIdOfFromPayData: +new Date()
+      infiniteIdOfFromPayData: +new Date(),
+
+      // Переменная, которая отвечает за отображение всплывающих кнопок группы добавления новых документов
+      addGroupShow: false
     }
   },
 
-  computed: {
+  /* computed: {
     totalSumDoc() {
       return this.fromPayData.reduce((acc, item) => {
         return acc + item.sumDocNumber
@@ -738,7 +734,7 @@ export default {
         return acc + (item.sumDocNumber - item.sumPaidNumber)
       }, 0)
     }
-  },
+  }, */
 
   mounted() {
     this.init()
@@ -912,6 +908,7 @@ export default {
     // Функции контекстного меню таблицы документов к оплате
     // Вызов формы "Оплата по кассе"
     payedByCashboxForContextMenuOnly() {
+      this.addGroupShow = false
       this.$refs.paymentByCashbox.newDocument(this.selectedOrganization, this.accId)
       console.log('payed by cashbox')
     },
@@ -935,10 +932,12 @@ export default {
       }
 
       await this.addPayments()
-      await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'SUM')
-
+      const responseSpOplatSave = await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'SUM')
       await this.refreshTables()
-      await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
+
+      if (responseSpOplatSave) {
+        await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
+      }
     },
     async addPayments() {
       const ids = this.fromPaySelectedRows.map(value => value.id)
@@ -967,10 +966,12 @@ export default {
 
       const ids = this.toPaySelectedRows.map(value => value.id)
       await this.$axios.$post('/oper/spDocopl/deleteSelectedPayments', ids)
-      await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'DEDUCT')
+      const responseSpOplatSave = await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'DEDUCT')
 
       await this.refreshTables()
-      await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
+      if (responseSpOplatSave) {
+        await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
+      }
     },
 
     // Вызов контекстного меню таблицы "Документы на оплату"
@@ -1013,6 +1014,7 @@ export default {
     // Функционал кнопок таблицы "Документы на оплату"
     // Добавление нового документа в таблицу "Документы на оплату"
     newDocument() {
+      this.addGroupShow = false
       this.$refs.editPaymentDocument.newDocument(this.selectedOrganization)
     },
 
@@ -1062,9 +1064,13 @@ export default {
 
     // Вн. перемещение
     internalMovementForContextMenuOnly() {
-      this.$refs.internalPayment.editDocument(this.currentRowForContextMenu.docoplId,
-        this.selectedOrganization,
-        this.accId)
+      if (!this.selectedOrganization || !this.accId) {
+        this.$refs.userNotification.showUserNotification('error', 'Перед созданием внутреннего платежа, выберите организацию и расчетный счет!')
+        return
+      }
+
+      this.addGroupShow = false
+      this.$refs.internalPayment.newDocument(this.selectedOrganization, this.accId)
 
       console.log('internal movement')
     },
@@ -1237,17 +1243,21 @@ export default {
       const { content } = await this.$api.payment.docOplForPay.findDocumentsForPayForJournalTable(data)
 
       if (content.length > 0) {
+        const dataForResults = this.createCriteriasToGetResultsOfContent(searchCriterias)
+        const response = await this.$api.payment.docOplForPay.findDocumentsWithGroupBy(dataForResults)
+
+        if (response.length > 0) {
+          const results = response[0]
+          this.totalSumDoc = this.numberToSum(results.sum_sumDoc)
+          this.totalSumPaid = this.numberToSum(results.sum_sumPaid)
+          this.totalSumToPay = this.numberToSum(results.sum_sumToPay)
+        }
+
         this.pageOfFromPayData += 1
 
         content.forEach((value) => {
           value.sumPaid = value.sumPaid == null ? 0 : value.sumPaid
           value.sumOplat = value.sumToPay
-
-          if (value.buyer) {
-            value.buyerName = value.buyer.clName8
-          } else {
-            value.buyerName = ''
-          }
 
           if (value.myOrg) {
             value.payerName = value.myOrg.clName8
@@ -1275,27 +1285,60 @@ export default {
 </script>
 
 <style lang="scss">
-
-#journal-of-payment-docs-v-data-table-from-pay-docs td {
-    word-break:break-all !important;
-    padding: 0 5px !important;
-    height: 0 !important;
+#journal-of-payment-docs-v-data-table-from-pay-docs   {
+  border-collapse: collapse;
+  width: 100%;
+  height: 580px;
 }
 
-#journal-of-payment-docs-v-data-table-from-pay-docs th {
-    padding: 0 5px !important;
-    height: 0 !important;
+#journal-of-payment-docs-v-data-table-from-pay-docs   table{
+  width: 100%;
+}
+#journal-of-payment-docs-v-data-table-from-pay-docs   td, #journal-of-payment-docs-v-data-table-from-pay-docs   th {
+  border: 1px solid #ddd;
+  word-break:break-all !important;
+  padding: 0 0 !important;
+  height: 0 !important;
 }
 
-#journal-of-payment-docs-v-data-table-to-pay-docs td {
-    word-break:break-all !important;
-    padding: 0 0 !important;
-    height: 0 !important;
+#journal-of-payment-docs-v-data-table-from-pay-docs   tr:nth-child(even){background-color: #f2f2f2;}
+
+#journal-of-payment-docs-v-data-table-from-pay-docs   tr:hover {background-color: #ddd;}
+
+#journal-of-payment-docs-v-data-table-from-pay-docs   th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #639db1 !important;
+  color: white;
 }
 
-#journal-of-payment-docs-v-data-table-to-pay-docs th {
-    padding: 0 0 !important;
-    height: 0 !important;
+#journal-of-payment-docs-v-data-table-to-pay-docs  {
+  border-collapse: collapse;
+  width: 100%;
+  height: 452px;
+}
+
+#journal-of-payment-docs-v-data-table-to-pay-docs  table{
+  width: 100%;
+}
+#journal-of-payment-docs-v-data-table-to-pay-docs  td, #journal-of-payment-docs-v-data-table-to-pay-docs  th {
+  border: 1px solid #ddd;
+  word-break:break-all !important;
+  padding: 0 0 !important;
+  height: 0 !important;
+}
+
+#journal-of-payment-docs-v-data-table-to-pay-docs  tr:nth-child(even){background-color: #f2f2f2;}
+
+#journal-of-payment-docs-v-data-table-to-pay-docs  tr:hover {background-color: #ddd;}
+
+#journal-of-payment-docs-v-data-table-to-pay-docs  th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #639db1 !important;
+  color: white;
 }
 
 .journal-of-payment-docs-to-pay-col-5 {
@@ -1403,8 +1446,8 @@ export default {
 }
 
 .journal-of-payment-docs-bottom-spacer-for-fromPay-results{
-  flex: 0 0 59%;
-  max-width: 59%;
+  flex: 0 0 55%;
+  max-width: 55%;
 }
 
 .journal-of-payment-docs-result-text{
@@ -1495,10 +1538,6 @@ export default {
 }
 
 .journal-of-payment-docs-from-pay-docs-payerName {
-  width: 100px !important
-}
-
-.journal-of-payment-docs-from-pay-docs-buyerName {
   width: 100px !important
 }
 
@@ -1596,7 +1635,7 @@ export default {
   transition-delay: 0.1s;
 }
 
-.social input:checked ~ .internal_payment {
+.add-group input:checked ~ .internal_payment {
   transform: translate(0, 65px);
   transition-delay: 0.2s;
 }

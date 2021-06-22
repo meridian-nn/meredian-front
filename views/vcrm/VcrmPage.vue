@@ -214,7 +214,7 @@ export default {
   data() {
     return {
       drawer: true,
-      mini: false,
+      mini: true,
       breadcrumbs: [
         {
           text: 'Справочник',

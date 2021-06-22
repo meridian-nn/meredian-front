@@ -61,6 +61,10 @@ Vue.mixin({
         },
 
       async changeSumToPayOfPaymentAccount(accId, sumOfPaymentDocs, operationType) {
+          if(sumOfPaymentDocs === 0) {
+            return
+          }
+
           const searchCriterias = this.createCriteriasToFindPaymentAccount(accId)
           const response = await this.$api.paymentAccounts.findBySearchCriteriaList(searchCriterias)
           let paymentAccount
@@ -81,7 +85,7 @@ Vue.mixin({
             paymentAccount.sumToPay = paymentAccount.sumToPay - sumOfPaymentDocs
           }
 
-          await this.$api.paymentAccounts.save(paymentAccount)
+          return await this.$api.paymentAccounts.save(paymentAccount)
        }
     }
 })

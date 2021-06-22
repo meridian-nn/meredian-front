@@ -426,7 +426,29 @@ Vue.mixin({
           }
         },
 
-        createSearchCriteriasForRequestPaymentAccGroupByOrg(date) {
+      createCriteriasToGetResultsOfContent(searchCriterias) {
+        const aggregateFunctions = [
+          {
+            "field": "sumDoc",
+            "function": "SUM"
+          },
+          {
+            "field": "sumPaid",
+            "function": "SUM"
+          },
+          {
+            "field": "sumToPay",
+            "function": "SUM"
+          }
+        ]
+
+        return {
+          aggregateFunctions: aggregateFunctions,
+          searchCriteria: searchCriterias
+        }
+      },
+
+      createSearchCriteriasForRequestPaymentAccGroupByOrg(date) {
           return [
             {
               dataType: "DATE",
@@ -447,7 +469,7 @@ Vue.mixin({
               ]
             }
           ]
-        },
+      },
 
       createCriteriasToFindPaymentAccount(accId) {
         return [
@@ -467,6 +489,29 @@ Vue.mixin({
             type: "AND",
             values: [
               new Date().toLocaleDateString()
+            ]
+          }
+        ]
+      },
+
+      createCriteriasToFindPaymentAccountsByOrgIdAndDataOplat(orgId, dataOplat) {
+        return [
+          {
+            dataType: "VARCHAR",
+            key: "myOrg.id",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              orgId
+            ]
+          },
+          {
+            dataType: "DATE",
+            key: "dataOplat",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date(dataOplat).toLocaleDateString()
             ]
           }
         ]
