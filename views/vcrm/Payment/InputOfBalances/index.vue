@@ -102,6 +102,7 @@ export default {
     async groupByOrg() {
       this.groupByOrgData = await this.getInfoAboutOrgs()
     },
+
     async getInfoAboutOrgs() {
       this.totalSumOfSaldo = 0
       this.totalSumOfNalich = 0
@@ -117,10 +118,12 @@ export default {
       }
 
       response[1] = response.splice(0, 1, response[1])[0]
-      for (const element of response) {
+      const ids = response.map(item => item['myOrg.id'])
+      const balance = await this.getBalanceOfOtherAccounts(...ids)
+      for (const [i, element] of response.entries()) {
         element.name = element['myOrg.clName']
-        const balance = await this.getBalanceOfOtherAccounts(element['myOrg.id'])
-        element.credit += balance
+
+        element.credit += balance[i]
         element.endBalance = element.sum_saldo + element.sum_nalich + element.sum_vnpl - element.sum_credit
 
         this.totalSumOfSaldo += element.sum_saldo
@@ -168,6 +171,7 @@ export default {
       })
       return totalToSumOplat
     },
+
     async getSumOfPaymentByCashboxOfOrg(orgId, accId) {
       let data
       if (accId) {

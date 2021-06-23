@@ -118,7 +118,7 @@ export default {
     },
 
     date: {
-      type: Date,
+      type: [String, Date],
       required: true
     }
   },
