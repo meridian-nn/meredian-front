@@ -50,7 +50,7 @@
                   :precision="2"
                   decimal-separator="."
                   output-type="number"
-                  read-only="true"
+                  :read-only="true"
                 /> {{ additionalMessage }}
               </span>
             </div>

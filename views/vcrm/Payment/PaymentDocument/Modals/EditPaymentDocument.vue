@@ -8,26 +8,6 @@
     class="edit-payment-document-modal"
     @input="$emit('close')"
   >
-    <!--template #activator="{ on, attrs }">
-      <v-fab-transition>
-        <v-btn
-          color="blue"
-          class="mr-2 mb-2"
-          fab
-          dark
-          small
-          fixed
-          bottom
-          right
-          v-bind="attrs"
-          v-on="on"
-          @click="dialog = true"
-        >
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
-      </v-fab-transition>
-    </template-->
-
     <v-card class="modal-card">
       <v-card-title>
         <span class="headline">Документ на оплату</span>
@@ -113,7 +93,7 @@
                 item-value="id"
                 item-text="clName"
                 hide-details="auto"
-                auto-select-first="true"
+                :auto-select-first="true"
                 outlined
               />
             </v-col>
@@ -157,7 +137,7 @@
                     v-model.number="editedItem.sumPaid"
                     type="number"
                     label="Оплачено"
-                    readonly="true"
+                    :readonly="true"
                     outlined
                     hide-details="auto"
                   />
@@ -170,7 +150,7 @@
                     type="number"
                     style="margin-left: 16px"
                     label="К оплате"
-                    readonly="true"
+                    :readonly="true"
                     outlined
                     hide-details="auto"
                   />
@@ -254,7 +234,6 @@
                             :items="contracts"
                             item-value="id"
                             item-text="numDogInt"
-                            clearable="true"
                             outlined
                             hide-details="auto"
                             @change="findClients"
@@ -270,7 +249,7 @@
                             item-value="id"
                             item-text="clName"
                             hide-details="auto"
-                            auto-select-first="true"
+                            :auto-select-first="true"
                             outlined
                           />
                         </v-col>

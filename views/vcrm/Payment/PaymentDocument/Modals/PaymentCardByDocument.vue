@@ -161,6 +161,12 @@
 <script>
 export default {
   name: 'PaymentCardByDocument',
+  props: {
+    show: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       date: new Date().toLocaleDateString(),

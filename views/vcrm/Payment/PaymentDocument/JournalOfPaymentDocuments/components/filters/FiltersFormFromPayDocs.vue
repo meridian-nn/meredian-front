@@ -19,7 +19,7 @@
               <v-text-field
                 v-model="filterItem.nameDoc"
                 label="Номер документа"
-                clearable="true"
+                :clearable="true"
                 outlined
                 hide-details="auto"
               />
@@ -33,7 +33,7 @@
                 label="Подразделение"
                 :loading="loadingType.departments"
                 :items="departments"
-                clearable="true"
+                :clearable="true"
                 item-value="id"
                 item-text="nameViddoc"
                 outlined
@@ -46,7 +46,7 @@
             <v-col cols="12">
               <v-text-field
                 v-model="filterItem.executorName"
-                clearable="true"
+                :clearable="true"
                 outlined
                 label="Имя исполнителя"
                 hide-details="auto"
@@ -61,7 +61,7 @@
                 label="Плательщик"
                 :loading="loadingType.payers"
                 :items="payers"
-                clearable="true"
+                :clearable="true"
                 item-value="id"
                 item-text="clName"
                 outlined
@@ -74,7 +74,7 @@
             <v-col cols="12">
               <v-text-field
                 v-model="filterItem.creatorName"
-                clearable="true"
+                :clearable="true"
                 outlined
                 label="Имя создателя документа"
                 hide-details="auto"
@@ -86,7 +86,7 @@
             <v-col cols="12">
               <v-text-field
                 v-model="filterItem.date"
-                clearable="true"
+                :clearable="true"
                 type="date"
                 outlined
                 label="Дата документа начиная с"
@@ -147,6 +147,12 @@
 
 export default {
   name: 'FiltersFormFromPayDocs',
+  props: {
+    show: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       // id элемента, для которого будут сохранены настроики фильтров

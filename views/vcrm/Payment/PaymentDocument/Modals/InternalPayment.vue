@@ -26,7 +26,7 @@
             <v-col cols="12">
               <v-text-field
                 v-model="selectedOrganization.shortName"
-                readonly="true"
+                :readonly="true"
                 label="Плательщик"
                 hide-details="auto"
                 outlined
@@ -61,7 +61,7 @@
           <v-row>
             <v-col cols="6">
               <v-text-field
-                v-model="docFromPay.sumDoc"
+                v-model.number="docFromPay.sumDoc"
                 type="number"
                 label="Сумма"
               />
@@ -143,9 +143,6 @@ export default {
 
       // id документа на оплату
       id: null,
-
-      // документ на оплату
-      editedItem: {},
 
       // внутренний платеж
       spDocint: {
@@ -275,6 +272,16 @@ export default {
     reset() {
       this.loadingType = {}
       this.docFromPay = {}
+      this.spDocint = {
+        kontrId: null,
+        accId: null
+      }
+      this.selectedOrganization = {}
+      this.selectedOrganizationId = null
+      this.selectedAccOfOrg = null
+      this.organizations = []
+      this.paymentAccounts = []
+      this.groups = []
       this.id = null
     },
 

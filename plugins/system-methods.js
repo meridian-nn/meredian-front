@@ -98,11 +98,13 @@ Vue.mixin({
 
           if (!response) {
             return
-          } else if(response.length < 2 || response.length > 2) {
-            return
           } else {
-            paymentAccountOfPayer = response[0]
-            paymentAccountOfReceiver = response[1]
+            paymentAccountOfPayer = response.find(el => el.acc.id === accIdOfPayer)
+            paymentAccountOfReceiver = response.find(el => el.acc.id === accIdOfReceiver)
+          }
+
+          if(!paymentAccountOfPayer || !paymentAccountOfReceiver) {
+            return
           }
 
           paymentAccountOfPayer.vnpl = paymentAccountOfPayer.vnpl ? paymentAccountOfPayer.vnpl : 0
@@ -116,6 +118,8 @@ Vue.mixin({
             paymentAccountOfReceiver
           ]
 
+          console.log(sumOfPayment)
+          console.log(arrayOfPaymentAccountsForSave)
           await this.$axios.$post('/oper/spOplat/saveAll', arrayOfPaymentAccountsForSave)
         }
     }
