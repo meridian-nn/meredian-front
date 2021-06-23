@@ -24,6 +24,14 @@ export const factory = send => ({
 
             getUsersBySearchCriterias(params) {
                 return send('POST', `/auth/findBySearchCriteriaList`, params)
+            },
+
+            findById(id) {
+              return send('GET', `/auth/findById/${id}`)
+            },
+
+            saveUser(params) {
+              return send('POST', `/auth/save`, params)
             }
         },
 

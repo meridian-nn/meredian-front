@@ -26,9 +26,9 @@
     <div class="users-editing-row">
       <div id="rolesOfCurrentUserDataTable">
         <v-client-table
-          v-model="rolesOfUsersDataTable"
-          :columns="rolesOfUsersColumns"
-          :options="rolesOfUsersOptions"
+          v-model="rolesOfChosenUserDataTable"
+          :columns="rolesOfChosenUserColumns"
+          :options="rolesOfChosenUserOptions"
         >
           <v-simple-checkbox
             slot="isHave"
@@ -130,9 +130,9 @@ export default {
       },
 
       // таблица данных по ролям сотрудников
-      rolesOfUsersDataTable: [],
-      rolesOfUsersColumns: ['isHave', 'name'],
-      rolesOfUsersOptions: {
+      rolesOfChosenUserDataTable: [],
+      rolesOfChosenUserColumns: ['isHave', 'name'],
+      rolesOfChosenUserOptions: {
         filterable: false,
         pagination: { show: false },
         texts: { noResults: '' },
@@ -261,11 +261,11 @@ export default {
         return
       }
 
-      this.rolesOfUsersDataTable = []
+      this.rolesOfChosenUserDataTable = []
       this.currentUserId = user.row.id
       this.currentUser = 'Выбран пользователь - ' + user.row.fullName
       const response = await this.$api.auth.users.getRoles()
-      this.rolesOfUsersDataTable = this.convertListOfRolesResponseToListOfUserRoles(response, user.row.id)
+      this.rolesOfChosenUserDataTable = this.convertListOfRolesResponseToListOfUserRoles(response, user.row.id)
     },
 
     putUserChangesIntoArrayOfChangedUsers(user) {
@@ -319,8 +319,25 @@ export default {
       }
     },
 
-    saveChanges() {
-      this.$refs.userNotification.showUserNotification('success', 'Сохранение прав пользователей в разработке!')
+    async saveChanges() {
+      const userResponse = await this.$api.auth.user.findById(this.currentUserId)
+      if (!userResponse) {
+        return
+      }
+      const rolesOfUser = []
+
+      for (const role of this.rolesOfChosenUserDataTable) {
+        if (role.isHave) {
+          rolesOfUser.push({
+            id: role.id
+          })
+        }
+      }
+
+      userResponse.roles = rolesOfUser
+      await this.$api.auth.user.saveUser(userResponse)
+
+      this.$refs.userNotification.showUserNotification('success', 'Права сохранены!')
     },
 
     async saveOrganizationWithAccountForUi() {
@@ -330,7 +347,8 @@ export default {
       }
 
       const filterEntityForSave = this.createFilterEntityForSave(
-        this.elementIdOfDefaultOrgAndAccForUISetting, this.formIdOfOrgAndAccForUISetting, uiSettingsValues, this.currentUserId)
+        this.elementIdOfDefaultOrgAndAccForUISetting, this.formIdOfOrgAndAccForUISetting, uiSettingsValues,
+        this.currentUserId, this.getCurrentUser().id)
 
       await this.$api.uiSettings.save(filterEntityForSave)
 

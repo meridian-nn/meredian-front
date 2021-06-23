@@ -5,11 +5,12 @@ Vue.mixin({
     methods: {
         // Функция для создания создания параметра для запроса сохранения параметров фильтров
         // this.$api.uiSettings.save
-        createFilterEntityForSave(elementId, formId, filterItem, userId) {
+        createFilterEntityForSave(elementId, formId, filterItem, userId,creatorId) {
             const filterEntityForSave = {
                 elementId: elementId,
                 formId: formId,
                 userId: userId,
+                creatorId: creatorId,
                 settingValue: JSON.stringify(filterItem)
             }
             return filterEntityForSave
