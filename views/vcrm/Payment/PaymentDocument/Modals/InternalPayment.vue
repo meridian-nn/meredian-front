@@ -204,10 +204,10 @@ export default {
     },
 
     // обработка события изменения организации пользователем на форме
-    organizationChange(val) {
-      delete (this.spDocint.accId)
+    organizationChange() {
+      this.spDocint.accId = null
       this.docFromPay.contractorId = this.spDocint.kontrId
-      this.findPaymentAccounts(val)
+      this.findPaymentAccounts(this.spDocint.kontrId)
     },
 
     // Функция поиска расчетных счетов выбранной организации
@@ -293,6 +293,7 @@ export default {
         alert(errorMessage)
       })
       if (errorMessage == null) {
+        await this.changeVnplOfpaymentAccounts(this.docFromPay.accId, this.spDocint.accId, this.docFromPay.sumDoc)
         this.dialog = false
       }
       this.$emit('save')
@@ -303,6 +304,9 @@ export default {
       let verificationPassed = true
       if (this.docFromPay.contractorId === this.selectedOrganizationId) {
         this.$refs.userNotification.showUserNotification('error', 'В полях "Плательщик" и "Кому" не может быть одна и та же организация!')
+        verificationPassed = false
+      } else if (this.docFromPay.accId === this.spDocint.accId) {
+        this.$refs.userNotification.showUserNotification('error', 'В полях "Расчетный счет плательщика" и "Расчетный счет получателя" не может быть указан один и тот же счет!')
         verificationPassed = false
       } else if (!this.docFromPay.contractorId) {
         this.$refs.userNotification.showUserNotification('error', 'Выберите организацию, которой производится платёж!')

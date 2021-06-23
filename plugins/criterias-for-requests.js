@@ -157,7 +157,7 @@ Vue.mixin({
                       elemParam = elemParam.sumToPayValue
                     }
 
-                    const dataType = typeof elemParam === 'number' ? 'INTEGER' : 'VARCHAR'
+                    const dataType = this.getDataTypeForRequestToSearchDocsFromPay(elemParam, key)
 
                     const operation = this.getOperationTypeForRequestToSearchDocsFromPay(key)
 
@@ -176,6 +176,26 @@ Vue.mixin({
 
 
             return data
+        },
+
+        getDataTypeForRequestToSearchDocsFromPay(elemParam, key) {
+          if(key === 'sumToPay') {
+            return 'VARCHAR'
+          } else {
+            return typeof elemParam === 'number' ? 'INTEGER' : 'VARCHAR'
+          }
+        },
+
+        getOperationTypeForRequestToSearchDocsFromPay(key) {
+          if (key === 'nameDoc'
+            || key === 'creatorName'
+            || key === 'executorName') {
+            return 'LIKE'
+          } else if (key === 'sumToPay') {
+            return 'GREATER_THAN'
+          } else {
+            return 'EQUALS'
+          }
         },
 
         createCriteriasToSearchDocsFromPayForEmailSendingForm(date, orgId) {
@@ -199,18 +219,6 @@ Vue.mixin({
               ]
             }
           ]
-        },
-
-        getOperationTypeForRequestToSearchDocsFromPay(key) {
-          if (key === 'nameDoc'
-              || key === 'creatorName'
-              || key === 'executorName') {
-            return 'LIKE'
-          } else if (key === 'sumToPay') {
-            return 'GREATER_THAN'
-          } else {
-            return 'EQUALS'
-          }
         },
 
         createCriteriasToSearchDocsFromPayBetweenDataOplatDates(firstDate, lastDate) {
@@ -480,6 +488,38 @@ Vue.mixin({
             type: "AND",
             values: [
               accId
+            ]
+          },
+          {
+            dataType: "DATE",
+            key: "dataOplat",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date().toLocaleDateString()
+            ]
+          }
+        ]
+      },
+
+      createCriteriasToFindTwoPaymentAccounts(firstAccId, secondAccId) {
+        return [
+          {
+            dataType: "VARCHAR",
+            key: "acc.id",
+            operation: "EQUALS",
+            type: "OR",
+            values: [
+              firstAccId
+            ]
+          },
+          {
+            dataType: "VARCHAR",
+            key: "acc.id",
+            operation: "EQUALS",
+            type: "OR",
+            values: [
+              secondAccId
             ]
           },
           {

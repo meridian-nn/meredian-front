@@ -226,9 +226,9 @@ export default {
 
       // объект с информацией о выделенном бюджете на выбранную дату
       budget: {},
-      // сумма выделенного бюджета на текущую дату
+      // сумма выделенного бюджета на выбранную дату
       budgetDistributionSum: 0,
-      // сумма распределенного бюджета на текущую дату
+      // сумма распределенного бюджета на выбранную дату
       budgetDistributedSum: 0,
 
       // выбранный отдел с информацией по бюджету
@@ -343,7 +343,15 @@ export default {
     init() {
       this.findDepartments()
       this.department = {}
+      this.findDepOfCurrentUser()
       this.findBudgetByDate()
+    },
+
+    findDepOfCurrentUser() {
+      const currentUser = this.getCurrentUser()
+      if (currentUser.department) {
+        this.selectedDep = currentUser.department.id
+      }
     },
 
     // Обновление информации на форме при изменении даты
@@ -464,17 +472,17 @@ export default {
         // await this.$api.payment.moneyDistributionByDepartments.save([this.department])
         await this.$axios.$post('/oper/depMoneyDistribution/save', [this.department])
 
-        this.findByDepartmentId(this.department.department.id)
+        await this.findByDepartmentId(this.department.department.id)
 
         // Сохранение распределения бюджета на подразделения отдела
         // await this.$api.payment.moneyDistributionByDepartments.save(this.moneyDistributionData)
         await this.$axios.$post('/oper/depMoneyDistribution/save', this.moneyDistributionData)
-        this.loadMoneyDistribution(this.department.department.id)
+        await this.loadMoneyDistribution(this.department.department.id)
 
-        this.findDepartments()
+        await this.findDepartments()
       }
 
-      this.findBudgetByDate()
+      await this.findBudgetByDate()
     },
 
     getDateForSave() {
@@ -517,7 +525,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   flex: 1 1 auto;
-  margin: 0px;
+  margin: 0;
 }
 
 .money-distribution-dep-row{
@@ -539,10 +547,9 @@ export default {
   display: flex;
   flex-wrap: wrap;
   flex: 1 1 auto;
-  margin: 0px;
+  margin: 0;
   padding-bottom: 15px;
   position: relative;
-  flex-wrap: nowrap;
 }
 
 .money-distribution-row-budget-for-distribution-border-bottom::after {
@@ -570,8 +577,6 @@ export default {
 }
 
 .money-distribution-budget-for-distribution-sum{
-  padding-left: 0px;
-  padding-right: 0px;
   flex: 0 0 20%;
   max-width: 20%;
   padding-left: 10px;
@@ -598,7 +603,7 @@ export default {
 }
 
 .money-distribution-brise-input input:focus ~ label, input:valid ~ label  {
-  top: 0px;
+  top: 0;
   transform: scale(0.94) translateX(-2px);
   color: #639db1;
 }
@@ -610,7 +615,6 @@ export default {
   width: 100%;
   height: 3px;
   background: #639db1;
-  left: -999px;
   transition: .25s;
   opacity: 0;
   z-index: 6;
@@ -630,8 +634,8 @@ export default {
 }
 
 .money-distribution-not-allocated-text{
-  padding-left: 0px;
-  padding-right: 0px;
+  padding-left: 0;
+  padding-right: 0;
   font-weight: 500 !important;
   font-size: 1rem !important;
   flex: 0 0 10%;
@@ -641,8 +645,8 @@ export default {
 }
 
 .money-distribution-not-allocated-sum{
-  padding-left: 0px;
-  padding-right: 0px;
+  padding-left: 0;
+  padding-right: 0;
   flex: 0 0 20%;
   max-width: 20%;
   margin-top: 5px;
@@ -711,11 +715,11 @@ export default {
 }
 
 .money-distribution-save-button{
-  padding-left: 0px;
+  padding-left: 0;
 }
 
 .money-distribution-cancel-button{
-  padding-left: 0px;
+  padding-left: 0;
 }
 
 .money-distribution-text-danger {
@@ -733,7 +737,7 @@ export default {
 
 #moneyDistributionData td, #moneyDistributionData th {
   border: 1px solid #ddd;
-  padding: 0px;
+  padding: 0;
 }
 
 #moneyDistributionData tr:nth-child(even){background-color: #f2f2f2;}
@@ -759,7 +763,7 @@ export default {
 
 #departmentsDataTable td, #departmentsDataTable th {
   border: 1px solid #ddd;
-  padding: 0px;
+  padding: 0;
 }
 
 #departmentsDataTable tr:nth-child(even){background-color: #f2f2f2;}

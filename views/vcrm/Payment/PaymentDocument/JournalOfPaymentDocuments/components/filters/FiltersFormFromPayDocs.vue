@@ -57,7 +57,7 @@
           <v-row>
             <v-col cols="12">
               <v-autocomplete
-                v-model="filterItem.myorgId"
+                v-model="filterItem['myOrg.id']"
                 label="Плательщик"
                 :loading="loadingType.payers"
                 :items="payers"
@@ -113,7 +113,7 @@
                   separator="space"
                   :precision="2"
                   decimal-separator="."
-                  :output-type="number"
+                  output-type="String"
                 />
                 <span class="line" />
               </div>
@@ -156,7 +156,14 @@ export default {
       loadingType: {},
 
       // объект, в котором храняться фильтры пользователя
-      filterItem: {},
+      filterItem: {
+        nameDoc: '',
+        departmentId: null,
+        executorName: '',
+        'myOrg.id': null,
+        creatorName: '',
+        date: null
+      },
 
       // Значение фильтра по полю "К оплате"
       sumToPayValue: 0,

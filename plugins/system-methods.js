@@ -60,7 +60,7 @@ Vue.mixin({
           return organizations
         },
 
-      async changeSumToPayOfPaymentAccount(accId, sumOfPaymentDocs, operationType) {
+        async changeSumToPayOfPaymentAccount(accId, sumOfPaymentDocs, operationType) {
           if(sumOfPaymentDocs === 0) {
             return
           }
@@ -75,17 +75,48 @@ Vue.mixin({
             paymentAccount = response[0]
           }
 
+          paymentAccount.sumToPay = paymentAccount.sumToPay ? paymentAccount.sumToPay : 0
+
           if(operationType === 'SUM') {
-            if(paymentAccount.sumToPay){
               paymentAccount.sumToPay = paymentAccount.sumToPay + sumOfPaymentDocs
-            } else {
-              paymentAccount.sumToPay = sumOfPaymentDocs
-            }
           } else if(operationType === 'DEDUCT') {
             paymentAccount.sumToPay = paymentAccount.sumToPay - sumOfPaymentDocs
           }
 
           return await this.$api.paymentAccounts.save(paymentAccount)
-       }
+        },
+
+        async changeVnplOfpaymentAccounts(accIdOfPayer, accIdOfReceiver, sumOfPayment) {
+          if(sumOfPayment === 0) {
+            return
+          }
+
+          const searchCriterias = this.createCriteriasToFindTwoPaymentAccounts(accIdOfPayer, accIdOfReceiver)
+          const response = await this.$api.paymentAccounts.findBySearchCriteriaList(searchCriterias)
+          let paymentAccountOfPayer
+          let paymentAccountOfReceiver
+
+          if (!response) {
+            return
+          } else if(response.length < 2 || response.length > 2) {
+            return
+          } else {
+            paymentAccountOfPayer = response[0]
+            paymentAccountOfReceiver = response[1]
+          }
+
+          paymentAccountOfPayer.vnpl = paymentAccountOfPayer.vnpl ? paymentAccountOfPayer.vnpl : 0
+          paymentAccountOfPayer.vnpl = paymentAccountOfPayer.vnpl - sumOfPayment
+
+          paymentAccountOfReceiver.vnpl = paymentAccountOfReceiver.vnpl ? paymentAccountOfReceiver.vnpl : 0
+          paymentAccountOfReceiver.vnpl = paymentAccountOfReceiver.vnpl + sumOfPayment
+
+          const arrayOfPaymentAccountsForSave = [
+            paymentAccountOfPayer,
+            paymentAccountOfReceiver
+          ]
+
+          await this.$axios.$post('/oper/spOplat/saveAll', arrayOfPaymentAccountsForSave)
+        }
     }
 })

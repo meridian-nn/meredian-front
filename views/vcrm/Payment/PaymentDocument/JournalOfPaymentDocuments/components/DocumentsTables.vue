@@ -160,12 +160,6 @@
                   </v-list-item-title>
                 </v-list-item>
 
-                <v-list-item @click="historyOfPaymentForContextMenuOnly">
-                  <v-list-item-title>
-                    История оплат
-                  </v-list-item-title>
-                </v-list-item>
-
                 <v-list-item @click="deleteFromToPayForContextMenuOnly">
                   <v-list-item-title>
                     Удалить из "к оплате"
@@ -185,6 +179,12 @@
                 <v-list-item @click="payedByCashboxForContextMenuOnly">
                   <v-list-item-title>
                     Оплата по кассе
+                  </v-list-item-title>
+                </v-list-item>
+
+                <v-list-item @click="internalMovementForContextMenuOnly">
+                  <v-list-item-title>
+                    Вн. перемещение
                   </v-list-item-title>
                 </v-list-item>
               </v-list>
@@ -370,16 +370,6 @@
           <div class="journal-of-payment-docs-buttons-of-table-docs-for-pay">
             <v-subheader class="font-weight-medium text-subtitle-1" />
             <div align="center">
-              <!--v-btn
-                color="blue"
-                class="mr-2 mb-2"
-                fab
-                dark
-                small
-                @click="newDocument"
-              >
-                <v-icon>mdi-plus</v-icon>
-              </v-btn-->
               <v-btn
                 color="blue"
                 class="mr-2 mb-2"
@@ -813,9 +803,9 @@ export default {
     },
 
     // Обработка события "Сохранение нового внутреннего платежа"
-    saveInternalPayment() {
-      this.refreshTables()
-      console.log('save internal payment')
+    async saveInternalPayment() {
+      await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
+      await this.refreshTables()
     },
 
     // Обновление списка документов к оплате, остатков на расчетных счетах выбранной организации и при изменении даты
@@ -877,11 +867,13 @@ export default {
 
       // await this.$api.payment.docOplToPay.saveSpDocoplToPay(this.toPaySelectedRows)
       await this.$axios.$post('/oper/spDocopl/saveSpDocoplToPay', this.toPaySelectedRows)
-      await this.changeSumToPayOfPaymentAccountOnForm(selectedDoc)
+      const responseSpOplatSave = await this.changeSumToPayOfPaymentAccountOnForm(selectedDoc)
 
       this.toPaySelectedRows = []
       await this.refreshTables()
-      await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
+      if (responseSpOplatSave) {
+        await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
+      }
     },
     changeSumToPayOfPaymentAccountOnForm(selectedDoc) {
       let sumDoc
@@ -893,7 +885,7 @@ export default {
         sumDoc = selectedDoc.sumOplat - selectedDoc.sumOplatFromRequest
         typeOfOperation = 'SUM'
       }
-      this.changeSumToPayOfPaymentAccount(this.accId, sumDoc, typeOfOperation)
+      return this.changeSumToPayOfPaymentAccount(this.accId, sumDoc, typeOfOperation)
     },
 
     // Отмена внесения измененя в сумму оплаты документа
@@ -922,6 +914,7 @@ export default {
       }
 
       if (!this.fromPaySelectedRows || !this.fromPaySelectedRows.length) {
+        this.$refs.userNotification.showUserNotification('error', 'Выберите документы на оплату!')
         return
       }
 
@@ -1082,6 +1075,11 @@ export default {
 
     // Перемещение документа из таблицы "Документы к оплате" в таблицу "Документы на оплату"
     deleteFromToPayForContextMenuOnly() {
+      if (!this.currentRowForContextMenu.isDoc) {
+        this.$refs.userNotification.showUserNotification('warning', 'Удаление оплаты по кассе невозможно!')
+        return
+      }
+
       this.toPaySelectedRows = []
       this.toPaySelectedRows.push(this.currentRowForContextMenu)
       this.deleteSelectedPayments()
@@ -1182,10 +1180,12 @@ export default {
       const responseElement = response[0]
       const saldo = responseElement.saldo
       const nalich = responseElement.nalich
+      const vnpl = responseElement.vnpl
+      const sumToPay = responseElement.sumToPay
 
       this.additionalMessage = ''
       this.currentPaymentAccountBalanceLessThenZero = false
-      this.currentPaymentAccountBalance = (saldo + nalich - this.totalToSumOplat)
+      this.currentPaymentAccountBalance = (saldo + nalich + vnpl - sumToPay)
 
       if (this.currentPaymentAccountBalance < 0) {
         this.additionalMessage = ' - сумма остатка на расчетном счете меньше нуля!'

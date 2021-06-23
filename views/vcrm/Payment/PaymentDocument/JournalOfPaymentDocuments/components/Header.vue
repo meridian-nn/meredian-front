@@ -93,7 +93,7 @@ export default {
           responseElem.sum_sumToPay = 0
         }
 
-        const sumOfClearBalance = responseElem.sum_saldo + responseElem.sum_nalich
+        const sumOfClearBalance = responseElem.sum_saldo + responseElem.sum_nalich + responseElem.sum_vnpl
         const sumOfOrg = sumOfClearBalance - responseElem.sum_sumToPay
 
         if (responseElem['acc.accType'] === 'COMMON') {
@@ -136,33 +136,6 @@ export default {
         valueSum: columnOrgValueNumberName,
         clearBalance: columnOrgClearBalanceName
       })
-    },
-
-    updateSumOfOrg(orgId, sumOfDocsToPay) {
-      const keyOfOrg = this.orgAccInfoHeaders.find(el => el.orgId === orgId)
-      const sumOfOrg = this.orgAccInfoData[0][keyOfOrg.clearBalance] - sumOfDocsToPay
-
-      this.orgAccInfoData[0][keyOfOrg.valueSum] = sumOfOrg
-      this.orgAccInfoData[0][keyOfOrg.value] = this.numberToSum(sumOfOrg)
-
-      this.updateTotalSum()
-    },
-
-    updateTotalSum() {
-      let totalSum = 0
-      for (const elem of this.orgAccInfoHeaders) {
-        if (!elem.valueSum) {
-          continue
-        }
-
-        totalSum += this.orgAccInfoData[0][elem.valueSum]
-      }
-      this.orgAccInfoData[0].total = this.numberToSum(totalSum)
-    },
-
-    findSumOfOrg(orgId) {
-      const keyOfOrg = this.orgAccInfoHeaders.find(el => el.orgId === orgId)
-      return this.orgAccInfoData[0][keyOfOrg.value]
     },
 
     reset() {
