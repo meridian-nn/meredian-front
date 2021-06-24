@@ -181,10 +181,10 @@ export default {
     this.init()
   },
   methods: {
-    init() {
-      this.findPayers()
-      this.findDefaultOrgAndAccIdForUserOnForm()
-      this.payerChange()
+    async init() {
+      await this.findPayers()
+      await this.findDefaultOrgAndAccIdForUserOnForm()
+      await this.payerChange()
     },
 
     async findDefaultOrgAndAccIdForUserOnForm() {
