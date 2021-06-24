@@ -101,6 +101,7 @@
                 :headers="toPayHeaders"
                 fixed-header
                 :items="toPayData"
+                item-key="keyId"
                 :show-select="true"
                 :single-select="false"
                 disable-pagination

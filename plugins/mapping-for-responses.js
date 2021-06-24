@@ -33,7 +33,7 @@ Vue.mixin({
                     accId: 0, // value.accId
                     depName: '',
                     isDoc: false,
-                    id: id
+                    keyId: id
                 }
 
                 totalPaymentSum += sumPlatFromValue
@@ -50,7 +50,7 @@ Vue.mixin({
                   value.buyerName = ''
                 }
 
-                value.id = id
+                value.keyId = id
                 value.sumOplatFromRequest = value.sumOplat
                 value.sumOplatMask = this.numberToSum(value.sumOplat)
                 value.isDoc = true
