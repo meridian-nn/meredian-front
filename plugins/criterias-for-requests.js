@@ -199,7 +199,7 @@ Vue.mixin({
         },
 
         createCriteriasToSearchDocsFromPayForEmailSendingForm(date, orgId) {
-          return [
+          const data =  [
             {
               'dataType': 'DATE',
               'key': 'dataDoc',
@@ -208,8 +208,11 @@ Vue.mixin({
               'values': [
                 new Date(date).toLocaleDateString()
               ]
-            },
-            {
+            }
+          ]
+
+          if(orgId) {
+            data.push({
               'dataType': 'INTEGER',
               'key': 'myOrg.id',
               'operation': 'EQUALS',
@@ -217,8 +220,10 @@ Vue.mixin({
               'values': [
                 orgId
               ]
-            }
-          ]
+            })
+          }
+
+          return data
         },
 
         createCriteriasToSearchDocsFromPayBetweenDataOplatDates(firstDate, lastDate) {

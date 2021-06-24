@@ -309,10 +309,7 @@ export default {
     // функция проверки заполнения обязательных полей
     checkParamsOfEditedItem() {
       let verificationPassed = true
-      if (this.docFromPay.contractorId === this.selectedOrganizationId) {
-        this.$refs.userNotification.showUserNotification('error', 'В полях "Плательщик" и "Кому" не может быть одна и та же организация!')
-        verificationPassed = false
-      } else if (this.docFromPay.accId === this.spDocint.accId) {
+      if (this.docFromPay.accId === this.spDocint.accId) {
         this.$refs.userNotification.showUserNotification('error', 'В полях "Расчетный счет плательщика" и "Расчетный счет получателя" не может быть указан один и тот же счет!')
         verificationPassed = false
       } else if (!this.docFromPay.contractorId) {

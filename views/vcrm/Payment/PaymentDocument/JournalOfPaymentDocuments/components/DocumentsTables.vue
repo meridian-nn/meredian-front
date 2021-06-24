@@ -737,8 +737,10 @@ export default {
       this.toPaySelectedRows = []
       await this.findDefaultOrgAndAccIdForUserOnForm()
       await this.findOrganizations()
-      if (this.accId && this.selectedOrganization) {
+      if (this.selectedOrganization) {
         await this.findPaymentAccounts(this.selectedOrganization)
+      }
+      if (this.accId) {
         await this.findToPay(this.accId)
       }
     },
@@ -1203,9 +1205,9 @@ export default {
       this.toPaySelectedRows = []
       this.toPayData = []
 
-      const dataFromPay = this.createCriteriasForRequestToSearchDocsToPay(
+      const dataToPay = this.createCriteriasForRequestToSearchDocsToPay(
         accId, this.selectedOrganization, this.date)
-      const toPayDataResponse = await this.$api.payment.docOplToPay.findDocumentsByCriterias(dataFromPay)
+      const toPayDataResponse = await this.$api.payment.docOplToPay.findDocumentsByCriterias(dataToPay)
 
       const dataPaymentByCashbox = this.createCriteriasForRequestToSearchPaymentsByCashbox(
         accId, this.selectedOrganization, this.date)

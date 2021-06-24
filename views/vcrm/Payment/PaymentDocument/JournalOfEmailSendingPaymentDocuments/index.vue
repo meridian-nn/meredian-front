@@ -27,6 +27,7 @@
           item-text="clName"
           hide-details="auto"
           outlined
+          :clearable="true"
           @change="payerChange"
         />
       </div>
@@ -116,20 +117,12 @@ export default {
           value: 'nameDoc'
         },
         {
-          text: 'Контрагент',
-          value: 'namePlat'
-        },
-        {
           text: 'Сумма оплаты',
           value: 'sumPaid'
         },
         {
           text: 'Плательщик',
           value: 'myorgName'
-        },
-        {
-          text: 'Покупатель',
-          value: 'buyerName'
         },
         {
           text: 'Исполнитель',
@@ -156,10 +149,10 @@ export default {
       documentsForExport: [],
 
       // Количество различных департаментов в таблице
-      buyersInPayData: [],
+      payersInPayData: [],
 
       // Текущий департамент из цикла выгрузки документов
-      currentBuyer: null,
+      currentPayer: null,
 
       // Итоговая сумма по колонке "К оплате" документов на оплату
       totalSumOplat: 0,
@@ -168,10 +161,8 @@ export default {
       exportFields: {
         'Дата': 'dataDoc',
         'Номер': 'nameDoc',
-        'Контрагент': 'namePlat',
         'Сумма оплаты': 'sumPaid',
         'Плательщик': 'myorgName',
-        'Покупатель': 'buyerName',
         'Исполнитель': 'executorName',
         'Подразделение': 'depName',
         'Частичная оплата': 'partialPayment',
@@ -193,35 +184,35 @@ export default {
     init() {
       this.findPayers()
       this.findDefaultOrgAndAccIdForUserOnForm()
+      this.payerChange()
     },
 
     async findDefaultOrgAndAccIdForUserOnForm() {
       const filtersParams = await this.findDefaultOrgAndAccIdForUser()
       if (filtersParams) {
         this.selectedPayer = filtersParams.orgId
-        this.payerChange()
       }
     },
 
     async startDownloadExcel() {
-      for (const buyer of this.buyersInPayData) {
-        await this.downloadBuyer(buyer)
+      for (const payer of this.payersInPayData) {
+        await this.downloadPayer(payer)
       }
     },
 
-    downloadBuyer(buyer) {
+    downloadPayer(payer) {
       const promise = new Promise((resolve, reject) => {
-        const depDocs = this.documentsFromPayData.filter(doc => doc.buyerName === buyer)
+        const depDocs = this.documentsFromPayData.filter(doc => doc.payerName === payer)
         let sumOfDocs = 0
         this.documentsForExport = depDocs
         this.documentsForExport.forEach((doc) => {
           sumOfDocs += doc.sumPaidNumber
         })
         this.exportFooter = 'Итого к оплате: ' + this.numberToSum(sumOfDocs)
-        this.currentBuyer = buyer
+        this.currentPayer = payer
 
         this.$refs.downloadExcel.click()
-        resolve('download' + this.currentBuyer)
+        resolve('download' + this.currentPayer)
       })
       return promise
     },
@@ -253,14 +244,14 @@ export default {
       this.documentsFromPayData = await this.$api.payment.docOplForPay.findDocumentsForPayByCriterias(data)
       let totalSumOplat = 0
       this.documentsFromPayData.forEach((value) => {
-        if (!value.buyer) {
-          value.buyerName = ''
+        if (!value.myOrg) {
+          value.payerName = ''
         } else {
-          value.buyerName = value.buyer.shortName
+          value.payerName = value.myOrg.clName
         }
 
-        if (!this.buyersInPayData.includes(value.buyerName)) {
-          this.buyersInPayData.push(value.buyerName)
+        if (!this.payersInPayData.includes(value.payerName)) {
+          this.payersInPayData.push(value.payerName)
         }
 
         if (!value.sumPaid) {
@@ -278,7 +269,7 @@ export default {
 
     // Метод генерации имени для файла выгрузки
     generateNameForExportFile() {
-      this.exportFileName = 'Журнал_документов_на_оплату_покуп._' + this.currentBuyer + '_' + new Date().toLocaleDateString() + ' - ' + new Date().toLocaleTimeString() + '.xls'
+      this.exportFileName = 'Журнал_документов_на_оплату_покуп._' + this.currentPayer + '_' + new Date().toLocaleDateString() + ' - ' + new Date().toLocaleTimeString() + '.xls'
       // this.linkToDocumentForSending =
     },
 
