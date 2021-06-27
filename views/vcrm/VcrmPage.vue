@@ -215,18 +215,7 @@ export default {
     return {
       drawer: true,
       mini: false,
-      breadcrumbs: [
-        {
-          text: 'Справочник',
-          disabled: false,
-          href: 'breadcrumbs_link_1'
-        },
-        {
-          text: 'GTIN',
-          disabled: true,
-          href: 'breadcrumbs_link_2'
-        }
-      ]
+      breadcrumbs: []
     }
   },
 
@@ -259,7 +248,16 @@ export default {
     },
 
     hasBreadcrumbs() {
-      this.breadcrumbs = this.$route.meta.breadcrumb
+      const crumbs = []
+      const matched = this.$route.matched
+
+      matched.forEach(function(route) {
+        if (route.meta && route.meta.breadcrumb) {
+          crumbs.push(route)
+        }
+      })
+
+      this.breadcrumbs = crumbs
     },
 
     onClickOutside() { return true }

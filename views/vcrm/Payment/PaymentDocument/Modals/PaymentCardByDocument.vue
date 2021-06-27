@@ -1,7 +1,6 @@
 <template>
   <v-dialog
     v-model="dialog"
-    :value="show"
     max-width="1000px"
     @input="$emit('close')"
   >
@@ -164,6 +163,8 @@ export default {
   data() {
     return {
       date: new Date().toLocaleDateString(),
+
+      totalToSumOplat: 0,
 
       dialog: false,
 

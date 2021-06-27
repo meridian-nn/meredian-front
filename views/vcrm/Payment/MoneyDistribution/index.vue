@@ -51,7 +51,7 @@
             separator="space"
             :precision="2"
             decimal-separator="."
-            :output-type="number"
+            output-type="number"
             :read-only="true"
           />
         </v-subheader>
@@ -99,7 +99,7 @@
             separator="space"
             :precision="2"
             decimal-separator="."
-            :output-type="number"
+            output-type="number"
           />
           <span class="line" />
         </div>
@@ -117,7 +117,7 @@
               separator="space"
               :precision="2"
               decimal-separator="."
-              :output-type="number"
+              output-type="number"
               :read-only="true"
             />
           </div>
@@ -140,7 +140,7 @@
             separator="space"
             :precision="2"
             decimal-separator="."
-            :output-type="number"
+            output-type="number"
             @input="update(row.distributionSum)"
           />
           <input
@@ -169,7 +169,7 @@
           separator="space"
           :precision="2"
           decimal-separator="."
-          :output-type="number"
+          output-type="number"
           :read-only="true"
         />
       </div>

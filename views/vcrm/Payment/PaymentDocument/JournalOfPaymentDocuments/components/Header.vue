@@ -25,9 +25,7 @@
         <div
           align="right"
         >
-          <v-btn
-            @click="$router.push({name: 'InputOfBalances'})"
-          >
+          <v-btn @click="$router.push({name: 'InputOfBalances'})">
             Ввод остатков по Р/С
           </v-btn>
         </div>
@@ -125,15 +123,17 @@ export default {
 
       let totalSumOfAccounts = 0
       let totalSumOfCashbox = 0
-      for (const orgAccElem of this.orgAccInfoHeaders) {
+      const ids = this.orgAccInfoHeaders.map(item => item['myOrg.id'])
+      const sumOfOtherAccounts = await this.getBalanceOfDocsToPay(ids, date)
+
+      for (const [i, orgAccElem] of this.orgAccInfoHeaders.entries()) {
         const responseElem = response.find(el => el['myOrg.id'] === orgAccElem.orgId)
         if (!responseElem) {
           continue
         }
 
-        const sumOfOtherAccounts = await this.getBalanceOfDocsToPay(orgAccElem.orgId, date)
         const sumOfClearBalance = responseElem.sum_saldo + responseElem.sum_nalich
-        const sumOfOrg = sumOfClearBalance - sumOfOtherAccounts
+        const sumOfOrg = sumOfClearBalance - sumOfOtherAccounts[i]
         orgAccInfoDataAccounts[orgAccElem.clearBalance] = sumOfClearBalance
         orgAccInfoDataAccounts[orgAccElem.valueSum] = sumOfOrg
         orgAccInfoDataAccounts[orgAccElem.value] = this.numberToSum(sumOfOrg)
@@ -165,16 +165,15 @@ export default {
 
       let totalSumOfAccounts = 0
       let totalSumOfCashbox = 0
-
+      const ids = response.map(item => item['myOrg.id'])
+      const sumOfDocToPay = await this.getBalanceOfDocsToPay(ids, date)
       for (const responseElem of response) {
         const sumOfClearBalance = responseElem.sum_saldo + responseElem.sum_nalich
         let sumOfOrg = sumOfClearBalance
 
         if (responseElem['acc.accType'] === 'COMMON') {
           this.addOrgIntoHeaders(responseElem)
-          const sumOfDocToPay = await this.getBalanceOfDocsToPay(responseElem['myOrg.id'], date)
           sumOfOrg = sumOfClearBalance - sumOfDocToPay
-
           orgAccInfoDataAccounts['org' + responseElem['myOrg.id'] + 'ClearBalance'] = sumOfClearBalance
           orgAccInfoDataAccounts['org' + responseElem['myOrg.id'] + 'ValueSum'] = sumOfOrg
           orgAccInfoDataAccounts['org' + responseElem['myOrg.id'] + 'Value'] = this.numberToSum(sumOfOrg)
@@ -236,14 +235,16 @@ export default {
       this.orgAccInfoData[0].total = this.numberToSum(totalSum)
     },
 
-    async getBalanceOfDocsToPay(orgId, date) {
-      const sumToPay = await this.getSumToPayDocsOfOrg(orgId, date)
-      const sumPaymentByCashbox = await this.getSumOfPaymentByCashboxOfOrg(orgId, date)
+    async getBalanceOfDocsToPay(orgIds, date) {
+      const sumToPay = await this.getSumToPayDocsOfOrg(orgIds, date)
+      const sumPaymentByCashbox = await this.getSumOfPaymentByCashboxOfOrg(orgIds, date)
       const totalSumOplat = sumToPay + sumPaymentByCashbox
+
       return totalSumOplat
     },
-    async getSumToPayDocsOfOrg(orgId, date) {
-      const data = this.createCriteriasWithoutAccIdForRequestToSearchDocsToPay(orgId, date)
+
+    async getSumToPayDocsOfOrg(orgIds, date) {
+      const data = this.createCriteriasWithoutAccIdForRequestToSearchDocsToPay(orgIds, date)
       let totalToSumOplat = 0
       const response = await this.$api.payment.docOplToPay.findDocumentsByCriterias(data)
       response.forEach((value) => {
@@ -251,8 +252,9 @@ export default {
       })
       return totalToSumOplat
     },
-    async getSumOfPaymentByCashboxOfOrg(orgId, date) {
-      const data = this.createCriteriasWithoutAccIdForRequestToSearchPaymentsByCashbox(orgId, date)
+
+    async getSumOfPaymentByCashboxOfOrg(orgIds, date) {
+      const data = this.createCriteriasWithoutAccIdForRequestToSearchPaymentsByCashbox(orgIds, date)
       let totalPaymentSum = 0
       const response = await this.$api.payment.findPaymentsByCashboxByCriterias(data)
       response.forEach((value) => {
@@ -260,6 +262,7 @@ export default {
           totalPaymentSum += value.paymentOperationSums[0].paymentSum
         }
       })
+
       return totalPaymentSum
     },
 

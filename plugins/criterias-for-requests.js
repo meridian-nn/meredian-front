@@ -56,9 +56,7 @@ Vue.mixin({
               key: 'payer.id',
               operation: 'EQUALS',
               type: 'AND',
-              values: [
-                orgId
-              ]
+              values: orgId
             }
           ]
           return data
@@ -103,7 +101,7 @@ Vue.mixin({
             return data
         },
 
-        createCriteriasWithoutAccIdForRequestToSearchDocsToPay( orgId, date) {
+        createCriteriasWithoutAccIdForRequestToSearchDocsToPay(orgIds, date) {
           const secDate = new Date(date)
           const curDateNum = secDate.getDate()
           secDate.setDate(curDateNum + 1)
@@ -113,9 +111,7 @@ Vue.mixin({
               'key': 'platId',
               'operation': 'EQUALS',
               'type': 'AND',
-              'values': [
-                orgId
-              ]
+              'values': orgIds
             },
             {
               'dataType': 'DATE',
@@ -127,6 +123,7 @@ Vue.mixin({
               ]
             }
           ]
+
           return data
         },
 

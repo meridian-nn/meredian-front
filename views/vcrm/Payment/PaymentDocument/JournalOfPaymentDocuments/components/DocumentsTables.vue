@@ -1,7 +1,5 @@
 <template>
-  <div
-    name="journal-of-payment-docs-documents-tables"
-  >
+  <div name="journal-of-payment-docs-documents-tables">
     <journal-of-payment-documents-header ref="journalOfPaymentDocumentsHeader" />
 
     <div class="journal-of-payment-docs-row">
@@ -43,12 +41,12 @@
                 :class="{'journal-of-payment-docs-text-danger': currentPaymentAccountBalanceLessThenZero}"
               >Остаток на Р/С:
                 <vue-numeric
-                  v-model.number="paymentAccountInfo"
+                  v-model="paymentAccountInfo"
                   class="journal-of-payment-docs-headline"
                   separator="space"
                   :precision="2"
                   decimal-separator="."
-                  :output-type="number"
+                  output-type="number"
                   :read-only="true"
                 /> {{ additionalMessage }}
               </span>
@@ -128,7 +126,7 @@
                           separator="space"
                           :precision="2"
                           decimal-separator="."
-                          :output-type="number"
+                          output-type="number"
                         />
                         <span class="line" />
                       </div>
@@ -224,6 +222,7 @@
       </div>
 
       <edit-payment-document
+        :value="dialog.editPaymentDocument"
         ref="editPaymentDocument"
         @close="closePaymentDocument"
         @cancel="closePaymentDocument"
@@ -231,6 +230,7 @@
       />
 
       <payment-card-by-document
+        :value="dialog.paymentCardByDocument"
         ref="paymentCardByDocument"
         @close="closePaymentCardByDocument"
       />
@@ -456,7 +456,10 @@
       </div>
     </div>
 
-    <div class="journal-of-payment-docs-row">
+    <div
+      v-if="false"
+      class="journal-of-payment-docs-row"
+    >
       <div class="journal-of-payment-docs-bottom-toPay-results">
         <div class="journal-of-payment-docs-row">
           <div>
@@ -472,7 +475,7 @@
                 separator="space"
                 :precision="2"
                 decimal-separator="."
-                :output-type="number"
+                output-type="number"
                 :read-only="true"
               />
             </th>
@@ -495,7 +498,7 @@
                 separator="space"
                 :precision="2"
                 decimal-separator="."
-                :output-type="number"
+                output-type="number"
                 :read-only="true"
               />
             </th>
@@ -508,7 +511,7 @@
                 separator="space"
                 :precision="2"
                 decimal-separator="."
-                :output-type="number"
+                output-type="number"
                 :read-only="true"
               />
             </th>
@@ -521,7 +524,7 @@
                 separator="space"
                 :precision="2"
                 decimal-separator="."
-                :output-type="number"
+                output-type="number"
                 :read-only="true"
               />
             </th>
@@ -530,7 +533,10 @@
       </div>
     </div>
 
-    <div class="journal-of-payment-docs-row">
+    <div
+      v-if="false"
+      class="journal-of-payment-docs-row"
+    >
       <div class="journal-of-payment-docs-bottom-spacer" />
       <div class="journal-of-payment-docs-bottom-comment">
         <v-text-field
@@ -569,7 +575,10 @@ export default {
 
   data() {
     return {
-      editPaymentDocumentDialog: false,
+      dialog: {
+        editPaymentDocument: false,
+        paymentCardByDocument: false
+      },
 
       date: new Date().toISOString().substr(0, 10),
 
@@ -773,19 +782,20 @@ export default {
     // Обработка события "Закрытие формы "Документ на оплату" по нажатию кнопки "Отмена""
     closePaymentDocument() {
       this.fromPaySelectedRows = []
-      console.log('close')
+      this.dialog.editPaymentDocument = false
     },
 
     // Обработка события "Сохранение нового документа на оплату и закрытие формы "Документ на оплату""
     savePaymentDocument() {
       this.updateDocsForPay()
-      console.log('open')
+
+      this.dialog.editPaymentDocument = false
     },
 
     // Обработка события "Закрытие модальной формы карточки оплат по документу"
     closePaymentCardByDocument() {
       this.fromPaySelectedRows = []
-      console.log('close PaymentCardByDocument')
+      this.dialog.paymentCardByDocument = false
     },
 
     // Обработка события "Закрытие модальной формы оплаты по кассе"
@@ -886,18 +896,7 @@ export default {
     // Функции контекстного меню таблицы документов к оплате
     // Вызов формы "Оплата по кассе"
     payedByCashboxForContextMenuOnly() {
-      /* if (this.selectedOrganization == null) {
-        this.$refs.userNotification.showUserNotification('error', 'Выберите организацию!')
-        return
-      }
-
-      if (this.accId == null) {
-        this.$refs.userNotification.showUserNotification('error', 'Выберите расчетный счет!')
-        return
-      } */
-
       this.$refs.paymentByCashbox.newDocument(this.selectedOrganization, this.accId)
-      console.log('payed by cashbox')
     },
 
     // Перемещение документа из таблицы "Документы на оплату" в таблицу "Документы к оплате" по нажатию на стрелку
@@ -989,6 +988,7 @@ export default {
     // Функционал кнопок таблицы "Документы на оплату"
     // Добавление нового документа в таблицу "Документы на оплату"
     newDocument() {
+      this.dialog.editPaymentDocument = true
       this.$refs.editPaymentDocument.newDocument(this.selectedOrganization)
     },
 
@@ -997,6 +997,7 @@ export default {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
         this.$refs.editPaymentDocument.editDocument(this.fromPaySelectedRows[0].id)
       }
+      this.dialog.editPaymentDocument = true
     },
 
     // Удаление выбранных документов на оплату
@@ -1032,6 +1033,7 @@ export default {
     // Копирование выбранного документа на оплату
     copyDocument() {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
+        this.dialog.editPaymentDocument = true
         this.$refs.editPaymentDocument.copyDocument(this.fromPaySelectedRows[0].id)
       }
     },

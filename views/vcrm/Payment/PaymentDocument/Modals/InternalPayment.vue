@@ -64,7 +64,6 @@
                 v-model="editedItem.sumDoc"
                 type="number"
                 label="Сумма"
-                @input="calcSum"
               />
             </v-col>
             <v-col cols="6">

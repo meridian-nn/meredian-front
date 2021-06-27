@@ -250,7 +250,7 @@
                             :items="contracts"
                             item-value="id"
                             item-text="numDogInt"
-                            clearable="true"
+                            :clearable="true"
                             outlined
                             hide-details="auto"
                             @change="findClients"
