@@ -15,7 +15,7 @@ export default {
     async login({ dispatch, commit }, credentials) {
       // eslint-disable-next-line no-useless-catch
       try {
-        await this.$axios.$get('http://192.168.1.70:9037/meridian/gtin/findAll?page=0&size=200', { auth: credentials, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        await this.$axios.$get('http://192.168.0.245:9037/meridian/auth/findByCurrentLogin', { auth: credentials, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
 
         await timeout(200)
 

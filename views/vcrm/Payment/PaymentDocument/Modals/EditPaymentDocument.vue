@@ -167,7 +167,7 @@
                     :loading="loadingType.documentTypes"
                     :items="documentTypes"
                     item-value="id"
-                    item-text="nameViddoc"
+                    item-text="opis"
                     hide-details="auto"
                     outlined
                   />
@@ -402,7 +402,7 @@ export default {
         return
       } */
       this.loadingType.documentTypes = true
-      this.documentTypes = await this.$api.budgetElements.findAllDocumentsTypes()
+      this.documentTypes = await this.$api.budgetElements.findGroups()
       this.loadingType.documentTypes = null
     },
     // обновление списка исполнителей для выбора пользователем после изменения подразделения на форме
@@ -414,6 +414,7 @@ export default {
       this.loadingType.executors = true
       const data = this.createCriteriasToSearchUsersByDepartmentId(departmentId)
       this.executors = await this.$api.auth.user.getUsersBySearchCriterias(data)
+      // this.executors = await this.$api.executors.findAll()
       this.loadingType.executors = null
     },
     // обновление списка клиентов для выбора пользователем

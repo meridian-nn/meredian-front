@@ -38,7 +38,10 @@
         </div>
       </div>
 
-      <div class="payment-menu-col-2">
+      <div
+        v-if="isHaveBudgetRole()"
+        class="payment-menu-col-2"
+      >
         <router-link :to="{ name: 'PaymentBudgetByDepartments' }">
           <v-img :src="require('@/assets/img/payment/budget.png')" />
         </router-link>
@@ -50,7 +53,10 @@
         </div>
       </div>
 
-      <div class="payment-menu-col-2">
+      <div
+        v-if="isHaveBudgetRole()"
+        class="payment-menu-col-2"
+      >
         <router-link :to="{ name: 'JournalOfEmailSendingPaymentDocuments' }">
           <v-img :src="require('@/assets/img/payment/email.png')" />
         </router-link>
@@ -62,7 +68,10 @@
         </div>
       </div>
 
-      <div class="payment-menu-col-2">
+      <div
+        v-if="isHaveBudgetRole()"
+        class="payment-menu-col-2"
+      >
         <router-link :to="{ name: 'MoneyDistribution' }">
           <v-img :src="require('@/assets/img/payment/distribution.png')" />
         </router-link>
@@ -74,7 +83,10 @@
         </div>
       </div>
 
-      <div class="payment-menu-col-2">
+      <div
+        v-if="isHaveBudgetRole()"
+        class="payment-menu-col-2"
+      >
         <router-link :to="{ name: 'InputOfBalances' }">
           <v-img :src="require('@/assets/img/payment/bank_acc.png')" />
         </router-link>
@@ -113,7 +125,10 @@
       <div class="payment-menu-col-2-spacer" />
     </v-row>
 
-    <v-row style="margin-top:150px; width:100%">
+    <v-row
+      v-if="isHaveBudgetRole()"
+      style="margin-top:150px; width:100%"
+    >
       <div class="chart-div">
         <bar-chart
           v-if="loaded"

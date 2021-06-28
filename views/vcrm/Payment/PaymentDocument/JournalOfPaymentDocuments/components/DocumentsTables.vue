@@ -2,7 +2,9 @@
   <div
     name="journal-of-payment-docs-documents-tables"
   >
-    <journal-of-payment-documents-header ref="journalOfPaymentDocumentsHeader" />
+    <journal-of-payment-documents-header
+      ref="journalOfPaymentDocumentsHeader"
+    />
 
     <div class="journal-of-payment-docs-row">
       <div class="journal-of-payment-docs-left-col">
@@ -758,6 +760,7 @@ export default {
       this.selectFirstPaymentAccount()
     },
 
+    // Функция поиска организации и расчетного счета по умолчанию для текущего пользователя
     async findDefaultOrgAndAccIdForUserOnForm() {
       const filtersParams = await this.findDefaultOrgAndAccIdForUser()
       if (filtersParams) {
@@ -1586,6 +1589,7 @@ export default {
 .add-group{
   width: 40px;
   height: 40px;
+  margin-right: 8px;
   display: flex;
   justify-content: center;
   align-items: center;

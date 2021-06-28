@@ -16,6 +16,7 @@ Vue.mixin({
           }
         },
 
+      // Функция поиска организации и расчетного счета по умолчанию для текущего пользователя
         async findDefaultOrgAndAccIdForUser() {
           const formAndElementIdsOfOrgAndAccIds = this.getObjectWithFormIdAndElementIdForDefaultOrgAndAcc()
           const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(formAndElementIdsOfOrgAndAccIds.formId,

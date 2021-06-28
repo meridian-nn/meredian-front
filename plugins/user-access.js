@@ -26,12 +26,24 @@ Vue.mixin({
             return await this.$api.auth.user.getRolesOfCurrentUser(id)
         },
 
+        isCanOpenPaymentRegister() {
+          return true
+        },
+
         //Функция проверяет наличие у пользователя роли для работы с АРМ "Реестр оплат"
         //5 - id роли "Бюджет - полный доступ"
         isHaveBudgetRole() {
             const currentUser = this.getCurrentUser()
             const rolesOfCurrentUser = currentUser.roles
             return !!rolesOfCurrentUser.find(role => role === 5)
+        },
+
+        //Функция проверяет наличие у пользователя роли для работы с формой "Журнал документов на оплату" АРМ "Реестр оплат"
+        // 9 - id роли "Бюджет - журнал документов"
+        isHaveJournalRole() {
+          const currentUser = this.getCurrentUser()
+          const rolesOfCurrentUser = currentUser.roles
+          return !!rolesOfCurrentUser.find(role => role === 9)
         },
 
         //Функция проверяет наличие у пользователя роли для работы с АРМ "Маркировка"

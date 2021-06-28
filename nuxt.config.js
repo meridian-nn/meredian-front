@@ -75,7 +75,7 @@ export default {
     },
 
     axios: {
-        baseURL: 'http://192.168.1.70:9037/meridian',
+        baseURL: 'http://192.168.0.245:9037/meridian',
         // proxy: true,
         mode: 'no-cors',
         auth: {
@@ -97,6 +97,11 @@ export default {
     },
 
     build: {
-        vendor: ['vue-tables-2', 'vue-json-excel', 'vue-html-to-paper', 'vue-numeric']
+        vendor: ['vue-tables-2', 'vue-json-excel', 'vue-html-to-paper', 'vue-numeric'],
+        extend(config, ctx) {
+            if (ctx.isDev) {
+                config.devtool = ctx.isClient ? 'source-map' : 'inline-source-map'
+            }
+        }
     }
 }

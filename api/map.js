@@ -141,6 +141,9 @@ export const factory = send => ({
         },
         findById(id) {
             return send('GET', `/oper/dict/spIsp/findById/${id}`)
+        },
+        findAll() {
+          return send('GET', `/oper/dict/spIsp/findAll`)
         }
     },
 

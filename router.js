@@ -2,7 +2,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-Vue.prototype.$hostName = 'http://192.168.1.70:9037'
+Vue.prototype.$hostName = 'http://192.168.0.245:9037'
 
 const dynamicPage = importer => () => {
     return importer().then(mod => mod.default || mod)
@@ -45,6 +45,9 @@ const PaymentMenuPage = dynamicPage(() =>
 
 const JournalOfPaymentDocumentsPage = dynamicPage(() =>
     import ('~/views/vcrm/Payment/PaymentDocument/JournalOfPaymentDocuments'))
+
+const JournalOfPaymentDocumentsFromPayDocsPage = dynamicPage( () =>
+    import ('~/views/vcrm/Payment/PaymentDocument/JournalOfPaymentDocuments/components/fromPayDocuments'))
 
 const JournalOfEmailSendingPaymentDocumentsPage = dynamicPage(() =>
     import ('~/views/vcrm/Payment/PaymentDocument/JournalOfEmailSendingPaymentDocuments'))
@@ -221,6 +224,12 @@ const createRouterConst = new Router({
                     path: 'journal_of_payment_documents',
                     name: 'JournalOfPaymentDocuments',
                     component: JournalOfPaymentDocumentsPage
+                },
+
+                {
+                    path: 'journal_of_payment_documents_from_pay_docs',
+                    name: 'JournalOfPaymentDocumentsFromPayDocs',
+                    component: JournalOfPaymentDocumentsFromPayDocsPage
                 },
 
                 {
