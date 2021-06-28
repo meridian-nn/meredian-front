@@ -42,6 +42,10 @@ export const factory = send => ({
 
             getRoles() {
                 return send('GET', `/auth/findRoles`)
+            },
+
+            findBySearchCriteria(params) {
+              return send('POST', `/auth/findBySearchCriteria`, params)
             }
         }
     },

@@ -560,6 +560,18 @@ Vue.mixin({
             ]
           }
         ]
+      },
+
+      createCriteriaToSearchUserByLogin(login) {
+        return {
+          dataType: 'VARCHAR',
+          key: 'login',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            login
+          ]
+        }
       }
     }
 })

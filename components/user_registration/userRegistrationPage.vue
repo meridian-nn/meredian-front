@@ -138,6 +138,11 @@ export default {
         return
       }
 
+      if (!await this.isLoginAvailable()) {
+        this.$refs.userNotification.showUserNotification('error', 'Указанный логин уже привязан к другой учетной записи! Укажите другой!')
+        return
+      }
+
       this.userInformation.enabled = true
       this.userInformation.id = null
 
@@ -147,6 +152,12 @@ export default {
 
       this.$refs.userNotification.showUserNotification('success', 'Новый пользователь создан')
       this.resetUserInformation()
+    },
+
+    async isLoginAvailable() {
+      const criteriaForRequest = this.createCriteriaToSearchUserByLogin(this.userInformation.login)
+      const response = await this.$api.auth.users.findBySearchCriteria(criteriaForRequest)
+      return response.length === 0
     },
 
     checkNewUserParams() {
