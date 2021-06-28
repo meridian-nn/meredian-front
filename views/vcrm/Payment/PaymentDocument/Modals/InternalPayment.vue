@@ -53,6 +53,7 @@
                 label="Р/счет"
                 :loading="loadingType.paymentAccounts"
                 :items="paymentAccounts"
+                no-data-text="Список пуст"
                 item-text="shortName"
                 item-value="id"
               />

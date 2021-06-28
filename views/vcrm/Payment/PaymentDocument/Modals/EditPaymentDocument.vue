@@ -59,6 +59,7 @@
                 label="Исполнитель"
                 :loading="loadingType.executors"
                 :items="executors"
+                no-data-text="Список пуст"
                 item-value="id"
                 item-text="fio"
                 outlined
@@ -234,6 +235,7 @@
                             :items="contracts"
                             item-value="id"
                             item-text="numDogInt"
+                            no-data-text="Список пуст"
                             outlined
                             hide-details="auto"
                             @change="findClients"
@@ -246,6 +248,7 @@
                             label="Клиент, для кого поставка"
                             :loading="loadingType.clients"
                             :items="clients"
+                            no-data-text="Список пуст"
                             item-value="id"
                             item-text="clName"
                             hide-details="auto"

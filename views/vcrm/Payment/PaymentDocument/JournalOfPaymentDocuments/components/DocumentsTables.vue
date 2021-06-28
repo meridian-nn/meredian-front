@@ -330,6 +330,7 @@
                       @infinite="findSpDocoplForPay"
                     >
                       <div slot="no-more" />
+                      <div slot="no-results" />
                     </infinite-loading>
                   </tbody>
                 </template>

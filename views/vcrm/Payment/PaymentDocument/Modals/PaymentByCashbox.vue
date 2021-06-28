@@ -249,7 +249,7 @@ export default {
       this.editedDocument = true
       await this.findEditedItem(id)
       await this.findPayers()
-      await this.organizationChange()
+      await this.findAccsOfChousenOrg()
       this.dialog = true
     },
 
