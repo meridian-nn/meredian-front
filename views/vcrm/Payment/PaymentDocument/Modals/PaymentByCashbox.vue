@@ -195,16 +195,16 @@ export default {
     // Функция обработки выбора организации
     async organizationChange() {
       await this.findAccsOfChousenOrg()
-      this.selectFirstPaymentAccount()
+      this.selectCashPaymentAccount()
     },
 
     // выбор первого расчетного счета из массива расчетных счетов
-    selectFirstPaymentAccount() {
+    selectCashPaymentAccount() {
       if (!this.accs) {
         return
       }
 
-      this.accId = this.accs[0].id
+      this.accId = this.accs.find(item => item.accType === 'CASH')
     },
 
     // поиск расчетных счетов выбранной организации
@@ -235,12 +235,12 @@ export default {
     },
 
     // Открытие формы для создания нового документа "Оплата по кассе"
-    newDocument(selOrgId, selAccId) {
+    async newDocument(selOrgId, selAccId) {
       this.reset()
       this.editedDocument = false
       this.payerId = selOrgId
-      this.accId = selAccId
-      this.findPayers()
+      await this.findPayers()
+      this.selectCashPaymentAccount()
       this.dialog = true
     },
 
