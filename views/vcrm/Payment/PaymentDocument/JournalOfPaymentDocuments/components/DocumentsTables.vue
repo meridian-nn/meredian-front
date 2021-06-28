@@ -153,13 +153,13 @@
               <v-list>
                 <v-list-item @click="payedByCashboxForContextMenuOnly">
                   <v-list-item-title>
-                    Оплата по кассе
+                    Новая оплата по кассе
                   </v-list-item-title>
                 </v-list-item>
 
-                <v-list-item @click="internalMovementForContextMenuOnly">
+                <v-list-item @click="editPaymentByCashboxForContextMenuOnly">
                   <v-list-item-title>
-                    Вн. перемещение
+                    Ред. оплату по кассе
                   </v-list-item-title>
                 </v-list-item>
 
@@ -182,12 +182,6 @@
                 <v-list-item @click="payedByCashboxForContextMenuOnly">
                   <v-list-item-title>
                     Оплата по кассе
-                  </v-list-item-title>
-                </v-list-item>
-
-                <v-list-item @click="internalMovementForContextMenuOnly">
-                  <v-list-item-title>
-                    Вн. перемещение
                   </v-list-item-title>
                 </v-list-item>
               </v-list>
@@ -911,6 +905,12 @@ export default {
       console.log('payed by cashbox')
     },
 
+    editPaymentByCashboxForContextMenuOnly() {
+      this.addGroupShow = false
+      this.$refs.paymentByCashbox.editDocument(this.currentRowForContextMenu.id)
+      console.log('payed by cashbox')
+    },
+
     // Перемещение документа из таблицы "Документы на оплату" в таблицу "Документы к оплате" по нажатию на стрелку
     async addPaymentDocument() {
       if (!this.accId) {
@@ -1020,27 +1020,45 @@ export default {
     // Изменение выбранного документа на оплату
     editDocument() {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
-        this.$refs.editPaymentDocument.editDocument(this.fromPaySelectedRows[0].id)
+        const selDoc = this.fromPaySelectedRows[0]
+        if (selDoc.isVnpl) {
+          this.$refs.internalPayment.editDocument(selDoc.id)
+        } else {
+          this.$refs.editPaymentDocument.editDocument(selDoc.id)
+        }
       }
     },
 
     // Удаление выбранных документов на оплату
-    async deleteDocument() {
+    deleteDocument() {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
-        const selectedRows = this.fromPaySelectedRows
-        const isDeletionPossible = this.checkSelectedRowsBeforeDelete(selectedRows)
-
-        if (isDeletionPossible === false) {
-          this.$refs.userNotification.showUserNotification('error', 'В выбранных на удаление документах на оплату есть документ, по которому есть оплата! Удаление невозможно!', 5000)
-          return
+        const selDoc = this.fromPaySelectedRows[0]
+        if (selDoc.isVnpl) {
+          this.deleteVnpl()
+        } else {
+          this.deleteDocFromPay()
         }
-
-        const ids = this.fromPaySelectedRows.map(value => value.id)
-        // await this.$api.payment.DocOplForPay.deleteSelectedPayments(ids)
-        await this.$axios.$post('/oper/spDocopl/deletePayment', ids)
-
-        await this.updateDocsForPay()
       }
+    },
+
+    deleteVnpl() {
+      this.$refs.userNotification.showUserNotification('success', 'метод в разработке!')
+    },
+
+    async deleteDocFromPay() {
+      const selectedRows = this.fromPaySelectedRows
+      const isDeletionPossible = this.checkSelectedRowsBeforeDelete(selectedRows)
+
+      if (isDeletionPossible === false) {
+        this.$refs.userNotification.showUserNotification('error', 'В выбранных на удаление документах на оплату есть документ, по которому есть оплата! Удаление невозможно!', 5000)
+        return
+      }
+
+      const ids = this.fromPaySelectedRows.map(value => value.id)
+      // await this.$api.payment.DocOplForPay.deleteSelectedPayments(ids)
+      await this.$axios.$post('/oper/spDocopl/deletePayment', ids)
+
+      await this.updateDocsForPay()
     },
 
     checkSelectedRowsBeforeDelete(selectedRows) {
@@ -1057,7 +1075,12 @@ export default {
     // Копирование выбранного документа на оплату
     copyDocument() {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
-        this.$refs.editPaymentDocument.copyDocument(this.fromPaySelectedRows[0].id)
+        const selDoc = this.fromPaySelectedRows[0]
+        if (selDoc.isVnpl) {
+          this.$refs.internalPayment.copyDocument(selDoc.id)
+        } else {
+          this.$refs.editPaymentDocument.copyDocument(selDoc.id)
+        }
       }
     },
 
@@ -1270,6 +1293,8 @@ export default {
           } else {
             value.payerName = value.myorgName
           }
+
+          value.isVnpl = value.nameDoc.substr(0, 4) === 'ВнПл'
 
           value.sumDocNumber = value.sumDoc
           value.sumDoc = this.numberToSum(value.sumDoc)

@@ -87,7 +87,7 @@ Vue.mixin({
           return await this.$api.paymentAccounts.save(paymentAccount)
         },
 
-        async changeVnplOfpaymentAccounts(accIdOfPayer, accIdOfReceiver, sumOfPayment) {
+        async changeVnplOfPaymentAccounts(accIdOfPayer, accIdOfReceiver, sumOfPayment) {
           if(sumOfPayment === 0) {
             return
           }

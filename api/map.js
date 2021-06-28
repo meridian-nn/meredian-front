@@ -165,6 +165,10 @@ export const factory = send => ({
             return send('POST', '/oper/spDocopl/selOplat')
         },
 
+        findPaymentByCashboxById(id) {
+            return send('GET', `/oper/payment/findById/${id}`)
+        },
+
         savePaymentByCashbox(params) {
             return send('POST', `/oper/payment/save`, params)
         },

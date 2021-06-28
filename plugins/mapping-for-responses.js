@@ -33,7 +33,8 @@ Vue.mixin({
                     accId: 0, // value.accId
                     depName: '',
                     isDoc: false,
-                    keyId: id
+                    keyId: id,
+                    id: value.id
                 }
 
                 totalPaymentSum += sumPlatFromValue

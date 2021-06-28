@@ -160,7 +160,18 @@ export default {
       groups: [],
 
       docFromPay: {},
-      selectedAccOfOrg: null
+
+      selectedAccOfOrg: null,
+
+      // переменная, которая означает что документ открыт для редактирования
+      editedDocument: false,
+
+      sumDocOfEditedDoc: 0,
+
+      spDocintOfEditedDoc: {
+        kontrId: null,
+        accId: null
+      }
     }
   },
 
@@ -227,11 +238,99 @@ export default {
 
     newDocument(selectedOrganization, accId) {
       this.reset()
+      this.editedDocument = false
       this.selectedOrganizationId = selectedOrganization
       this.selectedAccOfOrg = accId
       this.findPayerById()
       this.createNewDocFromPay()
       this.dialog = true
+    },
+
+    async copyDocument(id) {
+      this.reset()
+      this.editedDocument = false
+      const docFromPay = await this.findDocFromPayById(id)
+
+      if (!docFromPay) {
+        this.dialog = false
+        return
+      }
+
+      const spDocintOfDoc = docFromPay.spDocints[0]
+      this.spDocint = {
+        kontrId: spDocintOfDoc.kontrId,
+        accId: spDocintOfDoc.accId
+      }
+
+      await this.findPaymentAccounts(this.spDocint.kontrId)
+      this.selectedOrganizationId = docFromPay.myorgId
+      this.selectedAccOfOrg = docFromPay.accId
+      await this.findPayerById()
+
+      this.createNewDocFromPayByCopy(docFromPay)
+
+      this.dialog = true
+    },
+
+    async editDocument(id) {
+      this.reset()
+      this.editedDocument = true
+      const docFromPay = await this.findDocFromPayById(id)
+
+      if (!docFromPay) {
+        this.dialog = false
+        return
+      }
+
+      this.docFromPay = docFromPay
+      this.spDocint = this.docFromPay.spDocints[0]
+      this.sumDocOfEditedDoc = this.docFromPay.sumDoc
+      this.spDocintOfEditedDoc = {
+        kontrId: this.spDocint.kontrId,
+        accId: this.spDocint.accId
+      }
+      await this.findPaymentAccounts(this.spDocint.kontrId)
+      this.selectedOrganizationId = this.docFromPay.myorgId
+      this.selectedAccOfOrg = this.docFromPay.accId
+      await this.findPayerById()
+      this.dialog = true
+    },
+
+    createNewDocFromPayByCopy(docFromPay) {
+      const currentDate = new Date()
+      const dataDoc = currentDate.toISOString().substr(0, 10)
+      currentDate.setDate(currentDate.getDate() + 3)
+      const dataOplat = currentDate.toISOString().substr(0, 10)
+
+      this.docFromPay = {
+        accId: docFromPay.selectedAccOfOrg,
+        creatorId: this.getCurrentUser().id,
+        dataDoc: new Date(dataDoc).toLocaleDateString(),
+        dataOplat: new Date(dataOplat).toLocaleDateString(),
+        ispId: 0,
+        myorgId: docFromPay.selectedOrganizationId,
+        myOrg: {
+          id: docFromPay.selectedOrganizationId
+        },
+        nameDoc: docFromPay.nameDoc,
+        paymentStatus: 'BANK',
+        sumDoc: docFromPay.sumDoc,
+        prim: docFromPay.prim,
+        viddocId: docFromPay.viddocId,
+        spDocches: [],
+        spDocints: []
+      }
+    },
+
+    findDocFromPayById(id) {
+      const response = this.$api.payment.docOplForPay.findById(id)
+
+      if (!response) {
+        this.$refs.userNotification.showUserNotification('error', 'Произошла ошибка, документ не был найден в базе данных!')
+        return false
+      } else {
+        return response
+      }
     },
 
     createNewDocFromPay() {
@@ -276,11 +375,16 @@ export default {
         kontrId: null,
         accId: null
       }
+      this.spDocintOfEditedDoc = {
+        kontrId: null,
+        accId: null
+      }
       this.selectedOrganization = {}
       this.selectedOrganizationId = null
       this.selectedAccOfOrg = null
       this.organizations = []
       this.paymentAccounts = []
+      this.sumDocOfEditedDoc = 0
       this.groups = []
       this.id = null
     },
@@ -291,6 +395,14 @@ export default {
         return
       }
 
+      if (this.editedDocument) {
+        await this.saveEditedInternalPayment()
+      } else {
+        await this.saveNewInternalPayment()
+      }
+    },
+
+    async saveNewInternalPayment() {
       this.docFromPay.descr = this.docFromPay.prim
       this.docFromPay.spDocints.push(this.spDocint)
 
@@ -300,16 +412,35 @@ export default {
         alert(errorMessage)
       })
       if (errorMessage == null) {
-        await this.changeVnplOfpaymentAccounts(this.docFromPay.accId, this.spDocint.accId, this.docFromPay.sumDoc)
+        await this.changeVnplOfPaymentAccounts(this.docFromPay.accId, this.spDocint.accId, this.docFromPay.sumDoc)
         this.dialog = false
       }
       this.$emit('save')
     },
 
+    async saveEditedInternalPayment() {
+      this.docFromPay.descr = this.docFromPay.prim
+
+      let errorMessage = null
+      await this.$axios.$post('/oper/spDocopl/saveInternalPayment', this.docFromPay).catch((error) => {
+        errorMessage = error
+        alert(errorMessage)
+      })
+      if (errorMessage == null) {
+        await this.changeVnplOfPaymentAccounts(this.spDocintOfEditedDoc.accId, this.docFromPay.accId, this.sumDocOfEditedDoc)
+        await this.changeVnplOfPaymentAccounts(this.docFromPay.accId, this.spDocint.accId, this.docFromPay.sumDoc)
+        this.dialog = false
+      }
+    },
+
     // функция проверки заполнения обязательных полей
     checkParamsOfEditedItem() {
       let verificationPassed = true
-      if (this.docFromPay.accId === this.spDocint.accId) {
+
+      if (!this.docFromPay.accId) {
+        this.$refs.userNotification.showUserNotification('error', 'Не указан расчетный счет плательщика!')
+        verificationPassed = false
+      } else if (this.docFromPay.accId === this.spDocint.accId) {
         this.$refs.userNotification.showUserNotification('error', 'В полях "Расчетный счет плательщика" и "Расчетный счет получателя" не может быть указан один и тот же счет!')
         verificationPassed = false
       } else if (!this.docFromPay.contractorId) {

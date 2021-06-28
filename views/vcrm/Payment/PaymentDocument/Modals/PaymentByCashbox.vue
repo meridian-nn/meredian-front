@@ -156,7 +156,14 @@ export default {
       accs: [],
 
       // список групп
-      groups: []
+      groups: [],
+
+      // переменная, которая означает что документ открыт для редактирования
+      editedDocument: false,
+
+      sumDocOfEditedItem: 0,
+      payerIdOfEditedItem: null,
+      accIdOfEditedItem: null
     }
   },
 
@@ -230,10 +237,33 @@ export default {
     // Открытие формы для создания нового документа "Оплата по кассе"
     newDocument(selOrgId, selAccId) {
       this.reset()
+      this.editedDocument = false
       this.payerId = selOrgId
       this.accId = selAccId
       this.findPayers()
       this.dialog = true
+    },
+
+    async editDocument(id) {
+      this.reset()
+      this.editedDocument = true
+      await this.findEditedItem(id)
+      await this.findPayers()
+      await this.organizationChange()
+      this.dialog = true
+    },
+
+    // поиск документа на оплату по id
+    async findEditedItem(id) {
+      this.editedItem = await this.$api.payment.findPaymentByCashboxById(id)
+      this.payerId = this.editedItem.payer.id
+      this.accId = this.editedItem.acc.id
+      this.payerIdOfEditedItem = this.payerId
+      this.accIdOfEditedItem = this.accId
+      this.editedItem.sumDoc = this.editedItem.paymentOperationSums[0].paymentSum
+      this.editedItem.sumDocOfEditedItem = this.editedItem.sumDoc
+      this.editedItem.typeOfPaymentTransactionId = this.editedItem.paymentOperationSums[0].paymentOperationTypeId
+      this.editedItem.prim = this.editedItem.comment
     },
 
     // функция сохранения оплаты по кассе
@@ -242,6 +272,45 @@ export default {
         return
       }
 
+      if (this.editedDocument) {
+        await this.saveEditedPaymentByCashbox()
+      } else {
+        await this.saveNewPaymentByCashbox()
+      }
+    },
+
+    async saveEditedPaymentByCashbox() {
+      let errorMessage = null
+      this.editPaymentByCashbox()
+
+      await this.$api.payment.savePaymentByCashbox(this.editedItem).catch((error) => {
+        errorMessage = error
+        alert(errorMessage)
+      })
+
+      if (errorMessage == null) {
+        await this.changeSumToPayOfPaymentAccount(this.accIdOfEditedItem, this.editedItem.sumDocOfEditedItem, 'DEDUCT')
+        await this.changeSumToPayOfPaymentAccount(this.accId, this.editedItem.sumDoc, 'SUM')
+        this.dialog = false
+      }
+      this.$emit('save')
+    },
+
+    editPaymentByCashbox() {
+      this.editedItem.acc = {
+        id: this.accId
+      }
+
+      this.editedItem.payer = {
+        id: this.payerId
+      }
+
+      this.editedItem.paymentOperationSums[0].paymentOperationTypeId = this.editedItem.typeOfPaymentTransactionId
+      this.editedItem.paymentOperationSums[0].paymentSum = this.editedItem.sumDoc
+      this.editedItem.comment = this.editedItem.prim
+    },
+
+    async saveNewPaymentByCashbox() {
       const paymentByCashbox = this.createPaymentByCashbox()
       let errorMessage = null
       this.editedItem.dataDoc = this.date
@@ -316,23 +385,13 @@ export default {
       this.editedItem = {}
       this.spDocch = {}
       this.id = null
-    },
-
-    // открытие формы для редактирования документа "Оплата по кассе"
-    editDocument(id, accId) {
-      this.reset()
-      this.id = id
-      this.dialog = true
-      this.findEditedItem(accId)
-    },
-
-    // поиск документа на оплату по id
-    async findEditedItem(accId) {
-      if (this.id) {
-        this.editedItem = await this.$api.payment.docOplForPay.findById(this.id)
-        this.editedItem.accId = accId
-      }
+      this.sumDocOfEditedItem = 0
+      this.payerId = null
+      this.accId = null
+      this.payerIdOfEditedItem = null
+      this.accIdOfEditedItem = null
     }
+
   }
 }
 </script>
