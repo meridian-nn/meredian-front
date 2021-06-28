@@ -907,6 +907,12 @@ export default {
 
     editPaymentByCashboxForContextMenuOnly() {
       this.addGroupShow = false
+
+      if (this.currentRowForContextMenu.isDoc) {
+        this.$refs.userNotification.showUserNotification('error', 'Был выбран документ к оплате! Выберите оплату по кассе!')
+        return
+      }
+
       this.$refs.paymentByCashbox.editDocument(this.currentRowForContextMenu.id)
       console.log('payed by cashbox')
     },

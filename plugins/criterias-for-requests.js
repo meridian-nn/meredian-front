@@ -378,11 +378,11 @@ Vue.mixin({
           ]
         },
 
-        createCriteriasToSearchUsersByDepartmentId(depId){
+        createCriteriasToSearchExecutorsByDepartmentId(depId){
           return [
             {
               dataType: 'INTEGER',
-              key: 'department.id',
+              key: 'otdId',
               operation: 'EQUALS',
               type: 'AND',
               values: [

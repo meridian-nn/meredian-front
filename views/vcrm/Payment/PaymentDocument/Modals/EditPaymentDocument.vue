@@ -46,7 +46,7 @@
                 :loading="loadingType.departments"
                 :items="departments"
                 item-value="id"
-                item-text="nameViddoc"
+                item-text="namePodr"
                 outlined
                 hide-details="auto"
                 @change="departmentChange"
@@ -60,7 +60,7 @@
                 :loading="loadingType.executors"
                 :items="executors"
                 item-value="id"
-                item-text="fullName"
+                item-text="fio"
                 outlined
               />
             </v-col>
@@ -382,7 +382,7 @@ export default {
     async findDepartments() {
       if (!this.departments.length) {
         this.loadingType.departments = true
-        this.departments = await this.$api.budgetElements.findDepartments()
+        this.departments = await this.$api.departments.findAll()
         this.loadingType.departments = null
       }
     },
@@ -412,8 +412,8 @@ export default {
         return
       }
       this.loadingType.executors = true
-      const data = this.createCriteriasToSearchUsersByDepartmentId(departmentId)
-      this.executors = await this.$api.auth.user.getUsersBySearchCriterias(data)
+      const data = this.createCriteriasToSearchExecutorsByDepartmentId(departmentId)
+      this.executors = await this.$api.executors.findBySearchCriterias(data)
       // this.executors = await this.$api.executors.findAll()
       this.loadingType.executors = null
     },
@@ -463,6 +463,7 @@ export default {
       // очищаем массивы договоров и поставщиков для выбора пользователем, т.к. они будут изменены выбранным поставщиком
       // delete (this.editedItem.viddocId)
       // this.findDocumentType(depId)
+      this.editedItem.executorId = null
       this.findExecutors(depId)
     },
     getCurrentUser() {

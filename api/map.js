@@ -50,6 +50,12 @@ export const factory = send => ({
         }
     },
 
+    departments: {
+      findAll() {
+        return send('GET', `/oper/dir/spPodr/findAll`)
+      }
+    },
+
     code: {
         markCodeList(params) {
             return send('GET', `/markCode/findAll?page=0&size=9999${new URLSearchParams(params).toString()}`)
@@ -148,6 +154,9 @@ export const factory = send => ({
         },
         findAll() {
           return send('GET', `/oper/dict/spIsp/findAll`)
+        },
+        findBySearchCriterias(params) {
+          return send('POST', `/oper/dict/spIsp/findBySearchCriteriaList`, params)
         }
     },
 
