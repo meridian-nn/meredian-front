@@ -51,7 +51,7 @@
             separator="space"
             :precision="2"
             decimal-separator="."
-            :output-type="number"
+            output-type="number"
             :read-only="true"
           />
         </v-subheader>
@@ -99,7 +99,7 @@
             separator="space"
             :precision="2"
             decimal-separator="."
-            :output-type="number"
+            output-type="number"
           />
           <span class="line" />
         </div>
@@ -117,7 +117,7 @@
               separator="space"
               :precision="2"
               decimal-separator="."
-              :output-type="number"
+              output-type="number"
               :read-only="true"
             />
           </div>
@@ -140,7 +140,7 @@
             separator="space"
             :precision="2"
             decimal-separator="."
-            :output-type="number"
+            output-type="number"
             @input="update(row.distributionSum)"
           />
           <input
@@ -169,7 +169,7 @@
           separator="space"
           :precision="2"
           decimal-separator="."
-          :output-type="number"
+          output-type="number"
           :read-only="true"
         />
       </div>
@@ -447,11 +447,11 @@ export default {
         distributionDate: new Date(this.date).toLocaleDateString()
       }
 
-      const moneyDistributionByDepartments = await this.$api.payment.moneyDistributionByDepartments.findForEdit(data)
+      this.moneyDistributionData = await this.$api.payment.moneyDistributionByDepartments.findForEdit(data)
 
-      this.moneyDistributionData = moneyDistributionByDepartments.map((item) => {
+      /* this.moneyDistributionData = moneyDistributionByDepartments.map((item) => {
         return { ...item, distributionSum: 0 }
-      })
+      }) */
     },
 
     // Обработка события сохранения распределения бюджетов на форме
@@ -472,17 +472,17 @@ export default {
         // await this.$api.payment.moneyDistributionByDepartments.save([this.department])
         await this.$axios.$post('/oper/depMoneyDistribution/save', [this.department])
 
-        await this.findByDepartmentId(this.department.department.id)
-
+        //  await this.findByDepartmentId(this.department.department.id)
         // Сохранение распределения бюджета на подразделения отдела
         // await this.$api.payment.moneyDistributionByDepartments.save(this.moneyDistributionData)
         await this.$axios.$post('/oper/depMoneyDistribution/save', this.moneyDistributionData)
-        await this.loadMoneyDistribution(this.department.department.id)
-
-        await this.findDepartments()
       }
 
       await this.findBudgetByDate()
+      await this.findDepartments()
+      if (this.department.department) {
+        await this.loadMoneyDistribution(this.department.department.id)
+      }
     },
 
     getDateForSave() {
@@ -502,7 +502,7 @@ export default {
 }
 
 .table-total-text {
-  flex-basis: 398px;
+  flex-basis: 447px;
 }
 
 .money-distribution-main-row-headline {
