@@ -572,6 +572,32 @@ Vue.mixin({
             login
           ]
         }
+      },
+
+      createCriteriasToSearchDocToPayByDocoplId(docoplId) {
+        return [
+          {
+            dataType: 'VARCHAR',
+            key: 'docoplId',
+            operation: 'EQUALS',
+            type: 'AND',
+            values: [
+              docoplId
+            ]
+          }
+        ]
+      },
+
+      createCriteriaToSearchExecutorById(executorId) {
+        return {
+          dataType: 'VARCHAR',
+          key: 'id',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            executorId
+          ]
+        }
       }
     }
 })

@@ -157,6 +157,9 @@ export const factory = send => ({
         },
         findBySearchCriterias(params) {
           return send('POST', `/oper/dict/spIsp/findBySearchCriteriaList`, params)
+        },
+        findBySearchCriteria(params) {
+          return send('POST', `/oper/dict/spIsp/findBySearchCriteria`, params)
         }
     },
 

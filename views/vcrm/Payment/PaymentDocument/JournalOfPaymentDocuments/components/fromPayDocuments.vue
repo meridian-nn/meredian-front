@@ -136,7 +136,10 @@
           offset-y
         >
           <v-list>
-            <v-list-item @click="payDocumentForContextMenuOnly">
+            <v-list-item
+              v-if="isHaveBudgetRole()"
+              @click="payDocumentForContextMenuOnly"
+            >
               <v-list-item-title>
                 Оплатить
               </v-list-item-title>
@@ -194,7 +197,10 @@
             <v-icon>mdi-delete-forever</v-icon>
           </v-btn>
 
-          <div class="add-group">
+          <div
+            v-if="isHaveBudgetRole()"
+            class="add-group"
+          >
             <label
               for="add"
               class="add-group__btn"
@@ -219,13 +225,25 @@
               нал
             </button>
             <button
-              ref=""
+              v-if="isHaveBudgetRole()"
               class="add-group__link internal_payment"
               @click="internalMovementForContextMenuOnly"
             >
               внт
             </button>
           </div>
+
+          <v-btn
+            v-else
+            color="blue"
+            class="mr-2 mb-2"
+            fab
+            dark
+            small
+            @click="newDocument"
+          >
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
         </div>
       </div>
     </div>
