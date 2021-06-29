@@ -447,11 +447,11 @@ export default {
         distributionDate: new Date(this.date).toLocaleDateString()
       }
 
-      this.moneyDistributionData = await this.$api.payment.moneyDistributionByDepartments.findForEdit(data)
+      const moneyDistributionByDepartments = await this.$api.payment.moneyDistributionByDepartments.findForEdit(data)
 
-      /* this.moneyDistributionData = moneyDistributionByDepartments.map((item) => {
-        return { ...item, distributionSum: 0 }
-      }) */
+      this.moneyDistributionData = moneyDistributionByDepartments.map((item) => {
+        return { ...item, distributionSum: item?.distributionSum || 0 }
+      })
     },
 
     // Обработка события сохранения распределения бюджетов на форме

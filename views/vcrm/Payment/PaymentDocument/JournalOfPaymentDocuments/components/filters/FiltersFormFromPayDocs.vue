@@ -35,20 +35,26 @@
                 :items="departments"
                 :clearable="true"
                 item-value="id"
-                item-text="nameViddoc"
+                item-text="namePodr"
                 outlined
                 hide-details="auto"
+                @change="departmentChange"
               />
             </v-col>
           </v-row>
 
           <v-row>
             <v-col cols="12">
-              <v-text-field
-                v-model="filterItem.executorName"
+              <v-autocomplete
+                v-model="filterItem.executorId"
+                label="Исполнитель"
+                :loading="loadingType.executors"
+                :items="executors"
                 :clearable="true"
+                no-data-text="Список пуст"
+                item-value="id"
+                item-text="fio"
                 outlined
-                label="Имя исполнителя"
                 hide-details="auto"
               />
             </v-col>
@@ -187,7 +193,10 @@ export default {
       executorDepartments: null,
 
       // переменная, отвечающая за отображениие модального окна
-      dialog: false
+      dialog: false,
+
+      // список исполнителей для выбора пользователем
+      executors: []
     }
   },
 
@@ -214,8 +223,19 @@ export default {
     // Поиск подразделений для выбора пользователем
     async findDepartments() {
       this.loadingType.departments = true
-      this.departments = await this.$api.budgetElements.findDepartments()
+      this.departments = await this.$api.departments.findAll()
       this.loadingType.departments = null
+    },
+
+    departmentChange() {
+      this.findExecutors()
+    },
+
+    async findExecutors() {
+      this.loadingType.executors = true
+      const data = this.createCriteriasToSearchExecutorsByDepartmentId(this.filterItem.departmentId)
+      this.executors = await this.$api.executors.findBySearchCriterias(data)
+      this.loadingType.executors = null
     },
 
     // Поиск плательщиков для выбора пользователем
