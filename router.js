@@ -40,7 +40,7 @@ const VcrmPage = dynamicPage(() =>
   import('~/views/vcrm/VcrmPage'))
 
 const PaymentMenuPage = dynamicPage(() =>
-  import('~/views/vcrm/Payment/Menu'))
+  import('~/views/vcrm/Payment/PaymentPage'))
 
 const JournalOfPaymentDocumentsPage = dynamicPage(() =>
   import('~/views/vcrm/Payment/PaymentDocument/JournalOfPaymentDocuments'))
@@ -113,32 +113,17 @@ const createRouterConst = new Router({
   scrollBehavior,
   routes: [{
     path: '/meridian',
+    name: 'VcrmPage',
     component: VcrmPage,
     meta: {
-      breadcrumb: [{
-        text: 'Профиль',
-        disabled: false,
-        href: 'Dashboard'
-      }
-      ]
+      breadcrumb: { text: 'Профиль' }
     },
     children: [{
       path: 'gtin',
       name: 'GtinPage',
       component: GtinPage,
       meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: false,
-            href: 'Dashboard'
-          },
-          {
-            text: 'Журнал GTIN',
-            disabled: true,
-            href: 'GtinPage'
-          }
-        ]
+        breadcrumb: { text: 'Журнал GTIN' }
       }
     },
     {
@@ -146,17 +131,7 @@ const createRouterConst = new Router({
       name: 'MarkPage',
       component: MarkPage,
       meta: {
-        breadcrumb: [{
-          text: 'Профиль',
-          disabled: false,
-          href: 'Dashboard'
-        },
-        {
-          text: 'Журнал Кодов Маркировки',
-          disabled: true,
-          href: 'MarkPage'
-        }
-        ]
+        breadcrumb: { text: 'Журнал Кодов Маркировки' }
       }
     },
 
@@ -165,17 +140,7 @@ const createRouterConst = new Router({
       name: 'ChatPage',
       component: ChatPage,
       meta: {
-        breadcrumb: [{
-          text: 'Профиль',
-          disabled: false,
-          href: 'Dashboard'
-        },
-        {
-          text: 'Чат',
-          disabled: true,
-          href: 'ChatPage'
-        }
-        ]
+        breadcrumb: { text: 'Чат' }
       }
     },
 
@@ -184,16 +149,7 @@ const createRouterConst = new Router({
       name: 'RegistrationPage',
       component: RegistrationPage,
       meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          {
-            text: 'Регистрация нового пользователя',
-            disabled: false
-          }
-        ]
+        breadcrumb: { text: 'Регистрация нового пользователя' }
       }
     },
 
@@ -202,16 +158,7 @@ const createRouterConst = new Router({
       name: 'CurrentUserEditingPage',
       component: CurrentUserEditingPage,
       meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          {
-            text: 'Настройка профиля',
-            disabled: false
-          }
-        ]
+        breadcrumb: { text: 'Настройка профиля' }
       }
     },
 
@@ -220,16 +167,7 @@ const createRouterConst = new Router({
       name: 'UsersEditingPage',
       component: UsersEditingPage,
       meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          {
-            text: 'Редактирование аккаунтов пользователей',
-            disabled: false
-          }
-        ]
+        breadcrumb: { text: 'Редактирование аккаунтов пользователей' }
       }
     },
 
@@ -237,198 +175,98 @@ const createRouterConst = new Router({
       path: 'payment_menu',
       name: 'PaymentMenu',
       component: PaymentMenuPage,
-      meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          {
-            text: 'Меню реестра оплат',
-            disabled: false
+      meta: { breadcrumb: { text: 'Меню реестра оплат' } },
+      children: [
+        {
+          path: 'journal_of_payment_documents',
+          name: 'JournalOfPaymentDocuments',
+          component: JournalOfPaymentDocumentsPage,
+          meta: {
+            breadcrumb: { text: 'Журнал документов на оплату' }
           }
-        ]
-      }
-    },
+        },
 
-    {
-      path: 'journal_of_payment_documents',
-      name: 'JournalOfPaymentDocuments',
-      component: JournalOfPaymentDocumentsPage,
-      meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          {
-            text: 'Меню реестра оплат',
-            disabled: false
+        {
+          path: 'payment_by_cashbox',
+          name: 'PaymentByCashbox',
+          component: PaymentByCashboxPage,
+          meta: {
+            breadcrumb: { text: 'Меню реестра оплат' }
           }
-        ]
-      }
-    },
+        },
 
-    {
-      path: 'payment_by_cashbox',
-      name: 'PaymentByCashbox',
-      component: PaymentByCashboxPage,
-      meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          {
-            text: 'Меню реестра оплат',
-            disabled: false
+        {
+          path: 'internal_payment',
+          name: 'InternalPayment',
+          component: InternalPaymentPage,
+          meta: {
+            breadcrumb: { text: 'Меню реестра оплат' }
           }
-        ]
-      }
-    },
+        },
 
-    {
-      path: 'internal_payment',
-      name: 'InternalPayment',
-      component: InternalPaymentPage,
-      meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          {
-            text: 'Меню реестра оплат',
-            disabled: false
+        {
+          path: 'payment_budget_by_departmens',
+          name: 'PaymentBudgetByDepartments',
+          component: PaymentBudgetByDepartmentsPage,
+          meta: {
+            breadcrumb: { text: 'Бюджет оплат по подразделениям' }
           }
-        ]
-      }
-    },
+        },
 
-    {
-      path: 'payment_budget_by_departmens',
-      name: 'PaymentBudgetByDepartments',
-      component: PaymentBudgetByDepartmentsPage,
-      meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          {
-            text: 'Меню реестра оплат',
-            disabled: false
+        {
+          path: 'journal_of_email_sending_payment_documents',
+          name: 'JournalOfEmailSendingPaymentDocuments',
+          component: JournalOfEmailSendingPaymentDocumentsPage,
+          meta: {
+            breadcrumb: { text: 'Журнал рассылки на e-mail документов на оплату' }
           }
-        ]
-      }
-    },
+        },
 
-    {
-      path: 'journal_of_email_sending_payment_documents',
-      name: 'JournalOfEmailSendingPaymentDocuments',
-      component: JournalOfEmailSendingPaymentDocumentsPage,
-      meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          {
-            text: 'Меню реестра оплат',
-            disabled: false
+        {
+          path: 'history_of_payment_documents',
+          name: 'HistoryOfPaymentDocuments',
+          component: HistoryOfPaymentDocumentsPage,
+          meta: {
+            breadcrumb: { text: 'Меню реестра оплат' }
           }
-        ]
-      }
-    },
+        },
 
-    {
-      path: 'history_of_payment_documents',
-      name: 'HistoryOfPaymentDocuments',
-      component: HistoryOfPaymentDocumentsPage,
-      meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          {
-            text: 'Меню реестра оплат',
-            disabled: false
+        {
+          path: 'money_distribution',
+          name: 'MoneyDistribution',
+          component: MoneyDistributionPage,
+          meta: {
+            breadcrumb: { text: 'Распределение ДС по подразделениям' }
           }
-        ]
-      }
-    },
+        },
 
-    {
-      path: 'money_distribution',
-      name: 'MoneyDistribution',
-      component: MoneyDistributionPage,
-      meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          {
-            text: 'Меню реестра оплат',
-            disabled: false
+        {
+          path: 'input_of_balances',
+          name: 'InputOfBalances',
+          component: InputOfBalancesPage,
+          meta: {
+            breadcrumb: { text: 'Ввод остатков по Р/С' }
           }
-        ]
-      }
-    },
+        },
 
-    {
-      path: 'input_of_balances',
-      name: 'InputOfBalances',
-      component: InputOfBalancesPage,
-      meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          {
-            text: 'Меню реестра оплат',
-            disabled: false
+        {
+          path: 'register_of_documents_to_pay',
+          name: 'RegisterOfDocumentsToPay',
+          component: RegisterOfDocumentsToPayPage,
+          meta: {
+            breadcrumb: { text: 'Реестр документов оплат по кассе' }
           }
-        ]
-      }
-    },
+        },
 
-    {
-      path: 'register_of_documents_to_pay',
-      name: 'RegisterOfDocumentsToPay',
-      component: RegisterOfDocumentsToPayPage,
-      meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          {
-            text: 'Меню реестра оплат',
-            disabled: false
+        {
+          path: 'register_of_payments_by_cashbox',
+          name: 'RegisterOfPaymentsByCashbox',
+          component: RegisterOfPaymentsByCashboxPage,
+          meta: {
+            breadcrumb: { text: 'Реестр документов оплат по кассе' }
           }
-        ]
-      }
-    },
-
-    {
-      path: 'register_of_payments_by_cashbox',
-      name: 'RegisterOfPaymentsByCashbox',
-      component: RegisterOfPaymentsByCashboxPage,
-      meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          {
-            text: 'Меню реестра оплат',
-            disabled: false
-          }
-        ]
-      }
+        }
+      ]
     },
 
     {
@@ -436,13 +274,7 @@ const createRouterConst = new Router({
       name: 'SupplyMenu',
       component: SupplyMenuPage,
       meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          { text: 'АРМ Снабжение', disabled: false }
-        ]
+        breadcrumb: { text: 'АРМ Снабжение' }
       }
     },
 
@@ -451,13 +283,7 @@ const createRouterConst = new Router({
       name: 'CommodityMenu',
       component: CommodityMenuPage,
       meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          { text: 'АРМ Снабжение / Сырье (Снабжение)', disabled: false }
-        ]
+        breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
       }
     },
 
@@ -466,13 +292,7 @@ const createRouterConst = new Router({
       name: 'CommodityLogOfSewingPlan',
       component: CommodityLogOfSewingPlanPage,
       meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          { text: 'АРМ Снабжение / Сырье (Снабжение)', disabled: false }
-        ]
+        breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
       }
     },
 
@@ -481,13 +301,7 @@ const createRouterConst = new Router({
       name: 'ListOfCommodityForSewingApplication',
       component: ListOfCommodityForSewingApplicationPage,
       meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          { text: 'АРМ Снабжение / Сырье (Снабжение)', disabled: false }
-        ]
+        breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
       }
     },
 
@@ -496,13 +310,7 @@ const createRouterConst = new Router({
       name: 'RequisitionLogToSupplier',
       component: RequisitionLogToSupplierPage,
       meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          { text: 'АРМ Снабжение / Сырье (Снабжение)', disabled: false }
-        ]
+        breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
       }
     },
 
@@ -511,13 +319,7 @@ const createRouterConst = new Router({
       name: 'StockBalance',
       component: StockBalancePage,
       meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          { text: 'АРМ Снабжение / Сырье (Снабжение)', disabled: false }
-        ]
+        breadcrumb: { text: 'Складские остатки' }
       }
     },
 
@@ -526,13 +328,7 @@ const createRouterConst = new Router({
       name: 'Materials',
       component: MaterialsPage,
       meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          { text: 'АРМ Снабжение / Сырье (Снабжение)', disabled: false }
-        ]
+        breadcrumb: { text: 'АРМ Снабжение / Сырье (Закупки)' }
       }
     },
 
@@ -541,16 +337,7 @@ const createRouterConst = new Router({
       name: 'WarehouseInventory',
       component: WarehouseInventoryPage,
       meta: {
-        breadcrumb: [
-          {
-            text: 'Профиль',
-            disabled: true
-          },
-          {
-            text: 'АРМ Снабжение / Сырье (Снабжение)',
-            disabled: false
-          }
-        ]
+        breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
       }
     }
     ]

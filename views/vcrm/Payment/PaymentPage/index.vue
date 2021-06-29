@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="isPaymentPage"
     name="PaymentMenu"
     class="payment-menu"
   >
@@ -124,13 +125,17 @@
       </div>
     </v-row>
   </div>
+
+  <div v-else>
+    <router-view />
+  </div>
 </template>
 
 <script>
 import BarChart from '@/components/charts/Bar.vue'
 import PatchnoteWindow from './PatchnoteWindow/index.vue'
 export default {
-  name: 'PaymentMenu',
+  name: 'PaymentPage',
 
   components: {
     PatchnoteWindow,
@@ -154,6 +159,10 @@ export default {
         width: '100%',
         height: '400px'
       }
+    },
+
+    isPaymentPage() {
+      return this.$route.matched[this.$route.matched.length - 1].name === 'PaymentMenu'
     }
   },
 

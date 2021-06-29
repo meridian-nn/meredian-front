@@ -251,9 +251,9 @@ export default {
       const crumbs = []
       const matched = this.$route.matched
 
-      matched.forEach(function(route) {
-        if (route.meta && route.meta.breadcrumb) {
-          crumbs.push(route)
+      matched.forEach(function(route, i, arr) {
+        if (route?.meta?.breadcrumb) {
+          crumbs.push({ ...route.meta.breadcrumb, href: route.path, disabled: i === arr.length - 1 })
         }
       })
 
