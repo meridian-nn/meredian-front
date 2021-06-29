@@ -59,8 +59,8 @@
               output-type="number"
             />
             <vue-numeric
-              slot="credit"
-              v-model.number="row.credit"
+              slot="sumToPay"
+              v-model.number="row.sumToPay"
               slot-scope="{row}"
               :read-only="true"
               separator="space"
@@ -111,6 +111,8 @@ import ControlTable from '~/mixins/ControlTable'
 export default {
   name: 'BalanceScore',
 
+  mixins: [ControlTable],
+
   props: {
     organizations: {
       type: Array,
@@ -121,21 +123,14 @@ export default {
       type: [String, Date],
       required: true
     }
-  },
 
-  watch: {
-    date() {
-      this.findByDataOplatAndMyOrgId()
-    }
   },
-
-  mixins: [ControlTable],
 
   data() {
     return {
       orgId: null,
       loadingType: {},
-      oplatDataColumns: ['shortNameOfAccWithNumOfAcc', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
+      oplatDataColumns: ['shortNameOfAccWithNumOfAcc', 'saldo', 'nalich', 'vnpl', 'sumToPay', 'endBalance'],
       oplatData: [],
       oplatDataOptions: {
         filterable: ['shortNameOfAccWithNumOfAcc'],
@@ -150,14 +145,39 @@ export default {
           saldo: 'Остаток на р/с',
           nalich: 'Прочее',
           vnpl: 'ВнПл',
-          credit: 'К оплате',
+          sumToPay: 'К оплате',
           endBalance: 'Остаток на конец'
         }
       }
     }
   },
 
+  watch: {
+    date() {
+      this.findByDataOplatAndMyOrgId()
+    }
+  },
+
+  mounted() {
+    this.init()
+  },
+
   methods: {
+    async init() {
+      if (!this.orgId) {
+        await this.findDefaultOrgAndAccIdForUserOnForm()
+        await this.findByDataOplatAndMyOrgId()
+      }
+    },
+
+    // Поиск организации по умолчанию для текущего пользователя
+    async findDefaultOrgAndAccIdForUserOnForm() {
+      const filtersParams = await this.findDefaultOrgAndAccIdForUser()
+      if (filtersParams) {
+        this.orgId = filtersParams.orgId
+      }
+    },
+
     // Получение списка расч. счетов выбранной организации и их сортировка по возрастанию
     async findByDataOplatAndMyOrgId() {
       const data = {
@@ -169,7 +189,7 @@ export default {
       for (const elem of oplata) {
         elem.shortNameOfAcc = elem.acc.shortName
         elem.shortNameOfAccWithNumOfAcc = elem.acc.shortName + ' - ' + elem.acc.numAcc.slice(elem.acc.numAcc.length - 4)
-        elem.endBalance = elem.saldo + elem.nalich + elem.vnpl + elem.credit
+        elem.endBalance = elem.saldo + elem.nalich + elem.vnpl - elem.sumToPay
       }
 
       oplata.sort(this.customCompare('shortNameOfAcc'))

@@ -82,13 +82,13 @@ export default {
   },
   mounted() {
     this.init()
-    this.findOrganizations()
   },
 
   methods: {
-    init() {
-      this.selOplat()
-      this.groupByOrg()
+    async init() {
+      await this.selOplat()
+      await this.findOrganizations()
+      await this.groupByOrg()
       this.loadingType = {}
     },
 
