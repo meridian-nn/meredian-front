@@ -8,6 +8,29 @@ Vue.mixin({
             return 'journal-of-payment-docs-from-pay-docs'
         },
 
+        //Функция возвращает form id и element id для orgId и accId по умолчанию
+        getObjectWithFormIdAndElementIdForDefaultOrgAndAcc() {
+          return {
+            formId: 'everywhere',
+            elementId: 'everywhere'
+          }
+        },
+
+      // Функция поиска организации и расчетного счета по умолчанию для текущего пользователя
+        async findDefaultOrgAndAccIdForUser() {
+          const formAndElementIdsOfOrgAndAccIds = this.getObjectWithFormIdAndElementIdForDefaultOrgAndAcc()
+          const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(formAndElementIdsOfOrgAndAccIds.formId,
+            formAndElementIdsOfOrgAndAccIds.elementId, this.getCurrentUser().id)
+          const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
+          let filtersParams = {}
+
+          if (response.length) {
+            filtersParams = JSON.parse(response[0].settingValue)
+          }
+
+          return filtersParams
+        },
+
         //Функция возвращает цвет организации по переданному id организации
         getColorForOrganization(orgId) {
             if (orgId === 159) {
@@ -36,6 +59,69 @@ Vue.mixin({
           organizations[1] = organizations.splice(0, 1, organizations[1])[0]
 
           return organizations
+        },
+
+        async changeSumToPayOfPaymentAccount(accId, sumOfPaymentDocs, operationType) {
+          if(sumOfPaymentDocs === 0) {
+            return
+          }
+
+          const searchCriterias = this.createCriteriasToFindPaymentAccount(accId)
+          const response = await this.$api.paymentAccounts.findBySearchCriteriaList(searchCriterias)
+          let paymentAccount
+
+          if(!response) {
+            return
+          } else {
+            paymentAccount = response[0]
+          }
+
+          paymentAccount.sumToPay = paymentAccount.sumToPay ? paymentAccount.sumToPay : 0
+
+          if(operationType === 'SUM') {
+              paymentAccount.sumToPay = paymentAccount.sumToPay + sumOfPaymentDocs
+          } else if(operationType === 'DEDUCT') {
+            paymentAccount.sumToPay = paymentAccount.sumToPay - sumOfPaymentDocs
+          }
+
+          return await this.$api.paymentAccounts.save(paymentAccount)
+        },
+
+        async changeVnplOfPaymentAccounts(accIdOfPayer, accIdOfReceiver, sumOfPayment) {
+          if(sumOfPayment === 0) {
+            return
+          }
+
+          const searchCriterias = this.createCriteriasToFindTwoPaymentAccounts(accIdOfPayer, accIdOfReceiver)
+          const response = await this.$api.paymentAccounts.findBySearchCriteriaList(searchCriterias)
+          let paymentAccountOfPayer
+          let paymentAccountOfReceiver
+
+          if (!response) {
+            return
+          } else {
+            paymentAccountOfPayer = response.find(el => el.acc.id === accIdOfPayer)
+            paymentAccountOfReceiver = response.find(el => el.acc.id === accIdOfReceiver)
+          }
+
+          if(!paymentAccountOfPayer || !paymentAccountOfReceiver) {
+            return
+          }
+
+          paymentAccountOfPayer.vnpl = paymentAccountOfPayer.vnpl ? paymentAccountOfPayer.vnpl : 0
+          paymentAccountOfPayer.vnpl = paymentAccountOfPayer.vnpl - sumOfPayment
+
+          paymentAccountOfReceiver.vnpl = paymentAccountOfReceiver.vnpl ? paymentAccountOfReceiver.vnpl : 0
+          paymentAccountOfReceiver.vnpl = paymentAccountOfReceiver.vnpl + sumOfPayment
+
+          const arrayOfPaymentAccountsForSave = [
+            paymentAccountOfPayer,
+            paymentAccountOfReceiver
+          ]
+
+          console.log(sumOfPayment)
+          console.log(arrayOfPaymentAccountsForSave)
+          await this.$axios.$post('/oper/spOplat/saveAll', arrayOfPaymentAccountsForSave)
         }
     }
 })

@@ -55,7 +55,7 @@ export default {
       organizations: [],
 
       // таблица данных по остаткам на р/с организаций
-      groupByOrgColumns: ['name', 'saldo', 'nalich', 'vnpl', 'credit', 'endBalance'],
+      groupByOrgColumns: ['name', 'saldo', 'nalich', 'vnpl', 'sumToPay', 'endBalance'],
       groupByOrgData: [],
       groupByOrgOptions: {
         filterable: false,
@@ -67,7 +67,7 @@ export default {
           saldo: 'Остаток на р/с',
           nalich: 'Прочее',
           vnpl: 'ВнПл',
-          credit: 'К оплате',
+          sumToPay: 'К оплате',
           endBalance: 'Остаток на конец'
         }
       },
@@ -107,7 +107,7 @@ export default {
       this.totalSumOfSaldo = 0
       this.totalSumOfNalich = 0
       this.totalSumOfVNPL = 0
-      this.totalSumOfCredit = 0
+      this.totalSumToPay = 0
       this.totalSumOfEndBalance = 0
 
       const data = this.createParamsForRequestPaymentAccGroupByOrg(this.date, ['myOrg.id', 'myOrg.clName'])
@@ -118,24 +118,24 @@ export default {
       }
 
       response[1] = response.splice(0, 1, response[1])[0]
-      const ids = response.map(item => item['myOrg.id'])
-      const balance = await this.getBalanceOfOtherAccounts(...ids)
-      for (const [i, element] of response.entries()) {
+      for (const element of response) {
         element.name = element['myOrg.clName']
+        if (!element.sum_sumToPay) {
+          element.sum_sumToPay = 0
+        }
 
-        element.credit += balance[i]
-        element.endBalance = element.sum_saldo + element.sum_nalich + element.sum_vnpl - element.sum_credit
+        element.endBalance = element.sum_saldo + element.sum_nalich + element.sum_vnpl - element.sum_sumToPay
 
         this.totalSumOfSaldo += element.sum_saldo
         this.totalSumOfNalich += element.sum_nalich
         this.totalSumOfVNPL += element.sum_vnpl
-        this.totalSumOfCredit += element.sum_credit
+        this.totalSumToPay += element.sum_sumToPay
         this.totalSumOfEndBalance += element.endBalance
 
         element.saldo = this.numberToSum(element.sum_saldo)
         element.nalich = this.numberToSum(element.sum_nalich)
         element.vnpl = this.numberToSum(element.sum_vnpl)
-        element.credit = this.numberToSum(element.sum_credit)
+        element.sumToPay = this.numberToSum(element.sum_sumToPay)
         element.endBalance = this.numberToSum(element.endBalance)
       }
 
@@ -144,67 +144,28 @@ export default {
         'saldo': this.numberToSum(this.totalSumOfSaldo),
         'nalich': this.numberToSum(this.totalSumOfNalich),
         'vnpl': this.numberToSum(this.totalSumOfVNPL),
-        'credit': this.numberToSum(this.totalSumOfCredit),
+        'sumToPay': this.numberToSum(this.totalSumToPay),
         'endBalance': this.numberToSum(this.totalSumOfEndBalance)
       })
       return response
     },
-    async getBalanceOfOtherAccounts(orgId, accId) {
-      const sumToPay = await this.getSumToPayDocsOfOrg(orgId, accId)
-      const sumPaymentByCashbox = await this.getSumOfPaymentByCashboxOfOrg(orgId, accId)
-      const totalSumOplat = sumToPay + sumPaymentByCashbox
-      return totalSumOplat
-    },
-
-    async getSumToPayDocsOfOrg(orgId, accId) {
-      let data
-      if (accId) {
-        data = this.createCriteriasForRequestToSearchDocsToPay(accId, orgId, this.date)
-      } else {
-        data = this.createCriteriasWithoutAccIdForRequestToSearchDocsToPay(orgId, this.date)
-      }
-
-      let totalToSumOplat = 0
-      const response = await this.$api.payment.docOplToPay.findDocumentsByCriterias(data)
-      response.forEach((value) => {
-        totalToSumOplat += value.sumOplat
-      })
-      return totalToSumOplat
-    },
-
-    async getSumOfPaymentByCashboxOfOrg(orgId, accId) {
-      let data
-      if (accId) {
-        data = this.createCriteriasForRequestToSearchPaymentsByCashbox(accId, orgId, this.date)
-      } else {
-        data = this.createCriteriasWithoutAccIdForRequestToSearchPaymentsByCashbox(orgId, this.date)
-      }
-
-      let totalPaymentSum = 0
-      const response = await this.$api.payment.findPaymentsByCashboxByCriterias(data)
-      response.forEach((value) => {
-        if (value.paymentOperationSums.length > 0) {
-          totalPaymentSum += value.paymentOperationSums[0].paymentSum
-        }
-      })
-      return totalPaymentSum
-    },
 
     // Поиск организаций для выбора пользователем
     async findOrganizations() {
-      if (!this.organizations.length) {
-        this.loadingType.organizations = true
-
-        const data = {
-          typeCode: 1
-        }
-        const organizations = await this.$api.organizations.findByOrgTypeCode(data)
-
-        organizations[1] = organizations.splice(0, 1, organizations[1])[0]
-
-        this.organizations = organizations
-        this.loadingType.organizations = null
+      if (this.organizations.length) {
+        return
       }
+      this.loadingType.organizations = true
+
+      const data = {
+        typeCode: 1
+      }
+      const organizations = await this.$api.organizations.findByOrgTypeCode(data)
+
+      organizations[1] = organizations.splice(0, 1, organizations[1])[0]
+
+      this.organizations = organizations
+      this.loadingType.organizations = null
     }
   }
 

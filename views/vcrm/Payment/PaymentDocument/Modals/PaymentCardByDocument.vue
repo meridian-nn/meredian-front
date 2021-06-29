@@ -28,7 +28,7 @@
               <v-text-field
                 v-model="typeOfDoc"
                 :loading="loadingType.typeOfDoc"
-                readonly="true"
+                :readonly="true"
                 label="Тип документа"
                 outlined
                 hide-details="auto"
@@ -38,7 +38,7 @@
             <v-col cols="3">
               <v-text-field
                 v-model="document.nameDoc"
-                readonly="true"
+                :readonly="true"
                 label="Номер документа"
                 outlined
                 hide-details="auto"
@@ -47,9 +47,9 @@
 
             <v-col cols="6">
               <v-text-field
-                v-model="consumerOfDoc"
-                :loading="loadingType.consumerOfDoc"
-                readonly="true"
+                v-model="supplierOfDoc"
+                :loading="loadingType.supplierOfDoc"
+                :readonly="true"
                 label="Контрагент"
                 outlined
                 hide-details="auto"
@@ -62,7 +62,7 @@
               <v-text-field
                 v-model="orgOfDoc"
                 :loading="loadingType.orgOfDoc"
-                readonly="true"
+                :readonly="true"
                 label="Плательщик"
                 outlined
                 hide-details="auto"
@@ -74,7 +74,7 @@
             <v-col cols="3">
               <v-text-field
                 v-model="document.dataOplat"
-                readonly="true"
+                :readonly="true"
                 label="Срок"
                 outlined
                 hide-details="auto"
@@ -86,7 +86,7 @@
             <v-col cols="3">
               <v-text-field
                 v-model="document.sumDoc"
-                readonly="true"
+                :readonly="true"
                 label="Сумма"
                 outlined
                 hide-details="auto"
@@ -99,7 +99,7 @@
               <v-text-field
                 v-model="executorOfDoc"
                 :loading="loadingType.executorOfDoc"
-                readonly="true"
+                :readonly="true"
                 label="Исполнитель"
                 outlined
                 hide-details="auto"
@@ -132,7 +132,7 @@
             <v-col cols="12">
               <v-text-field
                 v-model="document.prim"
-                readonly="true"
+                :readonly="true"
                 label="Примечание"
                 outlined
                 hide-details="auto"
@@ -160,6 +160,12 @@
 <script>
 export default {
   name: 'PaymentCardByDocument',
+  props: {
+    show: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       date: new Date().toLocaleDateString(),
@@ -178,7 +184,7 @@ export default {
         },
         {
           text: 'Сумма оплаты',
-          value: 'sumOplat'
+          value: 'sumOplatMask'
         }
 
       ],
@@ -195,8 +201,8 @@ export default {
       // Тип выбранного документа
       typeOfDoc: null,
 
-      // Контрагент выбранного документа
-      consumerOfDoc: null,
+      // Поставщик выбранного документа
+      supplierOfDoc: null,
 
       // Плательщик выбранного документа
       orgOfDoc: null,
@@ -212,7 +218,7 @@ export default {
       this.document = {}
       this.documentId = null
       this.typeOfDoc = null
-      this.consumerOfDoc = null
+      this.supplierOfDoc = null
       this.orgOfDoc = null
       this.executorOfDoc = null
     },
@@ -226,63 +232,76 @@ export default {
 
     async findDocument() {
       this.document = await this.$api.payment.docOplForPay.findById(this.documentId)
-      this.findTypeOfDocument(this.document.viddocId)
-      this.findConsumerOfDocument(this.document.consumerId)
-      this.findOrganizationOfDocument(this.document.myorgId)
-      this.findExecutorOfDocument(this.document.ispId)
-      this.findToPayData(this.document.id)
+      await this.findTypeOfDocument()
+      await this.findConsumerOfDocument()
+      await this.fillOrganizationOfDocument()
+      await this.findExecutorOfDocument()
+      await this.findToPayData()
     },
 
-    async findTypeOfDocument(viddocId) {
+    async findTypeOfDocument() {
+      if (!this.document.viddocId) {
+        return
+      }
+
       this.loadingType.typeOfDoc = true
-
-      const typeOfDoc = await this.$api.budgetElements.findDocumentTypeById(viddocId)
-
+      const typeOfDoc = await this.$api.budgetElements.findDocumentTypeById(this.document.viddocId)
       this.typeOfDoc = typeOfDoc.nameViddoc
-
       this.loadingType.typeOfDoc = null
     },
 
-    async findConsumerOfDocument(consumerId) {
+    async findConsumerOfDocument() {
+      if (!this.document.supplierId) {
+        return
+      }
+
       this.loadingType.consumerOfDoc = true
-
-      const consumerOfDoc = await await this.$api.organizations.findById(consumerId)
-
-      this.consumerOfDoc = consumerOfDoc.shortName
-
+      const consumerOfDoc = await this.$api.organizations.findById(this.document.supplierId)
+      this.supplierOfDoc = consumerOfDoc.shortName
       this.loadingType.consumerOfDoc = null
     },
 
-    async findOrganizationOfDocument(myorgId) {
+    fillOrganizationOfDocument() {
+      if (!this.document.myOrg) {
+        return
+      }
+
       this.loadingType.organization = true
-
-      const organization = await this.$api.organizations.findById(myorgId)
-
-      this.orgOfDoc = organization.shortName
-
+      this.orgOfDoc = this.document.myOrg.shortName
       this.loadingType.organization = null
     },
 
-    async findExecutorOfDocument(ispId) {
+    async findExecutorOfDocument() {
+      if (!this.document.executorId) {
+        return
+      }
+
       this.loadingType.executor = true
 
-      const executor = await this.$api.executors.findById(ispId)
+      const searchCriteria = this.createCriteriaToSearchExecutorById(this.document.executorId)
+      const response = await this.$api.executors.findBySearchCriteria(searchCriteria)
 
+      if (!response || response.length === 0) {
+        this.loadingType.executor = null
+        return
+      }
+
+      const executor = response[0]
       this.executorOfDoc = executor.fio
 
       this.loadingType.executor = null
     },
 
-    async findToPayData(documentId) {
-      const data = {
-        docoplForPayId: documentId
-      }
+    async findToPayData() {
+      const searchCriterias = this.createCriteriasToSearchDocToPayByDocoplId(this.document.id)
       this.totalToSumOplat = 0
-      this.toPayData = await this.$api.payment.docOplToPay.findDocToPayByDocoplForPay(data)
+      this.toPayData = await this.$api.payment.docOplToPay.findDocumentsByCriterias(searchCriterias)
 
       this.toPayData.forEach((value) => {
+        value.sumOplatMask = this.numberToSum(value.sumOplat)
         this.totalToSumOplat += value.sumOplat
       })
+      this.totalToSumOplat = this.numberToSum(this.totalToSumOplat)
     },
 
     close() {

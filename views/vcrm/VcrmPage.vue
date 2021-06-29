@@ -38,7 +38,7 @@
         </v-list-item>
 
         <v-list-item
-          v-if="isHaveBudgetRole()"
+          v-if="isCanOpenPaymentRegister()"
           link
           :to="{ name: 'PaymentMenu' }"
         >

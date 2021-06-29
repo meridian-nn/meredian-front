@@ -34,20 +34,26 @@
                 :items="departments"
                 :clearable="true"
                 item-value="id"
-                item-text="nameViddoc"
+                item-text="namePodr"
                 outlined
                 hide-details="auto"
+                @change="departmentChange"
               />
             </v-col>
           </v-row>
 
           <v-row>
             <v-col cols="12">
-              <v-text-field
-                v-model="filterItem.executorName"
+              <v-autocomplete
+                v-model="filterItem.executorId"
+                label="Исполнитель"
+                :loading="loadingType.executors"
+                :items="executors"
                 :clearable="true"
+                no-data-text="Список пуст"
+                item-value="id"
+                item-text="fio"
                 outlined
-                label="Имя исполнителя"
                 hide-details="auto"
               />
             </v-col>
@@ -56,26 +62,10 @@
           <v-row>
             <v-col cols="12">
               <v-autocomplete
-                v-model="filterItem.myorgId"
+                v-model="filterItem['myOrg.id']"
                 label="Плательщик"
                 :loading="loadingType.payers"
                 :items="payers"
-                :clearable="true"
-                item-value="id"
-                item-text="clName"
-                outlined
-                hide-details="auto"
-              />
-            </v-col>
-          </v-row>
-
-          <v-row>
-            <v-col cols="12">
-              <v-autocomplete
-                v-model="filterItem['buyer.id']"
-                label="Покупатель"
-                :loading="loadingType.buyers"
-                :items="buyers"
                 :clearable="true"
                 item-value="id"
                 item-text="clName"
@@ -128,7 +118,7 @@
                   separator="space"
                   :precision="2"
                   decimal-separator="."
-                  output-type="number"
+                  output-type="String"
                 />
                 <span class="line" />
               </div>
@@ -162,25 +152,28 @@
 
 export default {
   name: 'FiltersFormFromPayDocs',
+  props: {
+    show: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       // id элемента, для которого будут сохранены настроики фильтров
-      elementId: 'journal-of-payment-docs-from-pay-docs',
+      elementId: null,
 
       // объект для отображения статусов процесса загрузки данных для полей
       loadingType: {},
 
       // объект, в котором храняться фильтры пользователя
       filterItem: {
-        date: null,
-        creatorName: null,
-        buyer: {
-          id: null
-        },
-        myorgId: null,
-        executorName: null,
+        nameDoc: '',
         departmentId: null,
-        nameDoc: null
+        executorName: '',
+        'myOrg.id': null,
+        creatorName: '',
+        date: null
       },
 
       // Значение фильтра по полю "К оплате"
@@ -192,9 +185,6 @@ export default {
       // массив плательщиков для выбора пользователем
       payers: [],
 
-      // массив покупателей для выбора пользователем
-      buyers: [],
-
       // массив подразделений для выбора пользователем
       departments: [],
       sumOplat: 0,
@@ -202,7 +192,10 @@ export default {
       executorDepartments: null,
 
       // переменная, отвечающая за отображениие модального окна
-      dialog: false
+      dialog: false,
+
+      // список исполнителей для выбора пользователем
+      executors: []
     }
   },
 
@@ -216,9 +209,9 @@ export default {
 
   methods: {
     init() {
+      this.elementId = this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs()
       this.findDepartments()
       this.findPayers()
-      this.findBuyers()
       this.findFiltersValues()
     },
 
@@ -229,26 +222,26 @@ export default {
     // Поиск подразделений для выбора пользователем
     async findDepartments() {
       this.loadingType.departments = true
-      this.departments = await this.$api.budgetElements.findDepartments()
+      this.departments = await this.$api.departments.findAll()
       this.loadingType.departments = null
+    },
+
+    departmentChange() {
+      this.findExecutors()
+    },
+
+    async findExecutors() {
+      this.loadingType.executors = true
+      const data = this.createCriteriasToSearchExecutorsByDepartmentId(this.filterItem.departmentId)
+      this.executors = await this.$api.executors.findBySearchCriterias(data)
+      this.loadingType.executors = null
     },
 
     // Поиск плательщиков для выбора пользователем
     async findPayers() {
       this.loadingType.payers = true
-
-      const data = {
-        typeCode: 1
-      }
-      this.payers = await this.$api.organizations.findByOrgTypeCode(data)
-
+      this.payers = await this.$api.organizations.findInternalOrganizations()
       this.loadingType.payers = null
-    },
-
-    async findBuyers() {
-      this.loadingType.buyers = true
-      this.buyers = await this.$api.organizations.findInternalOrganizations()
-      this.loadingType.buyers = null
     },
 
     async saveFilters() {
@@ -257,7 +250,8 @@ export default {
         isSumToPayUsed: this.isSumToPayUsed
       }
 
-      const filterEntityForSave = this.createFilterEntityForSave(this.elementId, this.$route.name, this.filterItem)
+      const filterEntityForSave = this.createFilterEntityForSave(this.elementId, this.$route.name, this.filterItem,
+        this.getCurrentUser().id, this.getCurrentUser().id)
 
       await this.$api.uiSettings.save(filterEntityForSave)
 

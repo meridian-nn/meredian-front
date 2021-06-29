@@ -1,12 +1,17 @@
 <template>
-  <div name="journal-of-payment-docs-documents-tables">
-    <journal-of-payment-documents-header ref="journalOfPaymentDocumentsHeader" />
+  <div
+    name="journal-of-payment-docs-documents-tables"
+  >
+    <journal-of-payment-documents-header
+      ref="journalOfPaymentDocumentsHeader"
+    />
 
     <div class="journal-of-payment-docs-row">
       <div class="journal-of-payment-docs-left-col">
         <div class="journal-of-payment-docs-row">
           <div class="journal-of-payment-docs-list-of-orgs">
             <v-autocomplete
+              v-model="selectedOrganization"
               label="Организация"
               :loading="loadingType.organizations"
               :items="organizations"
@@ -95,10 +100,10 @@
               <v-data-table
                 id="journal-of-payment-docs-v-data-table-to-pay-docs"
                 v-model="toPaySelectedRows"
-                height="452"
                 :headers="toPayHeaders"
                 fixed-header
                 :items="toPayData"
+                item-key="keyId"
                 :show-select="true"
                 :single-select="false"
                 disable-pagination
@@ -148,19 +153,13 @@
               <v-list>
                 <v-list-item @click="payedByCashboxForContextMenuOnly">
                   <v-list-item-title>
-                    Оплата по кассе
+                    Новая оплата по кассе
                   </v-list-item-title>
                 </v-list-item>
 
-                <v-list-item @click="internalMovementForContextMenuOnly">
+                <v-list-item @click="editPaymentByCashboxForContextMenuOnly">
                   <v-list-item-title>
-                    Вн. перемещение
-                  </v-list-item-title>
-                </v-list-item>
-
-                <v-list-item @click="historyOfPaymentForContextMenuOnly">
-                  <v-list-item-title>
-                    История оплат
+                    Ред. оплату по кассе
                   </v-list-item-title>
                 </v-list-item>
 
@@ -222,16 +221,16 @@
       </div>
 
       <edit-payment-document
-        :value="dialog.editPaymentDocument"
         ref="editPaymentDocument"
+        :value="dialog.editPaymentDocument"
         @close="closePaymentDocument"
         @cancel="closePaymentDocument"
         @save="savePaymentDocument"
       />
 
       <payment-card-by-document
-        :value="dialog.paymentCardByDocument"
         ref="paymentCardByDocument"
+        :value="dialog.paymentCardByDocument"
         @close="closePaymentCardByDocument"
       />
 
@@ -307,9 +306,6 @@
                       <td class="journal-of-payment-docs-from-pay-docs-payerName">
                         {{ item.payerName }}
                       </td>
-                      <td class="journal-of-payment-docs-from-pay-docs-buyerName">
-                        {{ item.buyerName }}
-                      </td>
                       <td class="journal-of-payment-docs-from-pay-docs-executorName">
                         {{ item.executorName }}
                       </td>
@@ -336,6 +332,7 @@
                       @infinite="findSpDocoplForPay"
                     >
                       <div slot="no-more" />
+                      <div slot="no-results" />
                     </infinite-loading>
                   </tbody>
                 </template>
@@ -373,16 +370,6 @@
           <div class="journal-of-payment-docs-buttons-of-table-docs-for-pay">
             <v-subheader class="font-weight-medium text-subtitle-1" />
             <div align="center">
-              <!--v-btn
-                color="blue"
-                class="mr-2 mb-2"
-                fab
-                dark
-                small
-                @click="newDocument"
-              >
-                <v-icon>mdi-plus</v-icon>
-              </v-btn-->
               <v-btn
                 color="blue"
                 class="mr-2 mb-2"
@@ -426,6 +413,7 @@
                 </label>
                 <input
                   id="add"
+                  v-model="addGroupShow"
                   class="add-group__input"
                   type="checkbox"
                 >
@@ -436,19 +424,18 @@
                   опл
                 </button>
                 <button
-                  href=""
                   class="add-group__link pay_by_cashbox"
                   @click="payedByCashboxForContextMenuOnly"
                 >
                   нал
                 </button>
-                <!--button
-                  href=""
+                <button
+                  ref=""
                   class="add-group__link internal_payment"
                   @click="internalMovementForContextMenuOnly"
                 >
                   внт
-                </button-->
+                </button>
               </div>
             </div>
           </div>
@@ -457,7 +444,6 @@
     </div>
 
     <div
-      v-if="false"
       class="journal-of-payment-docs-row"
     >
       <div class="journal-of-payment-docs-bottom-toPay-results">
@@ -520,7 +506,7 @@
           <div class="journal-of-payment-docs-result-text">
             <th>
               <vue-numeric
-                v-model="totalSumOplat"
+                v-model="totalSumToPay"
                 separator="space"
                 :precision="2"
                 decimal-separator="."
@@ -534,7 +520,6 @@
     </div>
 
     <div
-      v-if="false"
       class="journal-of-payment-docs-row"
     >
       <div class="journal-of-payment-docs-bottom-spacer" />
@@ -610,11 +595,6 @@ export default {
           width: '70px'
         },
         {
-          text: 'Покупатель',
-          value: 'buyerName',
-          width: '70px'
-        },
-        {
           text: 'Исполнитель',
           value: 'executorName',
           width: '70px'
@@ -650,10 +630,6 @@ export default {
           value: 'myorgName'
         },
         {
-          text: 'Покупатель',
-          value: 'buyer.shortName'
-        },
-        {
           text: 'Исполнитель',
           value: 'executorName'
         },
@@ -681,6 +657,11 @@ export default {
 
       // Список документов таблицы "Документы на оплату"
       fromPayData: [],
+
+      // Итоги по суммам документов по таблице "Документы на оплату"
+      totalSumDoc: 0,
+      totalSumPaid: 0,
+      totalSumToPay: 0,
 
       // Переменная для отображения информационного сообщения, что фильтры для таблицы "Документы на оплату" используются
       isFiltersForFromPayDocsUsing: false,
@@ -725,11 +706,14 @@ export default {
       pageOfFromPayData: 0,
 
       // Переменная для реализации обновления данных в таблице "Документы на оплату"
-      infiniteIdOfFromPayData: +new Date()
+      infiniteIdOfFromPayData: +new Date(),
+
+      // Переменная, которая отвечает за отображение всплывающих кнопок группы добавления новых документов
+      addGroupShow: false
     }
   },
 
-  computed: {
+  /* computed: {
     totalSumDoc() {
       return this.fromPayData.reduce((acc, item) => {
         return acc + item.sumDocNumber
@@ -747,31 +731,46 @@ export default {
         return acc + (item.sumDocNumber - item.sumPaidNumber)
       }, 0)
     }
-  },
+  }, */
 
   mounted() {
     this.init()
   },
   methods: {
-    init() {
-      this.selOplat()
+    async init() {
+      await this.selOplat()
       this.loadingType = {}
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
-      this.findOrganizations()
+      await this.findDefaultOrgAndAccIdForUserOnForm()
+      await this.findOrganizations()
+      if (this.selectedOrganization) {
+        await this.findPaymentAccounts(this.selectedOrganization)
+      }
+      if (this.accId) {
+        await this.findToPay(this.accId)
+      }
     },
 
     // Секция обработки событий на форме
 
     // Функция обработки выбора организации
-    async organizationChange(val) {
-      this.selectedOrganization = val
+    async organizationChange(orgId) {
       this.accId = null
       await this.updatePaymentAccountInfo(this.accId)
       this.toPayData = []
       this.totalToSumOplat = 0
-      await this.findPaymentAccounts(val)
+      await this.findPaymentAccounts(orgId)
       this.selectFirstPaymentAccount()
+    },
+
+    // Функция поиска организации и расчетного счета по умолчанию для текущего пользователя
+    async findDefaultOrgAndAccIdForUserOnForm() {
+      const filtersParams = await this.findDefaultOrgAndAccIdForUser()
+      if (filtersParams) {
+        this.selectedOrganization = filtersParams.orgId
+        this.accId = filtersParams.accId
+      }
     },
 
     // Выбор расчетного счета
@@ -804,8 +803,9 @@ export default {
     },
 
     // Обработка события "Сохранение новой оплаты по кассе"
-    savePaymentByCashbox() {
-      this.refreshTables()
+    async savePaymentByCashbox() {
+      await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
+      await this.refreshTables()
     },
 
     // Обработка события "Закрытие модальной формы внутреннего платежа"
@@ -814,14 +814,14 @@ export default {
     },
 
     // Обработка события "Сохранение нового внутреннего платежа"
-    saveInternalPayment() {
-      this.refreshTables()
-      console.log('save internal payment')
+    async saveInternalPayment() {
+      await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
+      await this.refreshTables()
     },
 
     // Обновление списка документов к оплате, остатков на расчетных счетах выбранной организации и при изменении даты
     async updateInformationOnForm() {
-      await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfoAlter(this.date)
+      await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
       await this.findToPay(this.accId)
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
@@ -878,10 +878,25 @@ export default {
 
       // await this.$api.payment.docOplToPay.saveSpDocoplToPay(this.toPaySelectedRows)
       await this.$axios.$post('/oper/spDocopl/saveSpDocoplToPay', this.toPaySelectedRows)
+      const responseSpOplatSave = await this.changeSumToPayOfPaymentAccountOnForm(selectedDoc)
 
       this.toPaySelectedRows = []
       await this.refreshTables()
-      await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
+      if (responseSpOplatSave) {
+        await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
+      }
+    },
+    changeSumToPayOfPaymentAccountOnForm(selectedDoc) {
+      let sumDoc
+      let typeOfOperation
+      if (selectedDoc.sumOplat < selectedDoc.sumOplatFromRequest) {
+        sumDoc = selectedDoc.sumOplatFromRequest - selectedDoc.sumOplat
+        typeOfOperation = 'DEDUCT'
+      } else {
+        sumDoc = selectedDoc.sumOplat - selectedDoc.sumOplatFromRequest
+        typeOfOperation = 'SUM'
+      }
+      return this.changeSumToPayOfPaymentAccount(this.accId, sumDoc, typeOfOperation)
     },
 
     // Отмена внесения измененя в сумму оплаты документа
@@ -896,7 +911,21 @@ export default {
     // Функции контекстного меню таблицы документов к оплате
     // Вызов формы "Оплата по кассе"
     payedByCashboxForContextMenuOnly() {
+      this.addGroupShow = false
       this.$refs.paymentByCashbox.newDocument(this.selectedOrganization, this.accId)
+      console.log('payed by cashbox')
+    },
+
+    editPaymentByCashboxForContextMenuOnly() {
+      this.addGroupShow = false
+
+      if (this.currentRowForContextMenu.isDoc) {
+        this.$refs.userNotification.showUserNotification('error', 'Был выбран документ к оплате! Выберите оплату по кассе!')
+        return
+      }
+
+      this.$refs.paymentByCashbox.editDocument(this.currentRowForContextMenu.id)
+      console.log('payed by cashbox')
     },
 
     // Перемещение документа из таблицы "Документы на оплату" в таблицу "Документы к оплате" по нажатию на стрелку
@@ -907,27 +936,33 @@ export default {
         return
       }
 
-      await this.addPayments()
+      if (!this.fromPaySelectedRows || !this.fromPaySelectedRows.length) {
+        this.$refs.userNotification.showUserNotification('error', 'Выберите документы на оплату!')
+        return
+      }
 
+      const sumDocs = this.countSumOfArrayElements(this.fromPaySelectedRows.map(value => value.sumOplatNumber))
+
+      if (sumDocs > this.currentPaymentAccountBalance) {
+        this.$refs.userNotification.showUserNotification('warning', 'Сумма выбранных документов на оплату превышает сумму остатка по выбранному р/с!', 4000)
+      }
+
+      await this.addPayments()
+      const responseSpOplatSave = await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'SUM')
       await this.refreshTables()
-      await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
+
+      if (responseSpOplatSave) {
+        await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
+      }
     },
     async addPayments() {
-      if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
-        const sumDocs = this.countSumOfArrayElements(this.fromPaySelectedRows.map(value => value.sumDoc))
-
-        if (sumDocs > this.currentPaymentAccountBalance) {
-          this.$refs.userNotification.showUserNotification('warning', 'Сумма выбранных документов на оплату превышает сумму остатка по выбранному р/с!', 4000)
-        }
-
-        const ids = this.fromPaySelectedRows.map(value => value.id)
-        const data = { ids, accId: this.accId }
-        /* await this.$api.payment.payDocument(data).catch((error) => {
+      const ids = this.fromPaySelectedRows.map(value => value.id)
+      const data = { ids, accId: this.accId }
+      /* await this.$api.payment.payDocument(data).catch((error) => {
           const errorMessage = error
           alert(errorMessage)
         }) */
-        await this.$axios.$post('/oper/spDocopl/payDocument', data)
-      }
+      await this.$axios.$post('/oper/spDocopl/payDocument', data)
     },
     countSumOfArrayElements(array) {
       let sum = 0
@@ -939,12 +974,19 @@ export default {
 
     // Удаление документов из таблицы "Документы к оплате"
     async deleteSelectedPayments() {
-      if (this.toPaySelectedRows && this.toPaySelectedRows.length) {
-        const ids = this.toPaySelectedRows.map(value => value.id)
-        await this.$axios.$post('/oper/spDocopl/deleteSelectedPayments', ids)
+      if (!this.toPaySelectedRows || !this.toPaySelectedRows.length) {
+        return
+      }
 
-        await this.refreshTables()
-        await this.$refs.journalOfPaymentDocumentsHeader.updateSumOfOrg(this.selectedOrganization, this.totalToSumOplat)
+      const sumDocs = this.countSumOfArrayElements(this.toPaySelectedRows.map(value => value.sumOplat))
+
+      const ids = this.toPaySelectedRows.map(value => value.id)
+      await this.$axios.$post('/oper/spDocopl/deleteSelectedPayments', ids)
+      const responseSpOplatSave = await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'DEDUCT')
+
+      await this.refreshTables()
+      if (responseSpOplatSave) {
+        await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
       }
     },
 
@@ -988,35 +1030,53 @@ export default {
     // Функционал кнопок таблицы "Документы на оплату"
     // Добавление нового документа в таблицу "Документы на оплату"
     newDocument() {
-      this.dialog.editPaymentDocument = true
+      this.addGroupShow = false
       this.$refs.editPaymentDocument.newDocument(this.selectedOrganization)
     },
 
     // Изменение выбранного документа на оплату
     editDocument() {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
-        this.$refs.editPaymentDocument.editDocument(this.fromPaySelectedRows[0].id)
+        const selDoc = this.fromPaySelectedRows[0]
+        if (selDoc.isVnpl) {
+          this.$refs.internalPayment.editDocument(selDoc.id)
+        } else {
+          this.$refs.editPaymentDocument.editDocument(selDoc.id)
+        }
       }
       this.dialog.editPaymentDocument = true
     },
 
     // Удаление выбранных документов на оплату
-    async deleteDocument() {
+    deleteDocument() {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
-        const selectedRows = this.fromPaySelectedRows
-        const isDeletionPossible = this.checkSelectedRowsBeforeDelete(selectedRows)
-
-        if (isDeletionPossible === false) {
-          this.$refs.userNotification.showUserNotification('error', 'В выбранных на удаление документах на оплату есть документ, по которому есть оплата! Удаление невозможно!', 5000)
-          return
+        const selDoc = this.fromPaySelectedRows[0]
+        if (selDoc.isVnpl) {
+          this.deleteVnpl()
+        } else {
+          this.deleteDocFromPay()
         }
-
-        const ids = this.fromPaySelectedRows.map(value => value.id)
-        // await this.$api.payment.DocOplForPay.deleteSelectedPayments(ids)
-        await this.$axios.$post('/oper/spDocopl/deletePayment', ids)
-
-        await this.updateDocsForPay()
       }
+    },
+
+    deleteVnpl() {
+      this.$refs.userNotification.showUserNotification('success', 'метод в разработке!')
+    },
+
+    async deleteDocFromPay() {
+      const selectedRows = this.fromPaySelectedRows
+      const isDeletionPossible = this.checkSelectedRowsBeforeDelete(selectedRows)
+
+      if (isDeletionPossible === false) {
+        this.$refs.userNotification.showUserNotification('error', 'В выбранных на удаление документах на оплату есть документ, по которому есть оплата! Удаление невозможно!', 5000)
+        return
+      }
+
+      const ids = this.fromPaySelectedRows.map(value => value.id)
+      // await this.$api.payment.DocOplForPay.deleteSelectedPayments(ids)
+      await this.$axios.$post('/oper/spDocopl/deletePayment', ids)
+
+      await this.updateDocsForPay()
     },
 
     checkSelectedRowsBeforeDelete(selectedRows) {
@@ -1033,16 +1093,24 @@ export default {
     // Копирование выбранного документа на оплату
     copyDocument() {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
-        this.dialog.editPaymentDocument = true
-        this.$refs.editPaymentDocument.copyDocument(this.fromPaySelectedRows[0].id)
+        const selDoc = this.fromPaySelectedRows[0]
+        if (selDoc.isVnpl) {
+          this.$refs.internalPayment.copyDocument(selDoc.id)
+        } else {
+          this.$refs.editPaymentDocument.copyDocument(selDoc.id)
+        }
       }
     },
 
     // Вн. перемещение
     internalMovementForContextMenuOnly() {
-      this.$refs.internalPayment.editDocument(this.currentRowForContextMenu.docoplId,
-        this.selectedOrganization,
-        this.accId)
+      if (!this.selectedOrganization || !this.accId) {
+        this.$refs.userNotification.showUserNotification('error', 'Перед созданием внутреннего платежа, выберите организацию и расчетный счет!')
+        return
+      }
+
+      this.addGroupShow = false
+      this.$refs.internalPayment.newDocument(this.selectedOrganization, this.accId)
 
       console.log('internal movement')
     },
@@ -1054,6 +1122,11 @@ export default {
 
     // Перемещение документа из таблицы "Документы к оплате" в таблицу "Документы на оплату"
     deleteFromToPayForContextMenuOnly() {
+      if (!this.currentRowForContextMenu.isDoc) {
+        this.$refs.userNotification.showUserNotification('warning', 'Удаление оплаты по кассе невозможно!')
+        return
+      }
+
       this.toPaySelectedRows = []
       this.toPaySelectedRows.push(this.currentRowForContextMenu)
       this.deleteSelectedPayments()
@@ -1098,19 +1171,17 @@ export default {
 
     // Поиск организаций для выбора пользователем
     async findOrganizations() {
-      if (!this.organizations.length) {
-        this.loadingType.organizations = true
-        this.organizations = await this.getBudgetOrganizations()
-        this.loadingType.organizations = null
-      }
+      this.loadingType.organizations = true
+      this.organizations = await this.getBudgetOrganizations()
+      this.loadingType.organizations = null
     },
 
     // Функция поиска расчетных счетов выбранной организации
-    async findPaymentAccounts(val) {
+    async findPaymentAccounts(orgId) {
       this.loadingType.paymentAccounts = true
 
       const data = {
-        orgId: val
+        orgId
       }
       let paymentAccounts = await this.$api.paymentAccounts.findAccByOrgId(data)
       paymentAccounts = paymentAccounts.sort(this.customCompare('shortName'))
@@ -1156,10 +1227,12 @@ export default {
       const responseElement = response[0]
       const saldo = responseElement.saldo
       const nalich = responseElement.nalich
+      const vnpl = responseElement.vnpl
+      const sumToPay = responseElement.sumToPay
 
       this.additionalMessage = ''
       this.currentPaymentAccountBalanceLessThenZero = false
-      this.currentPaymentAccountBalance = (saldo + nalich - this.totalToSumOplat)
+      this.currentPaymentAccountBalance = (saldo + nalich + vnpl - sumToPay)
 
       if (this.currentPaymentAccountBalance < 0) {
         this.additionalMessage = ' - сумма остатка на расчетном счете меньше нуля!'
@@ -1177,9 +1250,9 @@ export default {
       this.toPaySelectedRows = []
       this.toPayData = []
 
-      const dataFromPay = this.createCriteriasForRequestToSearchDocsToPay(
+      const dataToPay = this.createCriteriasForRequestToSearchDocsToPay(
         accId, this.selectedOrganization, this.date)
-      const toPayDataResponse = await this.$api.payment.docOplToPay.findDocumentsByCriterias(dataFromPay)
+      const toPayDataResponse = await this.$api.payment.docOplToPay.findDocumentsByCriterias(dataToPay)
 
       const dataPaymentByCashbox = this.createCriteriasForRequestToSearchPaymentsByCashbox(
         accId, this.selectedOrganization, this.date)
@@ -1195,7 +1268,8 @@ export default {
 
     // Поиск документов для таблицы "Документы на оплату" по выбранной организации
     async findSpDocoplForPay($state) {
-      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name, 'journal-of-payment-docs-from-pay-docs', this.getCurrentUser().id)
+      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
+        this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs(), this.getCurrentUser().id)
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
       let filtersParams
 
@@ -1216,23 +1290,29 @@ export default {
       const { content } = await this.$api.payment.docOplForPay.findDocumentsForPayForJournalTable(data)
 
       if (content.length > 0) {
+        const dataForResults = this.createCriteriasToGetResultsOfContent(searchCriterias)
+        const response = await this.$api.payment.docOplForPay.findDocumentsWithGroupBy(dataForResults)
+
+        if (response.length > 0) {
+          const results = response[0]
+          this.totalSumDoc = this.numberToSum(results.sum_sumDoc)
+          this.totalSumPaid = this.numberToSum(results.sum_sumPaid)
+          this.totalSumToPay = this.numberToSum(results.sum_sumToPay)
+        }
+
         this.pageOfFromPayData += 1
 
         content.forEach((value) => {
           value.sumPaid = value.sumPaid == null ? 0 : value.sumPaid
           value.sumOplat = value.sumToPay
 
-          if (value.buyer) {
-            value.buyerName = value.buyer.clName8
-          } else {
-            value.buyerName = ''
-          }
-
           if (value.myOrg) {
             value.payerName = value.myOrg.clName8
           } else {
             value.payerName = value.myorgName
           }
+
+          value.isVnpl = value.nameDoc.substr(0, 4) === 'ВнПл'
 
           value.sumDocNumber = value.sumDoc
           value.sumDoc = this.numberToSum(value.sumDoc)
@@ -1254,27 +1334,60 @@ export default {
 </script>
 
 <style lang="scss">
-
-#journal-of-payment-docs-v-data-table-from-pay-docs td {
-    word-break:break-all !important;
-    padding: 0 5px !important;
-    height: 0 !important;
+#journal-of-payment-docs-v-data-table-from-pay-docs   {
+  border-collapse: collapse;
+  width: 100%;
+  height: 580px;
 }
 
-#journal-of-payment-docs-v-data-table-from-pay-docs th {
-    padding: 0 5px !important;
-    height: 0 !important;
+#journal-of-payment-docs-v-data-table-from-pay-docs   table{
+  width: 100%;
+}
+#journal-of-payment-docs-v-data-table-from-pay-docs   td, #journal-of-payment-docs-v-data-table-from-pay-docs   th {
+  border: 1px solid #ddd;
+  word-break:break-all !important;
+  padding: 0 0 !important;
+  height: 0 !important;
 }
 
-#journal-of-payment-docs-v-data-table-to-pay-docs td {
-    word-break:break-all !important;
-    padding: 0 0 !important;
-    height: 0 !important;
+#journal-of-payment-docs-v-data-table-from-pay-docs   tr:nth-child(even){background-color: #f2f2f2;}
+
+#journal-of-payment-docs-v-data-table-from-pay-docs   tr:hover {background-color: #ddd;}
+
+#journal-of-payment-docs-v-data-table-from-pay-docs   th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #639db1 !important;
+  color: white;
 }
 
-#journal-of-payment-docs-v-data-table-to-pay-docs th {
-    padding: 0 0 !important;
-    height: 0 !important;
+#journal-of-payment-docs-v-data-table-to-pay-docs  {
+  border-collapse: collapse;
+  width: 100%;
+  height: 452px;
+}
+
+#journal-of-payment-docs-v-data-table-to-pay-docs  table{
+  width: 100%;
+}
+#journal-of-payment-docs-v-data-table-to-pay-docs  td, #journal-of-payment-docs-v-data-table-to-pay-docs  th {
+  border: 1px solid #ddd;
+  word-break:break-all !important;
+  padding: 0 0 !important;
+  height: 0 !important;
+}
+
+#journal-of-payment-docs-v-data-table-to-pay-docs  tr:nth-child(even){background-color: #f2f2f2;}
+
+#journal-of-payment-docs-v-data-table-to-pay-docs  tr:hover {background-color: #ddd;}
+
+#journal-of-payment-docs-v-data-table-to-pay-docs  th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #639db1 !important;
+  color: white;
 }
 
 .journal-of-payment-docs-to-pay-col-5 {
@@ -1357,8 +1470,8 @@ export default {
 }
 
 .journal-of-payment-docs-bottom-spacer{
-  flex: 0 0 30%;
-  max-width: 30%;
+  flex: 0 0 35%;
+  max-width: 35%;
 }
 
 .journal-of-payment-docs-bottom-spacer-for-toPay-results{
@@ -1367,8 +1480,8 @@ export default {
 }
 
 .journal-of-payment-docs-bottom-toPay-results{
-  flex: 0 0 30%;
-  max-width: 30%;
+  flex: 0 0 35%;
+  max-width: 35%;
 }
 
 .journal-of-payment-docs-bottom-spacer-btw-results{
@@ -1377,13 +1490,13 @@ export default {
 }
 
 .journal-of-payment-docs-bottom-fromPay-results{
-  flex: 0 0 67%;
-  max-width: 67%;
+  flex: 0 0 65%;
+  max-width: 65%;
 }
 
 .journal-of-payment-docs-bottom-spacer-for-fromPay-results{
-  flex: 0 0 65%;
-  max-width: 65%;
+  flex: 0 0 55%;
+  max-width: 55%;
 }
 
 .journal-of-payment-docs-result-text{
@@ -1392,8 +1505,8 @@ export default {
 }
 
 .journal-of-payment-docs-bottom-comment{
-  flex: 0 0 70%;
-  max-width: 70%;
+  flex: 0 0 65%;
+  max-width: 65%;
 }
 
 .journal-of-payment-docs-text-danger {
@@ -1477,10 +1590,6 @@ export default {
   width: 100px !important
 }
 
-.journal-of-payment-docs-from-pay-docs-buyerName {
-  width: 100px !important
-}
-
 .journal-of-payment-docs-from-pay-docs-executorName {
   width: 110px !important
 }
@@ -1523,6 +1632,7 @@ export default {
 .add-group{
   width: 40px;
   height: 40px;
+  margin-right: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1575,7 +1685,7 @@ export default {
   transition-delay: 0.1s;
 }
 
-.social input:checked ~ .internal_payment {
+.add-group input:checked ~ .internal_payment {
   transform: translate(0, 65px);
   transition-delay: 0.2s;
 }

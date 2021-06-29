@@ -192,6 +192,11 @@ export default {
     },
 
     async saveCurrentUser() {
+      if (!this.isAdmin()) {
+        this.$refs.userNotification.showUserNotification('error', 'Редактирование профиля доступно только администраторам!')
+        return
+      }
+
       if (!this.userInformation) {
         return
       }
