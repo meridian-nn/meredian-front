@@ -19,6 +19,7 @@
     <div class="journal-of-email-sending-payment-docs-row-with-btns">
       <div class="journal-of-email-sending-payment-docs-payer">
         <v-autocomplete
+          v-model="selectedPayer"
           label="Плательщик"
           :loading="loadingType.payers"
           :items="payers"
@@ -26,6 +27,7 @@
           item-text="clName"
           hide-details="auto"
           outlined
+          :clearable="true"
           @change="payerChange"
         />
       </div>
@@ -100,7 +102,7 @@ export default {
       date: new Date().toISOString().substr(0, 10),
       loadingType: {},
       payers: [],
-      seletedPayer: null,
+      selectedPayer: null,
       emailForSending: null,
       linkToDocumentForSending: null,
 
@@ -115,12 +117,16 @@ export default {
           value: 'nameDoc'
         },
         {
-          text: 'Контрагент',
-          value: 'namePlat'
+          text: 'Сумма оплаты',
+          value: 'sumPaid'
         },
         {
-          text: 'Сумма оплаты',
-          value: 'sumOplach'
+          text: 'Плательщик',
+          value: 'myorgName'
+        },
+        {
+          text: 'Исполнитель',
+          value: 'executorName'
         },
         {
           text: 'Подразделение',
@@ -143,10 +149,10 @@ export default {
       documentsForExport: [],
 
       // Количество различных департаментов в таблице
-      depsInPayData: [],
+      payersInPayData: [],
 
       // Текущий департамент из цикла выгрузки документов
-      currentDep: null,
+      currentPayer: null,
 
       // Итоговая сумма по колонке "К оплате" документов на оплату
       totalSumOplat: 0,
@@ -155,8 +161,9 @@ export default {
       exportFields: {
         'Дата': 'dataDoc',
         'Номер': 'nameDoc',
-        'Контрагент': 'namePlat',
-        'Сумма оплаты': 'sumOplach',
+        'Сумма оплаты': 'sumPaid',
+        'Плательщик': 'myorgName',
+        'Исполнитель': 'executorName',
         'Подразделение': 'depName',
         'Частичная оплата': 'partialPayment',
         'Комментарий': 'prim'
@@ -174,29 +181,38 @@ export default {
     this.init()
   },
   methods: {
-    init() {
-      this.findPayers()
+    async init() {
+      await this.findPayers()
+      await this.findDefaultOrgAndAccIdForUserOnForm()
+      await this.payerChange()
     },
 
-    async startDownloadExcel() {
-      for (const dep of this.depsInPayData) {
-        await this.downloadDep(dep)
+    async findDefaultOrgAndAccIdForUserOnForm() {
+      const filtersParams = await this.findDefaultOrgAndAccIdForUser()
+      if (filtersParams) {
+        this.selectedPayer = filtersParams.orgId
       }
     },
 
-    downloadDep(dep) {
+    async startDownloadExcel() {
+      for (const payer of this.payersInPayData) {
+        await this.downloadPayer(payer)
+      }
+    },
+
+    downloadPayer(payer) {
       const promise = new Promise((resolve, reject) => {
-        const depDocs = this.documentsFromPayData.filter(doc => doc.depName === dep)
+        const depDocs = this.documentsFromPayData.filter(doc => doc.payerName === payer)
         let sumOfDocs = 0
         this.documentsForExport = depDocs
         this.documentsForExport.forEach((doc) => {
-          sumOfDocs += doc.sumOplachNumber
+          sumOfDocs += doc.sumPaidNumber
         })
         this.exportFooter = 'Итого к оплате: ' + this.numberToSum(sumOfDocs)
-        this.currentDep = dep
+        this.currentPayer = payer
 
         this.$refs.downloadExcel.click()
-        resolve('download' + this.currentDep)
+        resolve('download' + this.currentPayer)
       })
       return promise
     },
@@ -212,34 +228,40 @@ export default {
     },
 
     updateAllInfo() {
-      if (this.seletedPayer) {
+      if (this.selectedPayer) {
         this.findSpDocoplForPay()
       }
     },
 
-    payerChange(val) {
-      this.seletedPayer = val
+    payerChange() {
       this.findSpDocoplForPay()
     },
 
     // Поиск документов для таблицы "Документы на оплату" по выбранной организации
     async findSpDocoplForPay() {
-      const data = {
-        dateDoc: new Date(this.date).toLocaleDateString(),
-        orgId: this.seletedPayer
-      }
+      const data = this.createCriteriasToSearchDocsFromPayForEmailSendingForm(this.date, this.selectedPayer)
 
-      this.documentsFromPayData = await this.$api.payment.docOplForPay.findSpDocoplForPay(data)
+      this.documentsFromPayData = await this.$api.payment.docOplForPay.findDocumentsForPayByCriterias(data)
       let totalSumOplat = 0
       this.documentsFromPayData.forEach((value) => {
-        if (!this.depsInPayData.includes(value.depName)) {
-          this.depsInPayData.push(value.depName)
+        if (!value.myOrg) {
+          value.payerName = ''
+        } else {
+          value.payerName = value.myOrg.clName
         }
 
-        totalSumOplat += value.sumOplach
-        value.partialPayment = (value.sumDoc !== value.sumOplach) ? 'Да' : 'Нет'
-        value.sumOplachNumber = value.sumOplach
-        value.sumOplach = this.numberToSum(value.sumOplach)
+        if (!this.payersInPayData.includes(value.payerName)) {
+          this.payersInPayData.push(value.payerName)
+        }
+
+        if (!value.sumPaid) {
+          value.sumPaid = 0
+        }
+
+        totalSumOplat += value.sumPaid
+        value.partialPayment = (value.sumDoc !== value.sumPaid) ? 'Да' : 'Нет'
+        value.sumPaidNumber = value.sumPaid
+        value.sumPaid = this.numberToSum(value.sumPaid)
       })
 
       this.totalSumOplat = this.numberToSum(totalSumOplat)
@@ -247,7 +269,7 @@ export default {
 
     // Метод генерации имени для файла выгрузки
     generateNameForExportFile() {
-      this.exportFileName = 'Журнал_документов_на_оплату_подр._' + this.currentDep + '_' + new Date().toLocaleDateString() + ' - ' + new Date().toLocaleTimeString() + '.xls'
+      this.exportFileName = 'Журнал_документов_на_оплату_покуп._' + this.currentPayer + '_' + new Date().toLocaleDateString() + ' - ' + new Date().toLocaleTimeString() + '.xls'
       // this.linkToDocumentForSending =
     },
 
@@ -266,13 +288,13 @@ export default {
 
 <style lang="scss">
 .v-data-table td {
-    padding: 0 0px !important;
-    height: 0px !important;
+    padding: 0 0 !important;
+    height: 0 !important;
 }
 
 .v-data-table th {
-    padding: 0 0px !important;
-    height: 0px !important;
+    padding: 0 0 !important;
+    height: 0 !important;
 }
 
 .journal-of-email-sending-payment-docs-main-div {
@@ -283,14 +305,14 @@ export default {
   display: flex;
   flex-wrap: wrap;
   flex: 1 1 auto;
-  margin: 0px;
+  margin: 0;
 }
 
 .journal-of-email-sending-payment-docs-row-with-btns {
   display: flex;
   flex-wrap: wrap;
   flex: 1 1 auto;
-  margin: 0px;
+  margin: 0;
   padding-bottom: 5px;
 }
 

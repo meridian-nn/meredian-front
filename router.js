@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-Vue.prototype.$hostName = 'http://192.168.1.70:9037'
+Vue.prototype.$hostName = 'http://192.168.0.245:9037'
 
 const dynamicPage = importer => () => {
   return importer().then(mod => mod.default || mod)
@@ -45,6 +45,9 @@ const PaymentMenuPage = dynamicPage(() =>
 const JournalOfPaymentDocumentsPage = dynamicPage(() =>
   import('~/views/vcrm/Payment/PaymentDocument/JournalOfPaymentDocuments'))
 
+const JournalOfPaymentDocumentsFromPayDocsPage = dynamicPage(() =>
+  import('~/views/vcrm/Payment/PaymentDocument/JournalOfPaymentDocuments/components/fromPayDocuments'))
+
 const JournalOfEmailSendingPaymentDocumentsPage = dynamicPage(() =>
   import('~/views/vcrm/Payment/PaymentDocument/JournalOfEmailSendingPaymentDocuments'))
 
@@ -53,9 +56,6 @@ const PaymentByCashboxPage = dynamicPage(() =>
 
 const InternalPaymentPage = dynamicPage(() =>
   import('~/views/vcrm/Payment/PaymentDocument/Modals/InternalPayment.vue'))
-
-const HistoryOfPaymentDocumentsPage = dynamicPage(() =>
-  import('~/views/vcrm/Payment/HistoryOfJournalOfPaymentDocuments-not-using'))
 
 const MoneyDistributionPage = dynamicPage(() =>
   import('~/views/vcrm/Payment/MoneyDistribution'))
@@ -176,96 +176,95 @@ const createRouterConst = new Router({
       name: 'PaymentMenu',
       component: PaymentMenuPage,
       meta: { breadcrumb: { text: 'Меню реестра оплат' } },
-      children: [
-        {
-          path: 'journal_of_payment_documents',
-          name: 'JournalOfPaymentDocuments',
-          component: JournalOfPaymentDocumentsPage,
-          meta: {
-            breadcrumb: { text: 'Журнал документов на оплату' }
-          }
-        },
-
-        {
-          path: 'payment_by_cashbox',
-          name: 'PaymentByCashbox',
-          component: PaymentByCashboxPage,
-          meta: {
-            breadcrumb: { text: 'Меню реестра оплат' }
-          }
-        },
-
-        {
-          path: 'internal_payment',
-          name: 'InternalPayment',
-          component: InternalPaymentPage,
-          meta: {
-            breadcrumb: { text: 'Меню реестра оплат' }
-          }
-        },
-
-        {
-          path: 'payment_budget_by_departmens',
-          name: 'PaymentBudgetByDepartments',
-          component: PaymentBudgetByDepartmentsPage,
-          meta: {
-            breadcrumb: { text: 'Бюджет оплат по подразделениям' }
-          }
-        },
-
-        {
-          path: 'journal_of_email_sending_payment_documents',
-          name: 'JournalOfEmailSendingPaymentDocuments',
-          component: JournalOfEmailSendingPaymentDocumentsPage,
-          meta: {
-            breadcrumb: { text: 'Журнал рассылки на e-mail документов на оплату' }
-          }
-        },
-
-        {
-          path: 'history_of_payment_documents',
-          name: 'HistoryOfPaymentDocuments',
-          component: HistoryOfPaymentDocumentsPage,
-          meta: {
-            breadcrumb: { text: 'Меню реестра оплат' }
-          }
-        },
-
-        {
-          path: 'money_distribution',
-          name: 'MoneyDistribution',
-          component: MoneyDistributionPage,
-          meta: {
-            breadcrumb: { text: 'Распределение ДС по подразделениям' }
-          }
-        },
-
-        {
-          path: 'input_of_balances',
-          name: 'InputOfBalances',
-          component: InputOfBalancesPage,
-          meta: {
-            breadcrumb: { text: 'Ввод остатков по Р/С' }
-          }
-        },
-
-        {
-          path: 'register_of_documents_to_pay',
-          name: 'RegisterOfDocumentsToPay',
-          component: RegisterOfDocumentsToPayPage,
-          meta: {
-            breadcrumb: { text: 'Реестр документов оплат по кассе' }
-          }
-        },
-
-        {
-          path: 'register_of_payments_by_cashbox',
-          name: 'RegisterOfPaymentsByCashbox',
-          component: RegisterOfPaymentsByCashboxPage,
-          meta: {
-            breadcrumb: { text: 'Реестр документов оплат по кассе' }
-          }
+      children: [{
+        path: 'journal_of_payment_documents',
+        name: 'JournalOfPaymentDocuments',
+        component: JournalOfPaymentDocumentsPage,
+        meta: {
+          breadcrumb: { text: 'Журнал документов на оплату' }
         }
+      },
+
+      {
+        path: 'journal_of_payment_documents_from_pay_docs',
+        name: 'JournalOfPaymentDocumentsFromPayDocs',
+        component: JournalOfPaymentDocumentsFromPayDocsPage,
+        meta: {
+          breadcrumb: { text: 'Документы на оплату' }
+        }
+      },
+
+      {
+        path: 'payment_by_cashbox',
+        name: 'PaymentByCashbox',
+        component: PaymentByCashboxPage,
+        meta: {
+          breadcrumb: { text: 'Меню реестра оплат' }
+        }
+      },
+
+      {
+        path: 'internal_payment',
+        name: 'InternalPayment',
+        component: InternalPaymentPage,
+        meta: {
+          breadcrumb: { text: 'Меню реестра оплат' }
+        }
+      },
+
+      {
+        path: 'payment_budget_by_departmens',
+        name: 'PaymentBudgetByDepartments',
+        component: PaymentBudgetByDepartmentsPage,
+        meta: {
+          breadcrumb: { text: 'Бюджет оплат по подразделениям' }
+        }
+      },
+
+      {
+        path: 'journal_of_email_sending_payment_documents',
+        name: 'JournalOfEmailSendingPaymentDocuments',
+        component: JournalOfEmailSendingPaymentDocumentsPage,
+        meta: {
+          breadcrumb: { text: 'Журнал рассылки на e-mail документов на оплату' }
+        }
+      },
+
+      {
+        path: 'money_distribution',
+        name: 'MoneyDistribution',
+        component: MoneyDistributionPage,
+        meta: {
+          breadcrumb: { text: 'Распределение ДС по подразделениям' }
+        }
+      },
+
+      {
+        path: 'input_of_balances',
+        name: 'InputOfBalances',
+        component: InputOfBalancesPage,
+        meta: {
+          breadcrumb: { text: 'Ввод остатков по Р/С' }
+        }
+      },
+
+      {
+        path: 'register_of_documents_to_pay',
+        name: 'RegisterOfDocumentsToPay',
+        component: RegisterOfDocumentsToPayPage,
+        meta: {
+          breadcrumb: { text: 'Реестр документов оплат по кассе' }
+        }
+      },
+
+      {
+        path: 'register_of_payments_by_cashbox',
+        name: 'RegisterOfPaymentsByCashbox',
+        component: RegisterOfPaymentsByCashboxPage,
+        meta: {
+          breadcrumb: { text: 'Реестр документов оплат по кассе' }
+        }
+      }
       ]
     },
 

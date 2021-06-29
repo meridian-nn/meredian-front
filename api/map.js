@@ -24,6 +24,14 @@ export const factory = send => ({
 
             getUsersBySearchCriterias(params) {
                 return send('POST', `/auth/findBySearchCriteriaList`, params)
+            },
+
+            findById(id) {
+              return send('GET', `/auth/findById/${id}`)
+            },
+
+            saveUser(params) {
+              return send('POST', `/auth/save`, params)
             }
         },
 
@@ -34,8 +42,18 @@ export const factory = send => ({
 
             getRoles() {
                 return send('GET', `/auth/findRoles`)
+            },
+
+            findBySearchCriteria(params) {
+              return send('POST', `/auth/findBySearchCriteria`, params)
             }
         }
+    },
+
+    departments: {
+      findAll() {
+        return send('GET', `/oper/dir/spPodr/findAll`)
+      }
     },
 
     code: {
@@ -100,12 +118,18 @@ export const factory = send => ({
         },
         findById(id) {
             return send('GET', `/oper/spAcc/findById/${id}`)
+        },
+        save(paymentAccount) {
+          return send('POST', `/oper/spOplat/save`, paymentAccount)
         }
     },
 
     budgetElements: {
         findDepartments() {
             return send('GET', '/oper/dict/spViddocopl/findDepartments')
+        },
+        findAllDocumentsTypes() {
+          return send('GET', '/oper/dict/spViddocopl/findAll')
         },
         findDocumentTypesByParentId(params) {
             return send('GET', `/oper/dict/spViddocopl/findByParentId?${new URLSearchParams(params).toString()}`)
@@ -127,6 +151,15 @@ export const factory = send => ({
         },
         findById(id) {
             return send('GET', `/oper/dict/spIsp/findById/${id}`)
+        },
+        findAll() {
+          return send('GET', `/oper/dict/spIsp/findAll`)
+        },
+        findBySearchCriterias(params) {
+          return send('POST', `/oper/dict/spIsp/findBySearchCriteriaList`, params)
+        },
+        findBySearchCriteria(params) {
+          return send('POST', `/oper/dict/spIsp/findBySearchCriteria`, params)
         }
     },
 
@@ -142,6 +175,10 @@ export const factory = send => ({
     payment: {
         selOplat() {
             return send('POST', '/oper/spDocopl/selOplat')
+        },
+
+        findPaymentByCashboxById(id) {
+            return send('GET', `/oper/payment/findById/${id}`)
         },
 
         savePaymentByCashbox(params) {
@@ -303,12 +340,20 @@ export const factory = send => ({
               return send('POST', `/oper/spDocoplRead/findPageBySearchCriteriaList`, params)
             },
 
+            findDocumentsWithGroupBy(params) {
+              return send('POST', `/oper/spDocoplRead/groupBy`, params)
+            },
+
             deleteSelectedPayments(params) {
                 return send('POST', `/oper/spDocopl/deletePayment`, params)
             },
 
             findById(id) {
                 return send('GET', `/oper/spDocopl/findById/${id}`)
+            },
+
+            findByIdRead(id) {
+              return send('GET', `/oper/spDocoplRead/findById/${id}`)
             },
 
             save(params) {

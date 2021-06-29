@@ -3,14 +3,13 @@
     name="users-editing-main-div"
     class="users-editing-main-div"
   >
-    <span class="headline"> Данная форма пока не работает! </span>
     <div class="users-editing-row">
       <div id="usersDataTable">
         <v-client-table
           v-model="usersDataTable"
           :columns="usersColumns"
           :options="usersOptions"
-          @row-click="findRolesOfChosenUser"
+          @row-click="userChosenEvent"
         >
           <v-simple-checkbox
             slot="enabled"
@@ -27,9 +26,9 @@
     <div class="users-editing-row">
       <div id="rolesOfCurrentUserDataTable">
         <v-client-table
-          v-model="rolesOfUsersDataTable"
-          :columns="rolesOfUsersColumns"
-          :options="rolesOfUsersOptions"
+          v-model="rolesOfChosenUserDataTable"
+          :columns="rolesOfChosenUserColumns"
+          :options="rolesOfChosenUserOptions"
         >
           <v-simple-checkbox
             slot="isHave"
@@ -47,9 +46,52 @@
         text
         @click="saveChanges"
       >
-        Сохранить
+        Сохранить права
       </v-btn>
       <v-spacer />
+    </div>
+
+    <div v-if="currentUser">
+      <span class="users-editing-headline"> Выбор организации с расчетным счетом по умолчанию для отображения на форме "Журнал документов на оплату" </span>
+      <div
+        class="users-editing-row"
+      >
+        <v-col cols="6">
+          <v-autocomplete
+            v-model="selectedOrganization"
+            label="Организация по умолчанию в журнале документов"
+            :loading="loadingType.organizations"
+            :items="organizations"
+            item-value="id"
+            item-text="clName"
+            hide-details="auto"
+            @change="organizationChange"
+          />
+        </v-col>
+
+        <v-col cols="6">
+          <v-autocomplete
+            v-model="selectedAccount"
+            label="Расч. счёт организации по умолчанию в журнале документов"
+            :loading="loadingType.paymentAccounts"
+            :items="paymentAccounts"
+            item-value="id"
+            item-text="shortName"
+            hide-details="auto"
+          />
+        </v-col>
+      </div>
+
+      <div class="users-editing-row">
+        <v-btn
+          color="blue darken-1"
+          text
+          @click="saveOrganizationWithAccountForUi"
+        >
+          Сохранить настройки
+        </v-btn>
+        <v-spacer />
+      </div>
     </div>
     <user-notification ref="userNotification" />
   </div>
@@ -88,23 +130,24 @@ export default {
       },
 
       // таблица данных по ролям сотрудников
-      rolesOfUsersDataTable: [],
-      rolesOfUsersColumns: ['isHave', 'name'],
-      rolesOfUsersOptions: {
+      rolesOfChosenUserDataTable: [],
+      rolesOfChosenUserColumns: ['isHave', 'name'],
+      rolesOfChosenUserOptions: {
         filterable: false,
         pagination: { show: false },
         texts: { noResults: '' },
         filterByColumn: false,
         editableColumns: ['isHave'],
         headings: {
-          isHave(h) {
+          /* isHave(h) {
             return h('h1', {
               style: {
                 color: 'red',
                 fontSize: '14px'
               }
             }, 'test')
-          },
+          }, */
+          isHave: 'Есть у пользователя',
           name: 'Имя роли'
         }
       },
@@ -115,7 +158,21 @@ export default {
       currentUserId: null,
 
       // Список измененных пользователей
-      changedUsers: []
+      changedUsers: [],
+
+      loadingType: {},
+
+      organizations: [],
+
+      selectedOrganization: null,
+
+      paymentAccounts: [],
+
+      selectedAccount: null,
+
+      elementIdOfDefaultOrgAndAccForUISetting: null,
+
+      formIdOfOrgAndAccForUISetting: null
     }
   },
 
@@ -125,7 +182,15 @@ export default {
 
   methods: {
     init() {
+      this.getValuesForFormIdAndElementIdOfDefaultOrgAndAccIds()
       this.findUsersAccounts()
+      this.findOrganizations()
+    },
+
+    getValuesForFormIdAndElementIdOfDefaultOrgAndAccIds() {
+      const formAndElementIds = this.getObjectWithFormIdAndElementIdForDefaultOrgAndAcc()
+      this.formIdOfOrgAndAccForUISetting = formAndElementIds.formId
+      this.elementIdOfDefaultOrgAndAccForUISetting = formAndElementIds.elementId
     },
 
     async findUsersAccounts() {
@@ -133,16 +198,74 @@ export default {
       this.usersDataTable = response
     },
 
+    async findOrganizations() {
+      this.loadingType.organizations = true
+      this.organizations = await this.getBudgetOrganizations()
+      this.loadingType.organizations = null
+    },
+
+    async organizationChange(selectedOrgId) {
+      this.selectedAccount = null
+      await this.findPaymentAccounts(selectedOrgId)
+      this.selectFirstPaymentAccount()
+    },
+
+    async findPaymentAccounts(selectedOrgId) {
+      this.loadingType.paymentAccounts = true
+
+      const data = {
+        orgId: selectedOrgId
+      }
+      let paymentAccounts = await this.$api.paymentAccounts.findAccByOrgId(data)
+      paymentAccounts = paymentAccounts.sort(this.customCompare('shortName'))
+      paymentAccounts.forEach((account) => {
+        account.shortName = account.shortName + ' - ' + account.numAcc.slice(account.numAcc.length - 4)
+      })
+
+      this.paymentAccounts = paymentAccounts
+
+      this.loadingType.paymentAccounts = null
+    },
+
+    selectFirstPaymentAccount() {
+      if (!this.paymentAccounts) {
+        return
+      }
+
+      this.selectedAccount = this.paymentAccounts[0].id
+    },
+
+    userChosenEvent(user) {
+      this.selectedOrganization = null
+      this.selectedAccount = null
+      this.findRolesOfChosenUser(user)
+      this.findDefaultOrgAndAccIdForUser(user.row.id)
+    },
+
+    async findDefaultOrgAndAccIdForUser(userId) {
+      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.formIdOfOrgAndAccForUISetting,
+        this.elementIdOfDefaultOrgAndAccForUISetting, userId)
+      const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
+      let filtersParams
+
+      if (response.length) {
+        filtersParams = JSON.parse(response[0].settingValue)
+        this.selectedOrganization = filtersParams.orgId
+        this.selectedAccount = filtersParams.accId
+        await this.findPaymentAccounts(this.selectedOrganization)
+      }
+    },
+
     async findRolesOfChosenUser(user) {
       if (this.currentUserId && this.currentUserId === user.row.id) {
         return
       }
 
-      this.rolesOfUsersDataTable = []
+      this.rolesOfChosenUserDataTable = []
       this.currentUserId = user.row.id
       this.currentUser = 'Выбран пользователь - ' + user.row.fullName
       const response = await this.$api.auth.users.getRoles()
-      this.rolesOfUsersDataTable = this.convertListOfRolesResponseToListOfUserRoles(response, user.row.id)
+      this.rolesOfChosenUserDataTable = this.convertListOfRolesResponseToListOfUserRoles(response, user.row.id)
     },
 
     putUserChangesIntoArrayOfChangedUsers(user) {
@@ -196,8 +319,40 @@ export default {
       }
     },
 
-    saveChanges() {
-      this.$refs.userNotification.showUserNotification('success', 'Ничего не произошло!')
+    async saveChanges() {
+      const userResponse = await this.$api.auth.user.findById(this.currentUserId)
+      if (!userResponse) {
+        return
+      }
+      const rolesOfUser = []
+
+      for (const role of this.rolesOfChosenUserDataTable) {
+        if (role.isHave) {
+          rolesOfUser.push({
+            id: role.id
+          })
+        }
+      }
+
+      userResponse.roles = rolesOfUser
+      await this.$api.auth.user.saveUser(userResponse)
+
+      this.$refs.userNotification.showUserNotification('success', 'Права сохранены!')
+    },
+
+    async saveOrganizationWithAccountForUi() {
+      const uiSettingsValues = {
+        orgId: this.selectedOrganization,
+        accId: this.selectedAccount
+      }
+
+      const filterEntityForSave = this.createFilterEntityForSave(
+        this.elementIdOfDefaultOrgAndAccForUISetting, this.formIdOfOrgAndAccForUISetting, uiSettingsValues,
+        this.currentUserId, this.getCurrentUser().id)
+
+      await this.$api.uiSettings.save(filterEntityForSave)
+
+      this.$refs.userNotification.showUserNotification('success', 'Настройки интерфейса для пользователя сохранены!')
     }
   }
 }

@@ -1,16 +1,19 @@
 <template>
   <div class="journal-of-payment-docs-main-div">
-    <journalOfPaymentDocumentsTables />
+    <journalOfPaymentDocumentsTables v-if="isHaveBudgetRole()" />
+    <from-pay-documents v-else-if="isHaveJournalRole()" />
   </div>
 </template>
 
 <script>
+import FromPayDocuments from '@/views/vcrm/Payment/PaymentDocument/JournalOfPaymentDocuments/components/fromPayDocuments'
 import JournalOfPaymentDocumentsTables from './components/DocumentsTables'
 
 export default {
   name: 'PaymentDocument',
   components: {
-    JournalOfPaymentDocumentsTables
+    JournalOfPaymentDocumentsTables,
+    FromPayDocuments
   },
   data() {
     return {}

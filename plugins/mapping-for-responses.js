@@ -12,6 +12,7 @@ Vue.mixin({
             const objToReturn = {}
             let totalPaymentSum = 0
             const arrayOfDataToReturn = []
+            let id = 0
 
             paymentByCashboxResponse.forEach((value) => {
                 let sumPlatFromValue = 0
@@ -25,15 +26,20 @@ Vue.mixin({
                     nameDoc: 'Оплата по кассе',
                     namePlat: value.payer.clName,
                     prCredit: 0,
+                    buyerName: '',
+                    executorName: '',
                     sumOplat: sumPlatFromValue,
                     sumOplatMask: this.numberToSum(sumPlatFromValue),
                     accId: 0, // value.accId
                     depName: '',
-                    isDoc: false
+                    isDoc: false,
+                    keyId: id,
+                    id: value.id
                 }
 
                 totalPaymentSum += sumPlatFromValue
                 arrayOfDataToReturn.push(item)
+                id += 1
             })
 
             toPayDataResponse.forEach((value) => {
@@ -45,9 +51,12 @@ Vue.mixin({
                   value.buyerName = ''
                 }
 
+                value.keyId = id
+                value.sumOplatFromRequest = value.sumOplat
                 value.sumOplatMask = this.numberToSum(value.sumOplat)
                 value.isDoc = true
                 arrayOfDataToReturn.push(value)
+                id += 1
             })
 
             objToReturn.totalPaymentSum = totalPaymentSum
