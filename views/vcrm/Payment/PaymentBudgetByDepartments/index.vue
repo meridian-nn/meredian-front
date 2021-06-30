@@ -63,11 +63,17 @@
         История оплаты
       </v-subheader>
       <div id="paymentBudgetByDepGroupByDate">
-        <v-client-table
-          v-model="groupByDate"
-          :columns="groupByDateColumns"
-          :options="groupByDateOptions"
-          @row-click="findGroupByDep"
+        <v-data-table
+          :headers="groupByDateHeaders"
+          height="523"
+          fixed-header
+          :items="groupByDate"
+          :show-select="false"
+          disable-pagination
+          hide-default-footer
+          no-data-text=""
+          class="elevation-1"
+          @click:row="findGroupByDep"
         />
       </div>
     </div>
@@ -77,10 +83,16 @@
         История оплаты по подразделениям
       </v-subheader>
       <div id="paymentBudgetByDepGroupByDep">
-        <v-client-table
-          v-model="groupByDep"
-          :columns="groupByDepColumns"
-          :options="groupByDepOptions"
+        <v-data-table
+          :headers="groupByDepHeaders"
+          height="523"
+          fixed-header
+          :items="groupByDep"
+          :show-select="false"
+          disable-pagination
+          hide-default-footer
+          no-data-text=""
+          class="elevation-1"
         />
       </div>
     </div>
@@ -103,39 +115,38 @@ export default {
       // Таблица для отображения инфрмации о итогах по документам на оплату в разрезе по дням
       groupByDate: [],
       groupByDateColumns: ['dataOplat', 'sumDoc', 'sumOplach'],
-      groupByDateOptions: {
-        filterable: false,
-        pagination: { show: false },
-        texts: { noResults: '' },
-        filterByColumn: false,
-        perPage: 100,
-        perPageValues: [100],
-        headings: {
-          dataOplat: 'Дата оплаты',
-          sumDoc: 'План',
-          sumOplach: 'Факт'
+      groupByDateHeaders: [
+        {
+          text: 'Дата оплаты',
+          value: 'dataOplat'
         },
-        orderBy: {
-          column: 'dataOplat'
+        {
+          text: 'План',
+          value: 'sumDoc'
+        },
+        {
+          text: 'Факт',
+          value: 'sumOplach'
         }
-      },
-
-      arrayForStashAllGroupsByDep: [],
+      ],
 
       // Таблица для отображения инфрмации о итогах по документам на оплату в разрезе по подразделениям
       groupByDep: [],
-      groupByDepColumns: ['dep', 'sumFact', 'prim'],
-      groupByDepOptions: {
-        filterable: false,
-        pagination: { show: false },
-        texts: { noResults: '' },
-        filterByColumn: false,
-        headings: {
-          dep: 'Отдел',
-          sumFact: 'Сумма факт',
-          prim: 'Примечание'
+      groupByDepColumns: ['depName', 'sumFact', 'prim'],
+      groupByDepHeaders: [
+        {
+          text: 'Отдел',
+          value: 'depName'
+        },
+        {
+          text: 'План',
+          value: 'sumDoc'
+        },
+        {
+          text: 'Факт',
+          value: 'sumOplach'
         }
-      }
+      ]
     }
   },
   mounted() {
@@ -162,53 +173,34 @@ export default {
 
       this.reset()
       const groupByDate = []
-      const groupByDep = []
 
-      const data = this.createCriteriasToSearchDocsFromPayBetweenDataOplatDates(this.startDate, this.endDate)
-      const response = await this.$api.payment.docOplForPay.findDocumentsForPayByCriterias(data)
-      for (const value of response) {
-        if (value.departmentId === null) {
-          continue
+      const paramsForRequest = this.createParamsForRequestDocForPayGroupByDataOplat(this.startDate, this.endDate, ['dataOplat'])
+      const response = await this.$api.payment.docOplForPay.findDocumentsForPayWithGroupBy(paramsForRequest)
+      for (const item of response) {
+        if (!item.sum_sumPaid) {
+          item.sum_sumPaid = 0
         }
 
-        let record = groupByDate.find(item => item.dataOplat === value.dataOplat)
-        const sumOplach = value.sumPaid === null ? 0 : value.sumPaid
-        const depName = value.depName
-
+        let record = groupByDate.find(record => record.dataOplat === item.dataOplat)
         if (record === undefined) {
           record = {
-            dataOplat: value.dataOplat,
-            sumDoc: this.numberToSum(value.sumDoc),
-            sumDocNumber: value.sumDoc,
-            sumOplach: this.numberToSum(sumOplach),
-            sumOplachNumber: sumOplach
+            dataOplat: item.dataOplat,
+            sumDoc: this.numberToSum(item.sum_sumDoc),
+            sumDocNumber: item.sum_sumDoc,
+            sumOplach: this.numberToSum(item.sum_sumPaid),
+            sumOplachNumber: item.sum_sumPaid
           }
           groupByDate.push(record)
         } else {
-          record.sumDocNumber += value.sumDoc
+          record.sumDocNumber += item.sum_sumDoc
           record.sumDoc = this.numberToSum(record.sumDocNumber)
-          record.sumOplachNumber += sumOplach
+          record.sumOplachNumber += item.sum_sumPaid
           record.sumOplach = this.numberToSum(record.sumOplachNumber)
-        }
-
-        let recordDep = groupByDep.find(item => item.dataOplat === value.dataOplat && item.dep === depName)
-        if (recordDep === undefined) {
-          recordDep = {
-            dataOplat: value.dataOplat,
-            dep: depName,
-            sumFact: this.numberToSum(sumOplach),
-            sumFactNumber: sumOplach,
-            prim: value.prim
-          }
-          groupByDep.push(recordDep)
-        } else {
-          recordDep.sumFactNumber += sumOplach
-          recordDep.sumFact = this.numberToSum(recordDep.sumFactNumber)
         }
       }
 
-      this.arrayForStashAllGroupsByDep = groupByDep
       this.groupByDate = groupByDate
+
       if (this.groupByDate.length > 0) {
         this.$refs.userNotification.showUserNotification('success', 'Документы найдены')
       } else {
@@ -216,24 +208,45 @@ export default {
       }
     },
 
+    async findGroupByDep(item) {
+      const groupByDep = []
+
+      const paramsForRequest = this.createParamsForRequestDocForPayGroupByDepName(item.dataOplat, ['depName'])
+      const response = await this.$api.payment.docOplForPay.findDocumentsForPayWithGroupBy(paramsForRequest)
+      for (const item of response) {
+        if (!item.sum_sumPaid) {
+          item.sum_sumPaid = 0
+        }
+
+        if (!item.depName) {
+          item.depName = 'Подразделение не указано'
+        }
+
+        let record = groupByDep.find(record => record.depName === item.depName)
+        if (record === undefined) {
+          record = {
+            depName: item.depName,
+            sumDoc: this.numberToSum(item.sum_sumDoc),
+            sumDocNumber: item.sum_sumDoc,
+            sumOplach: this.numberToSum(item.sum_sumPaid),
+            sumOplachNumber: item.sum_sumPaid
+          }
+          groupByDep.push(record)
+        } else {
+          record.sumDocNumber += item.sum_sumDoc
+          record.sumDoc = this.numberToSum(record.sumDocNumber)
+          record.sumOplachNumber += item.sum_sumPaid
+          record.sumOplach = this.numberToSum(record.sumOplachNumber)
+        }
+      }
+
+      this.groupByDep = groupByDep
+    },
+
     reset() {
       this.groupByDate = []
       this.groupByDep = []
       this.arrayForStashAllGroupsByDep = []
-    },
-
-    async findDepDocById(departmentId) {
-      const data = {
-        departmentId
-      }
-
-      const response = await this.$api.payment.moneyDistributionByDepartments.findByDepartmentId(data)
-      return response.department.nameViddoc
-    },
-
-    findGroupByDep(item) {
-      const groupByDep = this.arrayForStashAllGroupsByDep.filter(record => record.dataOplat === item.row.dataOplat)
-      this.groupByDep = groupByDep
     }
   }
 }
@@ -279,7 +292,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   flex: 1 1 auto;
-  margin: 0px;
+  margin: 0;
 }
 
 #paymentBudgetByDepGroupByDate {
@@ -291,7 +304,7 @@ export default {
 }
 #paymentBudgetByDepGroupByDate td, #paymentBudgetByDepGroupByDate th {
   border: 1px solid #ddd;
-  padding: 0px;
+  padding: 0;
 }
 
 #paymentBudgetByDepGroupByDate tr:nth-child(even){background-color: #f2f2f2;}
@@ -315,7 +328,7 @@ export default {
 }
 #paymentBudgetByDepGroupByDep td, #paymentBudgetByDepGroupByDep th {
   border: 1px solid #ddd;
-  padding: 0px;
+  padding: 0;
 }
 
 #paymentBudgetByDepGroupByDep tr:nth-child(even){background-color: #f2f2f2;}

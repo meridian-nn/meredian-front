@@ -223,6 +223,62 @@ Vue.mixin({
           return data
         },
 
+        createParamsForRequestDocForPayGroupByDepName(dateOplat, groupFields) {
+          const aggregateFunctions = [
+            {
+              "field": "sumDoc",
+              "function": "SUM"
+            },
+            {
+              "field": "sumPaid",
+              "function": "SUM"
+            }
+          ]
+
+          const searchCriteria = this.createCriteriasToSearchDocsFromPayByDataOplat(dateOplat)
+
+          return {
+            aggregateFunctions: aggregateFunctions,
+            groupFields: groupFields,
+            searchCriteria: searchCriteria
+          }
+        },
+
+        createCriteriasToSearchDocsFromPayByDataOplat(dateOplat) {
+          return [
+            {
+              dataType: 'DATE',
+              key: 'dataOplat',
+              operation: 'EQUALS',
+              type: 'AND',
+              values: [
+                dateOplat
+              ]
+            }
+          ]
+        },
+
+        createParamsForRequestDocForPayGroupByDataOplat(firstDate, lastDate, groupFields){
+          const aggregateFunctions = [
+            {
+              "field": "sumDoc",
+              "function": "SUM"
+            },
+            {
+              "field": "sumPaid",
+              "function": "SUM"
+            }
+          ]
+
+          const searchCriteria = this.createCriteriasToSearchDocsFromPayBetweenDataOplatDates(firstDate, lastDate)
+
+          return {
+            aggregateFunctions: aggregateFunctions,
+            groupFields: groupFields,
+            searchCriteria: searchCriteria
+          }
+        },
+
         createCriteriasToSearchDocsFromPayBetweenDataOplatDates(firstDate, lastDate) {
           return [
             {

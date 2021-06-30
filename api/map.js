@@ -336,6 +336,10 @@ export const factory = send => ({
                 return send('POST', `/oper/spDocoplRead/findBySearchCriteriaList`, params)
             },
 
+            findDocumentsForPayWithGroupBy(params) {
+                return send('POST', `/oper/spDocoplRead/groupBy`, params)
+            },
+
             findDocumentsForPayForJournalTable(params) {
               return send('POST', `/oper/spDocoplRead/findPageBySearchCriteriaList`, params)
             },

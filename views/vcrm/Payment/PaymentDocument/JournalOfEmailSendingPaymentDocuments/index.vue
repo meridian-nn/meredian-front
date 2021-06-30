@@ -81,8 +81,8 @@
           <tr>
             <th>Итого</th>
             <th />
+            <th> {{ totalSumOplat }}</th>
             <th />
-            <th>{{ totalSumOplat }}</th>
             <th />
             <th />
             <th />
