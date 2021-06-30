@@ -575,7 +575,7 @@ export default {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
         const selDoc = this.fromPaySelectedRows[0]
         if (selDoc.isVnpl) {
-          this.$refs.internalPayment.editDocument(selDoc.id)
+          this.$refs.userNotification.showUserNotification('error', 'У Вас нет прав на редактирование внутреннего платежа!')
         } else {
           this.$refs.editPaymentDocument.editDocument(selDoc.id)
         }
@@ -587,7 +587,7 @@ export default {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
         const selDoc = this.fromPaySelectedRows[0]
         if (selDoc.isVnpl) {
-          this.$refs.internalPayment.copyDocument(selDoc.id)
+          this.$refs.userNotification.showUserNotification('error', 'У Вас нет прав на создание внутреннего платежа!')
         } else {
           this.$refs.editPaymentDocument.copyDocument(selDoc.id)
         }
@@ -595,13 +595,13 @@ export default {
     },
 
     // Удаление выбранных документов на оплату
-    deleteDocument() {
+    async deleteDocument() {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
-        const selDoc = this.fromPaySelectedRows[0]
-        if (selDoc.isVnpl) {
-          this.deleteVnpl()
-        } else {
-          this.deleteDocFromPay()
+        const docsFromPay = this.fromPaySelectedRows.filter(item => item.isVnpl === false)
+
+        if (docsFromPay.length > 0) {
+          await this.deleteDocFromPay(docsFromPay)
+          await this.updateDocsForPay()
         }
       }
     },
@@ -610,8 +610,8 @@ export default {
       this.$refs.userNotification.showUserNotification('success', 'метод в разработке!')
     },
 
-    async deleteDocFromPay() {
-      const selectedRows = this.fromPaySelectedRows
+    async deleteDocFromPay(docsFromPay) {
+      const selectedRows = docsFromPay
       const isDeletionPossible = this.checkSelectedRowsBeforeDelete(selectedRows)
 
       if (isDeletionPossible === false) {
@@ -619,7 +619,7 @@ export default {
         return
       }
 
-      const ids = this.fromPaySelectedRows.map(value => value.id)
+      const ids = selectedRows.map(value => value.id)
       // await this.$api.payment.DocOplForPay.deleteSelectedPayments(ids)
       await this.$axios.$post('/oper/spDocopl/deletePayment', ids)
 
