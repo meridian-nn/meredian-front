@@ -122,6 +122,14 @@ Vue.mixin({
           console.log(sumOfPayment)
           console.log(arrayOfPaymentAccountsForSave)
           await this.$axios.$post('/oper/spOplat/saveAll', arrayOfPaymentAccountsForSave)
+        },
+
+        getConfigForDeleteMethods(){
+          return {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
         }
     }
 })

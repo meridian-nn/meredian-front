@@ -257,6 +257,7 @@ export default {
         return
       }
 
+      docFromPay.spDocints.sort(this.customCompare('id', -1))
       const spDocintOfDoc = docFromPay.spDocints[0]
       this.spDocint = {
         kontrId: spDocintOfDoc.kontrId,
@@ -284,12 +285,14 @@ export default {
       }
 
       this.docFromPay = docFromPay
+      this.docFromPay.spDocints.sort(this.customCompare('id', -1))
       this.spDocint = this.docFromPay.spDocints[0]
       this.sumDocOfEditedDoc = this.docFromPay.sumDoc
       this.spDocintOfEditedDoc = {
         kontrId: this.spDocint.kontrId,
         accId: this.spDocint.accId
       }
+      this.docFromPay.contractorId = this.spDocint.kontrId
       await this.findPaymentAccounts(this.spDocint.kontrId)
       this.selectedOrganizationId = this.docFromPay.myorgId
       this.selectedAccOfOrg = this.docFromPay.accId
@@ -304,14 +307,15 @@ export default {
       const dataOplat = currentDate.toISOString().substr(0, 10)
 
       this.docFromPay = {
-        accId: docFromPay.selectedAccOfOrg,
+        accId: this.selectedAccOfOrg,
         creatorId: this.getCurrentUser().id,
+        contractorId: this.spDocint.kontrId,
         dataDoc: new Date(dataDoc).toLocaleDateString(),
         dataOplat: new Date(dataOplat).toLocaleDateString(),
         ispId: 0,
-        myorgId: docFromPay.selectedOrganizationId,
+        myorgId: this.selectedOrganizationId,
         myOrg: {
-          id: docFromPay.selectedOrganizationId
+          id: this.selectedOrganizationId
         },
         nameDoc: docFromPay.nameDoc,
         paymentStatus: 'BANK',
@@ -432,6 +436,7 @@ export default {
         await this.changeVnplOfPaymentAccounts(this.docFromPay.accId, this.spDocint.accId, this.docFromPay.sumDoc)
         this.dialog = false
       }
+      this.$emit('save')
     },
 
     // функция проверки заполнения обязательных полей

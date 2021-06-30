@@ -365,7 +365,6 @@ export default {
       const editedItem = await this.$api.payment.docOplForPay.findByIdRead(this.id)
       await this.findDocumentType(editedItem.departmentId)
       await this.findExecutors(editedItem.departmentId)
-      // this.findSuppliers(editedItem.contractId)
       await this.findContracts()
       this.editedItem = editedItem
       if (this.editedItem.buyer) {
@@ -376,6 +375,7 @@ export default {
         this.id = null
         this.editedItem.id = null
         this.editedItem.creatorId = null
+        this.editedItem.sumPaid = 0
         this.editedItem.spDocches = []
         this.editedItem.spDocints = []
       }

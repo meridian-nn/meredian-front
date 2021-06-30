@@ -180,11 +180,8 @@ export default {
 
     // Получение списка расч. счетов выбранной организации и их сортировка по возрастанию
     async findByDataOplatAndMyOrgId() {
-      const data = {
-        dateOplat: new Date(this.date).toLocaleDateString(),
-        orgId: this.orgId || 0
-      }
-      let oplata = await this.$api.paymentAccounts.findByDataOplatAndMyOrgId(data)
+      const data = this.createCriteriasToFindPaymentAccountsByOrgIdAndDataOplat(this.orgId, this.date)
+      let oplata = await this.$api.paymentAccounts.findBySearchCriteriaList(data)
 
       for (const elem of oplata) {
         elem.shortNameOfAcc = elem.acc.shortName

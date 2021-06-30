@@ -1048,23 +1048,44 @@ export default {
     },
 
     // Удаление выбранных документов на оплату
-    deleteDocument() {
+    async deleteDocument() {
       if (this.fromPaySelectedRows && this.fromPaySelectedRows.length) {
-        const selDoc = this.fromPaySelectedRows[0]
-        if (selDoc.isVnpl) {
-          this.deleteVnpl()
-        } else {
-          this.deleteDocFromPay()
+        const docsFromPay = this.fromPaySelectedRows.filter(item => item.isVnpl === false)
+        const vnplDocs = this.fromPaySelectedRows.filter(item => item.isVnpl === true)
+        let isDeleteDocsFromPayHappened = false
+        let isDeleteVnplDocsHappened = false
+
+        if (docsFromPay.length > 0) {
+          await this.deleteDocFromPay(docsFromPay)
+          isDeleteDocsFromPayHappened = true
+        }
+
+        if (vnplDocs.length > 0) {
+          await this.deleteVnpl(vnplDocs)
+          isDeleteVnplDocsHappened = true
+        }
+
+        if (isDeleteDocsFromPayHappened || isDeleteVnplDocsHappened) {
+          await this.updateDocsForPay()
+          if (isDeleteVnplDocsHappened) {
+            await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
+          }
         }
       }
     },
 
-    deleteVnpl() {
-      this.$refs.userNotification.showUserNotification('success', 'метод в разработке!')
+    async deleteVnpl(vnplDocs) {
+      for (const vnplDocArr of vnplDocs) {
+        const vnplDoc = await this.$api.payment.docOplForPay.findById(vnplDocArr.id)
+        vnplDoc.spDocints.sort(this.customCompare('id', -1))
+        const spDocint = vnplDoc.spDocints[0]
+        await this.changeVnplOfPaymentAccounts(spDocint.accId, vnplDoc.accId, vnplDoc.sumDoc)
+        await this.$axios.$post('/oper/spDocopl/deleteInternalPayment', vnplDoc.id, this.getConfigForDeleteMethods())
+      }
     },
 
-    async deleteDocFromPay() {
-      const selectedRows = this.fromPaySelectedRows
+    async deleteDocFromPay(docsFromPay) {
+      const selectedRows = docsFromPay
       const isDeletionPossible = this.checkSelectedRowsBeforeDelete(selectedRows)
 
       if (isDeletionPossible === false) {
@@ -1072,11 +1093,9 @@ export default {
         return
       }
 
-      const ids = this.fromPaySelectedRows.map(value => value.id)
+      const ids = selectedRows.map(value => value.id)
       // await this.$api.payment.DocOplForPay.deleteSelectedPayments(ids)
       await this.$axios.$post('/oper/spDocopl/deletePayment', ids)
-
-      await this.updateDocsForPay()
     },
 
     checkSelectedRowsBeforeDelete(selectedRows) {
@@ -1123,12 +1142,22 @@ export default {
     // Перемещение документа из таблицы "Документы к оплате" в таблицу "Документы на оплату"
     deleteFromToPayForContextMenuOnly() {
       if (!this.currentRowForContextMenu.isDoc) {
-        this.$refs.userNotification.showUserNotification('warning', 'Удаление оплаты по кассе невозможно!')
-        return
+        this.deletePaymentByCashbox(this.currentRowForContextMenu)
+      } else {
+        this.deleteFromPay(this.currentRowForContextMenu)
       }
+    },
 
+    async deletePaymentByCashbox(curRow) {
+      await this.changeSumToPayOfPaymentAccount(curRow.accId, curRow.sumOplat, 'DEDUCT')
+      await this.$axios.$post('/oper/payment/delete', curRow.id, this.getConfigForDeleteMethods())
+      await this.refreshTables()
+      await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
+    },
+
+    deleteFromPay(curRow) {
       this.toPaySelectedRows = []
-      this.toPaySelectedRows.push(this.currentRowForContextMenu)
+      this.toPaySelectedRows.push(curRow)
       this.deleteSelectedPayments()
     },
 

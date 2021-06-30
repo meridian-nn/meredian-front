@@ -30,7 +30,7 @@ Vue.mixin({
                     executorName: '',
                     sumOplat: sumPlatFromValue,
                     sumOplatMask: this.numberToSum(sumPlatFromValue),
-                    accId: 0, // value.accId
+                    accId: value.acc.id,
                     depName: '',
                     isDoc: false,
                     keyId: id,
