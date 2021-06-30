@@ -85,7 +85,7 @@ export default {
 
       // Таблица для отображения инфрмации о итогах по документам к оплате в разрезе по дням
       groupByDate: [],
-      groupByDateColumns: ['dataOplat', 'nameDoc', 'namePlat', 'sumOplat', 'depName', 'prim'],
+      groupByDateColumns: ['dataOplat', 'nameDoc', 'namePlat', 'sumOplat', 'executorDepartmentName', 'prim'],
       groupByDateOptions: {
         filterable: false,
         pagination: { show: false },
@@ -98,7 +98,7 @@ export default {
           nameDoc: 'Номер',
           namePlat: 'Контрагент',
           sumOplat: 'Сумма оплаты',
-          depName: 'Подразделение',
+          executorDepartmentName: 'Подразделение',
           prim: 'Примечание'
         },
         orderBy: {
@@ -185,7 +185,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   flex: 1 1 auto;
-  margin: 0px;
+  margin: 0;
 }
 
 .register-of-docs-to-pay-headline {
@@ -228,7 +228,7 @@ export default {
 }
 #registerOfDocsToPayGroupByDate td, #registerOfDocsToPayGroupByDate th {
   border: 1px solid #ddd;
-  padding: 0px;
+  padding: 0;
 }
 
 #registerOfDocsToPayGroupByDate tr:nth-child(even){background-color: #f2f2f2;}
