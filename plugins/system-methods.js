@@ -61,6 +61,11 @@ Vue.mixin({
           return organizations
         },
 
+        getDateForCriteriasToSearchDocsFromPay() {
+          let currentDate = new Date()
+          return new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), currentDate.getDate())
+        },
+
         async changeSumToPayOfPaymentAccount(accId, sumOfPaymentDocs, operationType) {
           if(sumOfPaymentDocs === 0) {
             return

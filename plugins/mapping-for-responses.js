@@ -172,6 +172,31 @@ Vue.mixin({
           }
 
           return listOfMaterials
+        },
+
+      convertResponsePaymentsByCashboxToDataForTable(response) {
+        const arrayOfData = []
+        for (const item of response) {
+          let operationSum = 0
+          let groupName = ''
+
+          if (item.paymentOperationSums.length > 0) {
+            operationSum = item.paymentOperationSums[0].paymentSum
+            groupName = this.operationTypes.find(operation => operation.id === item.paymentOperationSums[0].paymentOperationTypeId)
+          }
+
+          const data = {
+            paymentDate: item.paymentDate,
+            orgName: item.payer.clName,
+            operationSum: this.numberToSum(operationSum),
+            groupName: groupName.name,
+            comment: item.comment
+          }
+
+          arrayOfData.push(data)
         }
+
+        return arrayOfData
+      },
     }
 })

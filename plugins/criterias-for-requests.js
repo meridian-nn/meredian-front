@@ -132,7 +132,8 @@ Vue.mixin({
                 'operation': 'GREATER_THAN',
                 'type': 'AND',
                 'values': [
-                  (typeof filtersParams === 'object' && filtersParams.date) ? new Date(filtersParams.date).toLocaleDateString() : new Date().toLocaleDateString()
+                  (typeof filtersParams === 'object' && filtersParams.date) ?
+                    new Date(filtersParams.date).toLocaleDateString() : this.getDateForCriteriasToSearchDocsFromPay().toLocaleDateString()
                 ]
             }]
 
@@ -651,6 +652,62 @@ Vue.mixin({
             executorId
           ]
         }
-      }
-    }
+      },
+
+      createParamsToSearchTotalSumOplatOfDocsToPayBetweenDates(startDate, endDate) {
+        return {
+          aggregateFunctions: [
+            {
+              field: 'sumOplat',
+              function: 'SUM'
+            },
+            {
+              field: 'id',
+              function: 'MIN'
+            }
+          ],
+          searchCriteria: this.createCriteriasForRequestToSearchDocumentsToPayBetweenDates(startDate, endDate)
+        }
+      },
+
+      createCriteriasForRequestToSearchDocumentsToPayBetweenDates(startDate, endDate) {
+        return [{
+          'dataType': 'DATE',
+          'key': 'dataOplat',
+          'operation': 'BETWEEN',
+          'type': 'AND',
+          'values': [
+            new Date(startDate).toLocaleDateString(), new Date(endDate).toLocaleDateString()
+          ]
+        }]
+      },
+
+      createParamsToSearchTotalToPaySumOfPaymentsByCashboxBetweenDates(startDate, endDate) {
+        return {
+          aggregateFunctions: [
+            {
+              field: 'toPaySum',
+              function: 'SUM'
+            },
+            {
+              field: 'id',
+              function: 'MIN'
+            }
+          ],
+          searchCriteria: this.createCriteriasForSearchPaymentsByCashboxBetweenDates(startDate, endDate)
+        }
+      },
+
+      createCriteriasForSearchPaymentsByCashboxBetweenDates(startDate, endDate) {
+        return [{
+          dataType: 'DATE',
+          key: 'paymentDate',
+          operation: 'BETWEEN',
+          type: 'AND',
+          values: [
+            new Date(startDate).toLocaleDateString(), new Date(endDate).toLocaleDateString()
+          ]
+        }]
+      },
+    },
 })

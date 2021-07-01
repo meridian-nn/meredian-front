@@ -49,7 +49,7 @@
       <div class="register-of-docs-to-pay-col-2">
         <v-btn
           class="register-of-docs-to-pay-button"
-          @click="findDocsToPayInPeriod"
+          @click="updateDocsToPay"
         >
           Найти
         </v-btn>
@@ -60,11 +60,76 @@
 
     <div class="register-of-docs-to-pay-row">
       <div id="registerOfDocsToPayGroupByDate">
-        <v-client-table
-          v-model="groupByDate"
-          :columns="groupByDateColumns"
-          :options="groupByDateOptions"
-        />
+        <v-data-table
+          :headers="groupByDateHeaders"
+          height="700"
+          fixed-header
+          :items="groupByDate"
+          :show-select="false"
+          disable-pagination
+          hide-default-footer
+          no-data-text=""
+          class="elevation-1"
+        >
+          <template #body="{ items }">
+            <tbody>
+              <tr
+                v-for="item in items"
+                :key="item.id"
+                :value="item"
+              >
+                <td class="register-of-docs-to-pay-dataOplat">
+                  {{ item.dataOplat }}
+                </td>
+                <td class="register-of-docs-to-pay-nameDoc">
+                  {{ item.nameDoc }}
+                </td>
+                <td class="register-of-docs-to-pay-namePlat">
+                  {{ item.namePlat }}
+                </td>
+                <td class="register-of-docs-to-pay-sumOplat">
+                  {{ item.sumOplat }}
+                </td>
+                <td class="register-of-docs-to-pay-executorDepartmentName">
+                  {{ item.executorDepartmentName }}
+                </td>
+                <td class="register-of-docs-to-pay-prim">
+                  {{ item.prim }}
+                </td>
+              </tr>
+
+              <infinite-loading
+                spinner="spiral"
+                :identifier="infiniteIdOfToPayDocs"
+                @infinite="findDocsToPayInPeriod"
+              >
+                <div slot="no-more" />
+                <div slot="no-results" />
+              </infinite-loading>
+            </tbody>
+          </template>
+        </v-data-table>
+      </div>
+    </div>
+
+    <div class="register-of-docs-to-pay-row">
+      <div>
+        <th>Итого</th>
+      </div>
+
+      <div class="register-of-docs-to-pay-for-toPay-results" />
+
+      <div class="register-of-docs-to-pay-result-text">
+        <th>
+          <vue-numeric
+            v-model="totalToSumOplat"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            output-type="number"
+            :read-only="true"
+          />
+        </th>
       </div>
     </div>
 
@@ -74,10 +139,14 @@
 
 <script>
 import UserNotification from '@/components/information_window/UserNotification'
+import InfiniteLoading from 'vue-infinite-loading'
 
 export default {
   name: 'RegisterOfDocumentsToPay',
-  components: { UserNotification },
+  components: {
+    UserNotification,
+    InfiniteLoading
+  },
   data() {
     return {
       startDate: new Date().toISOString().substr(0, 10),
@@ -86,34 +155,51 @@ export default {
       // Таблица для отображения инфрмации о итогах по документам к оплате в разрезе по дням
       groupByDate: [],
       groupByDateColumns: ['dataOplat', 'nameDoc', 'namePlat', 'sumOplat', 'executorDepartmentName', 'prim'],
-      groupByDateOptions: {
-        filterable: false,
-        pagination: { show: false },
-        texts: { noResults: '' },
-        filterByColumn: false,
-        perPage: 100,
-        perPageValues: [100],
-        headings: {
-          dataOplat: 'Дата оплаты',
-          nameDoc: 'Номер',
-          namePlat: 'Контрагент',
-          sumOplat: 'Сумма оплаты',
-          executorDepartmentName: 'Подразделение',
-          prim: 'Примечание'
+      groupByDateHeaders: [
+        {
+          text: 'Дата оплаты',
+          value: 'dataOplat'
         },
-        orderBy: {
-          column: 'dataOplat'
+        {
+          text: 'Номер',
+          value: 'nameDoc'
+        },
+        {
+          text: 'Контрагент',
+          value: 'namePlat'
+        },
+        {
+          text: 'Сумма оплаты',
+          value: 'sumOplat'
+        },
+        {
+          text: 'Подразделение',
+          value: 'executorDepartmentName'
+        },
+        {
+          text: 'Примечание',
+          value: 'prim'
         }
-      }
+      ],
 
+      // Переменная для реализации обновления данных в таблице
+      infiniteIdOfToPayDocs: +new Date(),
+
+      // Переменная для реализации пагинации таблицы
+      pageOfToPayDocs: 0,
+
+      // Итоговая сумма найденных документов к оплате
+      totalToSumOplat: 0
     }
   },
   mounted() {
     this.init()
   },
   methods: {
-    init() {
+    async init() {
+      this.reset()
       this.fillDatesOnInit()
+      await this.findTotalSumOfDocsToPay()
     },
 
     fillDatesOnInit() {
@@ -122,7 +208,23 @@ export default {
       this.endDate = new Date(date.getFullYear(), date.getMonth() + 1, 1).toISOString().substr(0, 10)
     },
 
-    async findDocsToPayInPeriod() {
+    async findTotalSumOfDocsToPay() {
+      const params = this.createParamsToSearchTotalSumOplatOfDocsToPayBetweenDates(this.startDate, this.endDate)
+      const response = await this.$api.payment.docOplToPay.findDocumentsByCriteriasWithGroupBy(params)
+
+      if (response.length > 0) {
+        this.totalToSumOplat = response[0].sum_sumOplat
+      }
+    },
+
+    async updateDocsToPay() {
+      await this.findTotalSumOfDocsToPay()
+      this.pageOfToPayDocs = 0
+      this.groupByDate = []
+      this.infiniteIdOfToPayDocs += 1
+    },
+
+    async findDocsToPayInPeriod($state) {
       if (this.startDate > this.endDate) {
         this.$refs.userNotification.showUserNotification('error', 'Начальная дата выбранного периода не может быть больше конечной даты выбранного периода!')
         return
@@ -130,46 +232,32 @@ export default {
 
       this.$refs.userNotification.showUserNotification('warning', 'Поиск документов')
 
-      this.reset()
-      const data = this.createCriteriaForRequest()
+      const searchCriterias = this.createCriteriasForRequestToSearchDocumentsToPayBetweenDates(this.startDate, this.endDate)
+      const data = { searchCriterias, page: this.pageOfToPayDocs }
 
-      const response = await this.$api.payment.docOplToPay.findDocumentsByCriteria(data)
-      let totalSumOplat = 0
-      response.forEach((value) => {
-        totalSumOplat += value.sumOplat
-        value.sumOplat = this.numberToSum(value.sumOplat)
-      })
-      response.push({
-        dataOplat: 'Итого:',
-        nameDoc: '',
-        namePlat: '',
-        sumOplat: this.numberToSum(totalSumOplat),
-        depName: '',
-        prim: ''
-      })
+      const { content } = await this.$api.payment.docOplToPay.findDocumentsByCriteriasByPage(data)
+      if (content.length > 0) {
+        this.pageOfToPayDocs += 1
 
-      if (response.length > 0) {
-        this.groupByDate = response
-        this.$refs.userNotification.showUserNotification('success', 'Документы найдены')
+        content.forEach((value) => {
+          value.sumOplat = this.numberToSum(value.sumOplat)
+        })
+
+        this.groupByDate.push(...content)
+        $state.loaded()
       } else {
-        this.$refs.userNotification.showUserNotification('warning', 'В указанном периоде документы не найдены')
-      }
-    },
+        $state.complete()
 
-    createCriteriaForRequest() {
-      const data = {
-        'dataType': 'DATE',
-        'key': 'dataOplat',
-        'operation': 'BETWEEN',
-        'type': 'AND',
-        'values': [
-          new Date(this.startDate).toLocaleDateString(), new Date(this.endDate).toLocaleDateString()
-        ]
+        if (this.groupByDate.length > 0) {
+          this.$refs.userNotification.showUserNotification('success', 'Документы найдены')
+        } else {
+          this.$refs.userNotification.showUserNotification('warning', 'В указанном периоде документы не найдены')
+        }
       }
-      return data
     },
 
     reset() {
+      this.pageOfToPayDocs = 0
       this.groupByDate = []
     }
   }
@@ -241,5 +329,39 @@ export default {
   text-align: left;
   background-color: #639db1 !important;
   color: white;
+}
+
+.register-of-docs-to-pay-result-text{
+  font-size: 0.75rem;
+  padding-right: 15px;
+}
+
+.register-of-docs-to-pay-for-toPay-results{
+  flex: 0 0 46%;
+  max-width: 46%;
+}
+
+.register-of-docs-to-pay-dataOplat{
+  width: 92px !important
+}
+
+.register-of-docs-to-pay-nameDoc{
+  width: 200px !important
+}
+
+.register-of-docs-to-pay-namePlat{
+  width: 300px !important
+}
+
+.register-of-docs-to-pay-sumOplat{
+  width: 250px !important
+}
+
+.register-of-docs-to-pay-executorDepartmentName{
+  width: 200px !important
+}
+
+.register-of-docs-to-pay-prim{
+  width: 200px !important
 }
 </style>

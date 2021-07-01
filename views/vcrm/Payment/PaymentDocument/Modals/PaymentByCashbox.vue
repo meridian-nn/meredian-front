@@ -198,7 +198,7 @@ export default {
       this.selectCashPaymentAccount()
     },
 
-    // выбор первого расчетного счета из массива расчетных счетов
+    // выбор кассового расчетного счета из массива расчетных счетов
     selectCashPaymentAccount() {
       if (!this.accs) {
         return
@@ -312,6 +312,7 @@ export default {
       this.editedItem.paymentOperationSums[0].paymentOperationTypeId = this.editedItem.typeOfPaymentTransactionId
       this.editedItem.paymentOperationSums[0].paymentSum = this.editedItem.sumDoc
       this.editedItem.comment = this.editedItem.prim
+      this.editedItem.toPaySum = this.editedItem.sumDoc
     },
 
     async saveNewPaymentByCashbox() {
@@ -345,6 +346,7 @@ export default {
             paymentSum: this.editedItem.sumDoc
           }
         ],
+        toPaySum: this.editedItem.sumDoc,
         paymentType: {
           id: 1
         },

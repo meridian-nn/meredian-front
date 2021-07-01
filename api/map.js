@@ -193,6 +193,14 @@ export const factory = send => ({
             return send('POST', `/oper/payment/findBySearchCriteriaList`, params)
         },
 
+        findPaymentsByCashboxByPageWithCriterias(params) {
+            return send('POST', `/oper/payment/findPageBySearchCriteriaList`, params)
+        },
+
+        findPaymentsWithGroupBy(params) {
+            return send('POST', `/oper/payment/groupBy`, params)
+        },
+
         payDocument(params) {
             return send('POST', `/oper/spDocopl/payDocument`, params)
         },
@@ -229,6 +237,14 @@ export const factory = send => ({
             */
             findDocumentsByCriteria(params) {
                 return send('POST', `/oper/spDocoplToPay/findBySearchCriteria`, params)
+            },
+
+            findDocumentsByCriteriasByPage(params) {
+                return send('POST', `/oper/spDocoplToPay/findPageBySearchCriteriaList`, params)
+            },
+
+            findDocumentsByCriteriasWithGroupBy(params) {
+                return send('POST', `/oper/spDocoplToPay/groupBy`, params)
             },
 
             /*

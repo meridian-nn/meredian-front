@@ -49,7 +49,7 @@
       <div class="register-of-payments-by-cashbox-col-2">
         <v-btn
           class="register-of-payments-by-cashbox-btn"
-          @click="findPaymentsByCashboxInPeriod"
+          @click="updatePaymentsByCashbox"
         >
           Найти
         </v-btn>
@@ -58,11 +58,73 @@
 
     <div class="register-of-paymets-by-cashbox-row">
       <div id="registerOfPaymentsByCashboxGroupByDate">
-        <v-client-table
-          v-model="groupByDate"
-          :columns="groupByDateColumns"
-          :options="groupByDateOptions"
-        />
+        <v-data-table
+          :headers="groupByDateHeaders"
+          height="700"
+          fixed-header
+          :items="groupByDate"
+          :show-select="false"
+          disable-pagination
+          hide-default-footer
+          no-data-text=""
+          class="elevation-1"
+        >
+          <template #body="{ items }">
+            <tbody>
+              <tr
+                v-for="item in items"
+                :key="item.id"
+                :value="item"
+              >
+                <td class="register-of-paymets-by-cashbox-paymentDate">
+                  {{ item.paymentDate }}
+                </td>
+                <td class="register-of-paymets-by-cashbox-orgName">
+                  {{ item.orgName }}
+                </td>
+                <td class="register-of-paymets-by-cashbox-operationSum">
+                  {{ item.operationSum }}
+                </td>
+                <td class="register-of-paymets-by-cashbox-groupName">
+                  {{ item.groupName }}
+                </td>
+                <td class="register-of-paymets-by-cashbox-comment">
+                  {{ item.comment }}
+                </td>
+              </tr>
+
+              <infinite-loading
+                spinner="spiral"
+                :identifier="infiniteIdOfPaymentsByCashbox"
+                @infinite="findPaymentsByCashboxInPeriod"
+              >
+                <div slot="no-more" />
+                <div slot="no-results" />
+              </infinite-loading>
+            </tbody>
+          </template>
+        </v-data-table>
+      </div>
+    </div>
+
+    <div class="register-of-paymets-by-cashbox-row">
+      <div>
+        <th>Итого</th>
+      </div>
+
+      <div class="register-of-payments-by-cashbox-results" />
+
+      <div class="register-of-payments-by-cashbox-text">
+        <th>
+          <vue-numeric
+            v-model="totalOperationSum"
+            separator="space"
+            :precision="2"
+            decimal-separator="."
+            output-type="number"
+            :read-only="true"
+          />
+        </th>
       </div>
     </div>
 
@@ -72,10 +134,14 @@
 
 <script>
 import UserNotification from '@/components/information_window/UserNotification'
+import InfiniteLoading from 'vue-infinite-loading'
 
 export default {
   name: 'RegisterOfPaymentsByCashbox',
-  components: { UserNotification },
+  components: {
+    UserNotification,
+    InfiniteLoading
+  },
   data() {
     return {
       startDate: new Date().toISOString().substr(0, 10),
@@ -84,32 +150,51 @@ export default {
       // Таблица для отображения списка документов оплат по кассе по дням
       groupByDate: [],
       groupByDateColumns: ['paymentDate', 'orgName', 'operationSum', 'groupName', 'comment'],
-      groupByDateOptions: {
-        filterable: false,
-        pagination: { show: false },
-        texts: { noResults: '' },
-        filterByColumn: false,
-        perPage: 100,
-        perPageValues: [100],
-        headings: {
-          paymentDate: 'Дата оплаты',
-          orgName: 'Организация',
-          operationSum: 'Сумма оплаты',
-          groupName: 'Группа',
-          comment: 'Примечание'
+      groupByDateHeaders: [
+        {
+          text: 'Дата оплаты',
+          value: 'paymentDate'
         },
-        orderBy: {
-          column: 'paymentDate'
+        {
+          text: 'Организация',
+          value: 'orgName'
+        },
+        {
+          text: 'Сумма оплаты',
+          value: 'operationSum'
+        },
+        {
+          text: 'Группа',
+          value: 'groupName'
+        },
+        {
+          text: 'Примечание',
+          value: 'comment'
         }
-      }
+      ],
+
+      // Переменная для реализации обновления данных в таблице
+      infiniteIdOfPaymentsByCashbox: +new Date(),
+
+      // Переменная для реализации пагинации таблицы
+      pageOfPaymentsByCashbox: 0,
+
+      // Итоговая сумма найденных документов к оплате
+      totalOperationSum: 0,
+
+      // Список типов операций
+      operationTypes: []
     }
   },
   mounted() {
     this.init()
   },
   methods: {
-    init() {
+    async init() {
+      this.reset()
       this.fillDatesOnInit()
+      await this.findOperationTypes()
+      await this.findTotalSumPaymentsByCashbox()
     },
 
     fillDatesOnInit() {
@@ -118,7 +203,23 @@ export default {
       this.endDate = new Date(date.getFullYear(), date.getMonth() + 1, 1).toISOString().substr(0, 10)
     },
 
-    async findPaymentsByCashboxInPeriod() {
+    async updatePaymentsByCashbox() {
+      await this.findTotalSumPaymentsByCashbox()
+      this.pageOfPaymentsByCashbox = 0
+      this.groupByDate = []
+      this.infiniteIdOfPaymentsByCashbox += 1
+    },
+
+    async findTotalSumPaymentsByCashbox() {
+      const params = this.createParamsToSearchTotalToPaySumOfPaymentsByCashboxBetweenDates(this.startDate, this.endDate)
+      const response = await this.$api.payment.findPaymentsWithGroupBy(params)
+
+      if (response.length > 0) {
+        this.totalOperationSum = response[0].sum_toPaySum
+      }
+    },
+
+    async findPaymentsByCashboxInPeriod($state) {
       if (this.startDate > this.endDate) {
         this.$refs.userNotification.showUserNotification('error', 'Начальная дата выбранного периода не может быть больше конечной даты выбранного периода!')
         return
@@ -126,82 +227,36 @@ export default {
 
       this.$refs.userNotification.showUserNotification('warning', 'Поиск документов')
 
-      this.reset()
-      const data = this.createCriteriasForRequest()
+      const searchCriterias = this.createCriteriasForSearchPaymentsByCashboxBetweenDates(this.startDate, this.endDate)
+      const data = { searchCriterias, page: this.pageOfPaymentsByCashbox }
 
-      const response = await this.$api.payment.findPaymentsByCashboxByCriteria(data)
-      const arrayOfData = await this.convertResponseToDataForTable(response)
+      const { content } = await this.$api.payment.findPaymentsByCashboxByPageWithCriterias(data)
+      if (content.length > 0) {
+        this.pageOfPaymentsByCashbox += 1
+        const arrayOfData = this.convertResponsePaymentsByCashboxToDataForTable(content)
+        this.groupByDate.push(...arrayOfData)
 
-      if (arrayOfData.length > 0) {
-        this.groupByDate = arrayOfData
-        this.$refs.userNotification.showUserNotification('success', 'Документы найдены')
+        $state.loaded()
       } else {
-        this.$refs.userNotification.showUserNotification('error', 'В указанном периоде документы не найдены')
-      }
-    },
+        $state.complete()
 
-    async convertResponseToDataForTable(response) {
-      const arrayOfData = []
-      let totalPaymentSumInPeriod = 0
-      for (const item of response) {
-        let operationSum = 0
-        let groupName = ''
-
-        if (item.paymentOperationSums.length > 0) {
-          operationSum = item.paymentOperationSums[0].paymentSum
-          groupName = await this.findNameOfOperationTypeById(item.paymentOperationSums[0].paymentOperationTypeId)
+        if (this.groupByDate.length > 0) {
+          this.$refs.userNotification.showUserNotification('success', 'Документы найдены')
+        } else {
+          this.$refs.userNotification.showUserNotification('warning', 'В указанном периоде документы не найдены')
         }
-
-        totalPaymentSumInPeriod += operationSum
-
-        const data = {
-          paymentDate: item.paymentDate,
-          orgName: item.payer.clName,
-          operationSum: this.numberToSum(operationSum),
-          groupName,
-          comment: item.comment
-        }
-
-        arrayOfData.push(data)
-      }
-
-      const data = {
-        paymentDate: 'Итого:',
-        orgName: '',
-        operationSum: this.numberToSum(totalPaymentSumInPeriod),
-        groupName: '',
-        comment: ''
-      }
-      arrayOfData.push(data)
-
-      return arrayOfData
-    },
-
-    async findNameOfOperationTypeById(id) {
-      const response = await this.$api.payment.typesOfPaymentTransactions.findById(id)
-      if (Object.prototype.hasOwnProperty.call(response, 'name')) {
-        return response.name
-      } else {
-        return ' '
       }
     },
 
-    createCriteriasForRequest() {
-      const data = {
-        dataType: 'DATE',
-        key: 'paymentDate',
-        operation: 'BETWEEN',
-        type: 'AND',
-        values: [
-          new Date(this.startDate).toLocaleDateString(), new Date(this.endDate).toLocaleDateString()
-        ]
-      }
-
-      return data
+    async findOperationTypes() {
+      this.operationTypes = await this.$api.payment.typesOfPaymentTransactions.findAll()
     },
 
     reset() {
+      this.pageOfPaymentsByCashbox = 0
       this.groupByDate = []
+      this.operationTypes = []
+      this.totalOperationSum = 0
     }
   }
 }
@@ -216,7 +271,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   flex: 1 1 auto;
-  margin: 0px;
+  margin: 0;
 }
 
 .register-of-payments-by-cashbox-headline {
@@ -259,7 +314,7 @@ export default {
 }
 #registerOfPaymentsByCashboxGroupByDate td, #registerOfPaymentsByCashboxGroupByDate th {
   border: 1px solid #ddd;
-  padding: 0px;
+  padding: 0;
 }
 
 #registerOfPaymentsByCashboxGroupByDate tr:nth-child(even){background-color: #f2f2f2;}
@@ -272,5 +327,42 @@ export default {
   text-align: left;
   background-color: #639db1 !important;
   color: white;
+}
+
+.register-of-payments-by-cashbox-text{
+  font-size: 0.75rem;
+  padding-right: 15px;
+}
+
+.register-of-payments-by-cashbox-results{
+  flex: 0 0 33%;
+  max-width: 33%;
+}
+
+.register-of-paymets-by-cashbox-row {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+.register-of-paymets-by-cashbox-paymentDate {
+  width: 90px !important
+}
+
+.register-of-paymets-by-cashbox-orgName {
+  width: 250px !important
+}
+
+.register-of-paymets-by-cashbox-operationSum {
+  width: 200px !important
+}
+
+.register-of-paymets-by-cashbox-groupName {
+  width: 200px !important
+}
+
+.register-of-paymets-by-cashbox-comment {
+  width: 200px !important
 }
 </style>

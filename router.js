@@ -253,7 +253,7 @@ const createRouterConst = new Router({
         name: 'RegisterOfDocumentsToPay',
         component: RegisterOfDocumentsToPayPage,
         meta: {
-          breadcrumb: { text: 'Реестр документов оплат по кассе' }
+          breadcrumb: { text: 'Реестр документов к оплате' }
         }
       },
 
