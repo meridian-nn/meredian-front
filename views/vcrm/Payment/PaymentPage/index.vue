@@ -191,7 +191,10 @@ export default {
     },
 
     async findDataAboutFromPayDocForChart() {
-      const data = this.createCriteriasForRequestToSearchDocsFromPay()
+      const filtersParams = {
+        date: new Date()
+      }
+      const data = this.createCriteriasForRequestToSearchDocsFromPay(filtersParams)
       const response = await this.$api.payment.docOplForPay.findDocumentsForPayByCriterias(data)
       const dataForChart = this.convertFromPayDataResponseToDataForChart(response)
       this.chartdata.labels = dataForChart.labels
