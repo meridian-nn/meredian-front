@@ -24,9 +24,7 @@
         Бюджет для распределения
       </div>
 
-      <div
-        class="money-distribution-budget-for-distribution-sum"
-      >
+      <div class="money-distribution-budget-for-distribution-sum">
         <div class="money-distribution-brise-input">
           <vue-numeric
             v-model.number="budgetDistributionSum"
@@ -38,16 +36,14 @@
         </div>
       </div>
 
-      <div
-        class="money-distribution-not-allocated-text"
-      >
+      <div class="money-distribution-not-allocated-text">
         Не распределено
       </div>
 
       <div class="money-distribution-not-allocated-sum">
         <v-subheader class="font-weight-medium text-subtitle-1">
           <vue-numeric
-            v-model.number="budgetDistributedSum"
+            :value="budgetDistributedSum"
             separator="space"
             :precision="2"
             decimal-separator="."
@@ -113,7 +109,7 @@
         <v-subheader class="font-weight-medium text-subtitle-1">
           <div :class=" {'money-distribution-text-danger': notDistributedLessThenZero}">
             <vue-numeric
-              v-model.number="departmentRestDistributionSum"
+              :value="departmentRestDistributionSum"
               separator="space"
               :precision="2"
               decimal-separator="."
@@ -128,6 +124,7 @@
     <div class="money-distribution-dep-row">
       <div id="moneyDistributionData">
         <v-client-table
+          ref="table"
           v-model="moneyDistributionData"
           :columns="columns"
           :options="options"
@@ -165,7 +162,7 @@
         class="table-total-val"
       >
         <vue-numeric
-          v-model.number="departmentRestDistributionTotal"
+          :value="departmentRestDistributionTotal"
           separator="space"
           :precision="2"
           decimal-separator="."
@@ -234,9 +231,9 @@ export default {
       // выбранный отдел с информацией по бюджету
       department: {},
       // сумма выделенного бюджета на отделу
-      depDistributionSum: null,
+      depDistributionSum: 0,
       // сумма распределенного бюджета по отделу
-      depDistributedSum: null,
+      depDistributedSum: 0,
 
       // признак, показывающий что не распределенный бюджет по отделу меньше 0
       notDistributedLessThenZero: false,
@@ -283,26 +280,11 @@ export default {
           distributionSum: 'Выделено',
           notDistributedSum: 'Не распределено'
         }
-      },
-
-      // Итоговая сумма по колонке "Выделено"
-      totalSumOfDistributionSum: 0
+      }
     }
   },
   computed: {
-    // функция для расчета суммы не распределенного бюджета на день (пока не используется)
-    budgetRestDistributionSum() {
-      const budgetDistributedSum = this.budget.restSum < 0 ? Math.abs(this.budget.restSum) - 1 : this.budget.restSum
-      const budgetRestDistributionSum = parseInt(this.budget.distributionSum
-        ? this.budget.distributionSum
-        : 0) - budgetDistributedSum
-
-      this.budget.distributedSum = budgetRestDistributionSum
-
-      return budgetRestDistributionSum
-    },
-
-    // функция для расчета суммы не распределенного бюджета на отдел (пока не используется)
+    // функция для расчета суммы не распределенного бюджета на отдел
     departmentRestDistributionSum() {
       const notDistributed = (this.depDistributionSum - this.depDistributedSum)
       this.notDistributedLessThenZero = (notDistributed < 0)
@@ -312,6 +294,12 @@ export default {
 
     departmentRestDistributionTotal() {
       return this.depDistributionSum - this.departmentRestDistributionSum
+    },
+
+    totalSumOfDistributionSum() {
+      return this.departmentsDataTable.reduce((acc, item) => {
+        return acc + Number(item.distributionSum) || 0
+      }, 0)
     }
   },
   watch: {
@@ -321,12 +309,6 @@ export default {
       },
       deep: true
     }
-    /* depDistributionSum: {
-      handler() {
-        this.calcBudgetDistributedSum()
-      },
-      deep: true
-    } */
   },
   mounted() {
     this.init()
@@ -372,25 +354,23 @@ export default {
         this.departments = await this.$api.budgetElements.findDepartments()
         this.loadingType.departments = null
       }
-      const departments = this.departments
-      this.departmentsDataTable = await this.findInfoForDepDataTable(departments)
+
+      this.departmentsDataTable = await this.findInfoForDepDataTable()
     },
 
     // Поиск информации о бюджетах всех отделов для демонстрации в таблице departmentsDataTable
-    async findInfoForDepDataTable(departments) {
+    async findInfoForDepDataTable(departments = this.departments) {
       const departmentsDataTable = []
-      this.totalSumOfDistributionSum = 0
-      const arrayOfPromises = []
-      departments.forEach((dep) => {
-        const response = this.getInfoAboutDepById(dep.id)
-        arrayOfPromises.push(response)
+
+      const arrayOfPromises = departments.map((dep) => {
+        return this.getInfoAboutDepById(dep.id)
       })
+
       await Promise.all(arrayOfPromises).then((results) => {
         results.forEach((result) => {
-          const distSum = !result.distributionSum ? 0 : result.distributionSum
-          this.totalSumOfDistributionSum += distSum
-          const distributedSum = !result.distributedSum ? 0 : result.distributedSum
-          const notDistSum = distSum - distributedSum
+          const distSum = result.distributionSum || 0
+          const notDistSum = distSum - result.distributedSum || 0
+
           departmentsDataTable.push({
             name: result.department.nameViddoc,
             distributionSum: this.numberToSum(distSum),
@@ -404,6 +384,7 @@ export default {
       })
       return departmentsDataTable
     },
+
     async getInfoAboutDepById(id) {
       if (id) {
         const data = {

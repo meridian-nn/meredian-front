@@ -75,7 +75,7 @@ export default {
     },
 
     axios: {
-        baseURL: 'http://192.168.1.70:9037/meridian',
+        baseURL: process.env.API_HOST,
         // proxy: true,
         mode: 'no-cors',
         auth: {

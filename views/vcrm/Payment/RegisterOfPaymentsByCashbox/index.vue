@@ -83,6 +83,7 @@ export default {
 
       // Таблица для отображения списка документов оплат по кассе по дням
       groupByDate: [],
+      paymentOperationType: [],
       groupByDateColumns: ['paymentDate', 'orgName', 'operationSum', 'groupName', 'comment'],
       groupByDateOptions: {
         filterable: false,
@@ -104,9 +105,26 @@ export default {
       }
     }
   },
+
+  async fetch() {
+    this.paymentOperationType = await this.$api.payment.typesOfPaymentTransactions.findAll()
+  },
+
+  computed: {
+    groupByDatePaymentOperationSums() {
+      return this.groupByDate.map(item => item.paymentOperationSums[0])
+    },
+
+    totalPaymentSumInPeriod() {
+      return this.groupByDate.reduce((acc, item) => {
+        return acc + Number(item.paymentOperationSums[0].paymentSum) || 0
+      }, 0)
+    }
+  },
   mounted() {
     this.init()
   },
+
   methods: {
     init() {
       this.fillDatesOnInit()
@@ -140,25 +158,27 @@ export default {
       }
     },
 
-    async convertResponseToDataForTable(response) {
+    findpaymentOperationTypeById(id) {
+      return this.paymentOperationType.find(x => x.id === id)
+    },
+
+    convertResponseToDataForTable(response) {
       const arrayOfData = []
-      let totalPaymentSumInPeriod = 0
+
       for (const item of response) {
         let operationSum = 0
         let groupName = ''
 
         if (item.paymentOperationSums.length > 0) {
           operationSum = item.paymentOperationSums[0].paymentSum
-          groupName = await this.findNameOfOperationTypeById(item.paymentOperationSums[0].paymentOperationTypeId)
+          groupName = this.findpaymentOperationTypeById(item.paymentOperationSums[0].paymentOperationTypeId)
         }
-
-        totalPaymentSumInPeriod += operationSum
 
         const data = {
           paymentDate: item.paymentDate,
           orgName: item.payer.clName,
           operationSum: this.numberToSum(operationSum),
-          groupName,
+          groupName: groupName.name,
           comment: item.comment
         }
 
@@ -168,7 +188,7 @@ export default {
       const data = {
         paymentDate: 'Итого:',
         orgName: '',
-        operationSum: this.numberToSum(totalPaymentSumInPeriod),
+        operationSum: this.numberToSum(this.totalPaymentSumInPeriod),
         groupName: '',
         comment: ''
       }
@@ -179,6 +199,7 @@ export default {
 
     async findNameOfOperationTypeById(id) {
       const response = await this.$api.payment.typesOfPaymentTransactions.findById(id)
+
       if (Object.prototype.hasOwnProperty.call(response, 'name')) {
         return response.name
       } else {

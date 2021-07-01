@@ -234,6 +234,10 @@ export default {
       immediate: true,
       handler() {
         this.hasBreadcrumbs()
+
+        console.log(this.mini)
+
+        this.mini = true
       }
     }
   },
