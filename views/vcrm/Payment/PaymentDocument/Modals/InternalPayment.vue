@@ -412,7 +412,7 @@ export default {
       this.docFromPay.spDocints.push(this.spDocint)
 
       let errorMessage = null
-      await this.$axios.$post('/oper/spDocopl/saveInternalPayment', this.docFromPay).catch((error) => {
+      await this.$axios.$post(this.$api.payment.getSaveInternalPaymentUrl(), this.docFromPay).catch((error) => {
         errorMessage = error
         alert(errorMessage)
       })
@@ -427,7 +427,7 @@ export default {
       this.docFromPay.descr = this.docFromPay.prim
 
       let errorMessage = null
-      await this.$axios.$post('/oper/spDocopl/saveInternalPayment', this.docFromPay).catch((error) => {
+      await this.$axios.$post(this.$api.payment.getSaveInternalPaymentUrl(), this.docFromPay).catch((error) => {
         errorMessage = error
         alert(errorMessage)
       })

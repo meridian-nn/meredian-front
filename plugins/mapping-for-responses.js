@@ -174,7 +174,7 @@ Vue.mixin({
           return listOfMaterials
         },
 
-      convertResponsePaymentsByCashboxToDataForTable(response) {
+      convertResponsePaymentsByCashboxToDataForTable(response, operationTypes) {
         const arrayOfData = []
         for (const item of response) {
           let operationSum = 0
@@ -182,7 +182,7 @@ Vue.mixin({
 
           if (item.paymentOperationSums.length > 0) {
             operationSum = item.paymentOperationSums[0].paymentSum
-            groupName = this.operationTypes.find(operation => operation.id === item.paymentOperationSums[0].paymentOperationTypeId)
+            groupName = operationTypes.find(operation => operation.id === item.paymentOperationSums[0].paymentOperationTypeId)
           }
 
           const data = {

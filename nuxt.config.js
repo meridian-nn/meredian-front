@@ -64,18 +64,20 @@ export default {
         '@nuxtjs/axios',
         '@nuxtjs/proxy'
     ],
+
     proxy: {
         // '/meridian': {
         //   target: 'http://192.168.1.70:9037'
         // }
     },
+
     server: {
         host: '0.0.0.0',
         port: 8000 // default: 3000
     },
 
     axios: {
-        baseURL: 'http://192.168.0.245:9037/meridian',
+        baseURL:  process.env.API_HOST,
         // proxy: true,
         mode: 'no-cors',
         auth: {

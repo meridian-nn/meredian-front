@@ -233,7 +233,7 @@ export default {
       const { content } = await this.$api.payment.findPaymentsByCashboxByPageWithCriterias(data)
       if (content.length > 0) {
         this.pageOfPaymentsByCashbox += 1
-        const arrayOfData = this.convertResponsePaymentsByCashboxToDataForTable(content)
+        const arrayOfData = this.convertResponsePaymentsByCashboxToDataForTable(content, this.operationTypes)
         this.groupByDate.push(...arrayOfData)
 
         $state.loaded()

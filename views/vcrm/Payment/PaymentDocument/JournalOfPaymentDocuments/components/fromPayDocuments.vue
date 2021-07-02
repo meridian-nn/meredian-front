@@ -535,7 +535,7 @@ export default {
           const errorMessage = error
           alert(errorMessage)
         }) */
-      await this.$axios.$post('/oper/spDocopl/payDocument', data)
+      await this.$axios.$post(this.$api.payment.getPayDocumentUrl(), data)
     },
     countSumOfArrayElements(array) {
       let sum = 0
@@ -622,7 +622,7 @@ export default {
 
       const ids = selectedRows.map(value => value.id)
       // await this.$api.payment.DocOplForPay.deleteSelectedPayments(ids)
-      await this.$axios.$post('/oper/spDocopl/deletePayment', ids)
+      await this.$axios.$post(this.$api.payment.getDeletePaymentUrl(), ids)
 
       await this.updateDocsForPay()
     },

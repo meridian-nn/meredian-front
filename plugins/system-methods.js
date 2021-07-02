@@ -124,9 +124,7 @@ Vue.mixin({
             paymentAccountOfReceiver
           ]
 
-          console.log(sumOfPayment)
-          console.log(arrayOfPaymentAccountsForSave)
-          await this.$axios.$post('/oper/spOplat/saveAll', arrayOfPaymentAccountsForSave)
+          await this.$axios.$post(this.$api.payment.balanceOfPaymentAccount.getSaveAllUrl(), arrayOfPaymentAccountsForSave)
         },
 
         getConfigForDeleteMethods(){

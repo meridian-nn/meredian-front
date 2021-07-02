@@ -1,8 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-Vue.prototype.$hostName = 'http://192.168.0.245:9037'
-
 const dynamicPage = importer => () => {
   return importer().then(mod => mod.default || mod)
 }

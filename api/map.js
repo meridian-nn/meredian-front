@@ -6,8 +6,12 @@ export const factory = send => ({
         },
 
         user: {
+            getFindByCurrentLoginUrl() {
+              return '/auth/findByCurrentLogin'
+            },
+
             get() {
-                return send('GET', '/auth/findByCurrentLogin')
+                return send('GET', this.getFindByCurrentLoginUrl())
             },
 
             getRolesOfCurrentUser(id) {
@@ -174,7 +178,15 @@ export const factory = send => ({
 
     payment: {
         selOplat() {
-            return send('POST', '/oper/spDocopl/selOplat')
+            return send('POST', this.getSelOplatUrl())
+        },
+
+        getSelOplatUrl() {
+            return '/oper/spDocopl/selOplat'
+        },
+
+        getSelOplatOfSpDocoplUrl() {
+          return '/oper/spDocopl/selOplat'
         },
 
         findPaymentByCashboxById(id) {
@@ -197,12 +209,20 @@ export const factory = send => ({
             return send('POST', `/oper/payment/findPageBySearchCriteriaList`, params)
         },
 
+        getDeletePaymentUrl() {
+            return '/oper/payment/delete'
+        },
+
         findPaymentsWithGroupBy(params) {
             return send('POST', `/oper/payment/groupBy`, params)
         },
 
         payDocument(params) {
-            return send('POST', `/oper/spDocopl/payDocument`, params)
+            return send('POST', this.getPayDocumentUrl(), params)
+        },
+
+        getPayDocumentUrl() {
+            return `/oper/spDocopl/payDocument`
         },
 
         findPaymentStatuses() {
@@ -210,7 +230,11 @@ export const factory = send => ({
         },
 
         saveInternalPayment(params) {
-            return send('POST', `/oper/spDocopl/saveInternalPayment`, params)
+            return send('POST', this.getSaveInternalPaymentUrl(), params)
+        },
+
+        getSaveInternalPaymentUrl() {
+            return `/oper/spDocopl/saveInternalPayment`
         },
 
         docOplToPay: {
@@ -276,11 +300,19 @@ export const factory = send => ({
             },
 
             saveSpDocoplToPay(params) {
-                return send('POST', `/oper/spDocopl/saveSpDocoplToPay`, params)
+                return send('POST', this.getSaveSpDocoplToPayUrl(), params)
+            },
+
+            getSaveSpDocoplToPayUrl() {
+              return '/oper/spDocopl/saveSpDocoplToPay'
             },
 
             deleteSelectedPayments(params) {
-                return send('POST', `/oper/spDocopl/deleteSelectedPayments`, params)
+                return send('POST', this.getDeleteSelectedPaymentsUrl(), params)
+            },
+
+            getDeleteSelectedPaymentsUrl() {
+                return `/oper/spDocopl/deleteSelectedPayments`
             }
         },
 
@@ -365,7 +397,11 @@ export const factory = send => ({
             },
 
             deleteSelectedPayments(params) {
-                return send('POST', `/oper/spDocopl/deletePayment`, params)
+                return send('POST', this.getDeletePaymentUrl(), params)
+            },
+
+            getDeletePaymentUrl() {
+                return `/oper/spDocopl/deletePayment`
             },
 
             findById(id) {
@@ -386,6 +422,10 @@ export const factory = send => ({
 
             saveSpDocch(params) {
                 return send('POST', `/oper/spDocopl/saveSpDocch`, params)
+            },
+
+            getDeleteInternalPaymentDocument() {
+                return '/oper/spDocopl/deleteInternalPayment'
             }
         },
 
@@ -400,7 +440,10 @@ export const factory = send => ({
                 return send('GET', `/oper/depMoneyDistribution/findForEdit?${new URLSearchParams(params).toString()}`)
             },
             save(params) {
-                return send('POST', `/oper/depMoneyDistribution/save`, params)
+                return send('POST', this.getSaveUrl(), params)
+            },
+            getSaveUrl() {
+              return `/oper/depMoneyDistribution/save`
             }
         },
 
@@ -408,6 +451,12 @@ export const factory = send => ({
             save(params) {
                 return send('POST', `/oper/spOplat/save`, params)
             },
+            saveAll(params) {
+              return send('POST', this.getSaveAllUrl(), params)
+            },
+            getSaveAllUrl() {
+              return '/oper/spOplat/saveAll'
+            }
         },
 
         typesOfPaymentTransactions: {
