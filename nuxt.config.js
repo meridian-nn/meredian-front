@@ -66,9 +66,9 @@ export default {
     ],
 
     proxy: {
-        // '/meridian': {
-        //   target: 'http://192.168.1.70:9037'
-        // }
+        '/meridian-rest': {
+           target: process.env.SERVER_ADDRESS
+        }
     },
 
     server: {
@@ -77,9 +77,8 @@ export default {
     },
 
     axios: {
-        baseURL:  process.env.API_HOST,
-        // proxy: true,
-        mode: 'no-cors',
+        proxy: true,
+        prefix: "/meridian-rest",
         auth: {
             username: 'admin',
             password: 'Wtrkop45'
