@@ -2,6 +2,7 @@ import { createServer } from 'http'
 import express from 'express'
 import logger from 'morgan'
 import { Server } from 'socket.io'
+import cors from 'cors'
 // mongo connection
 import './config/mongo.js'
 // socket configuration
@@ -16,7 +17,7 @@ const app = express()
 /** Get port from environment and store in Express. */
 const port = process.env.PORT || '3001'
 app.set('port', port)
-
+app.use(cors())
 app.use(logger('dev'))
 app.use(express.json())
 

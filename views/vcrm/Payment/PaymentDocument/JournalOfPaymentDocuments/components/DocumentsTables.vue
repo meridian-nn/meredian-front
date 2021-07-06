@@ -280,6 +280,8 @@
                 disable-pagination
                 hide-default-footer
                 class="elevation-1"
+                @update:sort-by="updateSort('by', $event)"
+                @update:sort-desc="updateSort('desc', $event)"
               >
                 <template #body="{ items }">
                   <tbody>
@@ -328,6 +330,7 @@
                     </tr>
 
                     <infinite-loading
+                      :key="keyLoading"
                       spinner="spiral"
                       :identifier="infiniteIdOfFromPayData"
                       @infinite="findSpDocoplForPay"
@@ -620,39 +623,48 @@ export default {
         {
           text: 'Дата',
           value: 'dataDoc',
-          cellClass: 'padding:0px; height:0px'
+          cellClass: 'padding:0px; height:0px',
+          sort: () => false
         },
         {
           text: 'Номер',
-          value: 'nameDoc'
+          value: 'nameDoc',
+          sort: () => false
         },
         {
           text: 'Плательщик',
-          value: 'myorgName'
+          value: 'myorgName',
+          sort: () => false
         },
         {
           text: 'Исполнитель',
-          value: 'executorName'
+          value: 'executorName',
+          sort: () => false
         },
         {
           text: 'Дата оплаты',
-          value: 'dataOplat'
+          value: 'dataOplat',
+          sort: () => false
         },
         {
           text: 'Сумма',
-          value: 'sumDoc'
+          value: 'sumDoc',
+          sort: () => false
         },
         {
           text: 'Оплачено',
-          value: 'sumPaid'
+          value: 'sumPaid',
+          sort: () => false
         },
         {
           text: 'К оплате',
-          value: 'sumOplat'
+          value: 'sumOplat',
+          sort: () => false
         },
         {
           text: 'Подразделение',
-          value: 'depName'
+          value: 'depName',
+          sort: () => false
         }
       ],
 
@@ -707,32 +719,43 @@ export default {
       pageOfFromPayData: 0,
 
       // Переменная для реализации обновления данных в таблице "Документы на оплату"
-      infiniteIdOfFromPayData: +new Date(),
+      infiniteIdOfFromPayData: 0,
 
       // Переменная, которая отвечает за отображение всплывающих кнопок группы добавления новых документов
-      addGroupShow: false
+      addGroupShow: false,
+      sortBy: [],
+      sortDesc: [],
+      keyLoading: Math.random()
     }
   },
 
-  /* computed: {
-    totalSumDoc() {
-      return this.fromPayData.reduce((acc, item) => {
-        return acc + item.sumDocNumber
-      }, 0)
-    },
+  computed: {
+    // totalSumDoc() {
+    //   return this.fromPayData.reduce((acc, item) => {
+    //     return acc + item.sumDocNumber
+    //   }, 0)
+    // },
 
-    totalSumPaid() {
-      return this.fromPayData.reduce((acc, item) => {
-        return acc + item.sumPaidNumber
-      }, 0)
-    },
+    // totalSumPaid() {
+    //   return this.fromPayData.reduce((acc, item) => {
+    //     return acc + item.sumPaidNumber
+    //   }, 0)
+    // },
 
-    totalSumOplat() {
-      return this.fromPayData.reduce((acc, item) => {
-        return acc + (item.sumDocNumber - item.sumPaidNumber)
-      }, 0)
+    // totalSumOplat() {
+    //   return this.fromPayData.reduce((acc, item) => {
+    //     return acc + (item.sumDocNumber - item.sumPaidNumber)
+    //   }, 0)
+    // }
+
+    handleSortData() {
+      const { sortDesc } = this
+
+      return this.sortBy.map((item, i) => {
+        return { 'direction': sortDesc[i] ? 'ASC' : 'DESC', 'property': item }
+      })
     }
-  }, */
+  },
 
   mounted() {
     this.init()
@@ -754,7 +777,16 @@ export default {
       }
     },
 
-    // Секция обработки событий на форме
+    updateSort(byDesc, event) {
+      if (byDesc === 'by') {
+        this.sortBy = event
+      } else if (byDesc === 'desc') {
+        this.sortDesc = event
+      }
+      this.pageOfFromPayData = 0
+      this.fromPayData = []
+      this.keyLoading = Math.random()
+    },
 
     // Функция обработки выбора организации
     async organizationChange(orgId) {
@@ -808,11 +840,6 @@ export default {
     async savePaymentByCashbox() {
       await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
       await this.refreshTables()
-    },
-
-    // Обработка события "Закрытие модальной формы внутреннего платежа"
-    closeInternalPayment() {
-      console.log('close internal payment')
     },
 
     // Обработка события "Сохранение нового внутреннего платежа"
@@ -1136,11 +1163,6 @@ export default {
       console.log('internal movement')
     },
 
-    // История платежей по документу
-    historyOfPaymentForContextMenuOnly() {
-      console.log('hisoty of payment')
-    },
-
     // Перемещение документа из таблицы "Документы к оплате" в таблицу "Документы на оплату"
     deleteFromToPayForContextMenuOnly() {
       if (!this.currentRowForContextMenu.isDoc) {
@@ -1310,7 +1332,7 @@ export default {
 
       const searchCriterias = this.createCriteriasForRequestToSearchDocsFromPay(filtersParams)
 
-      const data = { searchCriterias, page: this.pageOfFromPayData }
+      const data = { searchCriterias, page: this.pageOfFromPayData, orders: this.handleSortData }
 
       if (searchCriterias.length > 1) {
         this.isFiltersForFromPayDocsUsing = true
