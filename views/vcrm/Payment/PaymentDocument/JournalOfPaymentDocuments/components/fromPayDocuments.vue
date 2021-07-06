@@ -69,6 +69,8 @@
             disable-pagination
             hide-default-footer
             class="elevation-1"
+            @update:sort-by="updateSort('by', $event)"
+            @update:sort-desc="updateSort('desc', $event)"
           >
             <template #body="{ items }">
               <tbody>
@@ -108,8 +110,8 @@
                   <td class="journal-of-payment-docs-from-pay-docs-sumPaid">
                     {{ item.sumPaid }}
                   </td>
-                  <td class="journal-of-payment-docs-from-pay-docs-sumOplat">
-                    {{ item.sumOplat }}
+                  <td class="journal-of-payment-docs-from-pay-docs-sumToPay">
+                    {{ item.sumToPay }}
                   </td>
                   <td class="journal-of-payment-docs-from-pay-docs-depName">
                     {{ item.depName }}
@@ -117,6 +119,7 @@
                 </tr>
 
                 <infinite-loading
+                  :key="keyLoading"
                   spinner="spiral"
                   :identifier="infiniteIdOfFromPayData"
                   @infinite="findSpDocoplForPay"
@@ -371,39 +374,48 @@ export default {
         {
           text: 'Дата',
           value: 'dataDoc',
-          cellClass: 'padding:0px; height:0px'
+          cellClass: 'padding:0px; height:0px',
+          sort: () => false
         },
         {
           text: 'Номер',
-          value: 'nameDoc'
+          value: 'nameDoc',
+          sort: () => false
         },
         {
           text: 'Плательщик',
-          value: 'myorgName'
+          value: 'myorgName',
+          sort: () => false
         },
         {
           text: 'Исполнитель',
-          value: 'executorName'
+          value: 'executorName',
+          sort: () => false
         },
         {
           text: 'Дата оплаты',
-          value: 'dataOplat'
+          value: 'dataOplat',
+          sort: () => false
         },
         {
           text: 'Сумма',
-          value: 'sumDoc'
+          value: 'sumDoc',
+          sort: () => false
         },
         {
           text: 'Оплачено',
-          value: 'sumPaid'
+          value: 'sumPaid',
+          sort: () => false
         },
         {
           text: 'К оплате',
-          value: 'sumOplat'
+          value: 'sumToPay',
+          sort: () => false
         },
         {
           text: 'Подразделение',
-          value: 'depName'
+          value: 'depName',
+          sort: () => false
         }
       ],
 
@@ -411,7 +423,7 @@ export default {
       fromPayData: [],
 
       // Переменная для реализации обновления данных в таблице "Документы на оплату"
-      infiniteIdOfFromPayData: +new Date(),
+      infiniteIdOfFromPayData: 0,
 
       // Контекстное меню документов на оплату
       fromPayMenu: false,
@@ -439,7 +451,20 @@ export default {
       commentOfCurrentRowFromPay: '',
 
       // Переменная для реализации пагинации таблицы "Документы на оплату"
-      pageOfFromPayData: 0
+      pageOfFromPayData: 0,
+      sortBy: [],
+      sortDesc: [],
+      keyLoading: Math.random()
+    }
+  },
+
+  computed: {
+    handleSortData() {
+      const { sortDesc } = this
+
+      return this.sortBy.map((item, i) => {
+        return { 'direction': sortDesc[i] ? 'ASC' : 'DESC', 'property': item }
+      })
     }
   },
 
@@ -455,6 +480,17 @@ export default {
       if (this.selectedOrganization) {
         await this.findPaymentAccounts(this.selectedOrganization)
       }
+    },
+
+    updateSort(byDesc, event) {
+      if (byDesc === 'by') {
+        this.sortBy = event
+      } else if (byDesc === 'desc') {
+        this.sortDesc = event
+      }
+      this.pageOfFromPayData = 0
+      this.fromPayData = []
+      this.keyLoading = Math.random()
     },
 
     // Функция открытия формы фильтров таблицы "Документы на оплату"
@@ -514,7 +550,7 @@ export default {
         return
       }
 
-      const sumDocs = this.countSumOfArrayElements(this.fromPaySelectedRows.map(value => value.sumOplatNumber))
+      const sumDocs = this.countSumOfArrayElements(this.fromPaySelectedRows.map(value => value.sumToPayNumber))
 
       if (sumDocs > this.currentPaymentAccountBalance) {
         this.$refs.userNotification.showUserNotification('warning', 'Сумма выбранных документов на оплату превышает сумму остатка по выбранному р/с!', 4000)
@@ -750,28 +786,20 @@ export default {
 
       const searchCriterias = this.createCriteriasForRequestToSearchDocsFromPay(filtersParams)
 
-      const data = { searchCriterias, page: this.pageOfFromPayData }
+      const data = { searchCriterias, page: this.pageOfFromPayData, orders: this.handleSortData }
 
       this.isFiltersForFromPayDocsUsing = searchCriterias.length > 1
+
+      await this.fillResultsOfDocumentsFromPay(searchCriterias)
 
       const { content } = await this.$api.payment.docOplForPay.findDocumentsForPayForJournalTable(data)
 
       if (content.length > 0) {
-        const dataForResults = this.createCriteriasToGetResultsOfContent(searchCriterias)
-        const response = await this.$api.payment.docOplForPay.findDocumentsWithGroupBy(dataForResults)
-
-        if (response.length > 0) {
-          const results = response[0]
-          this.totalSumDoc = this.numberToSum(results.sum_sumDoc)
-          this.totalSumPaid = this.numberToSum(results.sum_sumPaid)
-          this.totalSumToPay = this.numberToSum(results.sum_sumToPay)
-        }
-
         this.pageOfFromPayData += 1
 
         content.forEach((value) => {
-          value.sumPaid = value.sumPaid == null ? 0 : value.sumPaid
-          value.sumOplat = value.sumToPay
+          value.sumPaid = value.sumPaid ? value.sumPaid : 0
+          value.sumToPay = value.sumToPay ? value.sumToPay : 0
 
           if (value.myOrg) {
             value.payerName = value.myOrg.clName8
@@ -785,8 +813,8 @@ export default {
           value.sumDoc = this.numberToSum(value.sumDoc)
           value.sumPaidNumber = value.sumPaid
           value.sumPaid = this.numberToSum(value.sumPaid)
-          value.sumOplatNumber = value.sumOplat
-          value.sumOplat = this.numberToSum(value.sumOplat)
+          value.sumToPayNumber = value.sumToPay
+          value.sumToPay = this.numberToSum(value.sumToPay)
         })
 
         this.fromPayData.push(...content)
@@ -794,6 +822,22 @@ export default {
         $state.loaded()
       } else {
         $state.complete()
+      }
+    },
+
+    async fillResultsOfDocumentsFromPay(searchCriterias) {
+      const dataForResults = this.createCriteriasToGetResultsOfContent(searchCriterias)
+      const response = await this.$api.payment.docOplForPay.findDocumentsWithGroupBy(dataForResults)
+
+      if (response.length > 0) {
+        const results = response[0]
+        this.totalSumDoc = this.numberToSum(results.sum_sumDoc)
+        this.totalSumPaid = this.numberToSum(results.sum_sumPaid)
+        this.totalSumToPay = this.numberToSum(results.sum_sumToPay)
+      } else {
+        this.totalSumDoc = 0
+        this.totalSumPaid = 0
+        this.totalSumToPay = 0
       }
     }
   }
@@ -885,7 +929,7 @@ export default {
   width: 84px !important
 }
 
-.journal-of-payment-docs-from-pay-docs-sumOplat {
+.journal-of-payment-docs-from-pay-docs-sumToPay {
   width: 81px !important
 }
 

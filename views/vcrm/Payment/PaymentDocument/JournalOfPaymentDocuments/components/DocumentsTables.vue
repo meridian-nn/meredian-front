@@ -321,8 +321,8 @@
                       <td class="journal-of-payment-docs-from-pay-docs-sumPaid">
                         {{ item.sumPaid }}
                       </td>
-                      <td class="journal-of-payment-docs-from-pay-docs-sumOplat">
-                        {{ item.sumOplat }}
+                      <td class="journal-of-payment-docs-from-pay-docs-sumToPay">
+                        {{ item.sumToPay }}
                       </td>
                       <td class="journal-of-payment-docs-from-pay-docs-depName">
                         {{ item.depName }}
@@ -658,7 +658,7 @@ export default {
         },
         {
           text: 'К оплате',
-          value: 'sumOplat',
+          value: 'sumToPay',
           sort: () => false
         },
         {
@@ -970,7 +970,7 @@ export default {
         return
       }
 
-      const sumDocs = this.countSumOfArrayElements(this.fromPaySelectedRows.map(value => value.sumOplatNumber))
+      const sumDocs = this.countSumOfArrayElements(this.fromPaySelectedRows.map(value => value.sumToPayNumber))
 
       if (sumDocs > this.currentPaymentAccountBalance) {
         this.$refs.userNotification.showUserNotification('warning', 'Сумма выбранных документов на оплату превышает сумму остатка по выбранному р/с!', 4000)
@@ -1334,30 +1334,18 @@ export default {
 
       const data = { searchCriterias, page: this.pageOfFromPayData, orders: this.handleSortData }
 
-      if (searchCriterias.length > 1) {
-        this.isFiltersForFromPayDocsUsing = true
-      } else {
-        this.isFiltersForFromPayDocsUsing = false
-      }
+      this.isFiltersForFromPayDocsUsing = searchCriterias.length > 1
+
+      await this.fillResultsOfDocumentsFromPay(searchCriterias)
 
       const { content } = await this.$api.payment.docOplForPay.findDocumentsForPayForJournalTable(data)
 
       if (content.length > 0) {
-        const dataForResults = this.createCriteriasToGetResultsOfContent(searchCriterias)
-        const response = await this.$api.payment.docOplForPay.findDocumentsWithGroupBy(dataForResults)
-
-        if (response.length > 0) {
-          const results = response[0]
-          this.totalSumDoc = this.numberToSum(results.sum_sumDoc)
-          this.totalSumPaid = this.numberToSum(results.sum_sumPaid)
-          this.totalSumToPay = this.numberToSum(results.sum_sumToPay)
-        }
-
         this.pageOfFromPayData += 1
 
         content.forEach((value) => {
-          value.sumPaid = value.sumPaid == null ? 0 : value.sumPaid
-          value.sumOplat = value.sumToPay
+          value.sumPaid = value.sumPaid ? value.sumPaid : 0
+          value.sumToPay = value.sumToPay ? value.sumToPay : 0
 
           if (value.myOrg) {
             value.payerName = value.myOrg.clName8
@@ -1371,8 +1359,8 @@ export default {
           value.sumDoc = this.numberToSum(value.sumDoc)
           value.sumPaidNumber = value.sumPaid
           value.sumPaid = this.numberToSum(value.sumPaid)
-          value.sumOplatNumber = value.sumOplat
-          value.sumOplat = this.numberToSum(value.sumOplat)
+          value.sumToPayNumber = value.sumToPay
+          value.sumToPay = this.numberToSum(value.sumToPay)
         })
 
         this.fromPayData.push(...content)
@@ -1380,6 +1368,22 @@ export default {
         $state.loaded()
       } else {
         $state.complete()
+      }
+    },
+
+    async fillResultsOfDocumentsFromPay(searchCriterias) {
+      const dataForResults = this.createCriteriasToGetResultsOfContent(searchCriterias)
+      const response = await this.$api.payment.docOplForPay.findDocumentsWithGroupBy(dataForResults)
+
+      if (response.length > 0) {
+        const results = response[0]
+        this.totalSumDoc = this.numberToSum(results.sum_sumDoc)
+        this.totalSumPaid = this.numberToSum(results.sum_sumPaid)
+        this.totalSumToPay = this.numberToSum(results.sum_sumToPay)
+      } else {
+        this.totalSumDoc = 0
+        this.totalSumPaid = 0
+        this.totalSumToPay = 0
       }
     }
   }
@@ -1659,7 +1663,7 @@ export default {
   width: 84px !important
 }
 
-.journal-of-payment-docs-from-pay-docs-sumOplat {
+.journal-of-payment-docs-from-pay-docs-sumToPay {
   width: 81px !important
 }
 
