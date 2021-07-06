@@ -100,9 +100,14 @@ const StockBalancePage = dynamicPage(() =>
 const MaterialsPage = dynamicPage(() =>
   import('~/views/vcrm/Supply/Materials'))
 
-const WarehouseInventoryPage = dynamicPage(() => {
-  import('~/views/vcrm/Supply/Сommodity/WarehouseInventory/WarehouseInventoryPage')
-})
+const WarehouseInventoryPage = dynamicPage(() =>
+  import('~/views/vcrm/Supply/Сommodity/WarehouseInventory/WarehouseInventoryPage'))
+
+const TechnologyOfProductionMenuPage = dynamicPage(() =>
+  import('~/views/vcrm/TechnologyOfProduction/TechnologyOfProductionPage'))
+
+const RecordsOfWorkByCardsPage = dynamicPage(() =>
+  import('~/views/vcrm/TechnologyOfProduction/RecordsOfWorkByCards'))
 
 Vue.use(Router)
 
@@ -267,6 +272,23 @@ const createRouterConst = new Router({
     },
 
     {
+      path: 'technology_of_production_menu',
+      name: 'TechnologyOfProductionMenu',
+      component: TechnologyOfProductionMenuPage,
+      meta: { breadcrumb: { text: 'Меню АРМ Технология производства' } },
+      children: [
+        {
+          path: 'records_of_work_by_cards',
+          name: 'RecordsOfWorkByCards',
+          component: RecordsOfWorkByCardsPage,
+          meta: {
+            breadcrumb: { text: 'Запись работы по карточкам' }
+          }
+        }
+      ]
+    },
+
+    {
       path: 'supply_menu',
       name: 'SupplyMenu',
       component: SupplyMenuPage,
@@ -336,8 +358,7 @@ const createRouterConst = new Router({
       meta: {
         breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
       }
-    }
-    ]
+    }]
   },
 
   {

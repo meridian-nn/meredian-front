@@ -320,6 +320,10 @@ export default {
     },
 
     async saveChanges() {
+      if (!this.currentUserId) {
+        return
+      }
+
       const userResponse = await this.$api.auth.user.findById(this.currentUserId)
       if (!userResponse) {
         return

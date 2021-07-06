@@ -66,7 +66,7 @@ export default {
   },
   methods: {
     init() {
-      this.findOrgAccInfo()
+      // this.findOrgAccInfo()
     },
 
     async findOrgAccInfo(date) {

@@ -60,6 +60,14 @@ Vue.mixin({
             const currentUser = this.getCurrentUser()
             const rolesOfCurrentUser = currentUser.roles
             return !!rolesOfCurrentUser.find(role => role === 8)
+        },
+
+        //Функция проверяет наличие у пользователя роли для работы с АРМ "Технологии производства"
+        //11 - id роли "Производство - полный доступ"
+        isHaveTechnologyOfProductionRole() {
+            const currentUser = this.getCurrentUser()
+            const rolesOfCurrentUser = currentUser.roles
+            return !!rolesOfCurrentUser.find(role => role === 11)
         }
     }
 })

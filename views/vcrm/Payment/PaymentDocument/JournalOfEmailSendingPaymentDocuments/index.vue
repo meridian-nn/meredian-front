@@ -71,6 +71,7 @@
         :show-select="false"
         :items-per-page="100"
         :disable-items-per-page="true"
+        no-data-text=""
         hide-default-footer
         :footer-props="{ itemsPerPageText: 'Количество строк на странице:' }"
         class="elevation-1 journal-of-email-sending-payment-docs-table"

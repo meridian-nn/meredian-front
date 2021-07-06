@@ -108,6 +108,7 @@
                 :single-select="false"
                 disable-pagination
                 hide-default-footer
+                no-data-text=""
                 class="elevation-1"
                 @contextmenu:row="showPayMenu"
               >
@@ -739,6 +740,7 @@ export default {
   methods: {
     async init() {
       await this.selOplat()
+      await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
       this.loadingType = {}
       this.fromPaySelectedRows = []
       this.toPaySelectedRows = []
