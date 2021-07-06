@@ -250,6 +250,7 @@ export default {
       immediate: true,
       handler() {
         this.hasBreadcrumbs()
+        this.mini = true
       }
     }
   },

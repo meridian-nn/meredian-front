@@ -94,7 +94,7 @@ export default {
 
     // Инициализация журнала оплат
     async selOplat() {
-      await this.$axios.$post(this.$api.payment.getSelOplatOfSpDocoplUrl())
+      await this.$axios.$post(this.$api.payment.getSelOplatUrl())
       // await this.$api.payment.selOplat()
     },
 

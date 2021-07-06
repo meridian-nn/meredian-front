@@ -149,6 +149,7 @@ export default {
 
       // Таблица для отображения списка документов оплат по кассе по дням
       groupByDate: [],
+      paymentOperationType: [],
       groupByDateColumns: ['paymentDate', 'orgName', 'operationSum', 'groupName', 'comment'],
       groupByDateHeaders: [
         {
@@ -186,9 +187,26 @@ export default {
       operationTypes: []
     }
   },
+
+  async fetch() {
+    this.paymentOperationType = await this.$api.payment.typesOfPaymentTransactions.findAll()
+  },
+
+  computed: {
+    groupByDatePaymentOperationSums() {
+      return this.groupByDate.map(item => item.paymentOperationSums[0])
+    },
+
+    totalPaymentSumInPeriod() {
+      return this.groupByDate.reduce((acc, item) => {
+        return acc + Number(item.paymentOperationSums[0].paymentSum) || 0
+      }, 0)
+    }
+  },
   mounted() {
     this.init()
   },
+
   methods: {
     async init() {
       this.reset()
