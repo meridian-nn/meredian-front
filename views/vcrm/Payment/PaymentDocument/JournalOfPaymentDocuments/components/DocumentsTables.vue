@@ -842,6 +842,11 @@ export default {
       await this.refreshTables()
     },
 
+    // Обработка события "Закрытие модальной формы внутреннего платежа"
+    closeInternalPayment() {
+      console.log('close internal payment')
+    },
+
     // Обработка события "Сохранение нового внутреннего платежа"
     async saveInternalPayment() {
       await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)

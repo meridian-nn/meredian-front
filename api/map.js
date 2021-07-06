@@ -11,7 +11,7 @@ export const factory = send => ({
             },
 
             get() {
-                return send('GET', this.getFindByCurrentLoginUrl())
+                return send('GET', '/auth/findByCurrentLogin')
             },
 
             getRolesOfCurrentUser(id) {
@@ -27,7 +27,7 @@ export const factory = send => ({
             },
 
             getUsersBySearchCriterias(params) {
-                return send('POST', `/auth/findBySearchCriteriaList`, params)
+                return send('POST', '/auth/findBySearchCriteriaList', params)
             },
 
             findById(id) {
@@ -45,7 +45,7 @@ export const factory = send => ({
             },
 
             getRoles() {
-                return send('GET', `/auth/findRoles`)
+                return send('GET', '/auth/findRoles')
             },
 
             findBySearchCriteria(params) {
@@ -78,17 +78,17 @@ export const factory = send => ({
         },
 
         findBySearchCriteria(params) {
-            return send('POST', `/markCode/findBySearchCriteria`, params)
+            return send('POST', '/markCode/findBySearchCriteria', params)
         },
 
         findBySearchCriterias(params) {
-            return send('POST', `/markCode/findBySearchCriteriaList`, params)
+            return send('POST', '/markCode/findBySearchCriteriaList', params)
         }
     },
 
     organizations: {
         findAll() {
-            return send('GET', `/oper/dict/spOrg/findAll`)
+            return send('GET', '/oper/dict/spOrg/findAll')
         },
         findByOrgTypeCode(params) {
             return send('GET', `/oper/dict/spOrg/findByOrgTypeCode?${new URLSearchParams(params).toString()}`)
@@ -97,7 +97,7 @@ export const factory = send => ({
             return send('GET', `/oper/dict/spOrg/findByDogId?${new URLSearchParams(params).toString()}`)
         },
         findPayers() {
-            return send('GET', `/oper/dict/spOrg/findPayers`)
+            return send('GET', '/oper/dict/spOrg/findPayers')
         },
         findById(id) {
             return send('GET', `/oper/dict/spOrg/findById/${id}`)
@@ -112,13 +112,13 @@ export const factory = send => ({
             return send('GET', `/oper/spAcc/findByOrgId?${new URLSearchParams(params).toString()}`)
         },
         groupBy(params) {
-          return send('POST', `/oper/spOplat/groupBy`, params)
+            return send('POST', '/oper/spOplat/groupBy', params)
         },
         findByDataOplatAndMyOrgId(params) {
             return send('GET', `/oper/spOplat/findByDataOplatAndMyOrgId?${new URLSearchParams(params).toString()}`)
         },
         findBySearchCriteriaList(params) {
-          return send('POST', `/oper/spOplat/findBySearchCriteriaList`, params)
+            return send('POST', '/oper/spOplat/findBySearchCriteriaList', params)
         },
         findById(id) {
             return send('GET', `/oper/spAcc/findById/${id}`)
@@ -133,7 +133,7 @@ export const factory = send => ({
             return send('GET', '/oper/dict/spViddocopl/findDepartments')
         },
         findAllDocumentsTypes() {
-          return send('GET', '/oper/dict/spViddocopl/findAll')
+            return send('GET', '/oper/dict/spViddocopl/findAll')
         },
         findDocumentTypesByParentId(params) {
             return send('GET', `/oper/dict/spViddocopl/findByParentId?${new URLSearchParams(params).toString()}`)
@@ -145,7 +145,7 @@ export const factory = send => ({
             return send('GET', `/oper/dogSelDogSpisSpec/findByMyDescr?${new URLSearchParams(params).toString()}`)
         },
         findGroups() {
-            return send('GET', `/oper/dict/spViddocopl/findGroup`)
+            return send('GET', '/oper/dict/spViddocopl/findGroup')
         }
     },
 
@@ -172,57 +172,53 @@ export const factory = send => ({
             return send('GET', '/oper/dict/spViddoc/findAll')
         },
         findBySearchCriteria(params) {
-            return send('POST', `/oper/dict/spViddoc/findBySearchCriteriaList`, params)
+            return send('POST', '/oper/dict/spViddoc/findBySearchCriteriaList', params)
         }
     },
 
     payment: {
         selOplat() {
-            return send('POST', this.getSelOplatUrl())
+          return send('POST', this.getSelOplatUrl())
         },
 
         getSelOplatUrl() {
-            return '/oper/spDocopl/selOplat'
-        },
-
-        getSelOplatOfSpDocoplUrl() {
           return '/oper/spDocopl/selOplat'
         },
 
-        findPaymentByCashboxById(id) {
-            return send('GET', `/oper/payment/findById/${id}`)
+        savePaymentByCashbox(params) {
+            return send('POST', '/oper/payment/save', params)
         },
 
-        savePaymentByCashbox(params) {
-            return send('POST', `/oper/payment/save`, params)
+        findPaymentByCashboxById(id) {
+          return send('GET', `/oper/payment/findById/${id}`)
         },
 
         findPaymentsByCashboxByCriteria(params) {
-            return send('POST', `/oper/payment/findBySearchCriteria`, params)
+            return send('POST', '/oper/payment/findBySearchCriteria', params)
         },
 
         findPaymentsByCashboxByCriterias(params) {
-            return send('POST', `/oper/payment/findBySearchCriteriaList`, params)
+            return send('POST', '/oper/payment/findBySearchCriteriaList', params)
         },
 
         findPaymentsByCashboxByPageWithCriterias(params) {
-            return send('POST', `/oper/payment/findPageBySearchCriteriaList`, params)
+          return send('POST', `/oper/payment/findPageBySearchCriteriaList`, params)
         },
 
         getDeletePaymentUrl() {
-            return '/oper/payment/delete'
+          return '/oper/payment/delete'
         },
 
         findPaymentsWithGroupBy(params) {
-            return send('POST', `/oper/payment/groupBy`, params)
+          return send('POST', `/oper/payment/groupBy`, params)
         },
 
         payDocument(params) {
-            return send('POST', this.getPayDocumentUrl(), params)
+          return send('POST', this.getPayDocumentUrl(), params)
         },
 
         getPayDocumentUrl() {
-            return `/oper/spDocopl/payDocument`
+          return `/oper/spDocopl/payDocument`
         },
 
         findPaymentStatuses() {
@@ -260,15 +256,15 @@ export const factory = send => ({
 	            }
             */
             findDocumentsByCriteria(params) {
-                return send('POST', `/oper/spDocoplToPay/findBySearchCriteria`, params)
+                return send('POST', '/oper/spDocoplToPay/findBySearchCriteria', params)
             },
 
             findDocumentsByCriteriasByPage(params) {
-                return send('POST', `/oper/spDocoplToPay/findPageBySearchCriteriaList`, params)
+              return send('POST', `/oper/spDocoplToPay/findPageBySearchCriteriaList`, params)
             },
 
             findDocumentsByCriteriasWithGroupBy(params) {
-                return send('POST', `/oper/spDocoplToPay/groupBy`, params)
+              return send('POST', `/oper/spDocoplToPay/groupBy`, params)
             },
 
             /*
@@ -296,11 +292,11 @@ export const factory = send => ({
             ]
             */
             findDocumentsByCriterias(params) {
-                return send('POST', `/oper/spDocoplToPay/findBySearchCriteriaList`, params)
+                return send('POST', '/oper/spDocoplToPay/findBySearchCriteriaList', params)
             },
 
             saveSpDocoplToPay(params) {
-                return send('POST', this.getSaveSpDocoplToPayUrl(), params)
+              return send('POST', this.getSaveSpDocoplToPayUrl(), params)
             },
 
             getSaveSpDocoplToPayUrl() {
@@ -308,11 +304,11 @@ export const factory = send => ({
             },
 
             deleteSelectedPayments(params) {
-                return send('POST', this.getDeleteSelectedPaymentsUrl(), params)
+              return send('POST', this.getDeleteSelectedPaymentsUrl(), params)
             },
 
             getDeleteSelectedPaymentsUrl() {
-                return `/oper/spDocopl/deleteSelectedPayments`
+              return `/oper/spDocopl/deleteSelectedPayments`
             }
         },
 
@@ -321,17 +317,17 @@ export const factory = send => ({
                 return send('GET', `/oper/spDocopl/findSpDocoplForPay?${new URLSearchParams(params).toString()}`)
             },
 
-            //Производит поиск документов на оплату, у которых переданная в параметре запроса дата находится в промежутке между data_doc и data_oplat
+            // Производит поиск документов на оплату, у которых переданная в параметре запроса дата находится в промежутке между data_doc и data_oplat
             findSpDocoplForPayBetweenDates(params) {
                 return send('GET', `/oper/spDocopl/findSpDocoplForPayBetweenDates?${new URLSearchParams(params).toString()}`)
             },
 
-            //Производит поиск документов на оплату, у которых data_doc находится в промеждутке между startDate и finishDate, которые переданы в параметрах запроса
+            // Производит поиск документов на оплату, у которых data_doc находится в промеждутке между startDate и finishDate, которые переданы в параметрах запроса
             findByDataDocBetweenParamDates(params) {
                 return send('GET', `/oper/spDocoplRead/findByDataDocBetween?${new URLSearchParams(params).toString()}`)
             },
 
-            //Производит поиск документов на оплату, у которых data_oplat находится в промеждутке между startDate и finishDate, которые переданы в параметрах запроса
+            // Производит поиск документов на оплату, у которых data_oplat находится в промеждутке между startDate и finishDate, которые переданы в параметрах запроса
             findByDataOplatBetweenParamDates(params) {
                 return send('GET', `/oper/spDocoplRead/findByDataOplatBetween?${new URLSearchParams(params).toString()}`)
             },
@@ -347,49 +343,45 @@ export const factory = send => ({
                 "values": [
                     "583"
                 ]
-	        }*/
+	        } */
             findDocumentsByCriteria(params) {
-                return send('POST', `/oper/spDocopl/findBySearchCriteria`, params)
+                return send('POST', '/oper/spDocopl/findBySearchCriteria', params)
             },
 
             /*
-            Производит поиск документов на оплату по заданным параметрам
-            Пример передаваемых параметров
-            [
-                {
-                    "dataType": "DATE",
-                    "key": "dataOplat",
-                    "operation": "BETWEEN",
-                    "type": "AND",
-                    "values": [
-                        "01.05.2021", "09.05.2021"
-                    ]
-                },
-                {
-                    "dataType": "INTEGER",
-                    "key": "myorgId",
-                    "operation": "EQUALS",
-                    "type": "AND",
-                    "values": [
-                        "123"
-                    ]
-                }
-            ]*/
+                  Производит поиск документов на оплату по заданным параметрам
+                  Пример передаваемых параметров
+                  [
+                      {
+                          "dataType": "DATE",
+                          "key": "dataOplat",
+                          "operation": "BETWEEN",
+                          "type": "AND",
+                          "values": [
+                              "01.05.2021", "09.05.2021"
+                          ]
+                      },
+                      {
+                          "dataType": "INTEGER",
+                          "key": "myorgId",
+                          "operation": "EQUALS",
+                          "type": "AND",
+                          "values": [
+                              "123"
+                          ]
+                      }
+                  ] */
             findDocumentsByCriterias(params) {
-                return send('POST', `/oper/spDocopl/findBySearchCriteriaList`, params)
+                return send('POST', '/oper/spDocopl/findBySearchCriteriaList', params)
             },
 
-            //Поиск документов с кастомным респонсом для таблицы "Документы на оплату" на форме "Журнал документов на оплату"
+            // Поиск документов с кастомным респонсом для таблицы "Документы на оплату" на форме "Журнал документов на оплату"
             findDocumentsForPayByCriterias(params) {
-                return send('POST', `/oper/spDocoplRead/findBySearchCriteriaList`, params)
-            },
-
-            findDocumentsForPayWithGroupBy(params) {
-                return send('POST', `/oper/spDocoplRead/groupBy`, params)
+                return send('POST', '/oper/spDocoplRead/findBySearchCriteriaList', params)
             },
 
             findDocumentsForPayForJournalTable(params) {
-              return send('POST', `/oper/spDocoplRead/findPageBySearchCriteriaList`, params)
+                return send('POST', '/oper/spDocoplRead/findPageBySearchCriteriaList', params)
             },
 
             findDocumentsWithGroupBy(params) {
@@ -397,11 +389,11 @@ export const factory = send => ({
             },
 
             deleteSelectedPayments(params) {
-                return send('POST', this.getDeletePaymentUrl(), params)
+              return send('POST', this.getDeletePaymentUrl(), params)
             },
 
             getDeletePaymentUrl() {
-                return `/oper/spDocopl/deletePayment`
+              return `/oper/spDocopl/deletePayment`
             },
 
             findById(id) {
@@ -413,19 +405,19 @@ export const factory = send => ({
             },
 
             save(params) {
-                return send('POST', `/oper/spDocopl/save`, params)
+                return send('POST', '/oper/spDocopl/save', params)
             },
 
             savePayment(params) {
-                return send('POST', `/oper/spDocopl/savePayment`, params)
+                return send('POST', '/oper/spDocopl/savePayment', params)
             },
 
             saveSpDocch(params) {
-                return send('POST', `/oper/spDocopl/saveSpDocch`, params)
+                return send('POST', '/oper/spDocopl/saveSpDocch', params)
             },
 
             getDeleteInternalPaymentDocument() {
-                return '/oper/spDocopl/deleteInternalPayment'
+              return '/oper/spDocopl/deleteInternalPayment'
             }
         },
 
@@ -440,7 +432,7 @@ export const factory = send => ({
                 return send('GET', `/oper/depMoneyDistribution/findForEdit?${new URLSearchParams(params).toString()}`)
             },
             save(params) {
-                return send('POST', this.getSaveUrl(), params)
+              return send('POST', this.getSaveUrl(), params)
             },
             getSaveUrl() {
               return `/oper/depMoneyDistribution/save`
@@ -449,7 +441,7 @@ export const factory = send => ({
 
         balanceOfPaymentAccount: {
             save(params) {
-                return send('POST', `/oper/spOplat/save`, params)
+                return send('POST', '/oper/spOplat/save', params)
             },
             saveAll(params) {
               return send('POST', this.getSaveAllUrl(), params)
@@ -461,7 +453,7 @@ export const factory = send => ({
 
         typesOfPaymentTransactions: {
             findAll() {
-                return send('GET', `/oper/dir/paymentOperationType/findAll`)
+                return send('GET', '/oper/dir/paymentOperationType/findAll')
             },
 
             findById(id) {
@@ -471,7 +463,7 @@ export const factory = send => ({
 
         typesOfPayments: {
             findAll() {
-                return send('GET', `/oper/dir/paymentType/findAll`)
+                return send('GET', '/oper/dir/paymentType/findAll')
             },
 
             findById(id) {
@@ -490,26 +482,26 @@ export const factory = send => ({
         },
 
         findBySearchCriteria(params) {
-            return send('POST', `/uiSetting/findBySearchCriteria`, params)
+            return send('POST', '/uiSetting/findBySearchCriteria', params)
         },
 
         findBySearchCriterias(params) {
-            return send('POST', `/uiSetting/findBySearchCriteriaList`, params)
+            return send('POST', '/uiSetting/findBySearchCriteriaList', params)
         },
 
         save(entity) {
-            return send('POST', `/uiSetting/save`, entity)
+            return send('POST', '/uiSetting/save', entity)
         },
 
         saveAll(entities) {
-            return send('POST', `uiSetting/saveAll`, entities)
+            return send('POST', 'uiSetting/saveAll', entities)
         }
     },
 
     supplyElements: {
         sewingPlan: {
             findAll() {
-                return send('GET', `/oper/supply/spPlanpsv/findAll`)
+                return send('GET', '/oper/supply/spPlanpsv/findAll')
             },
 
             findById(id) {
@@ -517,29 +509,29 @@ export const factory = send => ({
             },
 
             findBySearchCriteria(params) {
-                return send('POST', `/oper/supply/spPlanpsv/findBySearchCriteria`, params)
+                return send('POST', '/oper/supply/spPlanpsv/findBySearchCriteria', params)
             },
 
             findBySearchCriterias(params) {
-                return send('POST', `/oper/supply/spPlanpsv/findBySearchCriteriaList`, params)
+                return send('POST', '/oper/supply/spPlanpsv/findBySearchCriteriaList', params)
             },
 
             save(params) {
-                return send('POST', `/oper/supply/spPlanpsv/save`, params)
+                return send('POST', '/oper/supply/spPlanpsv/save', params)
             },
 
             saveAll(params) {
-                return send('POST', `/oper/supply/spPlanpsv/saveAll`, params)
+                return send('POST', '/oper/supply/spPlanpsv/saveAll', params)
             }
         },
 
         supply: {
             selPlanpsvZaivk(params) {
-                return send('POST', `/oper/supply/selPlanpsvZaivkOtladka/selPlanpsvZaivk`, params)
+                return send('POST', '/oper/supply/selPlanpsvZaivkOtladka/selPlanpsvZaivk', params)
             },
 
             findAll() {
-                return send('GET', `/oper/supply/selPlanpsvZaivkOtladka/findAll`)
+                return send('GET', '/oper/supply/selPlanpsvZaivkOtladka/findAll')
             },
 
             findById(id) {
@@ -547,27 +539,27 @@ export const factory = send => ({
             },
 
             findBySearchCriteria(params) {
-                return send('POST', `/oper/supply/selPlanpsvZaivkOtladka/findBySearchCriteria`, params)
+                return send('POST', '/oper/supply/selPlanpsvZaivkOtladka/findBySearchCriteria', params)
             },
 
             findBySearchCriteriaList(params) {
-                return send('POST', `/oper/supply/selPlanpsvZaivkOtladka/findBySearchCriteriaList`, params)
+                return send('POST', '/oper/supply/selPlanpsvZaivkOtladka/findBySearchCriteriaList', params)
             },
 
             findPageBySearchCriteriaList(params) {
-                return send('POST', `/oper/supply/selPlanpsvZaivkOtladka/findPageBySearchCriteriaList`, params)
+                return send('POST', '/oper/supply/selPlanpsvZaivkOtladka/findPageBySearchCriteriaList', params)
             }
         }
     },
 
     service: {
         /* в params передавать объект вида
-          {
-            "params": {},
-            "procName": "string"
-          }
-          Пример генерации params в методе 'createParamsForStashedFunctionSrSelPlanPsv'
-         */
+              {
+                "params": {},
+                "procName": "string"
+              }
+              Пример генерации params в методе 'createParamsForStashedFunctionSrSelPlanPsv'
+             */
 
         // Функция производит вызов хранимой процедуры в бд
         // возвращает набор данных

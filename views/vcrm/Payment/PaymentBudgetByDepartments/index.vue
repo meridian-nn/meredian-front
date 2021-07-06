@@ -175,7 +175,7 @@ export default {
       const groupByDate = []
 
       const paramsForRequest = this.createParamsForRequestDocForPayGroupByDataOplat(this.startDate, this.endDate, ['dataOplat'])
-      const response = await this.$api.payment.docOplForPay.findDocumentsForPayWithGroupBy(paramsForRequest)
+      const response = await this.$api.payment.docOplForPay.findDocumentsWithGroupBy(paramsForRequest)
       for (const item of response) {
         if (!item.sum_sumPaid) {
           item.sum_sumPaid = 0
@@ -212,7 +212,7 @@ export default {
       const groupByDep = []
 
       const paramsForRequest = this.createParamsForRequestDocForPayGroupByDepName(item.dataOplat, ['depName'])
-      const response = await this.$api.payment.docOplForPay.findDocumentsForPayWithGroupBy(paramsForRequest)
+      const response = await this.$api.payment.docOplForPay.findDocumentsWithGroupBy(paramsForRequest)
       for (const item of response) {
         if (!item.sum_sumPaid) {
           item.sum_sumPaid = 0

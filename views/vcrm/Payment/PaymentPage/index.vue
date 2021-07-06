@@ -16,8 +16,6 @@
       fixed
       bottom
       right
-      v-bind="attrs"
-      v-on="on"
     >
       <v-icon @click="openPatchnoteWindow">
         mdi-alert

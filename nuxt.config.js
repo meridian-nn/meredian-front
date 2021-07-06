@@ -67,7 +67,7 @@ export default {
 
     proxy: {
         '/meridian-rest': {
-           target: process.env.SERVER_ADDRESS
+            target: process.env.SERVER_ADDRESS
         }
     },
 
