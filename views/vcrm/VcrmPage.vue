@@ -77,7 +77,9 @@
           :to="{ name: 'TechnologyOfProductionMenu' }"
         >
           <v-list-item-action class="pr-1 pl-2 mr-1">
-            <v-img :src="require('@/assets/img/supply/supply_menu.png')" />
+            <v-icon class="blue--text">
+              mdi-forklift
+            </v-icon>
           </v-list-item-action>
 
           <v-list-item-content>

@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="isCommodityMenu"
     name="СommodityMenu"
     class="commodity-menu"
   >
@@ -71,11 +72,20 @@
       </v-row>
     </div>
   </div>
+
+  <div v-else>
+    <router-view />
+  </div>
 </template>
 
 <script>
 export default {
-  name: 'CommodityMenu'
+  name: 'CommodityMenu',
+  computed: {
+    isCommodityMenu() {
+      return this.$route.matched[this.$route.matched.length - 1].name === 'CommodityMenu'
+    }
+  }
 }
 </script>
 
