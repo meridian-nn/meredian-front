@@ -38,7 +38,7 @@ app.use('*', (req, res) => {
 /** Create HTTP server. */
 const httpServer = createServer(app)
 /** Create socket connection */
-global.io = new Server(httpServer)
+global.io = new Server(httpServer, { cors: { origins: '*:*' } })
 global.io.on('connection', WebSockets.connection)
 /** Listen on provided port, on all network interfaces. */
 httpServer.listen(port)
