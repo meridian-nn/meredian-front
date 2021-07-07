@@ -67,6 +67,27 @@
       </div>
     </div>
 
+    <div class="money-distribution-row">
+      <div
+        class="money-distribution-table-total-text-for-dep"
+      >
+        Итого
+      </div>
+
+      <div
+        class="money-distribution-table-total-val"
+      >
+        <vue-numeric
+          :value="totalSumOfDistributionSum"
+          separator="space"
+          :precision="2"
+          decimal-separator="."
+          output-type="number"
+          :read-only="true"
+        />
+      </div>
+    </div>
+
     <div class="money-distribution-dep-row">
       <div class="money-distribution-dep-col">
         <v-autocomplete
@@ -119,6 +140,7 @@
           </div>
         </v-subheader>
       </div>
+
     </div>
 
     <div class="money-distribution-dep-row">
@@ -152,14 +174,14 @@
 
       <div
         v-if="moneyDistributionData.length > 0"
-        class="table-total-text"
+        class="money-distribution-table-total-text"
       >
         Итого
       </div>
 
       <div
         v-if="moneyDistributionData.length > 0"
-        class="table-total-val"
+        class="money-distribution-table-total-val"
       >
         <vue-numeric
           :value="departmentRestDistributionTotal"
@@ -385,10 +407,6 @@ export default {
             notDistributedSum: this.numberToSum(notDistSum)
           })
         })
-        departmentsDataTable.push({
-          name: 'Итого:',
-          distributionSum: this.numberToSum(this.totalSumOfDistributionSum)
-        })
       })
       return departmentsDataTable
     },
@@ -483,8 +501,12 @@ export default {
   padding: 10px
 }
 
-.table-total-text {
+.money-distribution-table-total-text {
   flex-basis: 447px;
+}
+
+.money-distribution-table-total-text-for-dep {
+  flex-basis: 534px;
 }
 
 .money-distribution-main-row-headline {
