@@ -436,6 +436,9 @@ export const factory = send => ({
             },
             getSaveUrl() {
               return `/oper/depMoneyDistribution/save`
+            },
+            getSaveUrlForDepartments() {
+              return '/oper/depMoneyDistribution/saveList'
             }
         },
 
