@@ -404,9 +404,9 @@ export default {
     },
 
     // Обработка события "Выбор отдела пользователем на форме"
-    async departmentChange(val) {
-      await this.findByDepartmentId(val)
-      await this.loadMoneyDistribution(val)
+    async departmentChange(depId) {
+      await this.findByDepartmentId(depId)
+      await this.loadMoneyDistribution(depId)
 
       this.depDistributedSum = this.department.distributedSum
       this.depDistributionSum = this.department.distributionSum
@@ -422,9 +422,9 @@ export default {
     },
 
     // Поиск информации о распределении бюджета на подразделения выбранного отдела
-    async loadMoneyDistribution(val) {
+    async loadMoneyDistribution(id) {
       const data = {
-        parentId: val,
+        parentId: id,
         distributionDate: new Date(this.date).toLocaleDateString()
       }
 
@@ -462,6 +462,7 @@ export default {
       await this.findBudgetByDate()
       await this.findDepartments()
       if (this.department.department) {
+        await this.findByDepartmentId(this.department.department.id)
         await this.loadMoneyDistribution(this.department.department.id)
       }
     },
