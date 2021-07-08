@@ -1,4 +1,5 @@
-import Cookies from 'js-cookie'
+// import Cookies from 'js-cookie'
+import size from 'lodash/size'
 export default class HttpClient {
   constructor({ url }) {
     this.url = url
@@ -9,11 +10,19 @@ export default class HttpClient {
   }
 
   fetch = async(method, methodUrl, params = {}) => {
-    const url = new URL(this.url + methodUrl)
+    try {
+      const url = new URL(this.url + methodUrl)
 
-    const config = this.config(method, params)
+      if (method === 'GET' && size(params) > 0) {
+        url.search = new URLSearchParams(params).toString()
+      }
 
-    return await this.call(url, config)
+      const config = this.config(method, params)
+
+      return await this.call(url, config)
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   config(method, params = {}) {
@@ -28,16 +37,13 @@ export default class HttpClient {
 
   async call(url, config) {
     const response = await fetch(url, config)
-      // eslint-disable-next-line require-await
-      .then(async(res) => {
+      .then((res) => {
         const json = res.json()
 
         if (res.ok) {
           return json
-        } else if (res.status === 401) {
-          Cookies.remove('JWT')
         } else {
-          return json.then((err) => { throw err })
+          throw res
         }
       }).catch((error) => {
         throw error

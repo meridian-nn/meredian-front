@@ -910,8 +910,7 @@ export default {
       this.toPaySelectedRows = []
       this.toPaySelectedRows.push(selectedDoc)
 
-      // await this.$api.payment.docOplToPay.saveSpDocoplToPay(this.toPaySelectedRows)
-      await this.$axios.$post(this.$api.payment.docOplToPay.getSaveSpDocoplToPayUrl(), this.toPaySelectedRows)
+      await this.$api.payment.docOplToPay.saveSpDocoplToPay(this.toPaySelectedRows)
       const responseSpOplatSave = await this.changeSumToPayOfPaymentAccountOnForm(selectedDoc)
 
       this.toPaySelectedRows = []
@@ -992,11 +991,7 @@ export default {
     async addPayments() {
       const ids = this.fromPaySelectedRows.map(value => value.id)
       const data = { ids, accId: this.accId }
-      /* await this.$api.payment.payDocument(data).catch((error) => {
-          const errorMessage = error
-          alert(errorMessage)
-        }) */
-      await this.$axios.$post(this.$api.payment.getPayDocumentUrl(), data)
+      await this.$api.payment.payDocument(data)
     },
     countSumOfArrayElements(array) {
       let sum = 0
@@ -1128,8 +1123,9 @@ export default {
       }
 
       const ids = selectedRows.map(value => value.id)
-      // await this.$api.payment.DocOplForPay.deleteSelectedPayments(ids)
-      await this.$axios.$post(this.$api.payment.docOplForPay.getDeletePaymentUrl(), ids)
+      await this.$api.payment.docOplForPay.deleteSelectedPayments(ids)
+
+      // await this.$axios.$post(this.$api.payment.docOplForPay.getDeletePaymentUrl(), ids)
     },
 
     checkSelectedRowsBeforeDelete(selectedRows) {

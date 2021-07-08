@@ -389,7 +389,7 @@ export const factory = send => ({
             },
 
             deleteSelectedPayments(params) {
-              return send('POST', this.getDeletePaymentUrl(), params)
+              return send('POST', '/oper/spDocopl/deletePayment', params)
             },
 
             getDeletePaymentUrl() {
@@ -427,6 +427,9 @@ export const factory = send => ({
             },
             findByDepartmentId(params) {
                 return send('GET', `/oper/depMoneyDistribution/findByDepartmentId?${new URLSearchParams(params).toString()}`)
+            },
+            findByDepartments(params) {
+              return send('GET', `/oper/depMoneyDistribution/findByDepartmentId?${new URLSearchParams(params).toString()}`)
             },
             findForEdit(params) {
                 return send('GET', `/oper/depMoneyDistribution/findForEdit?${new URLSearchParams(params).toString()}`)

@@ -490,8 +490,7 @@ export default {
 
     // Инициализация журнала оплат
     async selOplat() {
-      await this.$axios.$post('/oper/spDocopl/selOplat')
-      // await this.$api.payment.selOplat()
+      await this.$api.payment.selOplat()
     },
 
     // Обновление таблиц "Документы к оплате" и "Документы на оплату"

@@ -128,7 +128,19 @@
         <v-breadcrumbs
           class="white--text"
           :items="breadcrumbs"
-        />
+        >
+          <template v-slot:item="{ item }">
+            <v-breadcrumbs-item
+              active-class="tmp"
+              :link="item.link"
+              :href="item.href"
+              :to="{ name: item.name }"
+              :disabled="item.disabled"
+            >
+              {{ item.text }}
+            </v-breadcrumbs-item>
+          </template>
+        </v-breadcrumbs>
 
         <v-spacer />
 
@@ -270,7 +282,15 @@ export default {
 
       matched.forEach(function(route, i, arr) {
         if (route?.meta?.breadcrumb) {
-          crumbs.push({ ...route.meta.breadcrumb, href: route.path, disabled: i === arr.length - 1 })
+          if (Array.isArray(route?.meta?.breadcrumb)) {
+            const tmpArray = route.meta.breadcrumb.map((item) => {
+              return { ...item, href: item.path, disabled: i === arr.length - 1, link: false }
+            })
+
+            crumbs.push(...tmpArray)
+          } else {
+            crumbs.push({ ...route.meta.breadcrumb, href: route.path, name: route.name, disabled: i === arr.length - 1, link: true })
+          }
         }
       })
 
