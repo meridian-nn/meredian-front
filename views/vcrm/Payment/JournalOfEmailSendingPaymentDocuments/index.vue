@@ -1,11 +1,13 @@
 <template>
-  <div class="journal-of-email-sending-payment-docs-main-div">
+  <div
+    class="journal-of-email-sending-payment-docs-main-div"
+  >
     <div class="journal-of-email-sending-payment-docs-row">
       <div
         align="center"
         class="journal-of-email-sending-payment-docs-main-row-headline"
       >
-        Журнал рассылки на e-mail документов на оплату
+        Журнал рассылки на e-mail документов к оплате
       </div>
       <div class="journal-of-email-sending-payment-docs-date">
         <v-text-field
@@ -28,7 +30,7 @@
           hide-details="auto"
           outlined
           :clearable="true"
-          @change="payerChange"
+          @change="updateAllInfo"
         />
       </div>
 
@@ -36,6 +38,8 @@
         <download-excel
           :data="documentsForExport"
           :fields="exportFields"
+          type="xls"
+          :header="headerData"
           :footer="exportFooter"
           :name="exportFileName"
           :before-generate="generateNameForExportFile"
@@ -63,17 +67,20 @@
       <div class="journal-of-email-sending-payment-docs-spacer-btw-btn-end" />
     </div>
 
-    <div class="journal-of-email-sending-payment-docs-row">
+    <div
+      id="tableForPrint"
+      class="journal-of-email-sending-payment-docs-row"
+    >
+      <h1 id="titleForTable" />
       <v-data-table
-        id="dataTable"
-        :headers="documentsFromPayHeaders"
-        :items="documentsFromPayData"
+        id="journal-of-email-sending-payment-data-table"
+        :headers="documentsToPayHeaders"
+        :items="documentsToPayData"
         :show-select="false"
         :items-per-page="100"
         :disable-items-per-page="true"
         no-data-text=""
         hide-default-footer
-        :footer-props="{ itemsPerPageText: 'Количество строк на странице:' }"
         class="elevation-1 journal-of-email-sending-payment-docs-table"
       >
         <template
@@ -95,6 +102,7 @@
 </template>
 
 <script>
+import XLSX from 'xlsx'
 
 export default {
   name: 'JournalOfEmailSendingPaymentDocuments',
@@ -108,7 +116,7 @@ export default {
       linkToDocumentForSending: null,
 
       // Шапка таблицы "Документы к оплате"
-      documentsFromPayHeaders: [
+      documentsToPayHeaders: [
         {
           text: 'Дата',
           value: 'dataDoc'
@@ -144,16 +152,16 @@ export default {
       ],
 
       // Список документов таблицы "Документы к оплате"
-      documentsFromPayData: [],
+      documentsToPayData: [],
 
       // Массив документов для экпорта в excel
       documentsForExport: [],
 
-      // Количество различных департаментов в таблице
-      payersInPayData: [],
+      // Количество различных расчетных счетов в таблице
+      accsInPayData: [],
 
-      // Текущий департамент из цикла выгрузки документов
-      currentPayer: null,
+      // Текущий расчетный счет из цикла выгрузки документов
+      currentAcc: null,
 
       // Итоговая сумма по колонке "К оплате" документов на оплату
       totalSumOplat: 0,
@@ -170,6 +178,8 @@ export default {
         'Комментарий': 'prim'
       },
 
+      headerData: [],
+
       // Данные для экспорта в подвал таблицы
       exportFooter: '',
 
@@ -185,7 +195,7 @@ export default {
     async init() {
       await this.findPayers()
       await this.findDefaultOrgAndAccIdForUserOnForm()
-      await this.payerChange()
+      await this.updateAllInfo()
     },
 
     async findDefaultOrgAndAccIdForUserOnForm() {
@@ -196,26 +206,69 @@ export default {
     },
 
     async startDownloadExcel() {
-      for (const payer of this.payersInPayData) {
-        await this.downloadPayer(payer)
+      for (const acc of this.accsInPayData) {
+        await this.downloadAcc(acc)
       }
     },
 
-    downloadPayer(payer) {
-      const promise = new Promise((resolve, reject) => {
-        const depDocs = this.documentsFromPayData.filter(doc => doc.payerName === payer)
+    downloadPayerWithSheetJS(payer) {
+      return new Promise((resolve, reject) => {
+        this.currentAcc = payer
+        const wb = XLSX.utils.book_new()
+
+        const depDocsWS = XLSX.utils.json_to_sheet(this.exportFields)
+        XLSX.utils.book_append_sheet(wb, depDocsWS, 'depDocs')
+
+        const tabl = document.getElementById('dataTable')
+        XLSX.utils.sheet_add_dom('depDocs', tabl)
+        // const wb = XLSX.utils.table_to_book(tabl)
+        // const wb = XLSX.utils.book_new()
+        /* const depDocs = this.documentsFromPayData.filter(doc => doc.payerName === payer)
+        const depDocsWS = XLSX.utils.json_to_sheet(depDocs)
+        XLSX.utils.book_append_sheet(wb, depDocsWS, 'depDocs') */
+        this.generateNameForExportFile()
+        XLSX.writeFile(wb, this.exportFileName)
+        resolve('download' + this.currentAcc)
+      })
+    },
+
+    downloadAcc(acc) {
+      return new Promise((resolve, reject) => {
+        const depDocs = this.documentsToPayData.filter(doc => doc.accId === acc.acc.id)
         let sumOfDocs = 0
         this.documentsForExport = depDocs
         this.documentsForExport.forEach((doc) => {
           sumOfDocs += doc.sumPaidNumber
         })
-        this.exportFooter = 'Итого к оплате: ' + this.numberToSum(sumOfDocs)
-        this.currentPayer = payer
+        this.currentAcc = acc
+
+        const startBalance = acc.saldo + acc.nalich + acc.vnpl
+        const endBalance = startBalance - sumOfDocs
+        this.createHeaderForDownloadingData(acc, startBalance)
+        this.createFooterForDownloadingData(sumOfDocs, endBalance)
 
         this.$refs.downloadExcel.click()
-        resolve('download' + this.currentPayer)
+        resolve('download' + this.currentAcc)
       })
-      return promise
+    },
+
+    createHeaderForDownloadingData(acc, startBalance) {
+      this.headerData = [
+        'Дата: ' + new Date(this.date).toLocaleDateString(),
+        'Фирма: ' + acc.myOrg.clName,
+        'Р/счет: ' + acc.acc.numAcc.slice(acc.acc.numAcc.length - 4) + ' ' + acc.acc.nameBank,
+        'Остаток на р/с: ' + this.numberToSum(acc.saldo),
+        'Прочее: ' + this.numberToSum(acc.nalich),
+        'Внутренний платеж: ' + this.numberToSum(acc.vnpl),
+        'Остаток на начало: ' + this.numberToSum(startBalance)
+      ]
+    },
+
+    createFooterForDownloadingData(sumOfDocs, endBalance) {
+      this.exportFooter = [
+        'Итого к оплате: ' + this.numberToSum(sumOfDocs),
+        'Остаток на р/с: ' + this.numberToSum(endBalance)
+      ]
     },
 
     async findPayers() {
@@ -228,72 +281,70 @@ export default {
       }
     },
 
+    // Обновление списка документов в таблице "Документы на оплату"
     updateAllInfo() {
-      if (this.selectedPayer) {
-        this.findSpDocoplForPay()
-      }
-    },
-
-    payerChange() {
       this.findSpDocoplForPay()
     },
 
-    // Поиск документов для таблицы "Документы на оплату" по выбранной организации
+    // Поиск документов для таблицы "Документы на оплату"
     async findSpDocoplForPay() {
-      const data = this.createCriteriasToSearchDocsFromPayForEmailSendingForm(this.date, this.selectedPayer)
+      // Поиск документов к оплате
+      const searchCriteriasForDocsToPay = this.createCriteriasToSearchDocsToPayForEmailSendingForm(this.date, this.selectedPayer)
+      const docsToPay = await this.$api.payment.docOplToPay.findDocumentsByCriterias(searchCriteriasForDocsToPay)
 
-      this.documentsFromPayData = await this.$api.payment.docOplForPay.findDocumentsForPayByCriterias(data)
-      let totalSumOplat = 0
-      this.documentsFromPayData.forEach((value) => {
-        if (!value.myOrg) {
-          value.payerName = ''
-        } else {
-          value.payerName = value.myOrg.clName
-        }
+      // Поиск оплат по кассе
+      const searchCriteriasForPaymentByCashbox = this.createCriteriasToSearchPaymentByCashboxForEmailSendingForm(this.date, this.selectedPayer)
+      const paymentsByCashbox = await this.$api.payment.findPaymentsByCashboxByCriterias(searchCriteriasForPaymentByCashbox)
 
-        if (!this.payersInPayData.includes(value.payerName)) {
-          this.payersInPayData.push(value.payerName)
-        }
+      // Поиск внутренних платежей
+      const searchCriteriasForVNPLDocs = this.createCriteriasToSearchVNPLDocsForEmailSendingForm(this.date, this.selectedPayer)
+      const vnplDocs = await this.$api.payment.docOplForPay.findDocumentsForPayByCriterias(searchCriteriasForVNPLDocs)
 
-        if (!value.sumPaid) {
-          value.sumPaid = 0
-        }
-
-        totalSumOplat += value.sumPaid
-        value.partialPayment = (value.sumDoc !== value.sumPaid) ? 'Да' : 'Нет'
-        value.sumPaidNumber = value.sumPaid
-        value.sumPaid = this.numberToSum(value.sumPaid)
-      })
-
-      this.totalSumOplat = this.numberToSum(totalSumOplat)
+      // Конвертация респонсов в данные для отображения на форме
+      const resultOfConvert = await this.convertVNPLPaymentByCashboxAndDocsToPayResponsesToDataForTable(
+        vnplDocs,
+        paymentsByCashbox,
+        docsToPay,
+        this.date)
+      this.documentsToPayData = resultOfConvert.dataForTable
+      this.totalSumOplat = resultOfConvert.totalSumOplat
+      this.accsInPayData = resultOfConvert.accsInDataForTable
     },
 
     // Метод генерации имени для файла выгрузки
     generateNameForExportFile() {
-      this.exportFileName = 'Журнал_документов_на_оплату_покуп._' + this.currentPayer + '_' + new Date().toLocaleDateString() + ' - ' + new Date().toLocaleTimeString() + '.xls'
-      // this.linkToDocumentForSending =
-    },
+      let numberOfAcc = ''
+      if (this.currentAcc.acc.accType === 'COMMON') {
+        numberOfAcc = this.currentAcc.acc.numAcc.slice(this.currentAcc.acc.numAcc.length - 4)
+      } else {
+        numberOfAcc = 'Касса'
+      }
 
-    send() {
-
+      this.exportFileName = 'Журнал_документов_на_оплату_покуп._' + this.currentAcc.myOrg.clName + '_' + numberOfAcc + '_' + new Date().toLocaleDateString() + ' - ' + new Date().toLocaleTimeString() + '.xls'
     },
 
     // Печать таблицы документов на оплату
     print() {
-      console.log(this)
-      this.$htmlToPaper('dataTable')
+      const payer = this.payers.find(curPayer => curPayer.id === this.selectedPayer)
+      const title = document.getElementById('titleForTable')
+      title.innerHTML = 'Дата: ' + new Date(this.date).toLocaleDateString() + ' \n '
+      title.innerHTML = title.innerHTML + (payer ? 'Фирма: ' + payer.clName : '')
+
+      this.$htmlToPaper('tableForPrint', null, () => {
+        title.innerHTML = ''
+      })
     }
   }
 }
 </script>
 
 <style lang="scss">
-.v-data-table td {
+#journal-of-email-sending-payment-data-table  td {
     padding: 0 0 !important;
     height: 0 !important;
 }
 
-.v-data-table th {
+#journal-of-email-sending-payment-data-table  th {
     padding: 0 0 !important;
     height: 0 !important;
 }

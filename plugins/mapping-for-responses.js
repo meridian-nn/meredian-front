@@ -198,5 +198,105 @@ Vue.mixin({
 
         return arrayOfData
       },
+
+      async convertVNPLPaymentByCashboxAndDocsToPayResponsesToDataForTable(vnplDocs, paymentsByCashbox, docsToPay, chosenDate) {
+        const dataForTable = []
+        let totalSumOplat = 0
+        const accsInDataForTable = []
+
+
+        for (const vnplDoc of vnplDocs) {
+          if (!vnplDoc.myOrg) {
+            vnplDoc.payerName = ''
+          } else {
+            vnplDoc.payerName = vnplDoc.myOrg.clName8
+          }
+
+          if(!vnplDoc.sumPaid) {
+            vnplDoc.sumPaid = 0
+          }
+
+          const data = {
+            accId: vnplDoc.accId,
+            dataDoc: vnplDoc.dataDoc,
+            nameDoc: vnplDoc.nameDoc,
+            sumPaid: this.numberToSum(vnplDoc.sumPaid),
+            sumPaidNumber: vnplDoc.sumPaid,
+            myorgName: vnplDoc.payerName,
+            executorName: vnplDoc.executorName,
+            depName: vnplDoc.depName,
+            partialPayment: (vnplDoc.sumDoc !== vnplDoc.sumPaid) ? 'Да' : 'Нет',
+            prim: vnplDoc.prim
+          }
+          dataForTable.push(data)
+          totalSumOplat += vnplDoc.sumPaid
+
+          await this.searchAccIfInAccsinDataForTable(accsInDataForTable, vnplDoc.accId, chosenDate)
+        }
+
+        for (const paymentByCashbox of paymentsByCashbox) {
+          const data = {
+            accId: paymentByCashbox.acc.id,
+            dataDoc: paymentByCashbox.paymentDate,
+            nameDoc: 'Оплата по кассе от ' + paymentByCashbox.paymentDate,
+            sumPaid: this.numberToSum(paymentByCashbox.toPaySum),
+            sumPaidNumber: paymentByCashbox.toPaySum,
+            myorgName: paymentByCashbox.payer.clName8,
+            executorName: '',
+            depName: '',
+            partialPayment: 'Нет',
+            prim: paymentByCashbox.comment
+          }
+          dataForTable.push(data)
+          totalSumOplat += paymentByCashbox.toPaySum
+
+          await this.searchAccIfInAccsinDataForTable(accsInDataForTable, paymentByCashbox.acc.id, chosenDate)
+        }
+
+        for (const docToPay of docsToPay) {
+          if(!docToPay.sumOplat) {
+            docToPay.sumOplat = 0
+          }
+
+          const data = {
+            accId: docToPay.accId,
+            dataDoc: docToPay.dataOplat,
+            nameDoc: docToPay.nameDoc,
+            sumPaid: this.numberToSum(docToPay.sumOplat),
+            sumPaidNumber: docToPay.sumOplat,
+            myorgName: docToPay.namePlat1,
+            executorName: docToPay.executorName,
+            depName: docToPay.depName,
+            partialPayment: 'Да',
+            prim: docToPay.prim
+          }
+          dataForTable.push(data)
+          totalSumOplat +=docToPay.sumOplat
+
+          await this.searchAccIfInAccsinDataForTable(accsInDataForTable, docToPay.accId, chosenDate)
+        }
+        totalSumOplat = this.numberToSum(totalSumOplat)
+
+        return {
+          dataForTable,
+          totalSumOplat,
+          accsInDataForTable
+        }
+      },
+
+      async searchAccIfInAccsinDataForTable(accsInDataForTable, accId, chosenDate) {
+        const accInDataForTable = accsInDataForTable.find(elem => elem.acc.id === accId)
+
+        if(accInDataForTable) {
+          return
+        }
+
+        const searchCriteriasForAcc = this.createCriteriasToSearchAcc(chosenDate, accId)
+        const acc = await this.$api.paymentAccounts.findBySearchCriteriaList(searchCriteriasForAcc)
+
+        if(acc && acc.length > 0) {
+          accsInDataForTable.push(acc[0])
+        }
+      }
     }
 })

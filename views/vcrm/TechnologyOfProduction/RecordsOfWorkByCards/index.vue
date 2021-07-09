@@ -311,6 +311,7 @@ export default {
 
     getTenLastYears() {
       let year = new Date().getFullYear()
+      this.years.push(year)
       for (let i = 0; i < 10; i++) {
         const yearForPush = year - 1
         year = yearForPush
@@ -393,7 +394,7 @@ export default {
 
 .records-of-work-by-cards-indentation-for-inputs {
   margin-right: 10px;
-  width: 190px;
+  width: 95px;
 }
 
 .records-of-work-by-cards-bottom-spacer{

@@ -27,7 +27,7 @@ Vue.mixin({
         },
 
         isCanOpenPaymentRegister() {
-          return true
+          return this.isHaveBudgetRole() || this.isHaveJournalRole()
         },
 
         //Функция проверяет наличие у пользователя роли для работы с АРМ "Реестр оплат"

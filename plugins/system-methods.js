@@ -66,12 +66,12 @@ Vue.mixin({
           return new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), currentDate.getDate())
         },
 
-        async changeSumToPayOfPaymentAccount(accId, sumOfPaymentDocs, operationType) {
+        async changeSumToPayOfPaymentAccount(accId, sumOfPaymentDocs, operationType, date) {
           if(sumOfPaymentDocs === 0) {
             return
           }
 
-          const searchCriterias = this.createCriteriasToFindPaymentAccount(accId)
+          const searchCriterias = this.createCriteriasToFindPaymentAccount(accId,date)
           const response = await this.$api.paymentAccounts.findBySearchCriteriaList(searchCriterias)
           let paymentAccount
 

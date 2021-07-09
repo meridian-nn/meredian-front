@@ -63,7 +63,7 @@
           class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
           align="center"
         >
-          Журнал рассылки на email документов на оплату
+          Журнал рассылки на email документов к оплате
         </div>
       </div>
 

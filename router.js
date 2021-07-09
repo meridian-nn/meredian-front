@@ -47,7 +47,7 @@ const JournalOfPaymentDocumentsFromPayDocsPage = dynamicPage(() =>
   import('~/views/vcrm/Payment/PaymentDocument/JournalOfPaymentDocuments/components/fromPayDocuments'))
 
 const JournalOfEmailSendingPaymentDocumentsPage = dynamicPage(() =>
-  import('~/views/vcrm/Payment/PaymentDocument/JournalOfEmailSendingPaymentDocuments'))
+  import('~/views/vcrm/Payment/JournalOfEmailSendingPaymentDocuments'))
 
 const PaymentByCashboxPage = dynamicPage(() =>
   import('~/views/vcrm/Payment/PaymentDocument/Modals/PaymentByCashbox.vue'))

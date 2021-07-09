@@ -930,7 +930,7 @@ export default {
         sumDoc = selectedDoc.sumOplat - selectedDoc.sumOplatFromRequest
         typeOfOperation = 'SUM'
       }
-      return this.changeSumToPayOfPaymentAccount(this.accId, sumDoc, typeOfOperation)
+      return this.changeSumToPayOfPaymentAccount(this.accId, sumDoc, typeOfOperation, this.date)
     },
 
     // Отмена внесения измененя в сумму оплаты документа
@@ -982,7 +982,7 @@ export default {
       }
 
       await this.addPayments()
-      const responseSpOplatSave = await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'SUM')
+      const responseSpOplatSave = await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'SUM', new Date())
       await this.refreshTables()
 
       if (responseSpOplatSave) {
@@ -1016,7 +1016,7 @@ export default {
 
       const ids = this.toPaySelectedRows.map(value => value.id)
       await this.$axios.$post(this.$api.payment.docOplToPay.getDeleteSelectedPaymentsUrl(), ids)
-      const responseSpOplatSave = await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'DEDUCT')
+      const responseSpOplatSave = await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'DEDUCT', this.date)
 
       await this.refreshTables()
       if (responseSpOplatSave) {
@@ -1178,7 +1178,7 @@ export default {
     },
 
     async deletePaymentByCashbox(curRow) {
-      await this.changeSumToPayOfPaymentAccount(curRow.accId, curRow.sumOplat, 'DEDUCT')
+      await this.changeSumToPayOfPaymentAccount(curRow.accId, curRow.sumOplat, 'DEDUCT', this.date)
       await this.$axios.$post(this.$api.payment.getDeletePaymentUrl(), curRow.id, this.getConfigForDeleteMethods())
       await this.refreshTables()
       await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)

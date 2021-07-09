@@ -66,8 +66,7 @@ Vue.mixin({
         // accId - id расчетного счета организации
         createCriteriasForRequestToSearchDocsToPay(accId, orgId, date) {
             const secDate = new Date(date)
-            const curDateNum = secDate.getDate()
-            secDate.setDate(curDateNum + 1)
+            secDate.setDate(secDate.getDate() + 1)
           return [{
               'dataType': 'INTEGER',
               'key': 'accId',
@@ -201,10 +200,105 @@ Vue.mixin({
             {
               'dataType': 'DATE',
               'key': 'dataDoc',
-              'operation': 'GREATER_THAN',
+              'operation': 'EQUALS',
               'type': 'AND',
               'values': [
                 new Date(date).toLocaleDateString()
+              ]
+            }
+          ]
+
+          if(orgId) {
+            data.push({
+              'dataType': 'INTEGER',
+              'key': 'myOrg.id',
+              'operation': 'EQUALS',
+              'type': 'AND',
+              'values': [
+                orgId
+              ]
+            })
+          }
+
+          return data
+        },
+
+        createCriteriasToSearchDocsToPayForEmailSendingForm(date, orgId) {
+          const secDate = new Date(date)
+          secDate.setDate(secDate.getDate() + 1)
+          const data =  [
+            {
+              'dataType': 'DATE',
+              'key': 'dataOplat',
+              'operation': 'BETWEEN',
+              'type': 'AND',
+              'values': [
+                new Date(date).toLocaleDateString(), new Date(secDate).toLocaleDateString()
+              ]
+            }
+          ]
+
+          if(orgId) {
+            data.push({
+              'dataType': 'INTEGER',
+              'key': 'platId',
+              'operation': 'EQUALS',
+              'type': 'AND',
+              'values': [
+                orgId
+              ]
+            })
+          }
+
+          return data
+        },
+
+        createCriteriasToSearchPaymentByCashboxForEmailSendingForm(date, orgId) {
+          const data = [
+            {
+              'dataType': 'DATE',
+              'key': 'paymentDate',
+              'operation': 'EQUALS',
+              'type': 'AND',
+              'values': [
+                new Date(date).toLocaleDateString()
+              ]
+            },
+          ]
+
+          if(orgId) {
+            data.push({
+              'dataType': 'INTEGER',
+              'key': 'payer.id',
+              'operation': 'EQUALS',
+              'type': 'AND',
+              'values': [
+                orgId
+              ]
+            })
+          }
+
+          return data
+        },
+
+        createCriteriasToSearchVNPLDocsForEmailSendingForm(date, orgId) {
+          const data =  [
+            {
+              'dataType': 'DATE',
+              'key': 'dataDoc',
+              'operation': 'EQUALS',
+              'type': 'AND',
+              'values': [
+                new Date(date).toLocaleDateString()
+              ]
+            },
+            {
+              'dataType': 'VARCHAR',
+              'key': 'nameDoc',
+              'operation': 'LIKE',
+              'type': 'AND',
+              'values': [
+                "ВнПл"
               ]
             }
           ]
@@ -538,7 +632,7 @@ Vue.mixin({
           ]
       },
 
-      createCriteriasToFindPaymentAccount(accId) {
+      createCriteriasToFindPaymentAccount(accId,date) {
         return [
           {
             dataType: "VARCHAR",
@@ -555,7 +649,7 @@ Vue.mixin({
             operation: "EQUALS",
             type: "AND",
             values: [
-              new Date().toLocaleDateString()
+              new Date(date).toLocaleDateString()
             ]
           }
         ]
@@ -709,5 +803,28 @@ Vue.mixin({
           ]
         }]
       },
+
+      createCriteriasToSearchAcc(date, accId) {
+        return [
+          {
+            dataType: "DATE",
+            key: "dataOplat",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date(date).toLocaleDateString()
+            ]
+          },
+          {
+            dataType: "VARCHAR",
+            key: "acc.id",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              accId
+            ]
+          }
+        ]
+      }
     },
 })
