@@ -268,6 +268,7 @@ Vue.mixin({
             executorName: docToPay.executorName,
             depName: docToPay.depName,
             partialPayment: 'Да',
+            // (docToPay.sumDoc !== docToPay.sumOplat) ? 'Да' : 'Нет',
             prim: docToPay.prim
           }
           dataForTable.push(data)

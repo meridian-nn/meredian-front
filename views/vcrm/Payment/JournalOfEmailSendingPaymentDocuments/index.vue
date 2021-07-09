@@ -102,8 +102,6 @@
 </template>
 
 <script>
-import XLSX from 'xlsx'
-
 export default {
   name: 'JournalOfEmailSendingPaymentDocuments',
   data() {
@@ -209,27 +207,6 @@ export default {
       for (const acc of this.accsInPayData) {
         await this.downloadAcc(acc)
       }
-    },
-
-    downloadPayerWithSheetJS(payer) {
-      return new Promise((resolve, reject) => {
-        this.currentAcc = payer
-        const wb = XLSX.utils.book_new()
-
-        const depDocsWS = XLSX.utils.json_to_sheet(this.exportFields)
-        XLSX.utils.book_append_sheet(wb, depDocsWS, 'depDocs')
-
-        const tabl = document.getElementById('dataTable')
-        XLSX.utils.sheet_add_dom('depDocs', tabl)
-        // const wb = XLSX.utils.table_to_book(tabl)
-        // const wb = XLSX.utils.book_new()
-        /* const depDocs = this.documentsFromPayData.filter(doc => doc.payerName === payer)
-        const depDocsWS = XLSX.utils.json_to_sheet(depDocs)
-        XLSX.utils.book_append_sheet(wb, depDocsWS, 'depDocs') */
-        this.generateNameForExportFile()
-        XLSX.writeFile(wb, this.exportFileName)
-        resolve('download' + this.currentAcc)
-      })
     },
 
     downloadAcc(acc) {

@@ -56,6 +56,12 @@
           Перейти к новому периоду
         </v-btn>
       </div>
+
+      <div class="records-of-work-by-cards-btn">
+        <v-btn @click="recalculationOfOutputForMonth">
+          Пересчет выработки за месяц
+        </v-btn>
+      </div>
     </div>
 
     <div class="records-of-work-by-cards-row">
@@ -69,6 +75,7 @@
         <v-text-field
           v-model.number="numberOfOrder"
           hide-details="auto"
+          @keydown.enter="updateInfo"
         />
       </div>
 
@@ -112,14 +119,20 @@
       </div>
 
       <div class="records-of-work-by-cards-btn">
-        <v-btn @click="addProductionByBranch">
-          Занести выработку по филиалу
+        <v-btn @click="updateRecordsInfo">
+          Обновить данные
         </v-btn>
       </div>
 
       <div class="records-of-work-by-cards-btn">
-        <v-btn @click="recalculationOfOutputForMonth">
-          Пересчет выработки за месяц
+        <v-btn @click="updateRecordsInfoWithoutUserCriterias">
+          Не использовать отбор
+        </v-btn>
+      </div>
+
+      <div class="records-of-work-by-cards-btn">
+        <v-btn @click="addProductionByBranch">
+          Занести выработку по филиалу
         </v-btn>
       </div>
 
@@ -127,6 +140,7 @@
         <v-data-table
           id="records-of-work-by-cards-table-of-records"
           v-model="recordsSelectedRows"
+          height="750"
           :headers="recordsHeaders"
           fixed-header
           :items="recordsData"
@@ -135,6 +149,8 @@
           disable-pagination
           hide-default-footer
           class="elevation-1"
+          @update:sort-by="updateSort('by', $event)"
+          @update:sort-desc="updateSort('desc', $event)"
         >
           <template #body="{ items }">
             <tbody>
@@ -151,36 +167,46 @@
                   />
                 </td>
                 <td>
-                  {{ item.order }}
+                  {{ item.numZkzpsv }}
                 </td>
                 <td>
-                  {{ item.TP }}
+                  {{ item.posledCode }}
                 </td>
                 <td>
-                  {{ item.nameOfTP }}
+                  {{ item.namePosled }}
                 </td>
                 <td>
-                  {{ item.count }}
+                  {{ item.colvoMc }}
                 </td>
                 <td>
-                  {{ item.example }}
+                  {{ item.obraz }}
                 </td>
                 <td>
-                  {{ item.ratio }}
+                  {{ item.coeff }}
                 </td>
                 <td>
-                  {{ item.code }}
+                  {{ item.mcId }}
                 </td>
                 <td>
-                  {{ item.nameOfItem }}
+                  {{ item.nameMc }}
                 </td>
                 <td>
-                  {{ item.application }}
+                  {{ item.numZaivk }}
                 </td>
                 <td>
-                  {{ item.separationScheme }}
+                  {{ item.nameScheme }}
                 </td>
               </tr>
+
+              <infinite-loading
+                :key="keyLoading"
+                spinner="spiral"
+                :identifier="infiniteIdOfRecordsData"
+                @infinite="findOrdersOnTailoring"
+              >
+                <div slot="no-more" />
+                <div slot="no-results" />
+              </infinite-loading>
             </tbody>
           </template>
         </v-data-table>
@@ -192,12 +218,14 @@
 </template>
 
 <script>
+import InfiniteLoading from 'vue-infinite-loading'
 import UserNotification from '~/components/information_window/UserNotification'
 export default {
   name: 'RecordsOfWorkByCards',
 
   components: {
-    UserNotification
+    UserNotification,
+    InfiniteLoading
   },
 
   data() {
@@ -246,67 +274,128 @@ export default {
       recordsHeaders: [
         {
           text: 'Заказ',
-          value: 'order',
-          width: '64px'
+          value: 'numZkzpsv',
+          width: '64px',
+          sort: () => false
         },
         {
           text: 'ТП',
-          value: 'TP',
-          width: '40px'
+          value: 'posledCode',
+          width: '40px',
+          sort: () => false
         },
         {
           text: 'Наименование ТП',
-          value: 'nameOfTP',
-          width: '100px'
+          value: 'namePosled',
+          width: '100px',
+          sort: () => false
         },
         {
           text: 'Количество',
-          value: 'count',
-          width: '30px'
+          value: 'colvoMc',
+          width: '60px',
+          sort: () => false
         },
         {
           text: 'Образец',
-          value: 'example',
-          width: '30px'
+          value: 'obraz',
+          width: '50px',
+          sort: () => false
         },
         {
           text: 'Коэффициент',
-          value: 'ratio',
-          width: '35px'
+          value: 'coeff',
+          width: '70px',
+          sort: () => false
         },
         {
           text: 'Код',
-          value: 'code',
-          width: '40px'
+          value: 'mcId',
+          width: '40px',
+          sort: () => false
         },
         {
           text: 'Наименование изделия',
-          value: 'nameOfItem',
-          width: '100px'
+          value: 'nameMc',
+          width: '80px',
+          sort: () => false
         },
         {
           text: 'Заявка',
-          value: 'application',
-          width: '30px'
+          value: 'numZaivk',
+          width: '40px',
+          sort: () => false
         },
         {
           text: 'Схема разделения',
-          value: 'separationScheme',
-          width: '70px'
+          value: 'nameScheme',
+          width: '90px',
+          sort: () => false
         }
       ],
 
-      recordsData: []
+      recordsData: [],
+
+      pageOfRecords: 0,
+
+      sortBy: [],
+      sortDesc: [],
+      keyLoading: Math.random(),
+
+      infiniteIdOfRecordsData: 0,
+
+      elementId: null,
+
+      updateRecordsDataWithUserCriterias: true
+    }
+  },
+
+  computed: {
+    handleSortData() {
+      const { sortDesc } = this
+      return this.sortBy.map((item, i) => {
+        return {
+          'direction': sortDesc[i] ? 'ASC' : 'DESC',
+          'property': item
+        }
+      })
     }
   },
 
   mounted() {
     this.init()
   },
+
   methods: {
     init() {
+      this.elementId = this.getIdOfRecordsTableOfRecordsOfWorkByCards()
       this.findOrganizations()
       this.getTenLastYears()
+    },
+
+    updateInfo() {
+      console.log('enter pressed')
+    },
+
+    async updateRecordsInfo() {
+      const filterItem = {
+        numZkzpsv: this.numberOfOrder,
+        numZaivk: this.numberOfApplication,
+        mcId: this.code,
+        posledCode: this.TP
+      }
+
+      const filterEntityForSave = this.createFilterEntityForSave(this.elementId, this.$route.name, filterItem,
+        this.getCurrentUser().id, this.getCurrentUser().id)
+
+      await this.$api.uiSettings.save(filterEntityForSave)
+      this.updateRecordsDataWithUserCriterias = true
+      this.updateRecordsData()
+    },
+
+    updateRecordsInfoWithoutUserCriterias() {
+      this.updateRecordsDataWithUserCriterias = false
+      this.updateRecordsData()
     },
 
     getTenLastYears() {
@@ -336,6 +425,62 @@ export default {
 
     recalculationOfOutputForMonth() {
       this.$refs.userNotification.showUserNotification('success', 'Пересчет выработки за месяц')
+    },
+
+    updateSort(byDesc, event) {
+      if (byDesc === 'by') {
+        this.sortBy = event
+      } else if (byDesc === 'desc') {
+        this.sortDesc = event
+      }
+      this.pageOfRecords = 0
+      this.recordsData = []
+      this.keyLoading = Math.random()
+    },
+
+    // Обновление таблицы "Заказы на пошив"
+    updateRecordsData() {
+      this.pageOfRecords = 0
+      this.recordsData = []
+      this.infiniteIdOfRecordsData += 1
+    },
+
+    async findOrdersOnTailoring($state) {
+      let filtersParams
+      if (this.updateRecordsDataWithUserCriterias) {
+        filtersParams = await this.findUserCriteriasAndFillCriteriasFieldsOnForm()
+      }
+
+      const searchCriterias = this.createCriteriasToSearchOrdersOnTailoringByPage(filtersParams)
+      const params = { searchCriterias, page: this.pageOfRecords, orders: this.handleSortData }
+
+      const { content } = await this.$api.manufacturing.findPageBySearchCriterias(params)
+
+      if (content.length > 0) {
+        this.pageOfRecords += 1
+        this.recordsData.push(...content)
+
+        $state.loaded()
+      } else {
+        $state.complete()
+      }
+    },
+
+    async findUserCriteriasAndFillCriteriasFieldsOnForm() {
+      let filtersParams
+      const paramsToSearchUserCriterias = this.createCriteriasToSearchForFiltersValues(this.$route.name,
+        this.getIdOfRecordsTableOfRecordsOfWorkByCards(), this.getCurrentUser().id)
+      const response = await this.$api.uiSettings.findBySearchCriterias(paramsToSearchUserCriterias)
+
+      if (response.length) {
+        filtersParams = JSON.parse(response[0].settingValue)
+        this.numberOfOrder = filtersParams.numZkzpsv
+        this.numberOfApplication = filtersParams.numZaivk
+        this.code = filtersParams.mcId
+        this.TP = filtersParams.posledCode
+      }
+
+      return filtersParams
     }
   }
 }

@@ -443,6 +443,9 @@ export const factory = send => ({
             },
             getSaveUrlForDepartments() {
               return '/oper/depMoneyDistribution/saveList'
+            },
+            findBySearchCriterias(params) {
+              return send('POST', `/oper/depMoneyDistribution/findBySearchCriteriaList`, params)
             }
         },
 
@@ -557,6 +560,12 @@ export const factory = send => ({
                 return send('POST', '/oper/supply/selPlanpsvZaivkOtladka/findPageBySearchCriteriaList', params)
             }
         }
+    },
+
+    manufacturing: {
+      findPageBySearchCriterias(params) {
+        return send('POST', `/oper/manufacturing/manufacturingRequest/findPageBySearchCriteriaList`, params)
+      }
     },
 
     service: {

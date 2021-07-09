@@ -47,7 +47,6 @@ export default {
         { src: '~/plugins/format-date' },
         { src: '~plugins/vue-tables-2.js', ssr: false },
         { src: '~plugins/vue-json-excel.js', ssr: false },
-        { src: '~plugins/vue-sheetjs.js', ssr: false },
         { src: '~plugins/vue-html-to-paper.js', ssr: false },
         { src: '~/plugins/pluralize', ssr: false }
         // { src: '~/plugins/bootstrap', mode: 'client' }
@@ -99,7 +98,7 @@ export default {
     },
 
     build: {
-        vendor: ['vue-tables-2', 'vue-json-excel', 'vue-sheetjs', 'vue-html-to-paper', 'vue-numeric'],
+        vendor: ['vue-tables-2', 'vue-json-excel', 'vue-html-to-paper', 'vue-numeric'],
         extend(config, ctx) {
             if (ctx.isDev) {
                 config.devtool = ctx.isClient ? 'source-map' : 'inline-source-map'

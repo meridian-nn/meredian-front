@@ -825,6 +825,74 @@ Vue.mixin({
             ]
           }
         ]
+      },
+
+      createCriteriasToFindMoneyDistributionByDepartments(date, departments) {
+        const data = [
+          {
+            dataType: "DATE",
+            key: "distributionDate",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date(date).toLocaleDateString()
+            ]
+          }
+        ]
+
+        for (const department of departments) {
+          const elem = {
+            dataType: "INTEGER",
+            key: "department.id",
+            operation: "EQUALS",
+            type: "OR",
+            values: [
+              department.id
+            ]
+          }
+          data.push(elem)
+        }
+
+        return data
+      },
+
+      createCriteriasToSearchOrdersOnTailoringByPage(filtersParams) {
+        const data = [
+          {
+            dataType: "VARCHAR",
+            key: "userId",
+            operation: "EQUALS",
+            type: "OR",
+            values: [
+              "11"
+            ]
+          }
+        ]
+
+        if (filtersParams) {
+          for (const key in filtersParams) {
+            let elemParam = filtersParams[key]
+            if(!elemParam) {
+              continue
+            }
+
+            const dataType = 'VARCHAR'
+            const operation = 'EQUALS'
+
+            const dataElem = {
+              dataType,
+              key,
+              operation,
+              type: 'AND',
+              values: [
+                elemParam
+              ]
+            }
+            data.push(dataElem)
+          }
+        }
+
+        return data
       }
     },
 })

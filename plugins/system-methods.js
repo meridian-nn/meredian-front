@@ -8,6 +8,10 @@ Vue.mixin({
             return 'journal-of-payment-docs-from-pay-docs'
         },
 
+        getIdOfRecordsTableOfRecordsOfWorkByCards() {
+            return 'records-of-work-by-cards-table-of-records'
+        },
+
         //Функция возвращает form id и element id для orgId и accId по умолчанию
         getObjectWithFormIdAndElementIdForDefaultOrgAndAcc() {
           return {
