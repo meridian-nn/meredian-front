@@ -129,7 +129,7 @@
           class="white--text"
           :items="breadcrumbs"
         >
-          <template v-slot:item="{ item }">
+          <template #item="{ item }">
             <v-breadcrumbs-item
               active-class="tmp"
               :link="item.link"
@@ -182,31 +182,37 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item
-              v-if="isAdmin()"
-              :to="{ name: 'RegistrationPage' }"
-            >
-              <v-icon class="mr-2">
-                mdi-account-check
-              </v-icon>
+            <template v-if="isAdmin">
+              <v-list-item :to="{ name: 'RoleEditPage' }">
+                <v-icon class="mr-2">
+                  mdi-account-key
+                </v-icon>
 
-              <v-list-item-title>
-                Регистрация пользователя
-              </v-list-item-title>
-            </v-list-item>
+                <v-list-item-title>
+                  Роли
+                </v-list-item-title>
+              </v-list-item>
 
-            <v-list-item
-              v-if="isAdmin()"
-              :to="{ name: 'UsersEditingPage' }"
-            >
-              <v-icon class="mr-2">
-                mdi-account-edit
-              </v-icon>
+              <v-list-item :to="{ name: 'RegistrationPage' }">
+                <v-icon class="mr-2">
+                  mdi-account-check
+                </v-icon>
 
-              <v-list-item-title>
-                Редактирование аккаунтов пользователей
-              </v-list-item-title>
-            </v-list-item>
+                <v-list-item-title>
+                  Регистрация пользователя
+                </v-list-item-title>
+              </v-list-item>
+
+              <v-list-item :to="{ name: 'UsersEditingPage' }">
+                <v-icon class="mr-2">
+                  mdi-account-edit
+                </v-icon>
+
+                <v-list-item-title>
+                  Редактирование аккаунтов пользователей
+                </v-list-item-title>
+              </v-list-item>
+            </template>
 
             <v-list-item
               href="#"

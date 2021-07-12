@@ -9,30 +9,31 @@ export default class HttpClient {
     this._token = token
   }
 
-  fetch = async(method, methodUrl, params = {}) => {
-    try {
-      const url = new URL(this.url + methodUrl)
+  composeUrl(method, methodUrl, params) {
+    const url = new URL(this.url + methodUrl)
 
-      if (method === 'GET' && size(params) > 0) {
-        url.search = new URLSearchParams(params).toString()
-      }
-
-      const config = this.config(method, params)
-
-      return await this.call(url, config)
-    } catch (e) {
-      console.log(e)
+    if (method === 'GET' && size(params) > 0) {
+      url.search = new URLSearchParams(params).toString()
     }
+
+    return url
   }
 
-  config(method, params = {}) {
+  composeConfig(method, params = {}, headers = this.headersJson) {
     return {
       method,
       ...(method === 'POST' && {
         body: JSON.stringify(params)
       }),
-      headers: this.headers
+      headers
     }
+  }
+
+  fetch = async(method, methodUrl, params = {}) => {
+    const url = this.composeUrl(method, methodUrl, params)
+    const config = this.composeConfig(method, params)
+
+    return await this.call(url, config)
   }
 
   async call(url, config) {
@@ -52,17 +53,13 @@ export default class HttpClient {
     return response
   }
 
-  get headers() {
+  get headersJson() {
     const headers = {
       'Content-Type': 'application/json'
     }
 
     if (window.$nuxt.$store.state.auth.token) {
       headers.Authorization = 'Basic ' + window.$nuxt.$store.state.auth.token
-    }
-
-    if (this._token) {
-      headers.Authorization = `Bearer ${this._token}`
     }
 
     return headers

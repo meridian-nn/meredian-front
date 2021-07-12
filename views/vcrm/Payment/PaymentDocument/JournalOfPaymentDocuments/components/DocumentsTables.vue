@@ -1010,7 +1010,7 @@ export default {
       const sumDocs = this.countSumOfArrayElements(this.toPaySelectedRows.map(value => value.sumOplat))
 
       const ids = this.toPaySelectedRows.map(value => value.id)
-      await this.$axios.$post(this.$api.payment.docOplToPay.getDeleteSelectedPaymentsUrl(), ids)
+      await this.$api.payment.docOplToPay.deleteSelectedPayments(ids)
       const responseSpOplatSave = await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'DEDUCT')
 
       await this.refreshTables()
@@ -1109,7 +1109,8 @@ export default {
         vnplDoc.spDocints.sort(this.customCompare('id', -1))
         const spDocint = vnplDoc.spDocints[0]
         await this.changeVnplOfPaymentAccounts(spDocint.accId, vnplDoc.accId, vnplDoc.sumDoc)
-        await this.$axios.$post(this.$api.payment.docOplForPay.getDeleteInternalPaymentDocument(), vnplDoc.id, this.getConfigForDeleteMethods())
+        await this.$api.payment.docOplForPay.getDeleteInternalPaymentDocument(vnplDoc.id)
+        // await this.$axios.$post(this.$api.payment.docOplForPay.getDeleteInternalPaymentDocument(), vnplDoc.id, this.getConfigForDeleteMethods())
       }
     },
 
@@ -1175,7 +1176,8 @@ export default {
 
     async deletePaymentByCashbox(curRow) {
       await this.changeSumToPayOfPaymentAccount(curRow.accId, curRow.sumOplat, 'DEDUCT')
-      await this.$axios.$post(this.$api.payment.getDeletePaymentUrl(), curRow.id, this.getConfigForDeleteMethods())
+      await this.$api.payment.deletePaymentUrl(curRow.id)
+      // await this.$axios.$post(this.$api.payment.getDeletePaymentUrl(), curRow.id, this.getConfigForDeleteMethods())
       await this.refreshTables()
       await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
     },
@@ -1205,8 +1207,8 @@ export default {
 
     // Инициализация журнала оплат
     async selOplat() {
-      await this.$axios.$post(this.$api.payment.getSelOplatUrl())
-      // await this.$api.payment.selOplat()
+      // await this.$axios.$post(this.$api.payment.getSelOplatUrl())
+      await this.$api.payment.selOplat()
     },
 
     // Обновление таблиц "Документы к оплате" и "Документы на оплату"

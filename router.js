@@ -25,6 +25,9 @@ const AuthPage = dynamicPage(() =>
 const RegistrationPage = dynamicPage(() =>
   import('~/components/user_registration/userRegistrationPage.vue'))
 
+const RoleEditPage = dynamicPage(() =>
+  import('~/views/vcrm/User/RoleEditPage'))
+
 const CurrentUserEditingPage = dynamicPage(() =>
   import('~/components/current_user_editing/currentUserEditingPage'))
 
@@ -121,244 +124,255 @@ const createRouterConst = new Router({
     meta: {
       breadcrumb: { text: 'Профиль' }
     },
-    children: [{
-      path: 'gtin',
-      name: 'GtinPage',
-      component: GtinPage,
-      meta: {
-        breadcrumb: { text: 'Журнал GTIN' }
-      }
-    },
-    {
-      path: 'mark',
-      name: 'MarkPage',
-      component: MarkPage,
-      meta: {
-        breadcrumb: { text: 'Журнал Кодов Маркировки' }
-      }
-    },
-
-    {
-      path: 'chat',
-      name: 'ChatPage',
-      component: ChatPage,
-      meta: {
-        breadcrumb: { text: 'Чат' }
-      }
-    },
-
-    {
-      path: 'registration_page',
-      name: 'RegistrationPage',
-      component: RegistrationPage,
-      meta: {
-        breadcrumb: { text: 'Регистрация нового пользователя' }
-      }
-    },
-
-    {
-      path: 'current_user_editing',
-      name: 'CurrentUserEditingPage',
-      component: CurrentUserEditingPage,
-      meta: {
-        breadcrumb: { text: 'Настройка профиля' }
-      }
-    },
-
-    {
-      path: 'users_editing',
-      name: 'UsersEditingPage',
-      component: UsersEditingPage,
-      meta: {
-        breadcrumb: { text: 'Редактирование аккаунтов пользователей' }
-      }
-    },
-
-    {
-      path: 'payment_menu',
-      name: 'PaymentMenu',
-      component: PaymentMenuPage,
-      meta: { breadcrumb: { text: 'Меню реестра оплат' } },
-      children: [{
-        path: 'journal_of_payment_documents',
-        name: 'JournalOfPaymentDocuments',
-        component: JournalOfPaymentDocumentsPage,
+    children: [
+      {
+        path: 'gtin',
+        name: 'GtinPage',
+        component: GtinPage,
         meta: {
-          breadcrumb: { text: 'Журнал документов на оплату' }
+          breadcrumb: { text: 'Журнал GTIN' }
+        }
+      },
+      {
+        path: 'mark',
+        name: 'MarkPage',
+        component: MarkPage,
+        meta: {
+          breadcrumb: { text: 'Журнал Кодов Маркировки' }
         }
       },
 
       {
-        path: 'journal_of_payment_documents_from_pay_docs',
-        name: 'JournalOfPaymentDocumentsFromPayDocs',
-        component: JournalOfPaymentDocumentsFromPayDocsPage,
+        path: 'chat',
+        name: 'ChatPage',
+        component: ChatPage,
         meta: {
-          breadcrumb: { text: 'Документы на оплату' }
+          breadcrumb: { text: 'Чат' }
         }
       },
 
       {
-        path: 'payment_by_cashbox',
-        name: 'PaymentByCashbox',
-        component: PaymentByCashboxPage,
+        path: 'registration_page',
+        name: 'RegistrationPage',
+        component: RegistrationPage,
         meta: {
-          breadcrumb: { text: 'Меню реестра оплат' }
+          breadcrumb: { text: 'Регистрация нового пользователя' }
         }
       },
 
       {
-        path: 'internal_payment',
-        name: 'InternalPayment',
-        component: InternalPaymentPage,
+        path: 'role_edit',
+        name: 'RoleEditPage',
+        component: RoleEditPage,
         meta: {
-          breadcrumb: { text: 'Меню реестра оплат' }
+          breadcrumb: { text: 'Редактирования ролей' }
         }
       },
 
       {
-        path: 'payment_budget_by_departmens',
-        name: 'PaymentBudgetByDepartments',
-        component: PaymentBudgetByDepartmentsPage,
+        path: 'current_user_editing',
+        name: 'CurrentUserEditingPage',
+        component: CurrentUserEditingPage,
         meta: {
-          breadcrumb: { text: 'Бюджет оплат по подразделениям' }
+          breadcrumb: { text: 'Настройка профиля' }
         }
       },
 
       {
-        path: 'journal_of_email_sending_payment_documents',
-        name: 'JournalOfEmailSendingPaymentDocuments',
-        component: JournalOfEmailSendingPaymentDocumentsPage,
+        path: 'users_editing',
+        name: 'UsersEditingPage',
+        component: UsersEditingPage,
         meta: {
-          breadcrumb: { text: 'Журнал рассылки на e-mail документов на оплату' }
+          breadcrumb: { text: 'Редактирование аккаунтов пользователей' }
         }
       },
 
       {
-        path: 'money_distribution',
-        name: 'MoneyDistribution',
-        component: MoneyDistributionPage,
-        meta: {
-          breadcrumb: { text: 'Распределение ДС по подразделениям' }
-        }
-      },
+        path: 'payment_menu',
+        name: 'PaymentMenu',
+        component: PaymentMenuPage,
+        meta: { breadcrumb: { text: 'Меню реестра оплат' } },
+        children: [
+          {
+            path: 'journal_of_payment_documents',
+            name: 'JournalOfPaymentDocuments',
+            component: JournalOfPaymentDocumentsPage,
+            meta: {
+              breadcrumb: { text: 'Журнал документов на оплату' }
+            }
+          },
 
-      {
-        path: 'input_of_balances',
-        name: 'InputOfBalances',
-        component: InputOfBalancesPage,
-        meta: {
-          breadcrumb: { text: 'Ввод остатков по Р/С' }
-        }
-      },
+          {
+            path: 'journal_of_payment_documents_from_pay_docs',
+            name: 'JournalOfPaymentDocumentsFromPayDocs',
+            component: JournalOfPaymentDocumentsFromPayDocsPage,
+            meta: {
+              breadcrumb: { text: 'Документы на оплату' }
+            }
+          },
 
-      {
-        path: 'register_of_documents_to_pay',
-        name: 'RegisterOfDocumentsToPay',
-        component: RegisterOfDocumentsToPayPage,
-        meta: {
-          breadcrumb: { text: 'Реестр документов к оплате' }
-        }
-      },
+          {
+            path: 'payment_by_cashbox',
+            name: 'PaymentByCashbox',
+            component: PaymentByCashboxPage,
+            meta: {
+              breadcrumb: { text: 'Меню реестра оплат' }
+            }
+          },
 
-      {
-        path: 'register_of_payments_by_cashbox',
-        name: 'RegisterOfPaymentsByCashbox',
-        component: RegisterOfPaymentsByCashboxPage,
-        meta: {
-          breadcrumb: { text: 'Реестр документов оплат по кассе' }
-        }
-      }
-      ]
-    },
+          {
+            path: 'internal_payment',
+            name: 'InternalPayment',
+            component: InternalPaymentPage,
+            meta: {
+              breadcrumb: { text: 'Меню реестра оплат' }
+            }
+          },
 
-    {
-      path: 'technology_of_production_menu',
-      name: 'TechnologyOfProductionMenu',
-      component: TechnologyOfProductionMenuPage,
-      meta: { breadcrumb: { text: 'Меню АРМ Технология производства' } },
-      children: [
-        {
-          path: 'records_of_work_by_cards',
-          name: 'RecordsOfWorkByCards',
-          component: RecordsOfWorkByCardsPage,
-          meta: {
-            breadcrumb: { text: 'Запись работы по карточкам' }
+          {
+            path: 'payment_budget_by_departmens',
+            name: 'PaymentBudgetByDepartments',
+            component: PaymentBudgetByDepartmentsPage,
+            meta: {
+              breadcrumb: { text: 'Бюджет оплат по подразделениям' }
+            }
+          },
+
+          {
+            path: 'journal_of_email_sending_payment_documents',
+            name: 'JournalOfEmailSendingPaymentDocuments',
+            component: JournalOfEmailSendingPaymentDocumentsPage,
+            meta: {
+              breadcrumb: { text: 'Журнал рассылки на e-mail документов на оплату' }
+            }
+          },
+
+          {
+            path: 'money_distribution',
+            name: 'MoneyDistribution',
+            component: MoneyDistributionPage,
+            meta: {
+              breadcrumb: { text: 'Распределение ДС по подразделениям' }
+            }
+          },
+
+          {
+            path: 'input_of_balances',
+            name: 'InputOfBalances',
+            component: InputOfBalancesPage,
+            meta: {
+              breadcrumb: { text: 'Ввод остатков по Р/С' }
+            }
+          },
+
+          {
+            path: 'register_of_documents_to_pay',
+            name: 'RegisterOfDocumentsToPay',
+            component: RegisterOfDocumentsToPayPage,
+            meta: {
+              breadcrumb: { text: 'Реестр документов к оплате' }
+            }
+          },
+
+          {
+            path: 'register_of_payments_by_cashbox',
+            name: 'RegisterOfPaymentsByCashbox',
+            component: RegisterOfPaymentsByCashboxPage,
+            meta: {
+              breadcrumb: { text: 'Реестр документов оплат по кассе' }
+            }
           }
+        ]
+      },
+
+      {
+        path: 'technology_of_production_menu',
+        name: 'TechnologyOfProductionMenu',
+        component: TechnologyOfProductionMenuPage,
+        meta: { breadcrumb: { text: 'Меню АРМ Технология производства' } },
+        children: [
+          {
+            path: 'records_of_work_by_cards',
+            name: 'RecordsOfWorkByCards',
+            component: RecordsOfWorkByCardsPage,
+            meta: {
+              breadcrumb: { text: 'Запись работы по карточкам' }
+            }
+          }
+        ]
+      },
+
+      {
+        path: 'supply_menu',
+        name: 'SupplyMenu',
+        component: SupplyMenuPage,
+        meta: {
+          breadcrumb: { text: 'АРМ Снабжение' }
         }
-      ]
-    },
+      },
 
-    {
-      path: 'supply_menu',
-      name: 'SupplyMenu',
-      component: SupplyMenuPage,
-      meta: {
-        breadcrumb: { text: 'АРМ Снабжение' }
-      }
-    },
+      {
+        path: 'commodity_menu',
+        name: 'CommodityMenu',
+        component: CommodityMenuPage,
+        meta: {
+          breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
+        }
+      },
 
-    {
-      path: 'commodity_menu',
-      name: 'CommodityMenu',
-      component: CommodityMenuPage,
-      meta: {
-        breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
-      }
-    },
+      {
+        path: 'commodity_log_of_sewing_plan',
+        name: 'CommodityLogOfSewingPlan',
+        component: CommodityLogOfSewingPlanPage,
+        meta: {
+          breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
+        }
+      },
 
-    {
-      path: 'commodity_log_of_sewing_plan',
-      name: 'CommodityLogOfSewingPlan',
-      component: CommodityLogOfSewingPlanPage,
-      meta: {
-        breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
-      }
-    },
+      {
+        path: 'list_of_commodity_for_sewing_application',
+        name: 'ListOfCommodityForSewingApplication',
+        component: ListOfCommodityForSewingApplicationPage,
+        meta: {
+          breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
+        }
+      },
 
-    {
-      path: 'list_of_commodity_for_sewing_application',
-      name: 'ListOfCommodityForSewingApplication',
-      component: ListOfCommodityForSewingApplicationPage,
-      meta: {
-        breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
-      }
-    },
+      {
+        path: 'requisition_log_to_supplier',
+        name: 'RequisitionLogToSupplier',
+        component: RequisitionLogToSupplierPage,
+        meta: {
+          breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
+        }
+      },
 
-    {
-      path: 'requisition_log_to_supplier',
-      name: 'RequisitionLogToSupplier',
-      component: RequisitionLogToSupplierPage,
-      meta: {
-        breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
-      }
-    },
+      {
+        path: 'stock_balance',
+        name: 'StockBalance',
+        component: StockBalancePage,
+        meta: {
+          breadcrumb: { text: 'Складские остатки' }
+        }
+      },
 
-    {
-      path: 'stock_balance',
-      name: 'StockBalance',
-      component: StockBalancePage,
-      meta: {
-        breadcrumb: { text: 'Складские остатки' }
-      }
-    },
+      {
+        path: 'materials',
+        name: 'Materials',
+        component: MaterialsPage,
+        meta: {
+          breadcrumb: { text: 'АРМ Снабжение / Сырье (Закупки)' }
+        }
+      },
 
-    {
-      path: 'materials',
-      name: 'Materials',
-      component: MaterialsPage,
-      meta: {
-        breadcrumb: { text: 'АРМ Снабжение / Сырье (Закупки)' }
-      }
-    },
-
-    {
-      path: 'warehouse_inventory',
-      name: 'WarehouseInventory',
-      component: WarehouseInventoryPage,
-      meta: {
-        breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
-      }
-    }]
+      {
+        path: 'warehouse_inventory',
+        name: 'WarehouseInventory',
+        component: WarehouseInventoryPage,
+        meta: {
+          breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
+        }
+      }]
   },
 
   {
