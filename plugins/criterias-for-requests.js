@@ -893,6 +893,13 @@ Vue.mixin({
         }
 
         return data
+      },
+
+      createCriteriasToSearchOrgForRecordsOfWorkByCardsForm() {
+        return {
+          params: { descr: 'Larisa' },
+          procName: 'dbo.sel_proizv_our'
+        }
       }
-    },
+    }
 })

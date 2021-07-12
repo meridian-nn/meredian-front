@@ -1,6 +1,36 @@
 <template>
   <div class="records-of-work-by-cards-main-div">
     <div class="records-of-work-by-cards-row">
+      <div class="records-of-work-by-cards-header-btn">
+        <v-btn
+          color="blue"
+          class="mx-2"
+          fab
+          dark
+          x-small
+          @click="showJournalOfSewingOrders"
+        >
+          <v-icon dark>
+            mdi-plus
+          </v-icon>
+        </v-btn>
+      </div>
+
+      <div class="records-of-work-by-cards-header-btn">
+        <v-btn
+          color="blue"
+          class="mx-2"
+          fab
+          dark
+          x-small
+          @click="editRecord"
+        >
+          <v-icon dark>
+            mdi-file-edit
+          </v-icon>
+        </v-btn>
+      </div>
+
       <div class="records-of-work-by-cards-label">
         <v-subheader class="font-weight-medium text-subtitle-1">
           Месяц
@@ -45,7 +75,7 @@
           :loading="loadingType.organizations"
           :items="organizations"
           item-value="id"
-          item-text="clName"
+          item-text="name_podr"
           hide-details="auto"
           outlined
         />
@@ -120,13 +150,13 @@
 
       <div class="records-of-work-by-cards-btn">
         <v-btn @click="updateRecordsInfo">
-          Обновить данные
+          Обновить данные с отбором
         </v-btn>
       </div>
 
       <div class="records-of-work-by-cards-btn">
         <v-btn @click="updateRecordsInfoWithoutUserCriterias">
-          Не использовать отбор
+          Обновить данные без отбора
         </v-btn>
       </div>
 
@@ -158,11 +188,13 @@
                 v-for="item in items"
                 :key="item.id"
                 :value="item"
+                :class="getBackgroundClass(item.tmkId)"
               >
                 <td>
                   <v-checkbox
                     v-model="recordsSelectedRows"
                     :value="item"
+                    color="black"
                     hide-details
                   />
                 </td>
@@ -317,13 +349,13 @@ export default {
         {
           text: 'Наименование изделия',
           value: 'nameMc',
-          width: '80px',
+          width: '70px',
           sort: () => false
         },
         {
           text: 'Заявка',
           value: 'numZaivk',
-          width: '40px',
+          width: '50px',
           sort: () => false
         },
         {
@@ -359,6 +391,15 @@ export default {
           'property': item
         }
       })
+    },
+
+    getBackgroundClass() {
+      return (tmkId) => {
+        return {
+          'records-of-work-by-cards-td-white-background-class': tmkId === 0,
+          'records-of-work-by-cards-td-green-background-class': tmkId !== 0
+        }
+      }
     }
   },
 
@@ -371,6 +412,14 @@ export default {
       this.elementId = this.getIdOfRecordsTableOfRecordsOfWorkByCards()
       this.findOrganizations()
       this.getTenLastYears()
+    },
+
+    showJournalOfSewingOrders() {
+      this.$refs.userNotification.showUserNotification('success', 'Переход на форму "Журнал заказов на пошив"')
+    },
+
+    editRecord() {
+      this.$refs.userNotification.showUserNotification('success', 'Редактирование текущей записи')
     },
 
     updateInfo() {
@@ -411,7 +460,9 @@ export default {
     // поиск организаций для выбора пользователем
     async findOrganizations() {
       this.loadingType.organizations = true
-      this.organizations = await this.$api.organizations.findInternalOrganizations()
+      const searchCriterias = this.createCriteriasToSearchOrgForRecordsOfWorkByCardsForm()
+      this.organizations = await this.$api.service.executeStashedFunctionWithReturnedDataSet(searchCriterias)
+      // await this.$api.organizations.findInternalOrganizations()
       this.loadingType.organizations = null
     },
 
@@ -505,6 +556,10 @@ export default {
   margin-top: 5px
 }
 
+.records-of-work-by-cards-header-btn {
+  margin-top: 12px
+}
+
 .records-of-work-by-cards-btn {
   padding-top: 10px;
   margin-right: 10px;
@@ -563,15 +618,19 @@ export default {
   height: 0 !important;
 }
 
-#records-of-work-by-cards-table-of-records   tr:nth-child(even){background-color: #f2f2f2;}
-
-#records-of-work-by-cards-table-of-records   tr:hover {background-color: #ddd;}
-
 #records-of-work-by-cards-table-of-records  th {
   padding-top: 12px;
   padding-bottom: 12px;
   text-align: left;
   background-color: #639db1 !important;
   color: white;
+}
+
+.records-of-work-by-cards-td-white-background-class{
+  background-color: white;
+}
+
+.records-of-work-by-cards-td-green-background-class{
+  background-color: green;
 }
 </style>
