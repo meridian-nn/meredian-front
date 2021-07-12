@@ -30,7 +30,6 @@ export default {
 
   getters: {
     hasUser: state => (params) => {
-      // eslint-disable-next-line max-len
       return state.users.find(user => user.login === params.login && user.password === params.password ? user : false)
     }
   }

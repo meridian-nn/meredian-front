@@ -11,15 +11,15 @@ export const factory = send => ({
             },
 
             get() {
-                return send('GET', '/auth/findByCurrentLogin')
+              return send('GET', '/auth/findByCurrentLogin')
             },
 
             getRolesOfCurrentUser(id) {
-                return send('GET', `/auth/findRolesByUserId?userId=${id}`)
+              return send('GET', `/auth/findRolesByUserId?userId=${id}`)
             },
 
             saveNewUser(params) {
-                return send('POST', `/auth/editUser?email=${params.email}&enabled=${params.enabled}&department.id=${params.departmentId}&fullName=${params.fullName}&login=${params.login}&organization=${params.organization}&password=${params.password}&phone=${params.phone}&position=${params.position}&${new URLSearchParams('roles[0].id').toString()}7`)
+              return send('POST', `/auth/editUser?email=${params.email}&enabled=${params.enabled}&department.id=${params.departmentId}&fullName=${params.fullName}&login=${params.login}&organization=${params.organization}&password=${params.password}&phone=${params.phone}&position=${params.position}&${new URLSearchParams('roles[0].id').toString()}7`)
             },
 
             saveNewUserByPost(params) {
@@ -27,11 +27,11 @@ export const factory = send => ({
             },
 
             editUser(params) {
-                return send('POST', `/auth/editUser?${new URLSearchParams(params)}`)
+              return send('POST', `/auth/editUser?${new URLSearchParams(params)}`)
             },
 
             getUsersBySearchCriterias(params) {
-                return send('POST', '/auth/findBySearchCriteriaList', params)
+              return send('POST', '/auth/findBySearchCriteriaList', params)
             },
 
             findById(id) {
@@ -55,7 +55,23 @@ export const factory = send => ({
             findBySearchCriteria(params) {
               return send('POST', `/auth/findBySearchCriteria`, params)
             }
-        }
+        },
+
+        role: {
+          get() {
+            return send('GET', '/auth/appRole/findAll')
+          },
+
+          save(params) {
+            return send('POST', '/auth/appRole/save', params)
+          }
+        },
+
+        privilege: {
+          get() {
+            return send('GET', '/auth/appPrivilege/findAll')
+          }
+        },
     },
 
     departments: {
@@ -207,6 +223,10 @@ export const factory = send => ({
 
         findPaymentsByCashboxByPageWithCriterias(params) {
           return send('POST', `/oper/payment/findPageBySearchCriteriaList`, params)
+        },
+
+        deletePaymentUrl(params) {
+          return send('POST', '/oper/payment/delete', params)
         },
 
         getDeletePaymentUrl() {
@@ -393,7 +413,7 @@ export const factory = send => ({
             },
 
             deleteSelectedPayments(params) {
-              return send('POST', this.getDeletePaymentUrl(), params)
+              return send('POST', '/oper/spDocopl/deletePayment', params)
             },
 
             getDeletePaymentUrl() {
@@ -420,6 +440,10 @@ export const factory = send => ({
                 return send('POST', '/oper/spDocopl/saveSpDocch', params)
             },
 
+            deleteInternalPaymentDocument(params) {
+              return send('POST', '/oper/spDocopl/deleteInternalPayment', params)
+            },
+
             getDeleteInternalPaymentDocument() {
               return '/oper/spDocopl/deleteInternalPayment'
             }
@@ -431,6 +455,9 @@ export const factory = send => ({
             },
             findByDepartmentId(params) {
                 return send('GET', `/oper/depMoneyDistribution/findByDepartmentId?${new URLSearchParams(params).toString()}`)
+            },
+            findByDepartments(params) {
+              return send('GET', `/oper/depMoneyDistribution/findByDepartmentId?${new URLSearchParams(params).toString()}`)
             },
             findForEdit(params) {
                 return send('GET', `/oper/depMoneyDistribution/findForEdit?${new URLSearchParams(params).toString()}`)

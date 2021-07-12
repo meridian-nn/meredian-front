@@ -567,11 +567,7 @@ export default {
     async addPayments() {
       const ids = this.fromPaySelectedRows.map(value => value.id)
       const data = { ids, accId: this.accId }
-      /* await this.$api.payment.payDocument(data).catch((error) => {
-          const errorMessage = error
-          alert(errorMessage)
-        }) */
-      await this.$axios.$post(this.$api.payment.getPayDocumentUrl(), data)
+      await this.$api.payment.payDocument(data)
     },
     countSumOfArrayElements(array) {
       let sum = 0
@@ -657,8 +653,7 @@ export default {
       }
 
       const ids = selectedRows.map(value => value.id)
-      // await this.$api.payment.DocOplForPay.deleteSelectedPayments(ids)
-      await this.$axios.$post(this.$api.payment.getDeletePaymentUrl(), ids)
+      await this.$api.payment.DocOplForPay.deleteSelectedPayments(ids)
 
       await this.updateDocsForPay()
     },

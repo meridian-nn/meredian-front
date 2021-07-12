@@ -130,7 +130,19 @@
         <v-breadcrumbs
           class="white--text"
           :items="breadcrumbs"
-        />
+        >
+          <template #item="{ item }">
+            <v-breadcrumbs-item
+              active-class="tmp"
+              :link="item.link"
+              :href="item.href"
+              :to="{ name: item.name }"
+              :disabled="item.disabled"
+            >
+              {{ item.text }}
+            </v-breadcrumbs-item>
+          </template>
+        </v-breadcrumbs>
 
         <v-spacer />
 
@@ -172,31 +184,37 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item
-              v-if="isAdmin()"
-              :to="{ name: 'RegistrationPage' }"
-            >
-              <v-icon class="mr-2">
-                mdi-account-check
-              </v-icon>
+            <template v-if="isAdmin">
+              <v-list-item :to="{ name: 'RoleEditPage' }">
+                <v-icon class="mr-2">
+                  mdi-account-key
+                </v-icon>
 
-              <v-list-item-title>
-                Регистрация пользователя
-              </v-list-item-title>
-            </v-list-item>
+                <v-list-item-title>
+                  Роли
+                </v-list-item-title>
+              </v-list-item>
 
-            <v-list-item
-              v-if="isAdmin()"
-              :to="{ name: 'UsersEditingPage' }"
-            >
-              <v-icon class="mr-2">
-                mdi-account-edit
-              </v-icon>
+              <v-list-item :to="{ name: 'RegistrationPage' }">
+                <v-icon class="mr-2">
+                  mdi-account-check
+                </v-icon>
 
-              <v-list-item-title>
-                Редактирование аккаунтов пользователей
-              </v-list-item-title>
-            </v-list-item>
+                <v-list-item-title>
+                  Регистрация пользователя
+                </v-list-item-title>
+              </v-list-item>
+
+              <v-list-item :to="{ name: 'UsersEditingPage' }">
+                <v-icon class="mr-2">
+                  mdi-account-edit
+                </v-icon>
+
+                <v-list-item-title>
+                  Редактирование аккаунтов пользователей
+                </v-list-item-title>
+              </v-list-item>
+            </template>
 
             <v-list-item
               href="#"
@@ -272,7 +290,15 @@ export default {
 
       matched.forEach(function(route, i, arr) {
         if (route?.meta?.breadcrumb) {
-          crumbs.push({ ...route.meta.breadcrumb, href: route.path, disabled: i === arr.length - 1 })
+          if (Array.isArray(route?.meta?.breadcrumb)) {
+            const tmpArray = route.meta.breadcrumb.map((item) => {
+              return { ...item, href: item.path, disabled: i === arr.length - 1, link: false }
+            })
+
+            crumbs.push(...tmpArray)
+          } else {
+            crumbs.push({ ...route.meta.breadcrumb, href: route.path, name: route.name, disabled: i === arr.length - 1, link: true })
+          }
         }
       })
 

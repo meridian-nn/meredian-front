@@ -460,21 +460,17 @@ export default {
       this.budget.distributionDate = this.getDateForSave()
 
       // Сохранение распределения бюджета на отделы
-      // await this.$api.payment.moneyDistributionByDepartments.save([this.budget])
-      await this.$axios.$post(this.$api.payment.moneyDistributionByDepartments.getSaveUrl(), this.budget)
+      await this.$api.payment.moneyDistributionByDepartments.save([this.budget])
 
       if (this.department.department) {
         this.department.distributionSum = this.depDistributionSum || 0
         this.department.distributedSum = this.depDistributedSum || 0
 
         // Сохранение распределения бюджета на выбранный отдел
-        // await this.$api.payment.moneyDistributionByDepartments.save([this.department])
-        await this.$axios.$post(this.$api.payment.moneyDistributionByDepartments.getSaveUrl(), this.department)
+        await this.$api.payment.moneyDistributionByDepartments.save([this.department])
 
-        //  await this.findByDepartmentId(this.department.department.id)
         // Сохранение распределения бюджета на подразделения отдела
-        // await this.$api.payment.moneyDistributionByDepartments.save(this.moneyDistributionData)
-        await this.$axios.$post(this.$api.payment.moneyDistributionByDepartments.getSaveUrlForDepartments(), this.moneyDistributionData)
+        await this.$api.payment.moneyDistributionByDepartments.save(this.moneyDistributionData)
       }
 
       await this.findBudgetByDate()

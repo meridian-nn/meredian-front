@@ -128,7 +128,7 @@ Vue.mixin({
             paymentAccountOfReceiver
           ]
 
-          await this.$axios.$post(this.$api.payment.balanceOfPaymentAccount.getSaveAllUrl(), arrayOfPaymentAccountsForSave)
+          await this.$api.payment.balanceOfPaymentAccount.saveAll(arrayOfPaymentAccountsForSave)
         },
 
         getConfigForDeleteMethods(){
