@@ -1,5 +1,8 @@
 <template>
-  <div class="records-of-work-by-cards-main-div">
+  <div
+    v-if="isRecordsOfWorkByCards"
+    class="records-of-work-by-cards-main-div"
+  >
     <div class="records-of-work-by-cards-row">
       <div class="records-of-work-by-cards-header-btn">
         <v-btn
@@ -101,7 +104,7 @@
         </v-subheader>
       </div>
 
-      <div class="records-of-work-by-cards-indentation-for-inputs ">
+      <div class="records-of-work-by-cards-indentation-for-inputs">
         <v-text-field
           v-model.number="numberOfOrder"
           hide-details="auto"
@@ -115,7 +118,7 @@
         </v-subheader>
       </div>
 
-      <div class="records-of-work-by-cards-indentation-for-inputs ">
+      <div class="records-of-work-by-cards-indentation-for-inputs">
         <v-text-field
           v-model.number="numberOfApplication"
           hide-details="auto"
@@ -128,7 +131,7 @@
         </v-subheader>
       </div>
 
-      <div class="records-of-work-by-cards-indentation-for-inputs ">
+      <div class="records-of-work-by-cards-indentation-for-inputs">
         <v-text-field
           v-model.number="code"
           hide-details="auto"
@@ -247,6 +250,10 @@
       </div>
     </div>
   </div>
+
+  <div v-else>
+    <router-view />
+  </div>
 </template>
 
 <script>
@@ -307,49 +314,49 @@ export default {
         {
           text: 'Заказ',
           value: 'numZkzpsv',
-          width: '64px',
+          width: '25px',
           sort: () => false
         },
         {
           text: 'ТП',
           value: 'posledCode',
-          width: '40px',
+          width: '25px',
           sort: () => false
         },
         {
           text: 'Наименование ТП',
           value: 'namePosled',
-          width: '100px',
+          width: '140px',
           sort: () => false
         },
         {
           text: 'Количество',
           value: 'colvoMc',
-          width: '60px',
+          width: '30px',
           sort: () => false
         },
         {
           text: 'Образец',
           value: 'obraz',
-          width: '50px',
+          width: '25px',
           sort: () => false
         },
         {
           text: 'Коэффициент',
           value: 'coeff',
-          width: '70px',
+          width: '35px',
           sort: () => false
         },
         {
           text: 'Код',
           value: 'mcId',
-          width: '40px',
+          width: '25px',
           sort: () => false
         },
         {
           text: 'Наименование изделия',
           value: 'nameMc',
-          width: '70px',
+          width: '140px',
           sort: () => false
         },
         {
@@ -361,7 +368,7 @@ export default {
         {
           text: 'Схема разделения',
           value: 'nameScheme',
-          width: '90px',
+          width: '50px',
           sort: () => false
         }
       ],
@@ -400,6 +407,10 @@ export default {
           'records-of-work-by-cards-td-green-background-class': tmkId !== 0
         }
       }
+    },
+
+    isRecordsOfWorkByCards() {
+      return this.$route.matched[this.$route.matched.length - 1].name === 'RecordsOfWorkByCards'
     }
   },
 
@@ -419,6 +430,7 @@ export default {
     },
 
     editRecord() {
+      this.$router.push({ name: 'RecordsOfWorkOnOrder' })
       this.$refs.userNotification.showUserNotification('success', 'Редактирование текущей записи')
     },
 
@@ -575,7 +587,7 @@ export default {
 }
 
 .records-of-work-by-cards-autocomplete-organizations {
-  width:400px;
+  width:340px;
   margin-right: 10px;
   margin-top: 5px
 }
@@ -594,7 +606,7 @@ export default {
 
 .records-of-work-by-cards-indentation-for-inputs {
   margin-right: 10px;
-  width: 95px;
+  width: 64px;
 }
 
 .records-of-work-by-cards-bottom-spacer{

@@ -109,6 +109,9 @@ const TechnologyOfProductionMenuPage = dynamicPage(() =>
 const RecordsOfWorkByCardsPage = dynamicPage(() =>
   import('~/views/vcrm/TechnologyOfProduction/RecordsOfWorkByCards'))
 
+const RecordsOfWorkOnOrderPage = dynamicPage(() =>
+  import('~/views/vcrm/TechnologyOfProduction/RecordsOfWorkOnOrder'))
+
 Vue.use(Router)
 
 const createRouterConst = new Router({
@@ -291,7 +294,17 @@ const createRouterConst = new Router({
               component: RecordsOfWorkByCardsPage,
               meta: {
                 breadcrumb: { text: 'Запись работы по карточкам' }
-              }
+              },
+              children: [
+                {
+                  path: 'records_of_work_on_order',
+                  name: 'RecordsOfWorkOnOrder',
+                  component: RecordsOfWorkOnOrderPage,
+                  meta: {
+                    breadcrumb: { text: 'Запись работы по заказу' }
+                  }
+                }
+              ]
             }
           ]
         },
