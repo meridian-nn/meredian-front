@@ -141,7 +141,7 @@
         >
           <v-list>
             <v-list-item
-              v-if="isHaveBudgetRole()"
+              v-if="isHaveBudgetRole"
               @click="payDocumentForContextMenuOnly"
             >
               <v-list-item-title>
@@ -202,7 +202,7 @@
           </v-btn>
 
           <div
-            v-if="isHaveBudgetRole()"
+            v-if="isHaveBudgetRole"
             class="add-group"
           >
             <label
@@ -771,7 +771,7 @@ export default {
     // Поиск документов для таблицы "Документы на оплату" по выбранной организации
     async findSpDocoplForPay($state) {
       const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
-        this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs(), this.getCurrentUser().id)
+        this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs(), this.getCurrentUser.id)
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
       let filtersParams
 

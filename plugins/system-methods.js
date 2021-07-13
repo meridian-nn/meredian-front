@@ -20,7 +20,7 @@ Vue.mixin({
         async findDefaultOrgAndAccIdForUser() {
           const formAndElementIdsOfOrgAndAccIds = this.getObjectWithFormIdAndElementIdForDefaultOrgAndAcc()
           const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(formAndElementIdsOfOrgAndAccIds.formId,
-            formAndElementIdsOfOrgAndAccIds.elementId, this.getCurrentUser().id)
+            formAndElementIdsOfOrgAndAccIds.elementId, this.getCurrentUser.id)
           const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
           let filtersParams = {}
 

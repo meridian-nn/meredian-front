@@ -39,7 +39,12 @@ export default class HttpClient {
   async call(url, config) {
     const response = await fetch(url, config)
       .then((res) => {
-        const json = res.json()
+        let json
+        if (res.headers.get('Content-Type') === 'application/json') {
+          json = res.json()
+        } else {
+          json = res.text()
+        }
 
         if (res.ok) {
           return json

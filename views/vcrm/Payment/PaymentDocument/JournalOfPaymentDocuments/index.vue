@@ -1,7 +1,7 @@
 <template>
   <div class="journal-of-payment-docs-main-div">
-    <journalOfPaymentDocumentsTables v-if="isHaveBudgetRole()" />
-    <from-pay-documents v-else-if="isHaveJournalRole()" />
+    <journalOfPaymentDocumentsTables v-if="isHaveBudgetRole" />
+    <from-pay-documents v-else-if="isHaveJournalRole" />
   </div>
 </template>
 
