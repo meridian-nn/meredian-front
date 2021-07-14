@@ -43,7 +43,7 @@
       <div class="money-distribution-not-allocated-sum">
         <v-subheader class="font-weight-medium text-subtitle-1">
           <vue-numeric
-            :value="budgetDistributedSum"
+            :value="budgetNotDistributedSum"
             separator="space"
             :precision="2"
             decimal-separator="."
@@ -91,7 +91,7 @@
     <div class="money-distribution-dep-row">
       <div class="money-distribution-dep-col">
         <v-autocomplete
-          v-model="selectedDep"
+          v-model="selectedDepId"
           label="Отдел"
           :loading="loadingType.departments"
           :items="departments"
@@ -140,7 +140,6 @@
           </div>
         </v-subheader>
       </div>
-
     </div>
 
     <div class="money-distribution-dep-row">
@@ -247,21 +246,24 @@ export default {
       budget: {},
       // сумма выделенного бюджета на выбранную дату
       budgetDistributionSum: 0,
+
       // сумма распределенного бюджета на выбранную дату
-      budgetDistributedSum: 0,
+      budgetNotDistributedSum: 0,
+
+      // id выбранного отдела
+      selectedDepId: null,
 
       // выбранный отдел с информацией по бюджету
-      department: {},
+      selectedDepartment: {},
+
       // сумма выделенного бюджета на отделу
       depDistributionSum: 0,
+
       // сумма распределенного бюджета по отделу
       depDistributedSum: 0,
 
       // признак, показывающий что не распределенный бюджет по отделу меньше 0
       notDistributedLessThenZero: false,
-
-      // id выбранного отдела
-      selectedDep: null,
 
       // массив отделов для выбора пользователем
       departments: [],
@@ -286,12 +288,13 @@ export default {
         datepickerOptions: {
           showDropdowns: true,
           autoUpdateInput: true
-        }
+        },
+        uniqueKey: 'keyId'
       },
 
       // таблица данных по распределению общего бюджета по отделам
       departmentsDataTable: [],
-      departmentsColumns: ['name', 'distributionSum', 'notDistributedSum'],
+      departmentsColumns: ['name', 'distributionSumMask', 'notDistributedSumMask'],
       departmentsOptions: {
         filterable: false,
         pagination: { show: false },
@@ -299,8 +302,8 @@ export default {
         filterByColumn: false,
         headings: {
           name: 'Отдел',
-          distributionSum: 'Выделено',
-          notDistributedSum: 'Не распределено'
+          distributionSumMask: 'Выделено',
+          notDistributedSumMask: 'Не распределено'
         }
       }
     }
@@ -344,44 +347,61 @@ export default {
         : this.moneyDistributionData.reduce((acc, item) => { return acc + item.distributionSum || 0 }, 0)
     },
 
-    init() {
-      this.findDepartments()
-      this.department = {}
-      this.findDepOfCurrentUser()
-      this.findBudgetByDate()
+    async init() {
+      await this.findDepartments()
+      this.selectedDepartment = {}
+      await this.findDepOfCurrentUser()
+      await this.findBudgetByDate()
     },
 
     findDepOfCurrentUser() {
       const currentUser = this.getCurrentUser()
       if (currentUser.department) {
-        this.selectedDep = currentUser.department.id
+        this.selectedDepId = currentUser.department.id
       }
     },
 
     // Обновление информации на форме при изменении даты
-    updateAllInfo() {
-      this.init()
+    async updateAllInfo() {
+      await this.init()
 
-      if (this.selectedDep) {
-        this.departmentChange(this.selectedDep)
+      if (this.selectedDepId) {
+        await this.departmentChange(this.selectedDepId)
       }
     },
 
     // Поиск бюджета на распределение на выбранную дату
     async findBudgetByDate() {
-      const data = {
-        distributionDate: new Date(this.date).toLocaleDateString()
+      const searchCriterias = this.createCriteriasForSearchBudgetByDate(this.date)
+      const response = await this.$api.payment.moneyDistributionByDepartments.findBySearchCriterias(searchCriterias)
+      if (response.length === 0) {
+        this.budgetDistributionSum = 0
+        this.budgetNotDistributedSum = 0 - this.calcTotalOfDistributionSumByDep()
+      } else {
+        this.budget = response[0]
+
+        if (this.budget.distributionSum) {
+          this.budgetDistributionSum = this.budget.distributionSum
+        } else {
+          this.budgetDistributionSum = 0
+        }
+
+        this.budgetNotDistributedSum = this.budget.distributionSum - this.calcTotalOfDistributionSumByDep()
       }
-      this.budget = await this.$api.payment.moneyDistributionByDepartments.findBudgetByDate(data)
-      this.budgetDistributionSum = this.budget.distributionSum
-      this.budgetDistributedSum = this.budget.distributionSum - this.budget.distributedSum
+    },
+
+    calcTotalOfDistributionSumByDep() {
+      return this.departmentsDataTable.reduce((acc, item) => {
+        return acc + Number(item.distributionSum) || 0
+      }, 0)
     },
 
     // Поиск отделов для выбора пользователем на форме
     async findDepartments() {
       if (!this.departments.length) {
         this.loadingType.departments = true
-        this.departments = await this.$api.budgetElements.findDepartments()
+        const searchCriterias = this.createCriteriaToSearchMainDepartments()
+        this.departments = await this.$api.budgetElements.findDepartmentsBySearchCriterias(searchCriterias)
         this.loadingType.departments = null
       }
 
@@ -390,35 +410,13 @@ export default {
 
     // Поиск информации о бюджетах всех отделов для демонстрации в таблице departmentsDataTable
     async findInfoForDepDataTable(departments = this.departments) {
-      const departmentsDataTable = []
+      const searchCriteriasForMoneyDistrByDeps = this.createCriteriasToSearchMoneyDistributionByDepartments(this.date, departments)
+      // eslint-disable-next-line vue/max-len
+      const moneyDistrByDepsResponse = await this.$api.payment.moneyDistributionByDepartments.findBySearchCriterias(searchCriteriasForMoneyDistrByDeps)
 
-      const arrayOfPromises = departments.map((dep) => {
-        return this.getInfoAboutDepById(dep.id)
-      })
-
-      await Promise.all(arrayOfPromises).then((results) => {
-        results.forEach((result) => {
-          const distSum = result.distributionSum || 0
-          const notDistSum = distSum - result.distributedSum || 0
-
-          departmentsDataTable.push({
-            name: result.department.nameViddoc,
-            distributionSum: this.numberToSum(distSum),
-            notDistributedSum: this.numberToSum(notDistSum)
-          })
-        })
-      })
-      return departmentsDataTable
-    },
-
-    async getInfoAboutDepById(id) {
-      if (id) {
-        const data = {
-          distributionDate: new Date(this.date).toLocaleDateString(),
-          departmentId: id
-        }
-        return await this.$api.payment.moneyDistributionByDepartments.findByDepartmentId(data)
-      }
+      const searchCriteriasForMoneyDistrByDivisions = this.createParamsToSearchMoneyDistributionByDepParents(this.date, departments)
+      const moneyDistrByDivisionsResponse = await this.$api.payment.moneyDistributionByDepartments.groupBy(searchCriteriasForMoneyDistrByDivisions)
+      return this.convertMoneyDistributionByDepToDataForTable(moneyDistrByDepsResponse, moneyDistrByDivisionsResponse, departments)
     },
 
     // Обработка события "Выбор отдела пользователем на форме"
@@ -426,50 +424,57 @@ export default {
       await this.findByDepartmentId(depId)
       await this.loadMoneyDistribution(depId)
 
-      this.depDistributedSum = this.department.distributedSum
-      this.depDistributionSum = this.department.distributionSum
+      this.depDistributedSum = this.selectedDepartment.distributedSum
+      this.depDistributionSum = this.selectedDepartment.distributionSum
     },
 
     // Поиск информации по выбранному подразделению
-    async findByDepartmentId(id) {
-      const data = {
-        distributionDate: new Date(this.date).toLocaleDateString(),
-        departmentId: id
+    async findByDepartmentId(depId) {
+      const searchCriterias = this.createCriteriasToSearchMoneyDistributionByDepId(depId, this.date)
+      const response = await this.$api.payment.moneyDistributionByDepartments.findBySearchCriterias(searchCriterias)
+
+      if (response.length > 0) {
+        this.selectedDepartment = response[0]
+      } else {
+        this.selectedDepartment = {
+          department: {
+            id: this.selectedDepId
+          },
+          distributionDate: this.getDateForSave(),
+          distributionSum: 0,
+          distributedSum: 0
+        }
       }
-      this.department = await this.$api.payment.moneyDistributionByDepartments.findByDepartmentId(data)
     },
 
     // Поиск информации о распределении бюджета на подразделения выбранного отдела
-    async loadMoneyDistribution(id) {
-      const data = {
-        parentId: id,
-        distributionDate: new Date(this.date).toLocaleDateString()
-      }
-
-      const moneyDistributionByDepartments = await this.$api.payment.moneyDistributionByDepartments.findForEdit(data)
-
-      this.moneyDistributionData = moneyDistributionByDepartments.map((item) => {
-        return { ...item, distributionSum: item?.distributionSum || 0 }
-      })
+    async loadMoneyDistribution(depParentId) {
+      const searchCriteriasForDivisions = this.createCriteriasToSearchDivisions(depParentId)
+      const divisions = await this.$api.budgetElements.findDepartmentsBySearchCriterias(searchCriteriasForDivisions)
+      const searchCriteriasForMoneyDistribution = this.createCriteriasToSearchMoneyDistributionByDepParentId(depParentId, this.date)
+      const moneyDistributionByDivisions = await this.$api.payment.moneyDistributionByDepartments.findBySearchCriterias(
+        searchCriteriasForMoneyDistribution)
+      // eslint-disable-next-line vue/max-len
+      this.moneyDistributionData = this.convertMoneyDistributionsByDivisionsInDataForTable(divisions, moneyDistributionByDivisions, this.getDateForSave())
     },
 
     // Обработка события сохранения распределения бюджетов на форме
     async save() {
       this.budget.distributionSum = this.budgetDistributionSum
-      this.budget.distributedSum = this.budgetDistributedSum
+      this.budget.distributedSum = null
       this.budget.distributionDate = this.getDateForSave()
 
       // Сохранение распределения бюджета на отделы
       // await this.$api.payment.moneyDistributionByDepartments.save([this.budget])
       await this.$axios.$post(this.$api.payment.moneyDistributionByDepartments.getSaveUrl(), this.budget)
 
-      if (this.department.department) {
-        this.department.distributionSum = this.depDistributionSum || 0
-        this.department.distributedSum = this.depDistributedSum || 0
+      if (this.selectedDepartment.department) {
+        this.selectedDepartment.distributionSum = this.depDistributionSum || 0
+        this.selectedDepartment.distributedSum = this.depDistributedSum || 0
 
         // Сохранение распределения бюджета на выбранный отдел
         // await this.$api.payment.moneyDistributionByDepartments.save([this.department])
-        await this.$axios.$post(this.$api.payment.moneyDistributionByDepartments.getSaveUrl(), this.department)
+        await this.$axios.$post(this.$api.payment.moneyDistributionByDepartments.getSaveUrl(), this.selectedDepartment)
 
         //  await this.findByDepartmentId(this.department.department.id)
         // Сохранение распределения бюджета на подразделения отдела
@@ -477,11 +482,11 @@ export default {
         await this.$axios.$post(this.$api.payment.moneyDistributionByDepartments.getSaveUrlForDepartments(), this.moneyDistributionData)
       }
 
-      await this.findBudgetByDate()
       await this.findDepartments()
-      if (this.department.department) {
-        await this.findByDepartmentId(this.department.department.id)
-        await this.loadMoneyDistribution(this.department.department.id)
+      await this.findBudgetByDate()
+      if (this.selectedDepartment.department) {
+        await this.findByDepartmentId(this.selectedDepartment.department.id)
+        await this.loadMoneyDistribution(this.selectedDepartment.department.id)
       }
     },
 
@@ -606,7 +611,15 @@ export default {
   background: none;
 }
 
-.money-distribution-brise-input input:focus ~ label, input:valid ~ label  {
+.money-distribution-brise-input label {
+  position: absolute;
+  left: 10px;
+  top: 45%;
+  transition: ease-out .15s;
+  color: #999;
+}
+
+.money-distribution-brise-input input:valid ~ label, input:focus ~ label  {
   top: 0;
   transform: scale(0.94) translateX(-2px);
   color: #639db1;
@@ -627,14 +640,6 @@ export default {
 .money-distribution-brise-input input:focus ~ .line {
   left: 0;
   opacity: 1;
-}
-
-.money-distribution-brise-input label {
-  position: absolute;
-  left: 10px;
-  top: 45%;
-  transition: ease-out .15s;
-  color: #999;
 }
 
 .money-distribution-not-allocated-text{
