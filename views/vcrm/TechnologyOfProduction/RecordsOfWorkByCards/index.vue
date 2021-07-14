@@ -153,13 +153,13 @@
 
       <div class="records-of-work-by-cards-btn">
         <v-btn @click="updateRecordsInfo">
-          Обновить данные с отбором
+          <v-icon>mdi-binoculars</v-icon>
         </v-btn>
       </div>
 
       <div class="records-of-work-by-cards-btn">
         <v-btn @click="updateRecordsInfoWithoutUserCriterias">
-          Обновить данные без отбора
+          <v-icon>mdi-binoculars</v-icon> без отбора
         </v-btn>
       </div>
 
@@ -447,7 +447,7 @@ export default {
       }
 
       const filterEntityForSave = this.createFilterEntityForSave(this.elementId, this.$route.name, filterItem,
-        this.getCurrentUser().id, this.getCurrentUser().id)
+        this.getCurrentUser.id, this.getCurrentUser.id)
 
       await this.$api.uiSettings.save(filterEntityForSave)
       this.updateRecordsDataWithUserCriterias = true
@@ -532,7 +532,7 @@ export default {
     async findUserCriteriasAndFillCriteriasFieldsOnForm() {
       let filtersParams
       const paramsToSearchUserCriterias = this.createCriteriasToSearchForFiltersValues(this.$route.name,
-        this.getIdOfRecordsTableOfRecordsOfWorkByCards(), this.getCurrentUser().id)
+        this.getIdOfRecordsTableOfRecordsOfWorkByCards(), this.getCurrentUser.id)
       const response = await this.$api.uiSettings.findBySearchCriterias(paramsToSearchUserCriterias)
 
       if (response.length) {

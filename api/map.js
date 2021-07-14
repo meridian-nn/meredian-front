@@ -444,7 +444,7 @@ export const factory = send => ({
             },
 
             deleteInternalPaymentDocument(params) {
-              return send('POST', '/oper/spDocopl/deleteInternalPayment', params)
+              return send('POST', this.getDeleteInternalPaymentDocument(), params)
             },
 
             getDeleteInternalPaymentDocument() {

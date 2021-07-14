@@ -1011,7 +1011,7 @@ export default {
 
       const ids = this.toPaySelectedRows.map(value => value.id)
       await this.$api.payment.docOplToPay.deleteSelectedPayments(ids)
-      const responseSpOplatSave = await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'DEDUCT')
+      const responseSpOplatSave = await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'DEDUCT', this.date)
 
       await this.refreshTables()
       if (responseSpOplatSave) {
@@ -1108,8 +1108,9 @@ export default {
         const vnplDoc = await this.$api.payment.docOplForPay.findById(vnplDocArr.id)
         vnplDoc.spDocints.sort(this.customCompare('id', -1))
         const spDocint = vnplDoc.spDocints[0]
-        await this.changeVnplOfPaymentAccounts(spDocint.accId, vnplDoc.accId, vnplDoc.sumDoc)
-        await this.$api.payment.docOplForPay.getDeleteInternalPaymentDocument(vnplDoc.id)
+        const dataOfDoc = this.convertLocaleDateStringToDate(vnplDoc.dataDoc)
+        await this.changeVnplOfPaymentAccounts(spDocint.accId, vnplDoc.accId, vnplDoc.sumDoc, dataOfDoc)
+        await this.$api.payment.docOplForPay.deleteInternalPaymentDocument(vnplDoc.id)
         // await this.$axios.$post(this.$api.payment.docOplForPay.getDeleteInternalPaymentDocument(), vnplDoc.id, this.getConfigForDeleteMethods())
       }
     },
@@ -1175,7 +1176,9 @@ export default {
     },
 
     async deletePaymentByCashbox(curRow) {
-      await this.changeSumToPayOfPaymentAccount(curRow.accId, curRow.sumOplat, 'DEDUCT')
+      console.log(curRow.dataOplat)
+      const dateOfDoc = this.convertLocaleDateStringToDate(curRow.dataOplat)
+      await this.changeSumToPayOfPaymentAccount(curRow.accId, curRow.sumOplat, 'DEDUCT', dateOfDoc)
       await this.$api.payment.deletePaymentUrl(curRow.id)
       await this.refreshTables()
       await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)

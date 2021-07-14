@@ -655,7 +655,7 @@ Vue.mixin({
         ]
       },
 
-      createCriteriasToFindTwoPaymentAccounts(firstAccId, secondAccId) {
+      createCriteriasToFindTwoPaymentAccounts(firstAccId, secondAccId, dateOfDoc) {
         return [
           {
             dataType: "VARCHAR",
@@ -681,7 +681,7 @@ Vue.mixin({
             operation: "EQUALS",
             type: "AND",
             values: [
-              new Date().toLocaleDateString()
+              new Date(dateOfDoc).toLocaleDateString()
             ]
           }
         ]

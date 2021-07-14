@@ -70,6 +70,12 @@ Vue.mixin({
           return new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), currentDate.getDate())
         },
 
+        convertLocaleDateStringToDate(date) {
+          const parts = date.split('.')
+          console.log(parts)
+          return new Date(parts[2], parts[1] - 1, parts[0])
+        },
+
         async changeSumToPayOfPaymentAccount(accId, sumOfPaymentDocs, operationType, date) {
           if(sumOfPaymentDocs === 0) {
             return
@@ -96,12 +102,12 @@ Vue.mixin({
           return await this.$api.paymentAccounts.save(paymentAccount)
         },
 
-        async changeVnplOfPaymentAccounts(accIdOfPayer, accIdOfReceiver, sumOfPayment) {
+        async changeVnplOfPaymentAccounts(accIdOfPayer, accIdOfReceiver, sumOfPayment, dateOfDoc) {
           if(sumOfPayment === 0) {
             return
           }
 
-          const searchCriterias = this.createCriteriasToFindTwoPaymentAccounts(accIdOfPayer, accIdOfReceiver)
+          const searchCriterias = this.createCriteriasToFindTwoPaymentAccounts(accIdOfPayer, accIdOfReceiver, dateOfDoc)
           const response = await this.$api.paymentAccounts.findBySearchCriteriaList(searchCriterias)
           let paymentAccountOfPayer
           let paymentAccountOfReceiver

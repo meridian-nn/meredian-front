@@ -268,6 +268,7 @@ export default {
       this.editedItem.sumDocOfEditedItem = this.editedItem.sumDoc
       this.editedItem.typeOfPaymentTransactionId = this.editedItem.paymentOperationSums[0].paymentOperationTypeId
       this.editedItem.prim = this.editedItem.comment
+      this.date = this.editedItem.paymentDate
     },
 
     // функция сохранения оплаты по кассе
@@ -293,8 +294,9 @@ export default {
       })
 
       if (errorMessage == null) {
-        await this.changeSumToPayOfPaymentAccount(this.accIdOfEditedItem, this.editedItem.sumDocOfEditedItem, 'DEDUCT')
-        await this.changeSumToPayOfPaymentAccount(this.accId, this.editedItem.sumDoc, 'SUM')
+        const dateofDoc = this.convertLocaleDateStringToDate(this.editedItem.paymentDate)
+        await this.changeSumToPayOfPaymentAccount(this.accIdOfEditedItem, this.editedItem.sumDocOfEditedItem, 'DEDUCT', dateofDoc)
+        await this.changeSumToPayOfPaymentAccount(this.accId, this.editedItem.sumDoc, 'SUM', dateofDoc)
         this.dialog = false
       }
       this.$emit('save')
@@ -326,7 +328,8 @@ export default {
       })
 
       if (errorMessage == null) {
-        await this.changeSumToPayOfPaymentAccount(this.accId, this.editedItem.sumDoc, 'SUM')
+        const dateofDoc = this.convertLocaleDateStringToDate(this.editedItem.dataDoc)
+        await this.changeSumToPayOfPaymentAccount(this.accId, this.editedItem.sumDoc, 'SUM', dateofDoc)
         this.dialog = false
       }
       this.$emit('save')

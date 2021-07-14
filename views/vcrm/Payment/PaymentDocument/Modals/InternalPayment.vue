@@ -286,6 +286,7 @@ export default {
 
       this.docFromPay = docFromPay
       this.docFromPay.spDocints.sort(this.customCompare('id', -1))
+      this.date = this.docFromPay.dataDoc
       this.spDocint = this.docFromPay.spDocints[0]
       this.sumDocOfEditedDoc = this.docFromPay.sumDoc
       this.spDocintOfEditedDoc = {
@@ -417,7 +418,8 @@ export default {
         alert(errorMessage)
       })
       if (errorMessage == null) {
-        await this.changeVnplOfPaymentAccounts(this.docFromPay.accId, this.spDocint.accId, this.docFromPay.sumDoc)
+        const dataOfDoc = this.convertLocaleDateStringToDate(this.docFromPay.dataDoc)
+        await this.changeVnplOfPaymentAccounts(this.docFromPay.accId, this.spDocint.accId, this.docFromPay.sumDoc, dataOfDoc)
         this.dialog = false
       }
       this.$emit('save')
@@ -432,8 +434,9 @@ export default {
         alert(errorMessage)
       })
       if (errorMessage == null) {
-        await this.changeVnplOfPaymentAccounts(this.spDocintOfEditedDoc.accId, this.docFromPay.accId, this.sumDocOfEditedDoc)
-        await this.changeVnplOfPaymentAccounts(this.docFromPay.accId, this.spDocint.accId, this.docFromPay.sumDoc)
+        const dataOfDoc = this.convertLocaleDateStringToDate(this.docFromPay.dataDoc)
+        await this.changeVnplOfPaymentAccounts(this.spDocintOfEditedDoc.accId, this.docFromPay.accId, this.sumDocOfEditedDoc, dataOfDoc)
+        await this.changeVnplOfPaymentAccounts(this.docFromPay.accId, this.spDocint.accId, this.docFromPay.sumDoc, dataOfDoc)
         this.dialog = false
       }
       this.$emit('save')
