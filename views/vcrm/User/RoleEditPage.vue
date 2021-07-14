@@ -1,5 +1,21 @@
 <template>
   <div class="role-edit-page">
+    <div class="role-edit-page__head">
+      <v-btn
+        color="primary"
+        @click="openModalCreate"
+      >
+        Создать роль
+      </v-btn>
+
+      <v-btn
+        color="primary"
+        @click="openModalCreatePrivilege"
+      >
+        Создать привилегию
+      </v-btn>
+    </div>
+
     <v-expansion-panels accordion>
       <v-expansion-panel
         v-for="(role, i) in roles"
@@ -31,16 +47,33 @@
     </v-expansion-panels>
 
     <user-notification ref="userNotification" />
+
+    <create-role
+      :value="modal.createRole"
+      :privileges="privileges"
+      @close="closeModalCreate"
+      @save="createRole"
+    />
+
+    <create-privilege
+      :value="modal.createPrivilege"
+      @close="closeModalCreatePrivilege"
+      @save="createPrivilege"
+    />
   </div>
 </template>
 
 <script>
 import UserNotification from '@/components/information_window/UserNotification'
+import CreateRole from './modals/CreateRole.vue'
+import CreatePrivilege from './modals/CreatePrivilege.vue'
 export default {
   name: 'RoleEditPage',
 
   components: {
-    UserNotification
+    UserNotification,
+    CreateRole,
+    CreatePrivilege
   },
 
   async asyncData({ $api }) {
@@ -50,6 +83,15 @@ export default {
     ])
 
     return { roles, privileges }
+  },
+
+  data() {
+    return {
+      modal: {
+        createRole: false,
+        createPrivilege: false
+      }
+    }
   },
 
   computed: {
@@ -69,13 +111,70 @@ export default {
   },
 
   methods: {
-    saveRolePrivileges(roles) {
+    openModalCreate() {
+      this.modal.createRole = true
+    },
+
+    closeModalCreate() {
+      this.modal.createRole = false
+    },
+
+    openModalCreatePrivilege() {
+      this.modal.createPrivilege = true
+    },
+
+    closeModalCreatePrivilege() {
+      this.modal.createPrivilege = false
+    },
+
+    async createRole(form) {
       try {
-        this.$api.auth.role.save(roles)
+        await this.saveRolePrivileges(form)
+
+        this.getRoles()
+
+        this.closeModalCreate()
+      } catch (e) {
+        console.error(e)
+      }
+    },
+
+    async saveRolePrivileges(roles) {
+      try {
+        await this.$api.auth.role.save(roles)
       } catch (e) {
         this.$refs.userNotification.showUserNotification('error', 'Ошибка сервера. Поробуйте позже')
         console.error(e)
       }
+    },
+
+    async getRoles() {
+      this.roles = await this.$api.auth.role.get()
+    },
+
+    async createPrivilege(newPrivilege) {
+      try {
+        await this.saveNewPrivilege(newPrivilege)
+
+        this.getPrivileges()
+
+        this.closeModalCreatePrivilege()
+      } catch (e) {
+        console.error(e)
+      }
+    },
+
+    async saveNewPrivilege(newPrivilege) {
+      try {
+        await this.$api.auth.privilege.save(newPrivilege)
+      } catch (e) {
+        this.$refs.userNotification.showUserNotification('error', 'Ошибка сервера. Поробуйте позже')
+        console.error(e)
+      }
+    },
+
+    async getPrivileges() {
+      this.privileges = await this.$api.auth.privilege.get()
     }
   }
 }
@@ -91,6 +190,10 @@ export default {
 
   .v-input__slot {
     margin-bottom: 0;
+  }
+
+  &__head {
+    margin-bottom: 15px;
   }
 }
 </style>
