@@ -1,5 +1,14 @@
 <template>
   <div class="role-edit-page">
+    <div class="role-edit-page__head">
+      <v-btn
+        color="primary"
+        @click="openModalCreate"
+      >
+        Создать роль
+      </v-btn>
+    </div>
+
     <v-expansion-panels accordion>
       <v-expansion-panel
         v-for="(role, i) in roles"
@@ -31,16 +40,25 @@
     </v-expansion-panels>
 
     <user-notification ref="userNotification" />
+
+    <create-role
+      :value="modal.createRole"
+      :privileges="privileges"
+      @close="closeModalCreate"
+      @save="createRole"
+    />
   </div>
 </template>
 
 <script>
 import UserNotification from '@/components/information_window/UserNotification'
+import CreateRole from './modals/CreateRole.vue'
 export default {
   name: 'RoleEditPage',
 
   components: {
-    UserNotification
+    UserNotification,
+    CreateRole
   },
 
   async asyncData({ $api }) {
@@ -50,6 +68,14 @@ export default {
     ])
 
     return { roles, privileges }
+  },
+
+  data() {
+    return {
+      modal: {
+        createRole: false
+      }
+    }
   },
 
   computed: {
@@ -69,13 +95,37 @@ export default {
   },
 
   methods: {
-    saveRolePrivileges(roles) {
+    openModalCreate() {
+      this.modal.createRole = true
+    },
+
+    closeModalCreate() {
+      this.modal.createRole = false
+    },
+
+    async createRole(form) {
       try {
-        this.$api.auth.role.save(roles)
+        await this.saveRolePrivileges(form)
+
+        this.getRoles()
+
+        this.closeModalCreate()
+      } catch (e) {
+        console.error(e)
+      }
+    },
+
+    async saveRolePrivileges(roles) {
+      try {
+        await this.$api.auth.role.save(roles)
       } catch (e) {
         this.$refs.userNotification.showUserNotification('error', 'Ошибка сервера. Поробуйте позже')
         console.error(e)
       }
+    },
+
+    async getRoles() {
+      this.roles = await this.$api.auth.role.get()
     }
   }
 }
@@ -91,6 +141,10 @@ export default {
 
   .v-input__slot {
     margin-bottom: 0;
+  }
+
+  &__head {
+    margin-bottom: 15px;
   }
 }
 </style>

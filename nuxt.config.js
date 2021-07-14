@@ -38,6 +38,7 @@ export default {
         '~/plugins/utils',
         '~/plugins/custom-compare.js',
         '~/plugins/number-to-sum',
+        '~/plugins/vuelidate',
         '~/plugins/criterias-for-requests',
         '~/plugins/mapping-for-responses',
         '~/plugins/mapping-for-queryes-params',
