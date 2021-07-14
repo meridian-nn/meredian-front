@@ -256,7 +256,7 @@ export default {
         await this.$apiClient.call(process.env.API_HOST_SOCKET + '/room/user/remove', {
           method: 'POST',
           body: JSON.stringify({ userId: user.id, roomId: this.selectedRoom._id }),
-          headers: this.$apiClient.headers
+          headers: this.$apiClient.headersJson
         })
       } catch (error) {
         console.log(error)
@@ -268,7 +268,7 @@ export default {
         await this.$apiClient.call(process.env.API_HOST_SOCKET + '/room/invite', {
           method: 'POST',
           body: JSON.stringify({ userId: user.id, roomId: this.selectedRoom._id }),
-          headers: this.$apiClient.headers
+          headers: this.$apiClient.headersJson
         })
       } catch (error) {
         console.log(error)
@@ -279,7 +279,7 @@ export default {
       await this.$apiClient.call(process.env.API_HOST_SOCKET + `/room/${roomId}/mark-read`, {
         method: 'PUT',
         body: JSON.stringify({ userId: this.user.id }),
-        headers: this.$apiClient.headers
+        headers: this.$apiClient.headersJson
       })
     },
 
@@ -287,7 +287,7 @@ export default {
       const messages = await this.$apiClient.call(process.env.API_HOST_SOCKET +
         `/room/${roomId}`, {
         method: 'GET',
-        headers: this.$apiClient.headers
+        headers: this.$apiClient.headersJson
       })
 
       this.messagesList = messages.data
@@ -327,7 +327,7 @@ export default {
           `/room/${this.selectedRoom._id}/message`, {
           method: 'POST',
           body: JSON.stringify({ messageText: this.form.content, user: this.user }),
-          headers: this.$apiClient.headers
+          headers: this.$apiClient.headersJson
         })
 
         this.form.content = ''

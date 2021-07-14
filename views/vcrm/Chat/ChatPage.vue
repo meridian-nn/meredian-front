@@ -196,7 +196,7 @@ export default {
     const rooms = await $apiClient.call(process.env.API_HOST_SOCKET + '/room/list', {
       method: 'POST',
       body: JSON.stringify({ userId: store.state.profile.user.id }),
-      headers: $apiClient.headers
+      headers: $apiClient.headersJson
     })
 
     return { userList: [...users], roomsList: [...rooms.data] }
@@ -372,7 +372,7 @@ export default {
       return this.$apiClient.call(process.env.API_HOST_SOCKET + '/room/initiate', {
         method: 'POST',
         body: JSON.stringify({ userIds: [this.user.id, user.id] }),
-        headers: this.$apiClient.headers
+        headers: this.$apiClient.headersJson
       })
     },
 
