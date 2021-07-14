@@ -20,7 +20,7 @@
 
       <v-list @click.native.stop="mini = mini">
         <v-list-item
-          v-if="isHaveGTINRole()"
+          v-if="isHaveGTINRole"
           link
           :to="{ name: 'GtinPage' }"
         >
@@ -38,7 +38,7 @@
         </v-list-item>
 
         <v-list-item
-          v-if="isCanOpenPaymentRegister()"
+          v-if="isCanOpenPaymentRegister"
           link
           :to="{ name: 'PaymentMenu' }"
         >
@@ -56,7 +56,7 @@
         </v-list-item>
 
         <v-list-item
-          v-if="isHaveSupplyRole()"
+          v-if="isHaveSupplyRole"
           link
           :to="{ name: 'SupplyMenu' }"
         >
@@ -72,7 +72,7 @@
         </v-list-item>
 
         <v-list-item
-          v-if="isHaveTechnologyOfProductionRole()"
+          v-if="isHaveTechnologyOfProductionRole"
           link
           :to="{ name: 'TechnologyOfProductionMenu' }"
         >

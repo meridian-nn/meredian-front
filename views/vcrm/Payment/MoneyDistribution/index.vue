@@ -355,7 +355,7 @@ export default {
     },
 
     findDepOfCurrentUser() {
-      const currentUser = this.getCurrentUser()
+      const currentUser = this.getCurrentUser
       if (currentUser.department) {
         this.selectedDepId = currentUser.department.id
       }

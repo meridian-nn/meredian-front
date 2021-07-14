@@ -308,7 +308,7 @@ export default {
 
       this.docFromPay = {
         accId: this.selectedAccOfOrg,
-        creatorId: this.getCurrentUser().id,
+        creatorId: this.getCurrentUser.id,
         contractorId: this.spDocint.kontrId,
         dataDoc: new Date(dataDoc).toLocaleDateString(),
         dataOplat: new Date(dataOplat).toLocaleDateString(),
@@ -345,7 +345,7 @@ export default {
       const dataOplat = currentDate.toISOString().substr(0, 10)
       this.docFromPay = {
         accId: this.selectedAccOfOrg,
-        creatorId: this.getCurrentUser().id,
+        creatorId: this.getCurrentUser.id,
         dataDoc: new Date(dataDoc).toLocaleDateString(),
         dataOplat: new Date(dataOplat).toLocaleDateString(),
         ispId: 0,

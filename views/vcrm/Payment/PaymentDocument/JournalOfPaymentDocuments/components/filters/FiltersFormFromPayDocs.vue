@@ -251,7 +251,7 @@ export default {
       }
 
       const filterEntityForSave = this.createFilterEntityForSave(this.elementId, this.$route.name, this.filterItem,
-        this.getCurrentUser().id, this.getCurrentUser().id)
+        this.getCurrentUser.id, this.getCurrentUser.id)
 
       await this.$api.uiSettings.save(filterEntityForSave)
 
@@ -261,7 +261,7 @@ export default {
 
     // поиск ранее сохраненных настроек фильтров для текущего пользователя
     async findFiltersValues() {
-      const data = this.createCriteriasToSearchForFiltersValues(this.$route.name, this.elementId, this.getCurrentUser().id)
+      const data = this.createCriteriasToSearchForFiltersValues(this.$route.name, this.elementId, this.getCurrentUser.id)
       const response = await this.$api.uiSettings.findBySearchCriterias(data)
 
       if (response.length) {
