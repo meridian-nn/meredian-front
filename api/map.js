@@ -70,6 +70,10 @@ export const factory = send => ({
         privilege: {
           get() {
             return send('GET', '/auth/appPrivilege/findAll')
+          },
+
+          save(params) {
+            return send('POST', '/auth/appPrivilege/save', params)
           }
         },
     },
