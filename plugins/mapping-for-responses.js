@@ -133,7 +133,7 @@ Vue.mixin({
         convertListOfRolesResponseToListOfUserRoles(response, userId) {
             let listOfRoles = []
             for (const role of response) {
-                const isHaveRole = role.users.find(user => user === userId) ? true : false
+                const isHaveRole = !!role.users.find(user => user === userId)
                 const roleForList = {
                     id: role.id,
                     isHave: isHaveRole,
@@ -298,6 +298,64 @@ Vue.mixin({
         if(acc && acc.length > 0) {
           accsInDataForTable.push(acc[0])
         }
+      },
+
+      convertMoneyDistributionByDepToDataForTable(moneyDistributionByDeps, moneyDistributionByDivisions, departments) {
+          const departmentsDataTable = []
+            for (const department of departments) {
+              let distributionSum = 0
+              let notDistributedSum = 0
+              const searchedElemByDeps = moneyDistributionByDeps.find(elem => elem.department.id === department.id)
+
+              if(searchedElemByDeps) {
+                distributionSum = searchedElemByDeps.distributionSum || 0
+              }
+
+              const searchedElemByDivisions = moneyDistributionByDivisions.find(elem => elem['department.parentId'] === department.id)
+
+              if(searchedElemByDivisions) {
+                notDistributedSum = distributionSum - (searchedElemByDivisions.sum_distributionSum || 0)
+              } else {
+                notDistributedSum = distributionSum
+              }
+
+              const dataTableElem = {
+                name: department.nameViddoc,
+                distributionSum: distributionSum,
+                distributionSumMask: this.numberToSum(distributionSum),
+                notDistributedSum: notDistributedSum,
+                notDistributedSumMask: this.numberToSum(notDistributedSum)
+              }
+
+              departmentsDataTable.push(dataTableElem)
+            }
+          return departmentsDataTable
+      },
+
+      convertMoneyDistributionsByDivisionsInDataForTable(divisions, moneyDistribution, date) {
+        const divisionsDataTable = []
+        let id = 1
+        for (const division of divisions) {
+          const searchedElement = moneyDistribution.find(elem => elem.department.id === division.id)
+          if (searchedElement) {
+            searchedElement.keyId = id
+            searchedElement.distributionSum = searchedElement.distributionSum || 0
+            divisionsDataTable.push(searchedElement)
+          } else {
+            const dataTableElem = {
+              keyId: id,
+              department: division,
+              distributionSum: 0,
+              distributionDate: date,
+              note: ''
+            }
+            divisionsDataTable.push(dataTableElem)
+          }
+          id++
+        }
+        return divisionsDataTable
       }
     }
+
+
 })

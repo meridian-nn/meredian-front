@@ -900,6 +900,235 @@ Vue.mixin({
           params: { descr: 'Larisa' },
           procName: 'dbo.sel_proizv_our'
         }
+      },
+
+      createCriteriasForSearchBudgetByDate(date) {
+        return [
+          {
+            dataType: "DATE",
+            key: "distributionDate",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date(date).toLocaleDateString()
+            ]
+          },
+          {
+            dataType: 'VARCHAR',
+            key: 'department',
+            operation: 'IS_NULL',
+            type: 'AND',
+            'values': [
+              "true"
+            ]
+          }
+        ]
+      },
+
+      createCriteriasToSearchMoneyDistributionByDepartments(date, departments) {
+        const data = [
+          {
+            dataType: "DATE",
+            key: "distributionDate",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date(date).toLocaleDateString()
+            ]
+          },
+          {
+            dataType: "VARCHAR",
+            key: "department.prDel",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              "0"
+            ]
+          }
+        ]
+
+        for (const department of departments) {
+          const dataElem = {
+            dataType: "VARCHAR",
+            key: "department.id",
+            operation: "EQUALS",
+            type: "OR",
+            values: [
+              department.id
+            ]
+          }
+
+          data.push(dataElem)
+        }
+
+        return data
+      },
+
+      createParamsToSearchMoneyDistributionByDepParents(date, depParents) {
+        return {
+          aggregateFunctions: [
+            {
+              field: 'distributionSum',
+              function: 'SUM'
+            }
+          ],
+
+          groupFields: [
+            "department.parentId"
+          ],
+
+          searchCriteria: this.createCriteriasToSearchMoneyDistributionByDepsParents(date, depParents)
+        }
+      },
+
+
+      createCriteriasToSearchMoneyDistributionByDepsParents(date, depParents) {
+        const data = [
+          {
+            dataType: "DATE",
+            key: "distributionDate",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date(date).toLocaleDateString()
+            ]
+          },
+          {
+            dataType: "VARCHAR",
+            key: "department.prDel",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              "0"
+            ]
+          }
+        ]
+
+        for (const depParent of depParents) {
+          const dataElem = {
+            dataType: "VARCHAR",
+            key: "department.parentId",
+            operation: "EQUALS",
+            type: "OR",
+            values: [
+              depParent.id
+            ]
+          }
+
+          data.push(dataElem)
+        }
+
+        return data
+      },
+
+      createCriteriasToSearchMoneyDistributionByDepId(depId, date) {
+        return [
+          {
+            dataType: "DATE",
+            key: "distributionDate",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date(date).toLocaleDateString()
+            ]
+          },
+          {
+            dataType: "VARCHAR",
+            key: "department.prDel",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              "0"
+            ]
+          },
+          {
+            dataType: 'VARCHAR',
+            key:'department.id',
+            operation: 'EQUALS',
+            type: 'AND',
+            values: [
+              depId
+            ]
+          }
+        ]
+      },
+
+      createCriteriasToSearchMoneyDistributionByDepParentId(depParentId, date) {
+        return [
+          {
+            dataType: "DATE",
+            key: "distributionDate",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date(date).toLocaleDateString()
+            ]
+          },
+          {
+            dataType: "VARCHAR",
+            key: "department.prDel",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              "0"
+            ]
+          },
+          {
+            dataType: 'VARCHAR',
+            key:'department.parentId',
+            operation: 'EQUALS',
+            type: 'AND',
+            values: [
+              depParentId
+            ]
+          }
+        ]
+      },
+
+      createCriteriaToSearchMainDepartments() {
+        return [
+          {
+          dataType: 'VARCHAR',
+          key:'parentId',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            "0"
+          ]
+        },
+          {
+            dataType: "VARCHAR",
+            key: "prDel",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              "0"
+            ]
+          }
+        ]
+      },
+
+      createCriteriasToSearchDivisions(depParentId) {
+        return [
+          {
+            dataType: 'VARCHAR',
+            key:'parentId',
+            operation: 'EQUALS',
+            type: 'AND',
+            values: [
+              depParentId
+            ]
+          },
+          {
+            dataType: "VARCHAR",
+            key: "prDel",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              "0"
+            ]
+          }
+        ]
       }
     }
 })

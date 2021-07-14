@@ -152,11 +152,14 @@ export const factory = send => ({
         findDepartments() {
             return send('GET', '/oper/dict/spViddocopl/findDepartments')
         },
+        findDepartmentsBySearchCriterias(params){
+            return send('POST', `/oper/dict/spViddocopl/findBySearchCriteriaList`, params )
+        },
+        findDepartmentsBySearchCriteria(params){
+          return send('POST', `/oper/dict/spViddocopl/findBySearchCriteria`, params )
+        },
         findAllDocumentsTypes() {
             return send('GET', '/oper/dict/spViddocopl/findAll')
-        },
-        findDocumentTypesByParentId(params) {
-            return send('GET', `/oper/dict/spViddocopl/findByParentId?${new URLSearchParams(params).toString()}`)
         },
         findDocumentTypeById(id) {
             return send('GET', `/oper/dict/spViddocopl/findById/${id}`)
@@ -456,9 +459,6 @@ export const factory = send => ({
             findByDepartmentId(params) {
                 return send('GET', `/oper/depMoneyDistribution/findByDepartmentId?${new URLSearchParams(params).toString()}`)
             },
-            findByDepartments(params) {
-              return send('GET', `/oper/depMoneyDistribution/findByDepartmentId?${new URLSearchParams(params).toString()}`)
-            },
             findForEdit(params) {
                 return send('GET', `/oper/depMoneyDistribution/findForEdit?${new URLSearchParams(params).toString()}`)
             },
@@ -473,6 +473,9 @@ export const factory = send => ({
             },
             findBySearchCriterias(params) {
               return send('POST', `/oper/depMoneyDistribution/findBySearchCriteriaList`, params)
+            },
+            groupBy(params) {
+              return send('POST', `/oper/depMoneyDistribution/groupBy`, params)
             }
         },
 
