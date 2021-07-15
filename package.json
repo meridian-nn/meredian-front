@@ -30,6 +30,7 @@
         "vue-json-excel": "^0.3.0",
         "vue-numeric": "^2.4.2",
         "vue-tables-2": "^2.2.1",
+        "vuelidate": "^0.7.6",
         "xlsx": "^0.16.9"
     },
     "devDependencies": {

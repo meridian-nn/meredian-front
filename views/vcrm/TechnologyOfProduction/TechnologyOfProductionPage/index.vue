@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="isTechnologyOfProductionPage"
     name="TechnologyOfProductionMenu"
     class="technology-of-production-menu"
   >
@@ -15,8 +16,6 @@
       fixed
       bottom
       right
-      v-bind="attrs"
-      v-on="on"
     >
       <v-icon @click="openPatchnoteWindow">
         mdi-alert
@@ -39,6 +38,10 @@
       </div>
     </v-row>
   </div>
+
+  <div v-else>
+    <router-view />
+  </div>
 </template>
 
 <script>
@@ -49,6 +52,12 @@ export default {
 
   components: {
     PatchnoteWindow
+  },
+
+  computed: {
+    isTechnologyOfProductionPage() {
+      return this.$route.matched[this.$route.matched.length - 1].name === 'TechnologyOfProductionMenu'
+    }
   },
 
   methods: {

@@ -97,7 +97,7 @@ export default {
         const { room } = await this.$apiClient.call(process.env.API_HOST_SOCKET + '/room/group/create', {
           method: 'POST',
           body: JSON.stringify({ ...this.form, userIds: [...this.form.userIds, this.user.id], ownerId: this.user.id }),
-          headers: this.$apiClient.headers
+          headers: this.$apiClient.headersJson
         })
 
         this.$emit('success', room)

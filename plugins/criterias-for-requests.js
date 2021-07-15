@@ -66,8 +66,7 @@ Vue.mixin({
         // accId - id расчетного счета организации
         createCriteriasForRequestToSearchDocsToPay(accId, orgId, date) {
             const secDate = new Date(date)
-            const curDateNum = secDate.getDate()
-            secDate.setDate(curDateNum + 1)
+            secDate.setDate(secDate.getDate() + 1)
           return [{
               'dataType': 'INTEGER',
               'key': 'accId',
@@ -201,10 +200,105 @@ Vue.mixin({
             {
               'dataType': 'DATE',
               'key': 'dataDoc',
-              'operation': 'GREATER_THAN',
+              'operation': 'EQUALS',
               'type': 'AND',
               'values': [
                 new Date(date).toLocaleDateString()
+              ]
+            }
+          ]
+
+          if(orgId) {
+            data.push({
+              'dataType': 'INTEGER',
+              'key': 'myOrg.id',
+              'operation': 'EQUALS',
+              'type': 'AND',
+              'values': [
+                orgId
+              ]
+            })
+          }
+
+          return data
+        },
+
+        createCriteriasToSearchDocsToPayForEmailSendingForm(date, orgId) {
+          const secDate = new Date(date)
+          secDate.setDate(secDate.getDate() + 1)
+          const data =  [
+            {
+              'dataType': 'DATE',
+              'key': 'dataOplat',
+              'operation': 'BETWEEN',
+              'type': 'AND',
+              'values': [
+                new Date(date).toLocaleDateString(), new Date(secDate).toLocaleDateString()
+              ]
+            }
+          ]
+
+          if(orgId) {
+            data.push({
+              'dataType': 'INTEGER',
+              'key': 'platId',
+              'operation': 'EQUALS',
+              'type': 'AND',
+              'values': [
+                orgId
+              ]
+            })
+          }
+
+          return data
+        },
+
+        createCriteriasToSearchPaymentByCashboxForEmailSendingForm(date, orgId) {
+          const data = [
+            {
+              'dataType': 'DATE',
+              'key': 'paymentDate',
+              'operation': 'EQUALS',
+              'type': 'AND',
+              'values': [
+                new Date(date).toLocaleDateString()
+              ]
+            },
+          ]
+
+          if(orgId) {
+            data.push({
+              'dataType': 'INTEGER',
+              'key': 'payer.id',
+              'operation': 'EQUALS',
+              'type': 'AND',
+              'values': [
+                orgId
+              ]
+            })
+          }
+
+          return data
+        },
+
+        createCriteriasToSearchVNPLDocsForEmailSendingForm(date, orgId) {
+          const data =  [
+            {
+              'dataType': 'DATE',
+              'key': 'dataDoc',
+              'operation': 'EQUALS',
+              'type': 'AND',
+              'values': [
+                new Date(date).toLocaleDateString()
+              ]
+            },
+            {
+              'dataType': 'VARCHAR',
+              'key': 'nameDoc',
+              'operation': 'LIKE',
+              'type': 'AND',
+              'values': [
+                "ВнПл"
               ]
             }
           ]
@@ -538,7 +632,7 @@ Vue.mixin({
           ]
       },
 
-      createCriteriasToFindPaymentAccount(accId) {
+      createCriteriasToFindPaymentAccount(accId,date) {
         return [
           {
             dataType: "VARCHAR",
@@ -555,13 +649,13 @@ Vue.mixin({
             operation: "EQUALS",
             type: "AND",
             values: [
-              new Date().toLocaleDateString()
+              new Date(date).toLocaleDateString()
             ]
           }
         ]
       },
 
-      createCriteriasToFindTwoPaymentAccounts(firstAccId, secondAccId) {
+      createCriteriasToFindTwoPaymentAccounts(firstAccId, secondAccId, dateOfDoc) {
         return [
           {
             dataType: "VARCHAR",
@@ -587,7 +681,7 @@ Vue.mixin({
             operation: "EQUALS",
             type: "AND",
             values: [
-              new Date().toLocaleDateString()
+              new Date(dateOfDoc).toLocaleDateString()
             ]
           }
         ]
@@ -709,5 +803,332 @@ Vue.mixin({
           ]
         }]
       },
-    },
+
+      createCriteriasToSearchAcc(date, accId) {
+        return [
+          {
+            dataType: "DATE",
+            key: "dataOplat",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date(date).toLocaleDateString()
+            ]
+          },
+          {
+            dataType: "VARCHAR",
+            key: "acc.id",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              accId
+            ]
+          }
+        ]
+      },
+
+      createCriteriasToFindMoneyDistributionByDepartments(date, departments) {
+        const data = [
+          {
+            dataType: "DATE",
+            key: "distributionDate",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date(date).toLocaleDateString()
+            ]
+          }
+        ]
+
+        for (const department of departments) {
+          const elem = {
+            dataType: "INTEGER",
+            key: "department.id",
+            operation: "EQUALS",
+            type: "OR",
+            values: [
+              department.id
+            ]
+          }
+          data.push(elem)
+        }
+
+        return data
+      },
+
+      createCriteriasToSearchOrdersOnTailoringByPage(filtersParams) {
+        const data = [
+          {
+            dataType: "VARCHAR",
+            key: "userId",
+            operation: "EQUALS",
+            type: "OR",
+            values: [
+              "11"
+            ]
+          }
+        ]
+
+        if (filtersParams) {
+          for (const key in filtersParams) {
+            let elemParam = filtersParams[key]
+            if(!elemParam) {
+              continue
+            }
+
+            const dataType = 'VARCHAR'
+            const operation = 'EQUALS'
+
+            const dataElem = {
+              dataType,
+              key,
+              operation,
+              type: 'AND',
+              values: [
+                elemParam
+              ]
+            }
+            data.push(dataElem)
+          }
+        }
+
+        return data
+      },
+
+      createCriteriasToSearchOrgForRecordsOfWorkByCardsForm() {
+        return {
+          params: { descr: 'Larisa' },
+          procName: 'dbo.sel_proizv_our'
+        }
+      },
+
+      createCriteriasForSearchBudgetByDate(date) {
+        return [
+          {
+            dataType: "DATE",
+            key: "distributionDate",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date(date).toLocaleDateString()
+            ]
+          },
+          {
+            dataType: 'VARCHAR',
+            key: 'department',
+            operation: 'IS_NULL',
+            type: 'AND',
+            'values': [
+              "true"
+            ]
+          }
+        ]
+      },
+
+      createCriteriasToSearchMoneyDistributionByDepartments(date, departments) {
+        const data = [
+          {
+            dataType: "DATE",
+            key: "distributionDate",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date(date).toLocaleDateString()
+            ]
+          },
+          {
+            dataType: "VARCHAR",
+            key: "department.prDel",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              "0"
+            ]
+          }
+        ]
+
+        for (const department of departments) {
+          const dataElem = {
+            dataType: "VARCHAR",
+            key: "department.id",
+            operation: "EQUALS",
+            type: "OR",
+            values: [
+              department.id
+            ]
+          }
+
+          data.push(dataElem)
+        }
+
+        return data
+      },
+
+      createParamsToSearchMoneyDistributionByDepParents(date, depParents) {
+        return {
+          aggregateFunctions: [
+            {
+              field: 'distributionSum',
+              function: 'SUM'
+            }
+          ],
+
+          groupFields: [
+            "department.parentId"
+          ],
+
+          searchCriteria: this.createCriteriasToSearchMoneyDistributionByDepsParents(date, depParents)
+        }
+      },
+
+
+      createCriteriasToSearchMoneyDistributionByDepsParents(date, depParents) {
+        const data = [
+          {
+            dataType: "DATE",
+            key: "distributionDate",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date(date).toLocaleDateString()
+            ]
+          },
+          {
+            dataType: "VARCHAR",
+            key: "department.prDel",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              "0"
+            ]
+          }
+        ]
+
+        for (const depParent of depParents) {
+          const dataElem = {
+            dataType: "VARCHAR",
+            key: "department.parentId",
+            operation: "EQUALS",
+            type: "OR",
+            values: [
+              depParent.id
+            ]
+          }
+
+          data.push(dataElem)
+        }
+
+        return data
+      },
+
+      createCriteriasToSearchMoneyDistributionByDepId(depId, date) {
+        return [
+          {
+            dataType: "DATE",
+            key: "distributionDate",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date(date).toLocaleDateString()
+            ]
+          },
+          {
+            dataType: "VARCHAR",
+            key: "department.prDel",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              "0"
+            ]
+          },
+          {
+            dataType: 'VARCHAR',
+            key:'department.id',
+            operation: 'EQUALS',
+            type: 'AND',
+            values: [
+              depId
+            ]
+          }
+        ]
+      },
+
+      createCriteriasToSearchMoneyDistributionByDepParentId(depParentId, date) {
+        return [
+          {
+            dataType: "DATE",
+            key: "distributionDate",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              new Date(date).toLocaleDateString()
+            ]
+          },
+          {
+            dataType: "VARCHAR",
+            key: "department.prDel",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              "0"
+            ]
+          },
+          {
+            dataType: 'VARCHAR',
+            key:'department.parentId',
+            operation: 'EQUALS',
+            type: 'AND',
+            values: [
+              depParentId
+            ]
+          }
+        ]
+      },
+
+      createCriteriaToSearchMainDepartments() {
+        return [
+          {
+          dataType: 'VARCHAR',
+          key:'parentId',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            "0"
+          ]
+        },
+          {
+            dataType: "VARCHAR",
+            key: "prDel",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              "0"
+            ]
+          }
+        ]
+      },
+
+      createCriteriasToSearchDivisions(depParentId) {
+        return [
+          {
+            dataType: 'VARCHAR',
+            key:'parentId',
+            operation: 'EQUALS',
+            type: 'AND',
+            values: [
+              depParentId
+            ]
+          },
+          {
+            dataType: "VARCHAR",
+            key: "prDel",
+            operation: "EQUALS",
+            type: "AND",
+            values: [
+              "0"
+            ]
+          }
+        ]
+      }
+    }
 })

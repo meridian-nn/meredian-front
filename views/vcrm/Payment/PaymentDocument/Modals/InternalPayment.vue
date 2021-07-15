@@ -286,6 +286,7 @@ export default {
 
       this.docFromPay = docFromPay
       this.docFromPay.spDocints.sort(this.customCompare('id', -1))
+      this.date = this.docFromPay.dataDoc
       this.spDocint = this.docFromPay.spDocints[0]
       this.sumDocOfEditedDoc = this.docFromPay.sumDoc
       this.spDocintOfEditedDoc = {
@@ -308,7 +309,7 @@ export default {
 
       this.docFromPay = {
         accId: this.selectedAccOfOrg,
-        creatorId: this.getCurrentUser().id,
+        creatorId: this.getCurrentUser.id,
         contractorId: this.spDocint.kontrId,
         dataDoc: new Date(dataDoc).toLocaleDateString(),
         dataOplat: new Date(dataOplat).toLocaleDateString(),
@@ -345,7 +346,7 @@ export default {
       const dataOplat = currentDate.toISOString().substr(0, 10)
       this.docFromPay = {
         accId: this.selectedAccOfOrg,
-        creatorId: this.getCurrentUser().id,
+        creatorId: this.getCurrentUser.id,
         dataDoc: new Date(dataDoc).toLocaleDateString(),
         dataOplat: new Date(dataOplat).toLocaleDateString(),
         ispId: 0,
@@ -412,12 +413,13 @@ export default {
       this.docFromPay.spDocints.push(this.spDocint)
 
       let errorMessage = null
-      await this.$axios.$post(this.$api.payment.getSaveInternalPaymentUrl(), this.docFromPay).catch((error) => {
+      await this.$api.payment.saveInternalPayment(this.docFromPay).catch((error) => {
         errorMessage = error
         alert(errorMessage)
       })
       if (errorMessage == null) {
-        await this.changeVnplOfPaymentAccounts(this.docFromPay.accId, this.spDocint.accId, this.docFromPay.sumDoc)
+        const dataOfDoc = this.convertLocaleDateStringToDate(this.docFromPay.dataDoc)
+        await this.changeVnplOfPaymentAccounts(this.docFromPay.accId, this.spDocint.accId, this.docFromPay.sumDoc, dataOfDoc)
         this.dialog = false
       }
       this.$emit('save')
@@ -427,13 +429,14 @@ export default {
       this.docFromPay.descr = this.docFromPay.prim
 
       let errorMessage = null
-      await this.$axios.$post(this.$api.payment.getSaveInternalPaymentUrl(), this.docFromPay).catch((error) => {
+      await this.$api.payment.saveInternalPayment(this.docFromPay).catch((error) => {
         errorMessage = error
         alert(errorMessage)
       })
       if (errorMessage == null) {
-        await this.changeVnplOfPaymentAccounts(this.spDocintOfEditedDoc.accId, this.docFromPay.accId, this.sumDocOfEditedDoc)
-        await this.changeVnplOfPaymentAccounts(this.docFromPay.accId, this.spDocint.accId, this.docFromPay.sumDoc)
+        const dataOfDoc = this.convertLocaleDateStringToDate(this.docFromPay.dataDoc)
+        await this.changeVnplOfPaymentAccounts(this.spDocintOfEditedDoc.accId, this.docFromPay.accId, this.sumDocOfEditedDoc, dataOfDoc)
+        await this.changeVnplOfPaymentAccounts(this.docFromPay.accId, this.spDocint.accId, this.docFromPay.sumDoc, dataOfDoc)
         this.dialog = false
       }
       this.$emit('save')

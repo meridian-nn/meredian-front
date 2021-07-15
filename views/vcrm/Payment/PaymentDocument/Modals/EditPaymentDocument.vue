@@ -453,7 +453,7 @@ export default {
     async findContracts() {
       this.loadingType.contracts = true
       const data = {
-        myDescr: this.getCurrentUser().email
+        myDescr: this.getCurrentUser.email
       }
       this.contracts = await this.$api.budgetElements.findContracts(data)
       this.loadingType.contracts = null
@@ -469,9 +469,6 @@ export default {
       // this.findDocumentType(depId)
       this.editedItem.executorId = null
       this.findExecutors(depId)
-    },
-    getCurrentUser() {
-      return this.$store.state.profile.user
     },
 
     // функция отработки события изменения дат на форме
@@ -493,7 +490,7 @@ export default {
         return
       }
       let errorMessage = null
-      this.editedItem.creatorId = this.getCurrentUser().id
+      this.editedItem.creatorId = this.getCurrentUser.id
       this.editedItem.ispId = 0
       this.editedItem.dataOplat = new Date(this.editedItem.dataOplat).toLocaleDateString()
       this.editedItem.dataDoc = new Date(this.editedItem.dataDoc).toLocaleDateString()

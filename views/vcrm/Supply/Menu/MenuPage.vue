@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="isSupplyMenuPage"
     name="SupplyMenu"
     class="supply-menu"
   >
@@ -15,8 +16,6 @@
       fixed
       bottom
       right
-      v-bind="attrs"
-      v-on="on"
     >
       <v-icon @click="openPatchnoteWindow">
         mdi-alert
@@ -53,6 +52,10 @@
       <v-spacer />
     </v-row>
   </div>
+
+  <div v-else>
+    <router-view />
+  </div>
 </template>
 
 <script>
@@ -64,14 +67,10 @@ export default {
     PatchnoteWindow
   },
 
-  data() {
-    return {
-
+  computed: {
+    isSupplyMenuPage() {
+      return this.$route.matched[this.$route.matched.length - 1].name === 'SupplyMenu'
     }
-  },
-
-  mounted() {
-
   },
 
   methods: {

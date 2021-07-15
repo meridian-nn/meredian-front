@@ -910,8 +910,7 @@ export default {
       this.toPaySelectedRows = []
       this.toPaySelectedRows.push(selectedDoc)
 
-      // await this.$api.payment.docOplToPay.saveSpDocoplToPay(this.toPaySelectedRows)
-      await this.$axios.$post(this.$api.payment.docOplToPay.getSaveSpDocoplToPayUrl(), this.toPaySelectedRows)
+      await this.$api.payment.docOplToPay.saveSpDocoplToPay(this.toPaySelectedRows)
       const responseSpOplatSave = await this.changeSumToPayOfPaymentAccountOnForm(selectedDoc)
 
       this.toPaySelectedRows = []
@@ -930,7 +929,7 @@ export default {
         sumDoc = selectedDoc.sumOplat - selectedDoc.sumOplatFromRequest
         typeOfOperation = 'SUM'
       }
-      return this.changeSumToPayOfPaymentAccount(this.accId, sumDoc, typeOfOperation)
+      return this.changeSumToPayOfPaymentAccount(this.accId, sumDoc, typeOfOperation, this.date)
     },
 
     // Отмена внесения измененя в сумму оплаты документа
@@ -982,7 +981,7 @@ export default {
       }
 
       await this.addPayments()
-      const responseSpOplatSave = await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'SUM')
+      const responseSpOplatSave = await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'SUM', new Date())
       await this.refreshTables()
 
       if (responseSpOplatSave) {
@@ -992,11 +991,7 @@ export default {
     async addPayments() {
       const ids = this.fromPaySelectedRows.map(value => value.id)
       const data = { ids, accId: this.accId }
-      /* await this.$api.payment.payDocument(data).catch((error) => {
-          const errorMessage = error
-          alert(errorMessage)
-        }) */
-      await this.$axios.$post(this.$api.payment.getPayDocumentUrl(), data)
+      await this.$api.payment.payDocument(data)
     },
     countSumOfArrayElements(array) {
       let sum = 0
@@ -1015,8 +1010,8 @@ export default {
       const sumDocs = this.countSumOfArrayElements(this.toPaySelectedRows.map(value => value.sumOplat))
 
       const ids = this.toPaySelectedRows.map(value => value.id)
-      await this.$axios.$post(this.$api.payment.docOplToPay.getDeleteSelectedPaymentsUrl(), ids)
-      const responseSpOplatSave = await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'DEDUCT')
+      await this.$api.payment.docOplToPay.deleteSelectedPayments(ids)
+      const responseSpOplatSave = await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'DEDUCT', this.date)
 
       await this.refreshTables()
       if (responseSpOplatSave) {
@@ -1113,8 +1108,10 @@ export default {
         const vnplDoc = await this.$api.payment.docOplForPay.findById(vnplDocArr.id)
         vnplDoc.spDocints.sort(this.customCompare('id', -1))
         const spDocint = vnplDoc.spDocints[0]
-        await this.changeVnplOfPaymentAccounts(spDocint.accId, vnplDoc.accId, vnplDoc.sumDoc)
-        await this.$axios.$post(this.$api.payment.docOplForPay.getDeleteInternalPaymentDocument(), vnplDoc.id, this.getConfigForDeleteMethods())
+        const dataOfDoc = this.convertLocaleDateStringToDate(vnplDoc.dataDoc)
+        await this.changeVnplOfPaymentAccounts(spDocint.accId, vnplDoc.accId, vnplDoc.sumDoc, dataOfDoc)
+        await this.$api.payment.docOplForPay.deleteInternalPaymentDocument(vnplDoc.id)
+        // await this.$axios.$post(this.$api.payment.docOplForPay.getDeleteInternalPaymentDocument(), vnplDoc.id, this.getConfigForDeleteMethods())
       }
     },
 
@@ -1128,8 +1125,9 @@ export default {
       }
 
       const ids = selectedRows.map(value => value.id)
-      // await this.$api.payment.DocOplForPay.deleteSelectedPayments(ids)
-      await this.$axios.$post(this.$api.payment.docOplForPay.getDeletePaymentUrl(), ids)
+      await this.$api.payment.docOplForPay.deleteSelectedPayments(ids)
+
+      // await this.$axios.$post(this.$api.payment.docOplForPay.getDeletePaymentUrl(), ids)
     },
 
     checkSelectedRowsBeforeDelete(selectedRows) {
@@ -1178,8 +1176,10 @@ export default {
     },
 
     async deletePaymentByCashbox(curRow) {
-      await this.changeSumToPayOfPaymentAccount(curRow.accId, curRow.sumOplat, 'DEDUCT')
-      await this.$axios.$post(this.$api.payment.getDeletePaymentUrl(), curRow.id, this.getConfigForDeleteMethods())
+      console.log(curRow.dataOplat)
+      const dateOfDoc = this.convertLocaleDateStringToDate(curRow.dataOplat)
+      await this.changeSumToPayOfPaymentAccount(curRow.accId, curRow.sumOplat, 'DEDUCT', dateOfDoc)
+      await this.$api.payment.deletePaymentUrl(curRow.id)
       await this.refreshTables()
       await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
     },
@@ -1209,8 +1209,8 @@ export default {
 
     // Инициализация журнала оплат
     async selOplat() {
-      await this.$axios.$post(this.$api.payment.getSelOplatUrl())
-      // await this.$api.payment.selOplat()
+      // await this.$axios.$post(this.$api.payment.getSelOplatUrl())
+      await this.$api.payment.selOplat()
     },
 
     // Обновление таблиц "Документы к оплате" и "Документы на оплату"
@@ -1327,7 +1327,7 @@ export default {
     // Поиск документов для таблицы "Документы на оплату" по выбранной организации
     async findSpDocoplForPay($state) {
       const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
-        this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs(), this.getCurrentUser().id)
+        this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs(), this.getCurrentUser.id)
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
       let filtersParams
 

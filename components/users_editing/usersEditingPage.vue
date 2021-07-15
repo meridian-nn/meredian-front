@@ -352,7 +352,7 @@ export default {
 
       const filterEntityForSave = this.createFilterEntityForSave(
         this.elementIdOfDefaultOrgAndAccForUISetting, this.formIdOfOrgAndAccForUISetting, uiSettingsValues,
-        this.currentUserId, this.getCurrentUser().id)
+        this.currentUserId, this.getCurrentUser.id)
 
       await this.$api.uiSettings.save(filterEntityForSave)
 

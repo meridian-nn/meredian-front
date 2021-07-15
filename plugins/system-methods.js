@@ -8,6 +8,10 @@ Vue.mixin({
             return 'journal-of-payment-docs-from-pay-docs'
         },
 
+        getIdOfRecordsTableOfRecordsOfWorkByCards() {
+            return 'records-of-work-by-cards-table-of-records'
+        },
+
         //Функция возвращает form id и element id для orgId и accId по умолчанию
         getObjectWithFormIdAndElementIdForDefaultOrgAndAcc() {
           return {
@@ -20,7 +24,7 @@ Vue.mixin({
         async findDefaultOrgAndAccIdForUser() {
           const formAndElementIdsOfOrgAndAccIds = this.getObjectWithFormIdAndElementIdForDefaultOrgAndAcc()
           const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(formAndElementIdsOfOrgAndAccIds.formId,
-            formAndElementIdsOfOrgAndAccIds.elementId, this.getCurrentUser().id)
+            formAndElementIdsOfOrgAndAccIds.elementId, this.getCurrentUser.id)
           const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
           let filtersParams = {}
 
@@ -66,12 +70,18 @@ Vue.mixin({
           return new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), currentDate.getDate())
         },
 
-        async changeSumToPayOfPaymentAccount(accId, sumOfPaymentDocs, operationType) {
+        convertLocaleDateStringToDate(date) {
+          const parts = date.split('.')
+          console.log(parts)
+          return new Date(parts[2], parts[1] - 1, parts[0])
+        },
+
+        async changeSumToPayOfPaymentAccount(accId, sumOfPaymentDocs, operationType, date) {
           if(sumOfPaymentDocs === 0) {
             return
           }
 
-          const searchCriterias = this.createCriteriasToFindPaymentAccount(accId)
+          const searchCriterias = this.createCriteriasToFindPaymentAccount(accId,date)
           const response = await this.$api.paymentAccounts.findBySearchCriteriaList(searchCriterias)
           let paymentAccount
 
@@ -92,12 +102,12 @@ Vue.mixin({
           return await this.$api.paymentAccounts.save(paymentAccount)
         },
 
-        async changeVnplOfPaymentAccounts(accIdOfPayer, accIdOfReceiver, sumOfPayment) {
+        async changeVnplOfPaymentAccounts(accIdOfPayer, accIdOfReceiver, sumOfPayment, dateOfDoc) {
           if(sumOfPayment === 0) {
             return
           }
 
-          const searchCriterias = this.createCriteriasToFindTwoPaymentAccounts(accIdOfPayer, accIdOfReceiver)
+          const searchCriterias = this.createCriteriasToFindTwoPaymentAccounts(accIdOfPayer, accIdOfReceiver, dateOfDoc)
           const response = await this.$api.paymentAccounts.findBySearchCriteriaList(searchCriterias)
           let paymentAccountOfPayer
           let paymentAccountOfReceiver
@@ -124,7 +134,7 @@ Vue.mixin({
             paymentAccountOfReceiver
           ]
 
-          await this.$axios.$post(this.$api.payment.balanceOfPaymentAccount.getSaveAllUrl(), arrayOfPaymentAccountsForSave)
+          await this.$api.payment.balanceOfPaymentAccount.saveAll(arrayOfPaymentAccountsForSave)
         },
 
         getConfigForDeleteMethods(){

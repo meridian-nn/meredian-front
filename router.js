@@ -25,6 +25,9 @@ const AuthPage = dynamicPage(() =>
 const RegistrationPage = dynamicPage(() =>
   import('~/components/user_registration/userRegistrationPage.vue'))
 
+const RoleEditPage = dynamicPage(() =>
+  import('~/views/vcrm/User/RoleEditPage'))
+
 const CurrentUserEditingPage = dynamicPage(() =>
   import('~/components/current_user_editing/currentUserEditingPage'))
 
@@ -47,7 +50,7 @@ const JournalOfPaymentDocumentsFromPayDocsPage = dynamicPage(() =>
   import('~/views/vcrm/Payment/PaymentDocument/JournalOfPaymentDocuments/components/fromPayDocuments'))
 
 const JournalOfEmailSendingPaymentDocumentsPage = dynamicPage(() =>
-  import('~/views/vcrm/Payment/PaymentDocument/JournalOfEmailSendingPaymentDocuments'))
+  import('~/views/vcrm/Payment/JournalOfEmailSendingPaymentDocuments'))
 
 const PaymentByCashboxPage = dynamicPage(() =>
   import('~/views/vcrm/Payment/PaymentDocument/Modals/PaymentByCashbox.vue'))
@@ -109,6 +112,9 @@ const TechnologyOfProductionMenuPage = dynamicPage(() =>
 const RecordsOfWorkByCardsPage = dynamicPage(() =>
   import('~/views/vcrm/TechnologyOfProduction/RecordsOfWorkByCards'))
 
+const RecordsOfWorkOnOrderPage = dynamicPage(() =>
+  import('~/views/vcrm/TechnologyOfProduction/RecordsOfWorkOnOrder'))
+
 Vue.use(Router)
 
 const createRouterConst = new Router({
@@ -129,6 +135,7 @@ const createRouterConst = new Router({
         breadcrumb: { text: 'Журнал GTIN' }
       }
     },
+
     {
       path: 'mark',
       name: 'MarkPage',
@@ -153,6 +160,15 @@ const createRouterConst = new Router({
       component: RegistrationPage,
       meta: {
         breadcrumb: { text: 'Регистрация нового пользователя' }
+      }
+    },
+
+    {
+      path: 'role_edit',
+      name: 'RoleEditPage',
+      component: RoleEditPage,
+      meta: {
+        breadcrumb: { text: 'Редактирования ролей' }
       }
     },
 
@@ -275,17 +291,23 @@ const createRouterConst = new Router({
       path: 'technology_of_production_menu',
       name: 'TechnologyOfProductionMenu',
       component: TechnologyOfProductionMenuPage,
-      meta: { breadcrumb: { text: 'Меню АРМ Технология производства' } },
-      children: [
-        {
-          path: 'records_of_work_by_cards',
-          name: 'RecordsOfWorkByCards',
-          component: RecordsOfWorkByCardsPage,
+      meta: { breadcrumb: { text: 'Меню технологий производства' } },
+      children: [{
+        path: 'records_of_work_by_cards',
+        name: 'RecordsOfWorkByCards',
+        component: RecordsOfWorkByCardsPage,
+        meta: {
+          breadcrumb: { text: 'Запись работы по карточкам' }
+        },
+        children: [{
+          path: 'records_of_work_on_order',
+          name: 'RecordsOfWorkOnOrder',
+          component: RecordsOfWorkOnOrderPage,
           meta: {
-            breadcrumb: { text: 'Запись работы по карточкам' }
+            breadcrumb: { text: 'Запись работы по заказу' }
           }
-        }
-      ]
+        }]
+      }]
     },
 
     {
@@ -293,72 +315,72 @@ const createRouterConst = new Router({
       name: 'SupplyMenu',
       component: SupplyMenuPage,
       meta: {
-        breadcrumb: { text: 'АРМ Снабжение' }
-      }
-    },
+        breadcrumb: { text: 'Меню снабжения' }
+      },
+      children: [{
+        path: 'commodity_menu',
+        name: 'CommodityMenu',
+        component: CommodityMenuPage,
+        meta: {
+          breadcrumb: { text: 'Сырье (Снабжение)' }
+        },
+        children: [{
+          path: 'commodity_log_of_sewing_plan',
+          name: 'CommodityLogOfSewingPlan',
+          component: CommodityLogOfSewingPlanPage,
+          meta: {
+            breadcrumb: { text: 'Журнал сырья по плану пошиву' }
+          }
+        },
+        {
+          path: 'list_of_commodity_for_sewing_application',
+          name: 'ListOfCommodityForSewingApplication',
+          component: ListOfCommodityForSewingApplicationPage,
+          meta: {
+            breadcrumb: { text: 'Список сырья по заявки на пошив' }
+          }
+        },
 
-    {
-      path: 'commodity_menu',
-      name: 'CommodityMenu',
-      component: CommodityMenuPage,
-      meta: {
-        breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
-      }
-    },
+        {
+          path: 'requisition_log_to_supplier',
+          name: 'RequisitionLogToSupplier',
+          component: RequisitionLogToSupplierPage,
+          meta: {
+            breadcrumb: { text: 'Журнал заявок поставщику' }
+          }
+        },
 
-    {
-      path: 'commodity_log_of_sewing_plan',
-      name: 'CommodityLogOfSewingPlan',
-      component: CommodityLogOfSewingPlanPage,
-      meta: {
-        breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
-      }
-    },
+        {
+          path: 'stock_balance',
+          name: 'StockBalance',
+          component: StockBalancePage,
+          meta: {
+            breadcrumb: { text: 'Складские остатки' }
+          }
+        }
+        ]
+      },
 
-    {
-      path: 'list_of_commodity_for_sewing_application',
-      name: 'ListOfCommodityForSewingApplication',
-      component: ListOfCommodityForSewingApplicationPage,
-      meta: {
-        breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
-      }
-    },
+      {
+        path: 'materials',
+        name: 'Materials',
+        component: MaterialsPage,
+        meta: {
+          breadcrumb: { text: 'Материал (Закупки)' }
+        }
+      },
 
-    {
-      path: 'requisition_log_to_supplier',
-      name: 'RequisitionLogToSupplier',
-      component: RequisitionLogToSupplierPage,
-      meta: {
-        breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
+      {
+        path: 'warehouse_inventory',
+        name: 'WarehouseInventory',
+        component: WarehouseInventoryPage,
+        meta: {
+          breadcrumb: { text: 'Просмотр складских запасов' }
+        }
       }
-    },
-
-    {
-      path: 'stock_balance',
-      name: 'StockBalance',
-      component: StockBalancePage,
-      meta: {
-        breadcrumb: { text: 'Складские остатки' }
-      }
-    },
-
-    {
-      path: 'materials',
-      name: 'Materials',
-      component: MaterialsPage,
-      meta: {
-        breadcrumb: { text: 'АРМ Снабжение / Сырье (Закупки)' }
-      }
-    },
-
-    {
-      path: 'warehouse_inventory',
-      name: 'WarehouseInventory',
-      component: WarehouseInventoryPage,
-      meta: {
-        breadcrumb: { text: 'АРМ Снабжение / Сырье (Снабжение)' }
-      }
-    }]
+      ]
+    }
+    ]
   },
 
   {

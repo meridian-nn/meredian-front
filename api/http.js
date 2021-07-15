@@ -1,4 +1,5 @@
-import Cookies from 'js-cookie'
+// import Cookies from 'js-cookie'
+import size from 'lodash/size'
 export default class HttpClient {
   constructor({ url }) {
     this.url = url
@@ -8,36 +9,47 @@ export default class HttpClient {
     this._token = token
   }
 
-  fetch = async(method, methodUrl, params = {}) => {
+  composeUrl(method, methodUrl, params) {
     const url = new URL(this.url + methodUrl)
 
-    const config = this.config(method, params)
+    if (method === 'GET' && size(params) > 0) {
+      url.search = new URLSearchParams(params).toString()
+    }
 
-    return await this.call(url, config)
+    return url
   }
 
-  config(method, params = {}) {
+  composeConfig(method, params = {}, headers = this.headersJson) {
     return {
       method,
       ...(method === 'POST' && {
         body: JSON.stringify(params)
       }),
-      headers: this.headers
+      headers
     }
+  }
+
+  fetch = async(method, methodUrl, params = {}) => {
+    const url = this.composeUrl(method, methodUrl, params)
+    const config = this.composeConfig(method, params)
+
+    return await this.call(url, config)
   }
 
   async call(url, config) {
     const response = await fetch(url, config)
-      // eslint-disable-next-line require-await
-      .then(async(res) => {
-        const json = res.json()
+      .then((res) => {
+        let json
+        if (res.headers.get('Content-Type').includes('application/json')) {
+          json = res.json()
+        } else {
+          json = res.text()
+        }
 
         if (res.ok) {
           return json
-        } else if (res.status === 401) {
-          Cookies.remove('JWT')
         } else {
-          return json.then((err) => { throw err })
+          throw res
         }
       }).catch((error) => {
         throw error
@@ -46,17 +58,13 @@ export default class HttpClient {
     return response
   }
 
-  get headers() {
+  get headersJson() {
     const headers = {
       'Content-Type': 'application/json'
     }
 
     if (window.$nuxt.$store.state.auth.token) {
       headers.Authorization = 'Basic ' + window.$nuxt.$store.state.auth.token
-    }
-
-    if (this._token) {
-      headers.Authorization = `Bearer ${this._token}`
     }
 
     return headers

@@ -38,7 +38,7 @@
       </div>
 
       <div
-        v-if="isHaveBudgetRole()"
+        v-if="isHaveBudgetRole"
         class="payment-menu-col-2"
       >
         <router-link :to="{ name: 'PaymentBudgetByDepartments' }">
@@ -53,7 +53,7 @@
       </div>
 
       <div
-        v-if="isHaveBudgetRole()"
+        v-if="isHaveBudgetRole"
         class="payment-menu-col-2"
       >
         <router-link :to="{ name: 'JournalOfEmailSendingPaymentDocuments' }">
@@ -63,12 +63,12 @@
           class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
           align="center"
         >
-          Журнал рассылки на email документов на оплату
+          Журнал рассылки на email документов к оплате
         </div>
       </div>
 
       <div
-        v-if="isHaveBudgetRole()"
+        v-if="isHaveBudgetRole"
         class="payment-menu-col-2"
       >
         <router-link :to="{ name: 'MoneyDistribution' }">
@@ -83,7 +83,7 @@
       </div>
 
       <div
-        v-if="isHaveBudgetRole()"
+        v-if="isHaveBudgetRole"
         class="payment-menu-col-2"
       >
         <router-link :to="{ name: 'InputOfBalances' }">
@@ -125,7 +125,7 @@
     </v-row>
 
     <v-row
-      v-if="isHaveBudgetRole()"
+      v-if="isHaveBudgetRole"
       style="margin-top:150px; width:100%"
     >
       <div class="chart-div">

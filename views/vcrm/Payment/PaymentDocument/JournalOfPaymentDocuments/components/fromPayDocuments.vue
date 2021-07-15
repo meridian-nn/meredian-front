@@ -141,7 +141,7 @@
         >
           <v-list>
             <v-list-item
-              v-if="isHaveBudgetRole()"
+              v-if="isHaveBudgetRole"
               @click="payDocumentForContextMenuOnly"
             >
               <v-list-item-title>
@@ -202,7 +202,7 @@
           </v-btn>
 
           <div
-            v-if="isHaveBudgetRole()"
+            v-if="isHaveBudgetRole"
             class="add-group"
           >
             <label
@@ -567,11 +567,7 @@ export default {
     async addPayments() {
       const ids = this.fromPaySelectedRows.map(value => value.id)
       const data = { ids, accId: this.accId }
-      /* await this.$api.payment.payDocument(data).catch((error) => {
-          const errorMessage = error
-          alert(errorMessage)
-        }) */
-      await this.$axios.$post(this.$api.payment.getPayDocumentUrl(), data)
+      await this.$api.payment.payDocument(data)
     },
     countSumOfArrayElements(array) {
       let sum = 0
@@ -657,8 +653,7 @@ export default {
       }
 
       const ids = selectedRows.map(value => value.id)
-      // await this.$api.payment.DocOplForPay.deleteSelectedPayments(ids)
-      await this.$axios.$post(this.$api.payment.getDeletePaymentUrl(), ids)
+      await this.$api.payment.DocOplForPay.deleteSelectedPayments(ids)
 
       await this.updateDocsForPay()
     },
@@ -776,7 +771,7 @@ export default {
     // Поиск документов для таблицы "Документы на оплату" по выбранной организации
     async findSpDocoplForPay($state) {
       const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
-        this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs(), this.getCurrentUser().id)
+        this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs(), this.getCurrentUser.id)
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
       let filtersParams
 

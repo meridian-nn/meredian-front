@@ -1,0 +1,794 @@
+<template>
+  <div class="records-of-work-on-order-main-div">
+    <div class="records-of-work-on-order-row">
+      <div class="records-of-work-on-order-label">
+        <v-subheader class="font-weight-medium text-subtitle-1">
+          Месяц
+        </v-subheader>
+      </div>
+
+      <div class="records-of-work-on-order-autocomplete-month">
+        <v-autocomplete
+          v-model="chosenMonth"
+          :loading="loadingType.suppliers"
+          :items="months"
+          item-value="id"
+          item-text="name"
+          hide-details="auto"
+          :auto-select-first="true"
+          outlined
+        />
+      </div>
+
+      <div class="records-of-work-on-order-label">
+        <v-subheader class="font-weight-medium text-subtitle-1">
+          Год
+        </v-subheader>
+      </div>
+
+      <div class="records-of-work-on-order-autocomplete-year">
+        <v-autocomplete
+          v-model="chosenYear"
+          :loading="loadingType.years"
+          :items="years"
+          item-value="id"
+          item-text="name"
+          hide-details="auto"
+          :auto-select-first="true"
+          outlined
+        />
+      </div>
+
+      <div class="records-of-work-on-order-label">
+        <v-subheader class="font-weight-medium text-subtitle-1">
+          Производство:
+        </v-subheader>
+      </div>
+
+      <div class="records-of-work-on-order-autocomplete-organizations">
+        <v-autocomplete
+          v-model="chosenOrg"
+          :loading="loadingType.organizations"
+          :items="organizations"
+          item-value="id"
+          item-text="name_podr"
+          hide-details="auto"
+          outlined
+        />
+      </div>
+    </div>
+
+    <div class="records-of-work-on-order-row">
+      <div class="records-of-work-on-order-col-4">
+        <div class="records-of-work-on-order-row">
+          <div class="records-of-work-on-order-label">
+            <v-subheader class="font-weight-medium text-subtitle-1">
+              № заказа
+            </v-subheader>
+          </div>
+
+          <div class="records-of-work-on-order-indentation-for-inputs">
+            <v-text-field
+              v-model.number="numberOfOrder"
+              hide-details="auto"
+            />
+          </div>
+
+          <div class="records-of-work-on-order-label">
+            <v-subheader class="font-weight-medium text-subtitle-1">
+              № заявки
+            </v-subheader>
+          </div>
+
+          <div class="records-of-work-on-order-indentation-for-inputs">
+            <v-text-field
+              v-model.number="numberOfApplication"
+              hide-details="auto"
+            />
+          </div>
+        </div>
+
+        <div class="records-of-work-on-order-row">
+          <div class="records-of-work-on-order-label">
+            <v-subheader class="font-weight-medium text-subtitle-1">
+              Кол-во изделий:
+            </v-subheader>
+          </div>
+
+          <div class="records-of-work-on-order-indentation-for-inputs">
+            <v-text-field
+              v-model.number="countOfProductions"
+              hide-details="auto"
+            />
+          </div>
+
+          <div class="records-of-work-on-order-label">
+            <v-subheader class="font-weight-medium text-subtitle-1">
+              Коэффициент:
+            </v-subheader>
+          </div>
+
+          <div class="records-of-work-on-order-coefficient-input">
+            <v-text-field
+              v-model.number="coefficient"
+              hide-details="auto"
+            />
+          </div>
+        </div>
+
+        <div class="records-of-work-on-order-btn-row">
+          <div class="records-of-work-on-order-btn">
+            <v-btn>
+              Сформировать карточки
+            </v-btn>
+          </div>
+
+          <div class="records-of-work-on-order-btn">
+            <v-btn>
+              Удалить карточки
+            </v-btn>
+          </div>
+        </div>
+      </div>
+
+      <div class="records-of-work-on-order-col-5">
+        <div class="records-of-work-on-order-row">
+          <div class="records-of-work-on-order-label">
+            <v-subheader class="font-weight-medium text-subtitle-1">
+              Код изделия:
+            </v-subheader>
+          </div>
+
+          <div class="records-of-work-on-order-indentation-for-inputs">
+            <v-text-field
+              v-model.number="codeOfProduction"
+              hide-details="auto"
+              outlined
+            />
+          </div>
+
+          <div class="records-of-work-on-order-descr-of-production-input">
+            <v-text-field
+              v-model.number="descrOfProduction"
+              hide-details="auto"
+              outlined
+            />
+          </div>
+        </div>
+
+        <div class="records-of-work-on-order-row">
+          <v-simple-checkbox
+            v-model="example"
+          />
+
+          <v-subheader
+            class="font-weight-medium text-subtitle-1"
+            style="margin-top: 10px"
+          >
+            Образец
+          </v-subheader>
+
+          <v-subheader
+            class="font-weight-medium text-subtitle-1"
+            style="margin-top: 10px"
+          >
+            Дата опер.
+          </v-subheader>
+          <div>
+            <v-text-field
+              v-model="dateOfOperation"
+              type="date"
+            />
+          </div>
+
+          <div
+            class="records-of-work-on-order-amount-of-change-label"
+          >
+            <v-subheader
+              class="font-weight-medium text-subtitle-1"
+              style="margin-top: 5px"
+            >
+              Изменить во всех операциях
+            </v-subheader>
+          </div>
+
+          <div
+            class="records-of-work-on-order-amount-of-change-input"
+          >
+            <v-text-field
+              v-model.number="amountOfChange"
+              hide-details="auto"
+              outlined
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="records-of-work-on-order-col-3">
+        <div class="records-of-work-on-order-row">
+          <div class="records-of-work-on-order-label">
+            <v-subheader class="font-weight-medium text-subtitle-1">
+              ТП:
+            </v-subheader>
+          </div>
+
+          <div class="records-of-work-on-order-tpid-input">
+            <v-text-field
+              v-model.number="TPid"
+              hide-details="auto"
+              outlined
+            />
+          </div>
+
+          <div class="records-of-work-on-order-tpname-input">
+            <v-text-field
+              v-model.number="TPname"
+              hide-details="auto"
+              outlined
+            />
+          </div>
+        </div>
+
+        <div class="records-of-work-on-order-row">
+          <div
+            class="records-of-work-on-separation-scheme-label"
+          >
+            <v-subheader
+              class="font-weight-medium text-subtitle-1"
+            >
+              Схема разделения:
+            </v-subheader>
+          </div>
+
+          <div class="records-of-work-on-order-autocomplete-separation-scheme">
+            <v-autocomplete
+              v-model="chosenSeparationScheme"
+              :loading="loadingType.separationScheme"
+              :items="separationScheme"
+              item-value="id"
+              item-text="name"
+              hide-details="auto"
+              outlined
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="records-of-work-on-order-row">
+      <div class="records-of-work-on-order-org-operations-table-col-4">
+        <div
+          class="records-of-work-on-order-row"
+          style="margin-bottom: 20px"
+        >
+          <v-data-table
+            id="records-of-work-on-order-org-operations"
+            height="400"
+            :headers="orgOperationsHeaders"
+            fixed-header
+            :items="orgOperationsData"
+            :show-select="false"
+            :single-select="false"
+            disable-pagination
+            hide-default-footer
+            class="elevation-1"
+          />
+        </div>
+
+        <div class="records-of-work-on-order-row">
+          <v-data-table
+            id="records-of-work-on-order-operations"
+            height="200"
+            :headers="operationsHeaders"
+            fixed-header
+            :items="operationsData"
+            :show-select="false"
+            :single-select="false"
+            disable-pagination
+            hide-default-footer
+            class="elevation-1"
+          />
+        </div>
+      </div>
+
+      <div class="records-of-work-on-order-dressmakers-and-operations-col-5">
+        <v-data-table
+          id="records-of-work-on-order-dressmakers-and-operations"
+          height="620"
+          :headers="dressmakersHeaders"
+          fixed-header
+          :items="dressmakersData"
+          :show-select="false"
+          :single-select="false"
+          disable-pagination
+          hide-default-footer
+          class="elevation-1"
+        />
+      </div>
+
+      <div class="records-of-work-on-order-col-3">
+        <div class="records-of-work-on-order-row">
+          <div class="records-of-work-on-order-list-of-dressmakers-headers-spacer" />
+          <div class="records-of-work-on-order-list-of-dressmakers-headers">
+            <div class="records-of-work-on-order-row">
+              <div
+                style="margin-top:5px"
+              >
+                <v-btn
+                  color="blue"
+                  class="mx-2"
+                  fab
+                  dark
+                  x-small
+                >
+                  <v-icon dark>
+                    mdi-minus
+                  </v-icon>
+                </v-btn>
+              </div>
+              <v-subheader
+                class="font-weight-medium text-subtitle-1"
+              >
+                Список швей
+              </v-subheader>
+            </div>
+          </div>
+        </div>
+        <div class="records-of-work-on-order-row">
+          <div class="records-of-work-on-order-left-arrow">
+            <v-btn
+              color="blue"
+              class="mr-2 mb-2"
+              fab
+              dark
+              small
+            >
+              <v-icon>mdi-arrow-left</v-icon>
+            </v-btn>
+          </div>
+          <div class="records-of-work-on-order-dressmakers-div">
+            <v-data-table
+              id="records-of-work-on-order-dressmakers"
+              height="572"
+              :headers="listOfDressmakersHeaders"
+              fixed-header
+              :items="listOfDressmakersData"
+              :show-select="false"
+              :single-select="false"
+              disable-pagination
+              hide-default-footer
+              class="elevation-1"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <user-notification ref="userNotification" />
+  </div>
+</template>
+<script>
+import UserNotification from '~/components/information_window/UserNotification'
+export default {
+  name: 'RecordsOfWorkOnOrder',
+
+  components: {
+    UserNotification
+  },
+
+  data() {
+    return {
+      loadingType: {},
+
+      months: [
+        'Январь',
+        'Февраль',
+        'Март',
+        'Апрель',
+        'Май',
+        'Июнь',
+        'Июль',
+        'Август',
+        'Сентябрь',
+        'Октябрь',
+        'Ноябрь',
+        'Декабрь'
+      ],
+
+      chosenMonth: {},
+
+      years: [],
+
+      chosenYear: {},
+
+      chosenOrg: {},
+
+      // массив организаций
+      organizations: [],
+
+      numberOfOrder: '',
+
+      numberOfApplication: '',
+
+      countOfProductions: 0,
+
+      coefficient: 0,
+
+      TPid: null,
+
+      TPname: '',
+
+      separationScheme: [],
+
+      chosenSeparationScheme: {},
+
+      codeOfProduction: null,
+
+      descrOfProduction: null,
+
+      example: false,
+
+      dateOfOperation: new Date().toISOString().substr(0, 10),
+
+      amountOfChange: 0,
+
+      orgOperationsHeaders: [
+        {
+          text: 'Цех',
+          value: 'ceh'
+        },
+        {
+          text: 'Орг. операция',
+          value: 'orgOperation'
+        }
+      ],
+
+      orgOperationsData: [],
+
+      operationsHeaders: [
+        {
+          text: 'Операция',
+          value: 'operation'
+        },
+        {
+          text: 'Кол-во',
+          value: 'count'
+        },
+        {
+          text: 'Всего',
+          value: 'amount'
+        },
+        {
+          text: 'Остаток',
+          value: 'balance'
+        }
+      ],
+
+      operationsData: [],
+
+      dressmakersHeaders: [
+        {
+          text: 'Таб. номер',
+          value: 'tabNumber'
+        },
+        {
+          text: 'ФИО',
+          value: 'fullName'
+        },
+        {
+          text: 'Код операции',
+          value: 'operationCode'
+        },
+        {
+          text: 'Кол-во',
+          value: 'count'
+        },
+        {
+          text: '+/-',
+          value: 'plusMinus'
+        },
+        {
+          text: 'Всего',
+          value: 'amount'
+        }
+      ],
+
+      dressmakersData: [],
+
+      listOfDressmakersHeaders: [
+        {
+          text: 'Таб. номер',
+          value: 'tabNumber'
+        },
+        {
+          text: 'ФИО',
+          value: 'fullName'
+        },
+        {
+          text: 'Бригада',
+          value: 'brigade'
+        }
+      ],
+
+      listOfDressmakersData: []
+    }
+  },
+
+  mounted() {
+    this.init()
+  },
+
+  methods: {
+    init() {
+      this.findOrganizations()
+      this.getTenLastYears()
+    },
+
+    getTenLastYears() {
+      let year = new Date().getFullYear()
+      this.years.push(year)
+      for (let i = 0; i < 10; i++) {
+        const yearForPush = year - 1
+        year = yearForPush
+        this.years.push(yearForPush)
+      }
+    },
+
+    // поиск организаций для выбора пользователем
+    async findOrganizations() {
+      this.loadingType.organizations = true
+      const searchCriterias = this.createCriteriasToSearchOrgForRecordsOfWorkByCardsForm()
+      this.organizations = await this.$api.service.executeStashedFunctionWithReturnedDataSet(searchCriterias)
+      this.loadingType.organizations = null
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.records-of-work-on-order-main-div{
+  margin: 10px;
+}
+
+.records-of-work-on-order-row {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  margin: 0;
+  min-width: 100%;
+}
+
+.records-of-work-on-order-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  margin-left: 16px;
+  min-width: 100%;
+}
+
+.records-of-work-on-order-label {
+  margin-right: 10px;
+  margin-top: 5px
+}
+
+.records-of-work-on-separation-scheme-label {
+  margin-right: 10px;
+  margin-top: 10px;
+  width: 111px;
+}
+
+.records-of-work-on-order-amount-of-change-label {
+  margin-right: 10px;
+  margin-top: 5px;
+  width: 153px
+}
+
+.records-of-work-on-order-autocomplete-month {
+  width:250px;
+  margin-right: 10px;
+  margin-top: 5px
+}
+
+.records-of-work-on-order-autocomplete-year {
+  width:125px;
+  margin-right: 10px;
+  margin-top: 5px
+}
+
+.records-of-work-on-order-autocomplete-organizations {
+  width:400px;
+  margin-right: 10px;
+  margin-top: 5px
+}
+
+.records-of-work-on-order-autocomplete-separation-scheme {
+  width:268px;
+  margin-right: 10px;
+  margin-top: 5px
+}
+
+.records-of-work-on-order-indentation-for-inputs {
+  margin-right: 10px;
+  width: 95px;
+}
+
+.records-of-work-on-order-amount-of-change-input {
+  margin-top: 5px;
+  margin-right: 10px;
+  width: 90px;
+}
+
+.records-of-work-on-order-coefficient-input {
+  margin-right: 10px;
+  width: 88px;
+}
+
+.records-of-work-on-order-descr-of-production-input {
+  margin-right: 10px;
+  width: 410px;
+}
+
+.records-of-work-on-order-btn {
+  padding-top: 10px;
+  margin-right: 10px;
+  margin-top: 5px
+}
+
+.records-of-work-on-order-tpid-input {
+  margin-right: 10px;
+  width: 100px;
+}
+
+.records-of-work-on-order-tpname-input {
+  margin-right: 10px;
+  width: 210px;
+}
+
+#records-of-work-on-order-org-operations {
+  border-collapse: collapse;
+  width: 100%;
+  height: 400px;
+}
+
+#records-of-work-on-order-org-operations   table{
+  width: 100%;
+}
+#records-of-work-on-order-org-operations   td, #records-of-work-on-order-org-operations   th {
+  border: 1px solid #ddd;
+  word-break:break-all !important;
+  padding: 0 0 !important;
+  height: 0 !important;
+}
+
+#records-of-work-on-order-org-operations  th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #639db1 !important;
+  color: white;
+}
+
+#records-of-work-on-order-operations {
+  border-collapse: collapse;
+  width: 100%;
+  height: 200px;
+}
+
+#records-of-work-on-order-operations   table{
+  width: 100%;
+}
+#records-of-work-on-order-operations   td, #records-of-work-on-order-operations   th {
+  border: 1px solid #ddd;
+  word-break:break-all !important;
+  padding: 0 0 !important;
+  height: 0 !important;
+}
+
+#records-of-work-on-order-operations th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #639db1 !important;
+  color: white;
+}
+
+#records-of-work-on-order-dressmakers-and-operations {
+  border-collapse: collapse;
+  width: 100%;
+  height: 620px;
+}
+
+#records-of-work-on-order-dressmakers-and-operations   table{
+  width: 100%;
+}
+#records-of-work-on-order-dressmakers-and-operations   td, #records-of-work-on-order-dressmakers-and-operations   th {
+  border: 1px solid #ddd;
+  word-break:break-all !important;
+  padding: 0 0 !important;
+  height: 0 !important;
+}
+
+#records-of-work-on-order-dressmakers-and-operations th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #639db1 !important;
+  color: white;
+}
+
+#records-of-work-on-order-dressmakers {
+  border-collapse: collapse;
+  width: 100%;
+  height: 572px;
+}
+
+#records-of-work-on-order-dressmakers   table{
+  width: 100%;
+}
+#records-of-work-on-order-dressmakers   td, #records-of-work-on-order-dressmakers   th {
+  border: 1px solid #ddd;
+  word-break:break-all !important;
+  padding: 0 0 !important;
+  height: 0 !important;
+}
+
+#records-of-work-on-order-dressmakers th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #639db1 !important;
+  color: white;
+}
+
+.records-of-work-on-order-left-arrow {
+  padding-top:250px;
+  flex: 0 0 10%;
+  max-width: 10%;
+}
+
+.records-of-work-on-order-dressmakers-div {
+  flex: 0 0 90%;
+  max-width: 90%;
+}
+
+.records-of-work-on-order-list-of-dressmakers-headers-spacer {
+  flex: 0 0 10%;
+  max-width: 10%;
+}
+
+.records-of-work-on-order-list-of-dressmakers-headers {
+  flex: 0 0 90%;
+  max-width: 90%;
+}
+
+.records-of-work-on-order-col-4{
+  flex: 0 0 33%;
+  max-width: 33%;
+  margin-top: 5px
+}
+
+.records-of-work-on-order-col-5{
+  flex: 0 0 42%;
+  max-width: 42%;
+  margin-top: 5px
+}
+
+.records-of-work-on-order-org-operations-table-col-4{
+  flex: 0 0 33%;
+  max-width: 33%;
+  margin-top: 5px;
+  padding-right: 10px;
+}
+
+.records-of-work-on-order-dressmakers-and-operations-col-5{
+  flex: 0 0 42%;
+  max-width: 42%;
+  margin-top: 5px;
+  padding-right: 10px;
+}
+
+.records-of-work-on-order-col-3{
+  flex: 0 0 25%;
+  max-width: 25%;
+  margin-top: 5px
+}
+</style>

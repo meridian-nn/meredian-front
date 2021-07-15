@@ -20,14 +20,14 @@
         <v-container>
           <v-row>
             <v-col cols="12">
-              <span class="headline">-</span>
+              <span class="headline">06.07.2021</span>
             </v-col>
           </v-row>
 
           <v-row>
             <v-col cols="12">
               <ul>
-                <li> - </li>
+                <li> Добавлена форма "Запись работы по карточкам" </li>
               </ul>
             </v-col>
           </v-row>

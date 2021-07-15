@@ -94,8 +94,7 @@ export default {
 
     // Инициализация журнала оплат
     async selOplat() {
-      await this.$axios.$post(this.$api.payment.getSelOplatUrl())
-      // await this.$api.payment.selOplat()
+      await this.$api.payment.selOplat()
     },
 
     // Метод получения итоговой суммы документов к оплате по организациям

@@ -207,7 +207,7 @@ export default {
     // Сохранение внесенных пользователем изменений
     async save() {
       document.activeElement.blur()
-      await this.$axios.$post(this.$api.payment.balanceOfPaymentAccount.getSaveAllUrl(), this.oplatData)
+      await this.$api.payment.balanceOfPaymentAccount.saveAll(this.oplatData)
       this.$emit('save')
     }
   }
