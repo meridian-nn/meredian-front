@@ -475,7 +475,7 @@ export default {
         await this.$api.payment.moneyDistributionByDepartments.save(this.selectedDepartment)
 
         // Сохранение распределения бюджета на подразделения отдела
-        await this.$api.payment.moneyDistributionByDepartments.saveList(this.moneyDistributionData)
+        await this.$api.payment.moneyDistributionByDepartments.saveAll(this.moneyDistributionData)
       }
 
       await this.findDepartments()

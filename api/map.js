@@ -472,6 +472,9 @@ export const factory = send => ({
             getSaveUrl() {
               return `/oper/depMoneyDistribution/save`
             },
+            saveAll(params) {
+              return send('POST', `/oper/depMoneyDistribution/saveAll`, params)
+            },
             saveList(params) {
               return send('POST', this.getSaveUrlForDepartments(), params)
             },
