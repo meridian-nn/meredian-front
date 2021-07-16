@@ -154,7 +154,7 @@
               <v-list>
                 <v-list-item @click="payedByCashboxForContextMenuOnly">
                   <v-list-item-title>
-                    Новая оплата по кассе
+                    Создать оплату по кассе
                   </v-list-item-title>
                 </v-list-item>
 
@@ -182,7 +182,7 @@
               <v-list>
                 <v-list-item @click="payedByCashboxForContextMenuOnly">
                   <v-list-item-title>
-                    Оплата по кассе
+                    Создать оплату по кассе
                   </v-list-item-title>
                 </v-list-item>
               </v-list>
@@ -194,28 +194,39 @@
           >
             <div align="center">
               <v-subheader class="font-weight-medium text-subtitle-1" />
-              <v-btn
-                color="blue"
-                class="mr-2 mb-2"
-                fab
-                dark
-                small
-
-                @click="addPaymentDocument"
+              <div
+                class="journal-of-payment-docs-add-payment-docs"
+                data-title="Перенести выбранные документы на оплату в список документов к оплате"
               >
-                <v-icon>mdi-arrow-left</v-icon>
-              </v-btn>
+                <v-btn
+                  color="blue"
+                  class="mr-2 mb-2 "
+                  fab
+                  dark
+                  small
+                  @click="addPaymentDocument"
+                >
+                  <v-icon>mdi-arrow-left</v-icon>
+                </v-btn>
+              </div>
               <br>
-              <v-btn
-                color="blue"
-                class="mr-2 mb-2"
-                fab
-                dark
-                small
-                @click="deleteSelectedPayments"
+
+              <div
+                class="journal-of-payment-docs-delete-payment-docs"
+                data-title="Перенести выбранные документы к оплате в список документов на оплату"
               >
-                <v-icon>mdi-arrow-right</v-icon>
-              </v-btn>
+                <v-btn
+                  color="blue"
+                  class="mr-2 mb-2"
+                  fab
+                  dark
+                  small
+
+                  @click="deleteSelectedPayments"
+                >
+                  <v-icon>mdi-arrow-right</v-icon>
+                </v-btn>
+              </div>
             </div>
           </div>
         </div>
@@ -374,45 +385,64 @@
           <div class="journal-of-payment-docs-buttons-of-table-docs-for-pay">
             <v-subheader class="font-weight-medium text-subtitle-1" />
             <div align="center">
-              <v-btn
-                color="blue"
-                class="mr-2 mb-2"
-                fab
-                dark
-                small
-                @click="editDocument"
+              <div
+                class="journal-of-payment-docs-buttons-edit-button"
+                data-title="Редактирование выбранного документа на оплату"
               >
-                <v-icon>mdi-file-edit</v-icon>
-              </v-btn>
+                <v-btn
+                  color="blue"
+                  class="mr-2 mb-2"
+                  fab
+                  dark
+                  small
+                  @click="editDocument"
+                >
+                  <v-icon>mdi-file-edit</v-icon>
+                </v-btn>
+              </div>
 
               <br>
-              <v-btn
-                color="blue"
-                class="mr-2 mb-2"
-                fab
-                dark
-                small
-                @click="copyDocument"
+
+              <div
+                class="journal-of-payment-docs-buttons-copy-button"
+                data-title="Копирование выбранного документа на оплату"
               >
-                <v-icon>mdi-content-copy</v-icon>
-              </v-btn>
+                <v-btn
+                  color="blue"
+                  class="mr-2 mb-2"
+                  fab
+                  dark
+                  small
+                  @click="copyDocument"
+                >
+                  <v-icon>mdi-content-copy</v-icon>
+                </v-btn>
+              </div>
 
               <br>
-              <v-btn
-                color="blue"
-                class="mr-2 mb-2"
-                fab
-                dark
-                small
-                @click="deleteDocument"
+              <div
+                class="journal-of-payment-docs-buttons-delete-button"
+                data-title="Удаление выбранных документов на оплату"
               >
-                <v-icon>mdi-delete-forever</v-icon>
-              </v-btn>
+                <v-btn
+                  color="blue"
+                  class="mr-2 mb-2"
+                  fab
+                  dark
+                  small
+                  @click="deleteDocument"
+                >
+                  <v-icon>mdi-delete-forever</v-icon>
+                </v-btn>
+              </div>
 
-              <div class="add-group">
+              <div
+                class="add-group"
+              >
                 <label
                   for="add"
                   class="add-group__btn"
+                  data-title="Создание новых документов"
                 > +
                 </label>
                 <input
@@ -423,19 +453,21 @@
                 >
                 <button
                   class="add-group__link doc_for_pay"
+                  data-title="Создание нового документа на оплату"
                   @click="newDocument"
                 >
                   опл
                 </button>
                 <button
                   class="add-group__link pay_by_cashbox"
+                  data-title="Создание новой оплаты по кассе"
                   @click="payedByCashboxForContextMenuOnly"
                 >
                   нал
                 </button>
                 <button
-                  ref=""
                   class="add-group__link internal_payment"
+                  data-title="Создание нового внутреннего платежа"
                   @click="internalMovementForContextMenuOnly"
                 >
                   внт
@@ -602,11 +634,6 @@ export default {
           text: 'Исполнитель',
           value: 'executorName',
           width: '70px'
-        },
-        {
-          text: 'Кредит',
-          value: 'prCredit',
-          width: '80px'
         },
         {
           text: 'Оплата',
@@ -1607,17 +1634,6 @@ export default {
   color: #999;
 }
 
-.journal-of-payment-docs-brise-input input:focus ~ .line {
-  left: 0;
-  opacity: 1;
-}
-
-.journal-of-payment-docs-brise-input input:valid ~ label, input:focus ~ label   {
-  top: 0;
-  transform: scale(0.94) translateX(-2px);
-  color: #639db1;
-}
-
 .journal-of-payment-docs-brise-input .line {
   position: absolute;
   left: 0;
@@ -1628,6 +1644,17 @@ export default {
   transition: .25s;
   opacity: 0;
   z-index: 6;
+}
+
+.journal-of-payment-docs-brise-input input:focus ~ .line {
+  left: 0;
+  opacity: 1;
+}
+
+.journal-of-payment-docs-brise-input input:valid ~ label, input:focus ~ label   {
+  top: 0;
+  transform: scale(0.94) translateX(-2px);
+  color: #639db1;
 }
 
 .journal-of-payment-docs-filter-button{
@@ -1712,11 +1739,25 @@ export default {
   color: #fff;
   font-size:26px;
   display: flex;
+  position: relative;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.6);
   z-index:2;
+}
+
+.add-group__btn:hover::after {
+  content: attr(data-title);
+  position: absolute;
+  right: 100%; top: -200%;
+  z-index: 1;
+  background: rgba(255,255,230,0.9);
+  font-family: Arial, sans-serif;
+  color: black;
+  font-size: 11px;
+  padding: 5px 10px;
+  border: 1px solid #333;
 }
 
 .add-group__btn:active {
@@ -1742,13 +1783,143 @@ export default {
   transform: translate(-60px, -30px);
 }
 
+.add-group .doc_for_pay:hover::after {
+  content: attr(data-title);
+  position: absolute; /* Абсолютное позиционирование */
+  right: 100%; top: -150%; /* Положение подсказки */
+  z-index: 1; /* Отображаем подсказку поверх других элементов */
+  background: rgba(255,255,230,0.9); /* Полупрозрачный цвет фона */
+  font-family: Arial, sans-serif; /* Гарнитура шрифта */
+  color: black;
+  font-size: 11px; /* Размер текста подсказки */
+  padding: 5px 10px; /* Поля */
+  border: 1px solid #333; /* Параметры рамки */
+}
+
 .add-group input:checked ~ .pay_by_cashbox {
   transform: translate(-60px, 30px);
   transition-delay: 0.1s;
+}
+
+.add-group .pay_by_cashbox:hover::after {
+  content: attr(data-title);
+  position: absolute; /* Абсолютное позиционирование */
+  right: 100%; top: -150%; /* Положение подсказки */
+  z-index: 1; /* Отображаем подсказку поверх других элементов */
+  background: rgba(255,255,230,0.9); /* Полупрозрачный цвет фона */
+  font-family: Arial, sans-serif; /* Гарнитура шрифта */
+  color: black;
+  font-size: 11px; /* Размер текста подсказки */
+  padding: 5px 10px; /* Поля */
+  border: 1px solid #333; /* Параметры рамки */
 }
 
 .add-group input:checked ~ .internal_payment {
   transform: translate(0, 65px);
   transition-delay: 0.2s;
 }
+
+.add-group .internal_payment:hover::after {
+  content: attr(data-title);
+  position: absolute; /* Абсолютное позиционирование */
+  right: 100%; top: -150%; /* Положение подсказки */
+  z-index: 1; /* Отображаем подсказку поверх других элементов */
+  background: rgba(255,255,230,0.9); /* Полупрозрачный цвет фона */
+  font-family: Arial, sans-serif; /* Гарнитура шрифта */
+  color: black;
+  font-size: 11px; /* Размер текста подсказки */
+  padding: 5px 10px; /* Поля */
+  border: 1px solid #333; /* Параметры рамки */
+}
+
+.journal-of-payment-docs-buttons-edit-button {
+  display: inline-block; /* Строчно-блочный элемент */
+  position: relative; /* Относительное позиционирование */
+}
+
+.journal-of-payment-docs-buttons-edit-button:hover::after {
+  content: attr(data-title);
+  position: absolute; /* Абсолютное позиционирование */
+  right: 100%; top: -160%; /* Положение подсказки */
+  z-index: 1; /* Отображаем подсказку поверх других элементов */
+  background: rgba(255,255,230,0.9); /* Полупрозрачный цвет фона */
+  color: black;
+  font-family: Arial, sans-serif; /* Гарнитура шрифта */
+  font-size: 11px; /* Размер текста подсказки */
+  padding: 5px 10px; /* Поля */
+  border: 1px solid #333; /* Параметры рамки */
+}
+
+.journal-of-payment-docs-buttons-copy-button {
+  display: inline-block; /* Строчно-блочный элемент */
+  position: relative; /* Относительное позиционирование */
+}
+
+.journal-of-payment-docs-buttons-copy-button:hover::after {
+  content: attr(data-title);
+  position: absolute; /* Абсолютное позиционирование */
+  right: 100%; top: -50%; /* Положение подсказки */
+  z-index: 1; /* Отображаем подсказку поверх других элементов */
+  background: rgba(255,255,230,0.9); /* Полупрозрачный цвет фона */
+  color: black;
+  font-family: Arial, sans-serif; /* Гарнитура шрифта */
+  font-size: 11px; /* Размер текста подсказки */
+  padding: 5px 10px; /* Поля */
+  border: 1px solid #333; /* Параметры рамки */
+}
+
+.journal-of-payment-docs-buttons-delete-button {
+  display: inline-block; /* Строчно-блочный элемент */
+  position: relative; /* Относительное позиционирование */
+}
+
+.journal-of-payment-docs-buttons-delete-button:hover::after {
+  content: attr(data-title);
+  position: absolute; /* Абсолютное позиционирование */
+  right: 100%; top: -50%; /* Положение подсказки */
+  z-index: 1; /* Отображаем подсказку поверх других элементов */
+  background: rgba(255,255,230,0.9); /* Полупрозрачный цвет фона */
+  color: black;
+  font-family: Arial, sans-serif; /* Гарнитура шрифта */
+  font-size: 11px; /* Размер текста подсказки */
+  padding: 5px 10px; /* Поля */
+  border: 1px solid #333; /* Параметры рамки */
+}
+
+.journal-of-payment-docs-add-payment-docs {
+  display: inline-block; /* Строчно-блочный элемент */
+  position: relative; /* Относительное позиционирование */
+}
+
+.journal-of-payment-docs-add-payment-docs:hover::after {
+  content: attr(data-title);
+  position: absolute; /* Абсолютное позиционирование */
+  right: 100%; top: -270%; /* Положение подсказки */
+  z-index: 1; /* Отображаем подсказку поверх других элементов */
+  background: rgba(255,255,230,0.9); /* Полупрозрачный цвет фона */
+  color: black;
+  font-family: Arial, sans-serif; /* Гарнитура шрифта */
+  font-size: 11px; /* Размер текста подсказки */
+  padding: 5px 10px; /* Поля */
+  border: 1px solid #333; /* Параметры рамки */
+}
+
+.journal-of-payment-docs-delete-payment-docs {
+  display: inline-block; /* Строчно-блочный элемент */
+  position: relative; /* Относительное позиционирование */
+}
+
+.journal-of-payment-docs-delete-payment-docs:hover::after {
+  content: attr(data-title);
+  position: absolute; /* Абсолютное позиционирование */
+  right: 100%; top: 100%; /* Положение подсказки */
+  z-index: 1; /* Отображаем подсказку поверх других элементов */
+  background: rgba(255,255,230,0.9); /* Полупрозрачный цвет фона */
+  color: black;
+  font-family: Arial, sans-serif; /* Гарнитура шрифта */
+  font-size: 11px; /* Размер текста подсказки */
+  padding: 5px 10px; /* Поля */
+  border: 1px solid #333; /* Параметры рамки */
+}
+
 </style>

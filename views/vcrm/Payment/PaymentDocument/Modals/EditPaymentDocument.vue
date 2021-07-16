@@ -384,11 +384,15 @@ export default {
     },
     // поиск подразделений для выбора пользователем
     async findDepartments() {
-      if (!this.departments.length) {
-        this.loadingType.departments = true
-        this.departments = await this.$api.departments.findAll()
-        this.loadingType.departments = null
+      if (this.departments.length) {
+        return
       }
+
+      this.loadingType.departments = true
+      const searchCriterias = this.createCriteriasToSearchDepartmentsForDocFromPayForm()
+      const response = await this.$api.departments.findBySearchCriterias(searchCriterias)
+      this.departments = response.sort(this.customCompare('rating'))
+      this.loadingType.departments = null
     },
     // поиск статусов оплаты документа для выбора пользователем
     async findPaymentStatuses() {
@@ -446,7 +450,8 @@ export default {
     // поиск плательщиков для выбора пользователем
     async findPayers() {
       this.loadingType.payers = true
-      this.payers = await this.$api.organizations.findInternalOrganizations()
+      const searchCriterias = this.createCriteriasToSearchActualOrganizations()
+      this.payers = await this.$api.organizations.findBySearchCriterias(searchCriterias)
       this.loadingType.payers = null
     },
     // обновление списка договоров для выбора пользователем после изменения поставщика на форме

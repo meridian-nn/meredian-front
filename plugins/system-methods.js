@@ -70,6 +70,12 @@ Vue.mixin({
           return new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), currentDate.getDate())
         },
 
+        // Функция возвращает текущую дату минус 6 месяцев
+        getDateForCriteriasToSearchExecutorsByDataUvol() {
+          let currentDate = new Date()
+          return new Date(currentDate.getFullYear(), currentDate.getMonth() - 6, currentDate.getDate())
+        },
+
         convertLocaleDateStringToDate(date) {
           const parts = date.split('.')
           console.log(parts)

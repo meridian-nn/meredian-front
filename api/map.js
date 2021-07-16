@@ -81,6 +81,9 @@ export const factory = send => ({
     departments: {
       findAll() {
         return send('GET', `/oper/dir/spPodr/findAll`)
+      },
+      findBySearchCriterias(params){
+        return send('POST', '/oper/dir/spPodr/findBySearchCriteriaList', params)
       }
     },
 
@@ -128,6 +131,9 @@ export const factory = send => ({
         },
         findInternalOrganizations() {
             return send('GET', '/oper/dict/spOrg/findInternalOrg')
+        },
+        findBySearchCriterias(params) {
+            return send('POST', `/oper/dict/spOrg/findBySearchCriteriaList`, params)
         }
     },
 
