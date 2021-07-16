@@ -78,7 +78,6 @@ Vue.mixin({
 
         convertLocaleDateStringToDate(date) {
           const parts = date.split('.')
-          console.log(parts)
           return new Date(parts[2], parts[1] - 1, parts[0])
         },
 

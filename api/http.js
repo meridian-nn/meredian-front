@@ -40,7 +40,8 @@ export default class HttpClient {
     const response = await fetch(url, config)
       .then((res) => {
         let json
-        if (res.headers.get('Content-Type').includes('application/json')) {
+        if (res.headers.get('Content-Type') &&
+        res.headers.get('Content-Type').includes('application/json')) {
           json = res.json()
         } else {
           json = res.text()

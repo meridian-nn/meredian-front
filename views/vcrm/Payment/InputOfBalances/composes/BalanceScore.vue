@@ -186,6 +186,11 @@ export default {
       for (const elem of oplata) {
         elem.shortNameOfAcc = elem.acc.shortName
         elem.shortNameOfAccWithNumOfAcc = elem.acc.shortName + ' - ' + elem.acc.numAcc.slice(elem.acc.numAcc.length - 4)
+
+        if (!elem.sumToPay) {
+          elem.sumToPay = 0
+        }
+
         elem.endBalance = elem.saldo + elem.nalich + elem.vnpl - elem.sumToPay
       }
 
