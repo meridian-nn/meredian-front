@@ -605,6 +605,12 @@ export const factory = send => ({
     manufacturing: {
       findPageBySearchCriterias(params) {
         return send('POST', `/oper/manufacturing/manufacturingRequest/findPageBySearchCriteriaList`, params)
+      },
+
+      findAll: {
+        get() {
+          return send('GET', '/oper/manufacturing/manufacturingRequestJournal/findAll')
+        }
       }
     },
 

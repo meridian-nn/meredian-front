@@ -11,7 +11,7 @@
           fab
           dark
           x-small
-          @click="showJournalOfSewingOrders"
+          :to="{ name: 'SewingOrderLog' }"
         >
           <v-icon dark>
             mdi-plus
@@ -423,10 +423,6 @@ export default {
       this.elementId = this.getIdOfRecordsTableOfRecordsOfWorkByCards()
       this.findOrganizations()
       this.getTenLastYears()
-    },
-
-    showJournalOfSewingOrders() {
-      this.$refs.userNotification.showUserNotification('success', 'Переход на форму "Журнал заказов на пошив"')
     },
 
     editRecord() {

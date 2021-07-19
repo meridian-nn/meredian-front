@@ -9,5 +9,6 @@ Vue.filter('formatDate', (date, format) => {
 })
 
 function formatDate(date, formatting) {
+  console.log(date, formatting)
   return dayjs(date).locale('ru').format(formatting)
 }
