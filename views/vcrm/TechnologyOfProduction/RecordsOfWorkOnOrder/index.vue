@@ -3,7 +3,7 @@
     v-model="dialog"
     :object-for-edit="orderFromRecordsOfWorkByCards"
     width="1900px"
-    fullscreen="true"
+    :fullscreen="true"
     padding="0px"
     persistent
     class="records-of-work-on-order-main-div"
@@ -25,7 +25,7 @@
           <v-text-field
             v-model.number="chosenMonth"
             hide-details="auto"
-            readonly="true"
+            :readonly="true"
             outlined
           />
         </div>
@@ -40,7 +40,7 @@
           <v-text-field
             v-model.number="chosenYear"
             hide-details="auto"
-            readonly="true"
+            :readonly="true"
             outlined
           />
         </div>
@@ -55,7 +55,7 @@
           <v-text-field
             v-model.number="chosenOrg"
             hide-details="auto"
-            readonly="true"
+            :readonly="true"
             outlined
           />
         </div>
@@ -374,7 +374,7 @@
         <v-btn
           color="blue darken-1"
           text
-          @click="cancel"
+          @click="close"
         >
           Закрыть
         </v-btn>
@@ -549,24 +549,7 @@ export default {
     }
   },
 
-  watch: {
-    dialog(val) {
-      if (val) {
-        this.init()
-      }
-    }
-  },
-
-  mounted() {
-    this.init()
-  },
-
   methods: {
-    init() {
-      this.findOrganizations()
-      this.getTenLastYears()
-    },
-
     openWithObject(order, varsOfForm) {
       if (!order) {
         return
@@ -577,31 +560,12 @@ export default {
       this.chosenMonth = this.varsOfForm.mesAnfb
       this.chosenYear = this.varsOfForm.godAnfb
       this.chosenOrg = this.varsOfForm.orgName
-      // this.init()
       this.dialog = true
     },
 
-    cancel() {
+    close() {
       this.dialog = false
-      this.$emit('cancel')
-    },
-
-    getTenLastYears() {
-      let year = new Date().getFullYear()
-      this.years.push(year)
-      for (let i = 0; i < 10; i++) {
-        const yearForPush = year - 1
-        year = yearForPush
-        this.years.push(yearForPush)
-      }
-    },
-
-    // поиск организаций для выбора пользователем
-    async findOrganizations() {
-      this.loadingType.organizations = true
-      const searchCriterias = this.createCriteriasToSearchOrgForRecordsOfWorkByCardsForm()
-      this.organizations = await this.$api.service.executeStashedFunctionWithReturnedDataSet(searchCriterias)
-      this.loadingType.organizations = null
+      this.$emit('close')
     }
   }
 }

@@ -37,7 +37,6 @@
       <records-of-work-on-order
         ref="recordsOfWorkOnOrder"
         @close="closeRecordsOfWorkOnOrder"
-        @cancel="cancelRecordsOfWorkOnOrder"
       />
 
       <div class="records-of-work-by-cards-label">
@@ -48,7 +47,7 @@
 
       <div class="records-of-work-by-cards-autocomplete-month">
         <v-autocomplete
-          v-model="chosenMonth"
+          v-model="chosenMonthId"
           :loading="loadingType.suppliers"
           :items="months"
           item-value="id"
@@ -74,7 +73,6 @@
           item-value="id"
           item-text="name"
           hide-details="auto"
-          :auto-select-first="true"
           :readonly="!isHaveTechnologyOfProductionRole"
           outlined
         />
@@ -82,13 +80,14 @@
 
       <div class="records-of-work-by-cards-autocomplete-organizations">
         <v-autocomplete
-          v-model="chosenOrg"
+          v-model="chosenOrgId"
           :loading="loadingType.organizations"
           :items="organizations"
-          item-value="id"
+          item-value="client_id"
           item-text="name_podr"
           hide-details="auto"
           outlined
+          @change="organizationChange"
         />
       </div>
 
@@ -221,6 +220,8 @@
           height="750"
           :headers="recordsHeaders"
           fixed-header
+          :loading="loadingType.recordsData"
+          loading-text="Заказы загружаются, подождите"
           :items="recordsData"
           :show-select="true"
           :single-select="false"
@@ -370,13 +371,13 @@ export default {
         }
       ],
 
-      chosenMonth: {},
+      chosenMonthId: {},
 
       years: [],
 
       chosenYear: {},
 
-      chosenOrg: {},
+      chosenOrgId: {},
 
       // массив организаций
       organizations: [],
@@ -535,7 +536,7 @@ export default {
         !this.organizations.length) {
         return
       }
-      this.chosenOrg = this.organizations[1]
+      this.chosenOrgId = this.organizations[1].client_id
       await this.findMonthOfProizv()
       await this.initData()
     },
@@ -573,18 +574,50 @@ export default {
       }
 
       this.monthOfProizv = response[0]
-      this.chosenMonth = this.months.find(elem => elem.id === this.monthOfProizv.monthCurr)
+      this.chosenMonthId = this.months.find(elem => elem.id === this.monthOfProizv.monthCurr).id
       this.variablesOfForm.mesAnfb = this.monthOfProizv.monthCurr
       this.chosenYear = this.years.find(elem => elem === this.monthOfProizv.yearCurr)
       this.variablesOfForm.godAnfb = this.monthOfProizv.yearCurr
     },
 
     // Инициализация данных формы
-    async initData() {
-      const params = this.createStructureForManufacturingInitDataProcedure(this.monthOfProizv)
+    async initData(customParams) {
+      let params = {}
+      if (customParams) {
+        params = this.createStructureForManufacturingInitDataProcedure(customParams)
+      } else {
+        params = this.createStructureForManufacturingInitDataProcedure(this.monthOfProizv)
+      }
+
       await this.$api.service.executedStashedFunction(params).catch((error) => {
         alert(error)
       })
+    },
+
+    async organizationChange() {
+      this.recordsData = []
+      this.loadingType.recordsData = true
+      const org = this.organizations.find(orgElem => orgElem.client_id === this.chosenOrgId)
+
+      if (!org) {
+        this.$refs.userNotification.showUserNotification('error', 'Произошла ошибка поиска организации в массиве')
+        this.loadingType.recordsData = false
+        return
+      }
+
+      this.variablesOfForm.orgAnfb = org.client_id
+      this.variablesOfForm.proizvAnfb = org.proizv_id
+
+      const customParams = {
+        proizvId: org.proizv_id,
+        firmaId: org.client_id,
+        monthCurr: this.variablesOfForm.mesAnfb,
+        yearCurr: this.variablesOfForm.godAnfb
+      }
+
+      await this.initData(customParams)
+      await this.updateRecordsData()
+      this.loadingType.recordsData = false
     },
 
     showJournalOfSewingOrders() {
@@ -599,7 +632,7 @@ export default {
       }
 
       this.orderForRecordsOfWorkOnOrder = {
-        tmkId1: 1,
+        tmkId1: 0,
         colvoTmk: 0,
         zschId: 0,
         schcardsId: 0,
@@ -647,11 +680,7 @@ export default {
     },
 
     closeRecordsOfWorkOnOrder() {
-      this.$refs.userNotification.showUserNotification('success', 'Форма "Запись работы по заказу" закрыта')
-    },
-
-    cancelRecordsOfWorkOnOrder() {
-      this.$refs.userNotification.showUserNotification('success', 'Форма "Запись работы по заказу" закрыта')
+      this.recordsSelectedRows = []
     },
 
     updateInfo() {

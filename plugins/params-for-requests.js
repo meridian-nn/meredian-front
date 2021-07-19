@@ -21,23 +21,23 @@ Vue.mixin({
       }
     },
 
-    createStructureForManufacturingInitDataProcedure(monthOfProizv) {
+    createStructureForManufacturingInitDataProcedure(paramsForRequest) {
       return {
-        params: this.createParamsForManufacturingInitDataProcedure(monthOfProizv),
+        params: this.createParamsForManufacturingInitDataProcedure(paramsForRequest),
         procName: this.$api.manufacturing.getManufacturingRequestInitDataProcedureName()
       }
     },
 
-    createParamsForManufacturingInitDataProcedure(monthOfProizv) {
+    createParamsForManufacturingInitDataProcedure(paramsForRequest) {
       const params = {
         user_id: this.getCurrentUser.id
       }
 
-      if (monthOfProizv) {
-        params.proizv_id_1 = monthOfProizv.proizvId
-        params.mes_1 = monthOfProizv.monthCurr
-        params.god_1 = monthOfProizv.yearCurr
-        params.firma_id_1 = monthOfProizv.firmaId
+      if (paramsForRequest) {
+        params.proizv_id_1 = paramsForRequest.proizvId
+        params.mes_1 = paramsForRequest.monthCurr
+        params.god_1 = paramsForRequest.yearCurr
+        params.firma_id_1 = paramsForRequest.firmaId
       }
 
       return params
