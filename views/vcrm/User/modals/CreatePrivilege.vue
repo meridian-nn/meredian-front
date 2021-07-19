@@ -120,7 +120,8 @@ export default {
         'DIRECTORY',
         'BUDGET',
         'SNAB',
-        'CONTRACT'
+        'CONTRACT',
+        'PRODUCTION'
       ],
 
       privilegeActions: [

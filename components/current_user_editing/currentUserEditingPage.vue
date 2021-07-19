@@ -164,7 +164,7 @@ export default {
     },
 
     findInfoAboutCurrentUser() {
-      this.currentUser = this.getCurrentUser()
+      this.currentUser = this.getCurrentUser
       const department = this.currentUser.department ? this.currentUser.department.id : null
       this.departmentId = department
 

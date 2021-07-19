@@ -874,13 +874,13 @@ Vue.mixin({
       return data
     },
 
-    createCriteriasToSearchOrdersOnTailoringByPage(filtersParams) {
+    createCriteriasToSearchOrdersOnTailoringByPage(filtersParams, monthOfProizv) {
       const data = [
         {
           dataType: 'VARCHAR',
           key: 'userId',
           operation: 'EQUALS',
-          type: 'OR',
+          type: 'AND',
           values: [
             '11'
           ]
@@ -910,14 +910,19 @@ Vue.mixin({
         }
       }
 
-      return data
-    },
-
-    createCriteriasToSearchOrgForRecordsOfWorkByCardsForm() {
-      return {
-        params: { descr: 'Larisa' },
-        procName: 'dbo.sel_proizv_our'
+      if (monthOfProizv) {
+        const dataElem = {
+          dataType: 'VARCHAR',
+          key: 'department',
+          operation: 'IS_NULL',
+          type: 'AND',
+          'values': [
+            'true'
+          ]
+        }
       }
+
+      return data
     },
 
     createCriteriasForSearchBudgetByDate(date) {
@@ -1273,6 +1278,29 @@ Vue.mixin({
             '29224'
           ]
         },
+      ]
+    },
+
+    createCriteriasForFindMonthOfProizv(variablesofForm) {
+      return [
+        {
+          dataType: 'VARCHAR',
+          key: 'firmaId',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            variablesofForm.orgAnfb
+          ]
+        },
+        {
+          dataType: 'VARCHAR',
+          key: 'proizvId',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            variablesofForm.proizvAnfb
+          ]
+        }
       ]
     }
   }

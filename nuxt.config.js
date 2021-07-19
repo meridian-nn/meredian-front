@@ -40,6 +40,7 @@ export default {
         '~/plugins/number-to-sum',
         '~/plugins/vuelidate',
         '~/plugins/criterias-for-requests',
+        '~/plugins/params-for-requests',
         '~/plugins/mapping-for-responses',
         '~/plugins/mapping-for-queryes-params',
         '~/plugins/system-methods',

@@ -2,11 +2,14 @@
 import Vue from 'vue'
 Vue.mixin({
   computed: {
-    // Функция проверяет, является ли текущий пользователь администратором
-    // 2 - id роли администратор
+
+    // Функция возвращает текущего пользователя со всей доп информацией (подразделение, организация, логин и т.д.)
     getCurrentUser() {
       return this.$store.state.profile.user
     },
+
+    // Функция проверяет, является ли текущий пользователь администратором
+    // 2 - id роли администратор
     isAdmin() {
       const rolesOfCurrentUser = this.getCurrentUser.roles
 
@@ -17,8 +20,9 @@ Vue.mixin({
       return rolesOfCurrentUser.includes(2)
     },
 
+    // Функция проверяет, имеет ли текущий пользователь доступ к меню реестра оплат
     isCanOpenPaymentRegister() {
-      return true
+      return this.isHaveBudgetRole || this.isHaveJournalRole
     },
 
     // Функция проверяет наличие у пользователя роли для работы с АРМ "Реестр оплат"

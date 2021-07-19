@@ -34,6 +34,12 @@
         </v-btn>
       </div>
 
+      <records-of-work-on-order
+        ref="recordsOfWorkOnOrder"
+        @close="closeRecordsOfWorkOnOrder"
+        @cancel="cancelRecordsOfWorkOnOrder"
+      />
+
       <div class="records-of-work-by-cards-label">
         <v-subheader class="font-weight-medium text-subtitle-1">
           Месяц
@@ -49,6 +55,7 @@
           item-text="name"
           hide-details="auto"
           :auto-select-first="true"
+          :readonly="!isHaveTechnologyOfProductionRole"
           outlined
         />
       </div>
@@ -68,6 +75,7 @@
           item-text="name"
           hide-details="auto"
           :auto-select-first="true"
+          :readonly="!isHaveTechnologyOfProductionRole"
           outlined
         />
       </div>
@@ -85,9 +93,45 @@
       </div>
 
       <div class="records-of-work-by-cards-btn">
-        <v-btn @click="goToNewPeriod">
-          Перейти к новому периоду
-        </v-btn>
+        <v-dialog
+          v-model="goToNewPeriodDialog"
+          persistent
+          max-width="420"
+        >
+          <template #activator="{ on, attrs }">
+            <v-btn
+              v-bind="attrs"
+              v-on="on"
+            >
+              Перейти к новому периоду
+            </v-btn>
+          </template>
+          <v-card>
+            <v-card-title class="text-h5">
+              ВНИМАНИЕ!
+            </v-card-title>
+            <v-card-text class="text-h6">
+              После перехода к новому периоду все карточки швей текущего периода будут удалены без возможности восстановления! Перейти к новому периоду?
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn
+                color="green darken-1"
+                text
+                @click="goToNewPeriod"
+              >
+                Да
+              </v-btn>
+              <v-btn
+                color="green darken-1"
+                text
+                @click="goToNewPeriodDialog = false"
+              >
+                Нет
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </div>
 
       <div class="records-of-work-by-cards-btn">
@@ -159,7 +203,8 @@
 
       <div class="records-of-work-by-cards-btn">
         <v-btn @click="updateRecordsInfoWithoutUserCriterias">
-          <v-icon>mdi-binoculars</v-icon> без отбора
+          <v-icon>mdi-binoculars</v-icon>
+          без отбора
         </v-btn>
       </div>
 
@@ -259,12 +304,15 @@
 <script>
 import InfiniteLoading from 'vue-infinite-loading'
 import UserNotification from '~/components/information_window/UserNotification'
+import RecordsOfWorkOnOrder from '~/views/vcrm/TechnologyOfProduction/RecordsOfWorkOnOrder/index.vue'
+
 export default {
   name: 'RecordsOfWorkByCards',
 
   components: {
     UserNotification,
-    InfiniteLoading
+    InfiniteLoading,
+    RecordsOfWorkOnOrder
   },
 
   data() {
@@ -272,18 +320,54 @@ export default {
       loadingType: {},
 
       months: [
-        'Январь',
-        'Февраль',
-        'Март',
-        'Апрель',
-        'Май',
-        'Июнь',
-        'Июль',
-        'Август',
-        'Сентябрь',
-        'Октябрь',
-        'Ноябрь',
-        'Декабрь'
+        {
+          id: 1,
+          name: 'Январь'
+        },
+        {
+          id: 2,
+          name: 'Февраль'
+        },
+        {
+          id: 3,
+          name: 'Март'
+        },
+        {
+          id: 4,
+          name: 'Апрель'
+        },
+        {
+          id: 5,
+          name: 'Май'
+        },
+        {
+          id: 6,
+          name: 'Июнь'
+        },
+        {
+          id: 7,
+          name: 'Июль'
+        },
+        {
+          id: 8,
+          name: 'Август'
+        },
+        {
+          id: 9,
+          name: 'Сентябрь'
+        },
+        {
+          id: 10,
+          name: 'Октябрь'
+        },
+        {
+          id: 11,
+          name: 'Ноябрь'
+        },
+        {
+          id: 12,
+          name: 'Декабрь'
+        }
       ],
 
       chosenMonth: {},
@@ -378,14 +462,36 @@ export default {
       pageOfRecords: 0,
 
       sortBy: [],
+
       sortDesc: [],
+
       keyLoading: Math.random(),
 
       infiniteIdOfRecordsData: 0,
 
       elementId: null,
 
-      updateRecordsDataWithUserCriterias: true
+      updateRecordsDataWithUserCriterias: true,
+
+      monthOfProizv: null,
+
+      variablesOfForm: {
+        orgAnfb: null,
+        orgName: null,
+        proizvAnfb: null,
+        mesAnfb: null,
+        godAnfb: null
+      },
+
+      orderForRecordsOfWorkOnOrder: {
+        tmkId1: 0,
+        colvoTmk: 0,
+        zschId: 0,
+        schcardsId: 0,
+        schId: 0
+      },
+
+      goToNewPeriodDialog: false
     }
   },
 
@@ -419,19 +525,133 @@ export default {
   },
 
   methods: {
-    init() {
+    // Инициализация формы
+    async init() {
       this.elementId = this.getIdOfRecordsTableOfRecordsOfWorkByCards()
-      this.findOrganizations()
       this.getTenLastYears()
+
+      await this.execSelProizvOur()
+      if (!this.organizations ||
+        !this.organizations.length) {
+        return
+      }
+      this.chosenOrg = this.organizations[1]
+      await this.findMonthOfProizv()
+      await this.initData()
+    },
+
+    // Поиск организации для текущего сотрудника
+    // на данный момент получает данные по userId = 'Larisa'
+    async execSelProizvOur() {
+      this.loadingType.organizations = true
+      const params = this.createStructureForSelProizvOurProcedure()
+      this.organizations = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params).catch((error) => {
+        alert(error)
+      })
+      this.loadingType.organizations = null
+
+      if (this.organizations ||
+        this.organizations.length) {
+        this.variablesOfForm.orgAnfb = this.organizations[1].client_id
+        this.variablesOfForm.orgName = this.organizations[1].name_podr
+        this.variablesOfForm.proizvAnfb = this.organizations[1].proizv_id
+      }
+    },
+
+    // Поиск текущего месяца для выбранной организации
+    async findMonthOfProizv() {
+      if (!this.variablesOfForm.orgAnfb) {
+        return
+      }
+
+      const params = this.createCriteriasForFindMonthOfProizv(this.variablesOfForm)
+      const response = await this.$api.manufacturing.findMonthOfProductionBySearchCriterias(params)
+
+      if (!response ||
+        !response.length) {
+        return
+      }
+
+      this.monthOfProizv = response[0]
+      this.chosenMonth = this.months.find(elem => elem.id === this.monthOfProizv.monthCurr)
+      this.variablesOfForm.mesAnfb = this.monthOfProizv.monthCurr
+      this.chosenYear = this.years.find(elem => elem === this.monthOfProizv.yearCurr)
+      this.variablesOfForm.godAnfb = this.monthOfProizv.yearCurr
+    },
+
+    // Инициализация данных формы
+    async initData() {
+      const params = this.createStructureForManufacturingInitDataProcedure(this.monthOfProizv)
+      await this.$api.service.executedStashedFunction(params).catch((error) => {
+        alert(error)
+      })
     },
 
     showJournalOfSewingOrders() {
       this.$refs.userNotification.showUserNotification('success', 'Переход на форму "Журнал заказов на пошив"')
     },
 
-    editRecord() {
-      this.$router.push({ name: 'RecordsOfWorkOnOrder' })
-      this.$refs.userNotification.showUserNotification('success', 'Редактирование текущей записи')
+    // Редактирование выбранной записи на пошив
+    async editRecord() {
+      if (!this.recordsSelectedRows ||
+        !this.recordsSelectedRows.length) {
+        return
+      }
+
+      this.orderForRecordsOfWorkOnOrder = {
+        tmkId1: 1,
+        colvoTmk: 0,
+        zschId: 0,
+        schcardsId: 0,
+        schId: 0
+      }
+      const currentRecord = this.recordsSelectedRows[0]
+
+      if (currentRecord.tmkId === 0) {
+        const params = this.createStructureForTechTmkUpdData(currentRecord, this.variablesOfForm)
+        if (!params) {
+          return
+        }
+
+        let curInsTmk = null
+        const response = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params).catch((error) => {
+          alert(error)
+        })
+
+        if (response &&
+           response.length) {
+          curInsTmk = response[0]
+        }
+
+        if (curInsTmk &&
+          curInsTmk.tmk_id > 0) {
+          this.orderForRecordsOfWorkOnOrder.tmkId1 = curInsTmk.tmk_id
+          this.orderForRecordsOfWorkOnOrder.colvoTmk = curInsTmk.colvo
+          this.orderForRecordsOfWorkOnOrder.zschId = curInsTmk.zar_sch_cards_id
+          this.orderForRecordsOfWorkOnOrder.schcardsId = curInsTmk.scheme_cards_id
+          this.orderForRecordsOfWorkOnOrder.schId = curInsTmk.scheme_id
+        }
+      } else {
+        this.orderForRecordsOfWorkOnOrder.tmkId1 = currentRecord.tmkId
+        this.orderForRecordsOfWorkOnOrder.colvoTmk = currentRecord.colvoMc
+        this.orderForRecordsOfWorkOnOrder.zschId = currentRecord.zarSchCardsId
+        this.orderForRecordsOfWorkOnOrder.schcardsId = currentRecord.schemeCardsId
+        this.orderForRecordsOfWorkOnOrder.schId = currentRecord.schemeId
+      }
+
+      if (this.orderForRecordsOfWorkOnOrder.tmkId1 > 0) {
+        this.$refs.recordsOfWorkOnOrder.openWithObject(this.orderForRecordsOfWorkOnOrder, this.variablesOfForm)
+      } else {
+        this.$refs.userNotification.showUserNotification('success', 'Выбранная запись не подходит по условиям!')
+      }
+    },
+
+    closeRecordsOfWorkOnOrder() {
+      this.$refs.userNotification.showUserNotification('success', 'Форма "Запись работы по заказу" закрыта')
+    },
+
+    cancelRecordsOfWorkOnOrder() {
+      this.$refs.userNotification.showUserNotification('success', 'Форма "Запись работы по заказу" закрыта')
     },
 
     updateInfo() {
@@ -469,17 +689,29 @@ export default {
       }
     },
 
-    // поиск организаций для выбора пользователем
-    async findOrganizations() {
-      this.loadingType.organizations = true
-      const searchCriterias = this.createCriteriasToSearchOrgForRecordsOfWorkByCardsForm()
-      this.organizations = await this.$api.service.executeStashedFunctionWithReturnedDataSet(searchCriterias)
-      // await this.$api.organizations.findInternalOrganizations()
-      this.loadingType.organizations = null
-    },
+    // Переход к новому периоду
+    async goToNewPeriod() {
+      this.goToNewPeriodDialog = false
+      const paramsForProcedure = {}
 
-    goToNewPeriod() {
-      this.$refs.userNotification.showUserNotification('success', 'Переход к новому периоду')
+      if (this.variablesOfForm.mesAnfb === 12) {
+        paramsForProcedure.newGod = this.variablesOfForm.godAnfb + 1
+        paramsForProcedure.newMes = 1
+      } else {
+        paramsForProcedure.newGod = this.variablesOfForm.godAnfb
+        paramsForProcedure.newMes = this.variablesOfForm.mesAnfb + 1
+      }
+
+      const params = this.createStructureForTechZarplSetPeriod(this.variablesOfForm, paramsForProcedure)
+      await this.$api.service.executedStashedFunction(params).catch((error) => {
+        alert(error)
+      })
+
+      await this.findMonthOfProizv()
+      await this.initData()
+      await this.updateRecordsData()
+
+      this.$refs.userNotification.showUserNotification('success', 'Переход к новому периоду произведен')
     },
 
     addProductionByBranch() {
@@ -508,6 +740,7 @@ export default {
       this.infiniteIdOfRecordsData += 1
     },
 
+    // Поиск заказов на пошив
     async findOrdersOnTailoring($state) {
       let filtersParams
       if (this.updateRecordsDataWithUserCriterias) {
@@ -515,7 +748,11 @@ export default {
       }
 
       const searchCriterias = this.createCriteriasToSearchOrdersOnTailoringByPage(filtersParams)
-      const params = { searchCriterias, page: this.pageOfRecords, orders: this.handleSortData }
+      const params = {
+        searchCriterias,
+        page: this.pageOfRecords,
+        orders: this.handleSortData
+      }
 
       const { content } = await this.$api.manufacturing.findPageBySearchCriterias(params)
 
@@ -550,7 +787,7 @@ export default {
 </script>
 
 <style lang="scss">
-.records-of-work-by-cards-main-div{
+.records-of-work-by-cards-main-div {
   margin: 10px;
 }
 
@@ -587,19 +824,19 @@ export default {
 }
 
 .records-of-work-by-cards-autocomplete-organizations {
-  width:340px;
+  width: 340px;
   margin-right: 10px;
   margin-top: 5px
 }
 
 .records-of-work-by-cards-autocomplete-month {
-  width:250px;
+  width: 250px;
   margin-right: 10px;
   margin-top: 5px
 }
 
 .records-of-work-by-cards-autocomplete-year {
-  width:125px;
+  width: 125px;
   margin-right: 10px;
   margin-top: 5px
 }
@@ -609,7 +846,7 @@ export default {
   width: 64px;
 }
 
-.records-of-work-by-cards-bottom-spacer{
+.records-of-work-by-cards-bottom-spacer {
   flex: 0 0 10%;
   max-width: 35%;
 }
@@ -620,17 +857,18 @@ export default {
   height: 750px;
 }
 
-#records-of-work-by-cards-table-of-records   table{
+#records-of-work-by-cards-table-of-records table {
   width: 100%;
 }
-#records-of-work-by-cards-table-of-records   td, #records-of-work-by-cards-table-of-records   th {
+
+#records-of-work-by-cards-table-of-records td, #records-of-work-by-cards-table-of-records th {
   border: 1px solid #ddd;
-  word-break:break-all !important;
+  word-break: break-all !important;
   padding: 0 0 !important;
   height: 0 !important;
 }
 
-#records-of-work-by-cards-table-of-records  th {
+#records-of-work-by-cards-table-of-records th {
   padding-top: 12px;
   padding-bottom: 12px;
   text-align: left;
@@ -638,11 +876,11 @@ export default {
   color: white;
 }
 
-.records-of-work-by-cards-td-white-background-class{
+.records-of-work-by-cards-td-white-background-class {
   background-color: white;
 }
 
-.records-of-work-by-cards-td-green-background-class{
+.records-of-work-by-cards-td-green-background-class {
   background-color: green;
 }
 </style>

@@ -611,6 +611,26 @@ export const factory = send => ({
     manufacturing: {
       findPageBySearchCriterias(params) {
         return send('POST', `/oper/manufacturing/manufacturingRequest/findPageBySearchCriteriaList`, params)
+      },
+
+      findMonthOfProductionBySearchCriterias(params) {
+        return send('POST', `/oper/manufacturing/techZarCurrMont/findBySearchCriteriaList`, params)
+      },
+
+      getSelProizvOurProcedureName() {
+        return 'dbo.sel_proizv_our'
+      },
+
+      getManufacturingRequestInitDataProcedureName() {
+        return 'dbo.manufacturing_request_init_data'
+      },
+
+      getTechTmkUpdDataProcedureName() {
+        return 'dbo.tech_tmk_upd_data'
+      },
+
+      getTechZarplSetPeriodProcedureName() {
+        return 'dbo.tech_zarpl_set_period'
       }
     },
 
