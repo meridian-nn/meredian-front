@@ -1,33 +1,39 @@
 <template>
   <div class="sewing-order-log-page">
     <div class="sewing-order-log-page-row">
-      <div class="sewing-order-log-page-btn">
-        <v-btn>
-          <v-icon>mdi-ruler</v-icon>
+      <div class="sewing-order-log-page-btn mr-4">
+        <v-btn
+          fab
+          small
+          color="blue"
+        >
+          <v-icon color="white">
+            mdi-pencil
+          </v-icon>
+        </v-btn>
+
+        <v-btn
+          fab
+          small
+          color="red"
+        >
+          <v-icon color="white">
+            mdi-delete
+          </v-icon>
         </v-btn>
       </div>
 
-      <v-simple-checkbox
+      <v-checkbox
         v-model="govContract"
         style="padding-top: 5px"
+        label="ГОСКОНТРАКТ"
       />
-      <v-subheader
-        class="font-weight-medium text-subtitle-1"
-        style="margin-top: 10px"
-      >
-        ГОСКОНТРАКТ
-      </v-subheader>
 
-      <v-simple-checkbox
+      <v-checkbox
         v-model="noOTK"
         style="padding-top: 5px"
+        label="Нет проверки ОТК"
       />
-      <v-subheader
-        class="font-weight-medium text-subtitle-1"
-        style="margin-top: 10px"
-      >
-        Нет проверки ОТК
-      </v-subheader>
 
       <div class="sewing-order-log-page-btn">
         <v-btn>
@@ -41,7 +47,7 @@
         <v-data-table
           id="sewing-order-log-page-records-table"
           v-model="selected"
-          height="700"
+          height="650"
           fixed-header
           show-select
           :single-select="false"
@@ -164,7 +170,7 @@ export default {
         {
           text: 'Дата',
           value: 'dataZkzpsv',
-          width: '92px',
+          width: '93px',
           sortable: false
         },
         {
@@ -176,7 +182,7 @@ export default {
         {
           text: 'Код',
           value: 'mcId',
-          width: '100px',
+          width: '60px',
           sortable: false
         },
         {
@@ -188,13 +194,13 @@ export default {
         {
           text: 'Ед.',
           value: 'nameProizv',
-          width: '100px',
+          width: '50px',
           sortable: false
         },
         {
           text: 'Кол-во',
           value: 'colvo',
-          width: '100px',
+          width: '60px',
           sortable: false
         },
         {
@@ -206,7 +212,7 @@ export default {
         {
           text: 'Факт',
           value: 'dataZkzpsv',
-          width: '125px'
+          width: '95px'
         },
         {
           text: 'Раскрой',
@@ -221,12 +227,12 @@ export default {
         {
           text: 'СводЗк',
           value: 'numSvod',
-          width: '100px'
+          width: '80px'
         },
         {
           text: 'Факт',
           value: 'dataRaskroyFact',
-          width: '125px'
+          width: '95px'
         },
         {
           text: 'Исполнитель',
@@ -462,7 +468,7 @@ export default {
 #sewing-order-log-page-records-table {
   border-collapse: collapse;
   width: 100%;
-  height: 700px;
+  height: 650px;
 }
 
 #sewing-order-log-page-records-table table {
