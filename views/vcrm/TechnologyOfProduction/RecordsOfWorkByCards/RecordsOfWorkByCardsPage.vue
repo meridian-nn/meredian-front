@@ -11,7 +11,7 @@
           fab
           dark
           x-small
-          @click="showJournalOfSewingOrders"
+          :to="{ name: 'SewingOrderLog' }"
         >
           <v-icon dark>
             mdi-plus
@@ -304,8 +304,8 @@
 
 <script>
 import InfiniteLoading from 'vue-infinite-loading'
+import RecordsOfWorkOnOrder from '@/views/vcrm/TechnologyOfProduction/RecordsOfWorkOnOrder/RecordsOfWorkOnOrderPage.vue'
 import UserNotification from '~/components/information_window/UserNotification'
-import RecordsOfWorkOnOrder from '~/views/vcrm/TechnologyOfProduction/RecordsOfWorkOnOrder/index.vue'
 
 export default {
   name: 'RecordsOfWorkByCards',
