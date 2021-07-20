@@ -166,40 +166,55 @@
       <div class="journal-of-payment-docs-buttons-of-table-docs-for-pay">
         <v-subheader class="font-weight-medium text-subtitle-1" />
         <div align="center">
-          <v-btn
-            color="blue"
-            class="mr-2 mb-2"
-            fab
-            dark
-            small
-            @click="editDocument"
+          <div
+            class="journal-of-payment-docs-buttons-edit-button"
+            data-title="Редактирование выбранного документа на оплату"
           >
-            <v-icon>mdi-file-edit</v-icon>
-          </v-btn>
+            <v-btn
+              color="blue"
+              class="mr-2 mb-2"
+              fab
+              dark
+              small
+              @click="editDocument"
+            >
+              <v-icon>mdi-file-edit</v-icon>
+            </v-btn>
+          </div>
 
           <br>
-          <v-btn
-            color="blue"
-            class="mr-2 mb-2"
-            fab
-            dark
-            small
-            @click="copyDocument"
+          <div
+            class="journal-of-payment-docs-buttons-copy-button"
+            data-title="Копирование выбранного документа на оплату"
           >
-            <v-icon>mdi-content-copy</v-icon>
-          </v-btn>
+            <v-btn
+              color="blue"
+              class="mr-2 mb-2"
+              fab
+              dark
+              small
+              @click="copyDocument"
+            >
+              <v-icon>mdi-content-copy</v-icon>
+            </v-btn>
+          </div>
 
           <br>
-          <v-btn
-            color="blue"
-            class="mr-2 mb-2"
-            fab
-            dark
-            small
-            @click="deleteDocument"
+          <div
+            class="journal-of-payment-docs-buttons-delete-button"
+            data-title="Удаление выбранных документов на оплату"
           >
-            <v-icon>mdi-delete-forever</v-icon>
-          </v-btn>
+            <v-btn
+              color="blue"
+              class="mr-2 mb-2"
+              fab
+              dark
+              small
+              @click="deleteDocument"
+            >
+              <v-icon>mdi-delete-forever</v-icon>
+            </v-btn>
+          </div>
 
           <div
             v-if="isHaveBudgetRole"
@@ -208,6 +223,7 @@
             <label
               for="add"
               class="add-group__btn"
+              data-title="Создание новых документов"
             > +
             </label>
             <input
@@ -237,17 +253,22 @@
             </button>
           </div>
 
-          <v-btn
+          <div
             v-else
-            color="blue"
-            class="mr-2 mb-2"
-            fab
-            dark
-            small
-            @click="newDocument"
+            class="journal-of-payment-docs-buttons-create-button"
+            data-title="Добавление нового документа на оплату"
           >
-            <v-icon>mdi-plus</v-icon>
-          </v-btn>
+            <v-btn
+              color="blue"
+              class="mr-2 mb-2"
+              fab
+              dark
+              small
+              @click="newDocument"
+            >
+              <v-icon>mdi-plus</v-icon>
+            </v-btn>
+          </div>
         </div>
       </div>
     </div>
@@ -974,11 +995,25 @@ export default {
   color: #fff;
   font-size:26px;
   display: flex;
+  position: relative;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.6);
   z-index:2;
+}
+
+.add-group__btn:hover::after {
+  content: attr(data-title);
+  position: absolute;
+  right: 100%; top: -200%;
+  z-index: 1;
+  background: rgba(255,255,230,0.9);
+  font-family: Arial, sans-serif;
+  color: black;
+  font-size: 11px;
+  padding: 5px 10px;
+  border: 1px solid #333;
 }
 
 .add-group__btn:active {
@@ -1028,4 +1063,75 @@ export default {
   flex: 0 0 58%;
 }
 
+.journal-of-payment-docs-buttons-edit-button {
+  display: inline-block; /* Строчно-блочный элемент */
+  position: relative; /* Относительное позиционирование */
+}
+
+.journal-of-payment-docs-buttons-edit-button:hover::after {
+  content: attr(data-title);
+  position: absolute; /* Абсолютное позиционирование */
+  right: 100%; top: -160%; /* Положение подсказки */
+  z-index: 1; /* Отображаем подсказку поверх других элементов */
+  background: rgba(255,255,230,0.9); /* Полупрозрачный цвет фона */
+  color: black;
+  font-family: Arial, sans-serif; /* Гарнитура шрифта */
+  font-size: 11px; /* Размер текста подсказки */
+  padding: 5px 10px; /* Поля */
+  border: 1px solid #333; /* Параметры рамки */
+}
+
+.journal-of-payment-docs-buttons-copy-button {
+  display: inline-block; /* Строчно-блочный элемент */
+  position: relative; /* Относительное позиционирование */
+}
+
+.journal-of-payment-docs-buttons-copy-button:hover::after {
+  content: attr(data-title);
+  position: absolute; /* Абсолютное позиционирование */
+  right: 100%; top: -50%; /* Положение подсказки */
+  z-index: 1; /* Отображаем подсказку поверх других элементов */
+  background: rgba(255,255,230,0.9); /* Полупрозрачный цвет фона */
+  color: black;
+  font-family: Arial, sans-serif; /* Гарнитура шрифта */
+  font-size: 11px; /* Размер текста подсказки */
+  padding: 5px 10px; /* Поля */
+  border: 1px solid #333; /* Параметры рамки */
+}
+
+.journal-of-payment-docs-buttons-delete-button {
+  display: inline-block; /* Строчно-блочный элемент */
+  position: relative; /* Относительное позиционирование */
+}
+
+.journal-of-payment-docs-buttons-delete-button:hover::after {
+  content: attr(data-title);
+  position: absolute; /* Абсолютное позиционирование */
+  right: 100%; top: -50%; /* Положение подсказки */
+  z-index: 1; /* Отображаем подсказку поверх других элементов */
+  background: rgba(255,255,230,0.9); /* Полупрозрачный цвет фона */
+  color: black;
+  font-family: Arial, sans-serif; /* Гарнитура шрифта */
+  font-size: 11px; /* Размер текста подсказки */
+  padding: 5px 10px; /* Поля */
+  border: 1px solid #333; /* Параметры рамки */
+}
+
+.journal-of-payment-docs-buttons-create-button {
+  display: inline-block; /* Строчно-блочный элемент */
+  position: relative; /* Относительное позиционирование */
+}
+
+.journal-of-payment-docs-buttons-create-button:hover::after {
+  content: attr(data-title);
+  position: absolute; /* Абсолютное позиционирование */
+  right: 100%; top: -50%; /* Положение подсказки */
+  z-index: 1; /* Отображаем подсказку поверх других элементов */
+  background: rgba(255,255,230,0.9); /* Полупрозрачный цвет фона */
+  color: black;
+  font-family: Arial, sans-serif; /* Гарнитура шрифта */
+  font-size: 11px; /* Размер текста подсказки */
+  padding: 5px 10px; /* Поля */
+  border: 1px solid #333; /* Параметры рамки */
+}
 </style>

@@ -110,10 +110,13 @@ const TechnologyOfProductionMenuPage = dynamicPage(() =>
   import('~/views/vcrm/TechnologyOfProduction/TechnologyOfProductionPage'))
 
 const RecordsOfWorkByCardsPage = dynamicPage(() =>
-  import('~/views/vcrm/TechnologyOfProduction/RecordsOfWorkByCards'))
+  import('@/views/vcrm/TechnologyOfProduction/RecordsOfWorkByCards/RecordsOfWorkByCardsPage'))
+
+const SewingOrderLog = dynamicPage(() =>
+  import('~/views/vcrm/TechnologyOfProduction/SewingOrderLog/SewingOrderLogPage'))
 
 const RecordsOfWorkOnOrderPage = dynamicPage(() =>
-  import('~/views/vcrm/TechnologyOfProduction/RecordsOfWorkOnOrder'))
+  import('@/views/vcrm/TechnologyOfProduction/RecordsOfWorkOnOrder/RecordsOfWorkOnOrderPage'))
 
 Vue.use(Router)
 
@@ -292,22 +295,34 @@ const createRouterConst = new Router({
       name: 'TechnologyOfProductionMenu',
       component: TechnologyOfProductionMenuPage,
       meta: { breadcrumb: { text: 'Меню технологий производства' } },
-      children: [{
-        path: 'records_of_work_by_cards',
-        name: 'RecordsOfWorkByCards',
-        component: RecordsOfWorkByCardsPage,
-        meta: {
-          breadcrumb: { text: 'Запись работы по карточкам' }
-        },
-        children: [{
-          path: 'records_of_work_on_order',
-          name: 'RecordsOfWorkOnOrder',
-          component: RecordsOfWorkOnOrderPage,
+      children: [
+        {
+          path: 'records_of_work_by_cards',
+          name: 'RecordsOfWorkByCards',
+          component: RecordsOfWorkByCardsPage,
           meta: {
-            breadcrumb: { text: 'Запись работы по заказу' }
-          }
-        }]
-      }]
+            breadcrumb: { text: 'Запись работы по карточкам' }
+          },
+          children: [
+            {
+              path: 'records_of_work_on_order',
+              name: 'RecordsOfWorkOnOrder',
+              component: RecordsOfWorkOnOrderPage,
+              meta: {
+                breadcrumb: { text: 'Запись работы по заказу' }
+              }
+            },
+            {
+              path: 'sewing_order_log',
+              name: 'SewingOrderLog',
+              component: SewingOrderLog,
+              meta: {
+                breadcrumb: { text: 'Журнал заказов на пошив' }
+              }
+            }
+          ]
+        }
+      ]
     },
 
     {

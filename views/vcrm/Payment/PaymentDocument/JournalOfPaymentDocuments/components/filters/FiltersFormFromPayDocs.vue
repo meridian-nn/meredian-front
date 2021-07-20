@@ -90,6 +90,18 @@
           <v-row>
             <v-col cols="12">
               <v-text-field
+                v-model="filterItem.prim"
+                :clearable="true"
+                outlined
+                label="Примечание"
+                hide-details="auto"
+              />
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
                 v-model="filterItem.date"
                 :clearable="true"
                 type="date"
@@ -173,6 +185,7 @@ export default {
         executorName: '',
         'myOrg.id': null,
         creatorName: '',
+        prim: '',
         date: null
       },
 
@@ -272,6 +285,10 @@ export default {
           this.isSumToPayUsed = this.filterItem.sumToPay.isSumToPayUsed
         }
       }
+
+      if (!this.filterItem.date) {
+        this.filterItem.date = this.getDateForCriteriasToSearchDocsFromPay().toISOString().substr(0, 10)
+      }
     },
 
     // функция отработки события нажития на кнопку "отмена"
@@ -320,17 +337,6 @@ export default {
   color: #999;
 }
 
-.filters-for-from-pay-docs-modal-brise-input input:focus ~ .line {
-  left: 0;
-  opacity: 1;
-}
-
-.filters-for-from-pay-docs-modal-brise-input input:valid ~ label, input:focus ~ label   {
-  top: 0;
-  transform: scale(0.94) translateX(-2px);
-  color: #639db1;
-}
-
 .filters-for-from-pay-docs-modal-brise-input .line {
   position: absolute;
   left: 0;
@@ -341,6 +347,17 @@ export default {
   transition: .25s;
   opacity: 0;
   z-index: 6;
+}
+
+.filters-for-from-pay-docs-modal-brise-input input:focus ~ .line {
+  left: 0;
+  opacity: 1;
+}
+
+.filters-for-from-pay-docs-modal-brise-input input:valid ~ label, input:focus ~ label   {
+  top: 0;
+  transform: scale(0.94) translateX(-2px);
+  color: #639db1;
 }
 
 .filters-for-from-pay-docs-modal-label {

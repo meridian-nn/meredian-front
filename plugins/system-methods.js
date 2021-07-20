@@ -45,9 +45,9 @@ Vue.mixin({
         },
 
         getRandomColor() {
-            var letters = '0123456789ABCDEF';
-            var color = '#';
-            for (var i = 0; i < 6; i++) {
+          const letters = '0123456789ABCDEF'
+          let color = '#'
+          for (let i = 0; i < 6; i++) {
                 color += letters[Math.floor(Math.random() * 16)];
             }
             return color;
@@ -70,9 +70,14 @@ Vue.mixin({
           return new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), currentDate.getDate())
         },
 
+        // Функция возвращает текущую дату минус 6 месяцев
+        getDateForCriteriasToSearchExecutorsByDataUvol() {
+          let currentDate = new Date()
+          return new Date(currentDate.getFullYear(), currentDate.getMonth() - 6, currentDate.getDate())
+        },
+
         convertLocaleDateStringToDate(date) {
           const parts = date.split('.')
-          console.log(parts)
           return new Date(parts[2], parts[1] - 1, parts[0])
         },
 
