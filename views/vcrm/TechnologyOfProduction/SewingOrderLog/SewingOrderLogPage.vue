@@ -7,7 +7,10 @@
           small
           color="blue"
         >
-          <v-icon color="white">
+          <v-icon
+            color="white"
+            @click="openEditModal"
+          >
             mdi-pencil
           </v-icon>
         </v-btn>
@@ -17,26 +20,30 @@
           small
           color="red"
         >
-          <v-icon color="white">
+          <v-icon
+            color="white"
+            @click="openConfirmModal"
+          >
             mdi-delete
           </v-icon>
         </v-btn>
       </div>
 
-      <v-checkbox
-        v-model="govContract"
-        style="padding-top: 5px"
-        label="ГОСКОНТРАКТ"
-      />
+      <div class="sewing-order-log-page-checkbox mr-4">
+        <v-checkbox
+          v-model="govContract"
+          class="mr-2"
+          label="ГОСКОНТРАКТ"
+        />
 
-      <v-checkbox
-        v-model="noOTK"
-        style="padding-top: 5px"
-        label="Нет проверки ОТК"
-      />
+        <v-checkbox
+          v-model="noOTK"
+          label="Нет проверки ОТК"
+        />
+      </div>
 
       <div class="sewing-order-log-page-btn">
-        <v-btn>
+        <v-btn small>
           Формирование уведомления о приемке для склада
         </v-btn>
       </div>
@@ -56,6 +63,7 @@
           :headers="headers"
           :items="man"
           calculate-widths
+          :item-class="typeOrder"
           @contextmenu:row="rightClickHandler"
         >
           <template #[`item.dataZkzpsv`]="{ item }">
@@ -135,12 +143,35 @@
         Красным цветом подсвечены позиции, где есть замечания базы по браку
       </div>
     </div>
+
+    <modal-edit
+      :value="modals.edit"
+      @close="closeEditModal"
+      @save="saveEditForm"
+    />
+
+    <modal-confirm
+      :value="modals.confirm"
+      @close="closeConfirmModal"
+      @success="removeSelectElement"
+    />
+
+    <user-notification ref="userNotification" />
   </div>
 </template>
 
 <script>
+import UserNotification from '@/components/information_window/UserNotification'
+import ModalEdit from './modals/Edit'
+import ModalConfirm from './modals/Confirm'
 export default {
   name: 'SewingOrderLogPage',
+
+  components: {
+    ModalEdit,
+    ModalConfirm,
+    UserNotification
+  },
 
   async asyncData({ $api }) {
     const manufacturs = await $api.manufacturing.manufacturingRequestJournalFindAll()
@@ -154,6 +185,10 @@ export default {
       xFromPayMenu: 0,
       yFromPayMenu: 0,
       selected: [],
+      modals: {
+        edit: false,
+        confirm: false
+      },
       headers: [
         {
           text: 'План',
@@ -451,6 +486,46 @@ export default {
       this.$nextTick(() => {
         this.fromPayMenu = true
       })
+    },
+
+    closeEditModal() {
+      this.modals.edit = false
+    },
+
+    openEditModal() {
+      this.modals.edit = true
+    },
+
+    closeConfirmModal() {
+      this.modals.confirm = false
+    },
+
+    openConfirmModal() {
+      this.modals.confirm = true
+    },
+
+    async removeSelectElement(params = this.selected) {
+      try {
+        await this.$api.manufacturing.manufacturingRequestJournalRemove(params)
+
+        this.closeConfirmModal()
+      } catch (e) {
+        this.$refs.userNotification.showUserNotification('warning', 'Ошибка сервера, попробуйте позже')
+      }
+    },
+
+    async saveEditForm(params = this.selected) {
+      try {
+        await this.$api.manufacturing.manufacturingRequestJournalSave(params)
+
+        this.closeEditModal()
+      } catch (e) {
+        this.$refs.userNotification.showUserNotification('warning', 'Ошибка сервера, попробуйте позже')
+      }
+    },
+
+    typeOrder(item) {
+      return item.gosKontrakt ? 'red' : 'blue'
     }
   }
 }
@@ -462,6 +537,11 @@ export default {
 
   &__table {
     overflow: auto;
+  }
+
+  &-checkbox {
+    display: flex;
+    align-items: center;
   }
 }
 
@@ -493,13 +573,10 @@ export default {
 .sewing-order-log-page-row {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   flex: 1 1 auto;
   margin: 0;
   min-width: 100%;
-}
-
-.sewing-order-log-page-btn {
-  padding-top: 13px;
 }
 
 .sewing-order-log-page-secondary-work-rectangle {
