@@ -43,8 +43,14 @@ const VcrmPage = dynamicPage(() =>
 const PaymentMenuPage = dynamicPage(() =>
   import('~/views/vcrm/Payment/PaymentPage'))
 
+const IncomingPaymentDocumentsPage = dynamicPage(() =>
+  import('~/views/vcrm/Payment/IncomingPaymentDocuments/IncomingPaymentDocumentsPage'))
+
 const JournalOfPaymentDocumentsPage = dynamicPage(() =>
   import('~/views/vcrm/Payment/PaymentDocument/JournalOfPaymentDocuments'))
+
+const OutgoingPaymentDocumentsPage = dynamicPage(() =>
+  import('~/views/vcrm/Payment/OutgoingPaymentDocuments/OutgoingPaymentDocumentsPage.vue'))
 
 const JournalOfPaymentDocumentsFromPayDocsPage = dynamicPage(() =>
   import('~/views/vcrm/Payment/PaymentDocument/JournalOfPaymentDocuments/components/fromPayDocuments'))
@@ -204,6 +210,22 @@ const createRouterConst = new Router({
         component: JournalOfPaymentDocumentsPage,
         meta: {
           breadcrumb: { text: 'Журнал документов на оплату' }
+        }
+      },
+      {
+        path: 'outgoing_payment_documents',
+        name: 'OutgoingPaymentDocuments',
+        component: OutgoingPaymentDocumentsPage,
+        meta: {
+          breadcrumb: { text: 'Исходящие платежные документы' }
+        }
+      },
+      {
+        path: 'incoming_payment_documents',
+        name: 'IncomingPaymentDocuments',
+        component: IncomingPaymentDocumentsPage,
+        meta: {
+          breadcrumb: { text: 'Входящие платежные документы' }
         }
       },
 

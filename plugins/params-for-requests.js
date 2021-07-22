@@ -107,6 +107,23 @@ Vue.mixin({
         raskroy: 0,
         proizv_id: variablesOfForm.proizvAnfb
       }
+    },
+
+    createStructureForTechZarAllPereschet(variablesOfForm) {
+      return {
+        params: this.createParamsForTechZarAllPereschet(variablesOfForm),
+        procName: this.$api.manufacturing.getTechZarAllPereschetName()
+      }
+    },
+
+    createParamsForTechZarAllPereschet(variablesOfForm) {
+      return {
+        firma_id: variablesOfForm.proizvAnfb === 146 ? 123 : variablesOfForm.orgAnfb,
+        proizv_id: variablesOfForm.proizvAnfb === 146 ? 146 : variablesOfForm.proizvAnfb,
+        month: variablesOfForm.mesAnfb,
+        year: variablesOfForm.godAnfb,
+        ceh_id: 6
+      }
     }
   }
 

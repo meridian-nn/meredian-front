@@ -633,6 +633,10 @@ export const factory = send => ({
             return 'dbo.tech_zarpl_set_period'
         },
 
+        getTechZarAllPereschetName() {
+            return 'dbo.tech_zar_all_pereschet'
+        },
+
         manufacturingRequestJournalFindAll() {
             return send('GET', '/oper/manufacturing/manufacturingRequestJournal/findAll')
         }
@@ -655,7 +659,7 @@ export const factory = send => ({
 
         // Функция производит вызов хранимой процедуры в бд
         // без возврата набора данных
-        executedStashedFunction(params) {
+        executeStashedFunction(params) {
             return send('POST', '/sys/storedProcedure/executeProcedure', params)
         }
     }

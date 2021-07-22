@@ -88,25 +88,24 @@
           </v-row>
 
           <v-row>
-            <v-col cols="12">
+            <v-col cols="6">
               <v-text-field
-                v-model="filterItem.prim"
-                :clearable="true"
-                outlined
-                label="Примечание"
-                hide-details="auto"
-              />
-            </v-col>
-          </v-row>
-
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                v-model="filterItem.date"
+                v-model="filterItem.dateFrom"
                 :clearable="true"
                 type="date"
                 outlined
+                :max="filterItem.dateTo"
                 label="Дата документа начиная с"
+              />
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                v-model="filterItem.dateTo"
+                :clearable="true"
+                type="date"
+                :min="filterItem.dateFrom"
+                outlined
+                label="Дата документа заканчивая"
               />
             </v-col>
           </v-row>
@@ -185,8 +184,8 @@ export default {
         executorName: '',
         'myOrg.id': null,
         creatorName: '',
-        prim: '',
-        date: null
+        dateFrom: null,
+        dateTo: null
       },
 
       // Значение фильтра по полю "К оплате"
