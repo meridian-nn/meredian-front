@@ -41,6 +41,21 @@
         v-if="isHaveBudgetRole"
         class="payment-menu-col-2"
       >
+        <router-link :to="{ name: 'IncomingPaymentDocuments' }">
+          <v-img :src="require('@/assets/img/payment/budget.png')" />
+        </router-link>
+        <div
+          class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
+          align="center"
+        >
+          Входящие платежные документы
+        </div>
+      </div>
+
+      <div
+        v-if="isHaveBudgetRole"
+        class="payment-menu-col-2"
+      >
         <router-link :to="{ name: 'PaymentBudgetByDepartments' }">
           <v-img :src="require('@/assets/img/payment/budget.png')" />
         </router-link>
@@ -219,8 +234,8 @@ export default {
 }
 
 .payment-menu-col-2-spacer {
-    flex: 0 0 15%;
-    max-width: 15%;
+    flex: 0 0 5%;
+    max-width: 5%;
 }
 
 .payment-menu-col-3 {

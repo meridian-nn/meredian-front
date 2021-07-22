@@ -254,7 +254,7 @@
                   {{ item.posledCode }}
                 </td>
                 <td>
-                  {{ item.namePosled }}
+                  {{ item.modelName }}
                 </td>
                 <td>
                   {{ item.colvoMc }}
@@ -410,7 +410,7 @@ export default {
         },
         {
           text: 'Наименование ТП',
-          value: 'namePosled',
+          value: 'modelName',
           width: '140px',
           sort: () => false
         },
@@ -539,6 +539,7 @@ export default {
       this.chosenOrgId = this.organizations[1].client_id
       await this.findMonthOfProizv()
       await this.initData()
+      await this.updateRecordsData()
     },
 
     // Поиск организации для текущего сотрудника
