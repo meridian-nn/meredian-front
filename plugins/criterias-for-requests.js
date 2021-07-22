@@ -125,6 +125,10 @@ Vue.mixin({
 
     // Создает объект с критериями отбора документов на оплату для запроса на бэк
     createCriteriasForRequestToSearchDocsFromPay(filtersParams) {
+      const valuesDate = [
+        (typeof filtersParams === 'object' && filtersParams.dateFrom) ?
+          new Date(filtersParams.dateFrom).toLocaleDateString() : this.getDateForCriteriasToSearchDocsFromPay().toLocaleDateString()
+      ]
       const dateTo = (typeof filtersParams === 'object' && filtersParams.dateTo) ?
       new Date(filtersParams.dateTo).toLocaleDateString() : null
 

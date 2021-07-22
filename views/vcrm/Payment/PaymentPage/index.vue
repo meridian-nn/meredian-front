@@ -37,7 +37,25 @@
         </div>
       </div>
 
-      <div class="payment-menu-col-2">
+      <div
+        v-if="isHaveBudgetRole"
+        class="payment-menu-col-2"
+      >
+        <router-link :to="{ name: 'IncomingPaymentDocuments' }">
+          <v-img :src="require('@/assets/img/payment/incoming.png')" />
+        </router-link>
+        <div
+          class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
+          align="center"
+        >
+          Входящие платежные документы
+        </div>
+      </div>
+
+      <div
+        v-if="isHaveBudgetRole"
+        class="payment-menu-col-2"
+      >
         <router-link :to="{ name: 'OutgoingPaymentDocuments' }">
           <v-img :src="require('@/assets/img/payment/outgoing.png')" />
         </router-link>
@@ -46,21 +64,6 @@
           align="center"
         >
           Исходящие платежные документы
-        </div>
-      </div>
-
-      <div
-        v-if="isHaveBudgetRole"
-        class="payment-menu-col-2"
-      >
-        <router-link :to="{ name: 'IncomingPaymentDocuments' }">
-          <v-img :src="require('@/assets/img/payment/budget.png')" />
-        </router-link>
-        <div
-          class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
-          align="center"
-        >
-          Входящие платежные документы
         </div>
       </div>
 
@@ -217,7 +220,7 @@ export default {
 
     async findDataAboutFromPayDocForChart() {
       const filtersParams = {
-        date: new Date()
+        dateFrom: new Date()
       }
       const data = this.createCriteriasForRequestToSearchDocsFromPay(filtersParams)
       const response = await this.$api.payment.docOplForPay.findDocumentsForPayByCriterias(data)
