@@ -125,50 +125,52 @@ Vue.mixin({
 
     // Создает объект с критериями отбора документов на оплату для запроса на бэк
     createCriteriasForRequestToSearchDocsFromPay(filtersParams) {
+      const dateTo = (typeof filtersParams === 'object' && filtersParams.dateTo) ?
+      new Date(filtersParams.dateTo).toLocaleDateString() : null
+
+      if (dateTo) valuesDate.push(dateTo)
+
       const data = [{
-        'dataType': 'DATE',
-        'key': 'dataDoc',
-        'operation': 'GREATER_THAN',
-        'type': 'AND',
-        'values': [
-          (typeof filtersParams === 'object' && filtersParams.date) ?
-            new Date(filtersParams.date).toLocaleDateString() : this.getDateForCriteriasToSearchDocsFromPay().toLocaleDateString()
-        ]
+          'dataType': 'DATE',
+          'key': 'dataDoc',
+          'operation': dateTo ? 'BETWEEN' : 'GREATER_THAN',
+          'type': 'AND',
+          'values': valuesDate
       }]
 
       if (filtersParams) {
-        for (const key in filtersParams) {
-          let elemParam = filtersParams[key]
+          for (const key in filtersParams) {
+              let elemParam = filtersParams[key]
 
-          if (!elemParam || key === 'date') {
-            continue
+              if (!elemParam || key === 'date' || key === 'dateTo' || key === 'dateFrom') {
+                  continue
+              }
+
+              if (key === 'sumToPay' && typeof elemParam === 'object') {
+                  const isFilterUsed = elemParam.isSumToPayUsed
+
+                  if (!isFilterUsed) {
+                      continue
+                  }
+
+                  elemParam = elemParam.sumToPayValue
+              }
+
+              const dataType = this.getDateForCriteriasToSearchDocsFromPay(elemParam, key)
+
+              const operation = this.getOperationTypeForRequestToSearchDocsFromPay(key)
+
+              const dataElem = {
+                  dataType,
+                  key,
+                  operation,
+                  'type': 'AND',
+                  'values': [
+                      elemParam
+                  ]
+              }
+              data.push(dataElem)
           }
-
-          if (key === 'sumToPay' && typeof elemParam === 'object') {
-            const isFilterUsed = elemParam.isSumToPayUsed
-
-            if (!isFilterUsed) {
-              continue
-            }
-
-            elemParam = elemParam.sumToPayValue
-          }
-
-          const dataType = this.getDataTypeForRequestToSearchDocsFromPay(elemParam, key)
-
-          const operation = this.getOperationTypeForRequestToSearchDocsFromPay(key)
-
-          const dataElem = {
-            dataType,
-            key,
-            operation,
-            'type': 'AND',
-            'values': [
-              elemParam
-            ]
-          }
-          data.push(dataElem)
-        }
       }
 
       return data

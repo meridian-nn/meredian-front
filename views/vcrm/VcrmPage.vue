@@ -146,6 +146,54 @@
 
         <v-spacer />
 
+        <template v-if="isAdmin">
+          <v-menu offset-y>
+            <template #activator="{ attrs, on }">
+              <v-btn
+                text
+                v-bind="attrs"
+                class="white--text"
+                v-on="on"
+              >
+                Админ-панель
+                <v-icon color="white">
+                  mdi-chevron-down
+                </v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item :to="{ name: 'RoleEditPage' }">
+                <v-icon class="mr-2">
+                  mdi-account-key
+                </v-icon>
+
+                <v-list-item-title>
+                  Роли
+                </v-list-item-title>
+              </v-list-item>
+
+              <v-list-item :to="{ name: 'RegistrationPage' }">
+                <v-icon class="mr-2">
+                  mdi-account-check
+                </v-icon>
+
+                <v-list-item-title>
+                  Регистрация пользователя
+                </v-list-item-title>
+              </v-list-item>
+
+              <v-list-item :to="{ name: 'UsersEditingPage' }">
+                <v-icon class="mr-2">
+                  mdi-account-edit
+                </v-icon>
+                <v-list-item-title>
+                  Редактирование аккаунтов пользователей
+                </v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </template>
+
         <v-menu offset-y>
           <template #activator="{ attrs, on }">
             <v-btn
@@ -183,38 +231,6 @@
                 Настройки
               </v-list-item-title>
             </v-list-item>
-
-            <template v-if="isAdmin">
-              <v-list-item :to="{ name: 'RoleEditPage' }">
-                <v-icon class="mr-2">
-                  mdi-account-key
-                </v-icon>
-
-                <v-list-item-title>
-                  Роли
-                </v-list-item-title>
-              </v-list-item>
-
-              <v-list-item :to="{ name: 'RegistrationPage' }">
-                <v-icon class="mr-2">
-                  mdi-account-check
-                </v-icon>
-
-                <v-list-item-title>
-                  Регистрация пользователя
-                </v-list-item-title>
-              </v-list-item>
-
-              <v-list-item :to="{ name: 'UsersEditingPage' }">
-                <v-icon class="mr-2">
-                  mdi-account-edit
-                </v-icon>
-
-                <v-list-item-title>
-                  Редактирование аккаунтов пользователей
-                </v-list-item-title>
-              </v-list-item>
-            </template>
 
             <v-list-item
               href="#"
