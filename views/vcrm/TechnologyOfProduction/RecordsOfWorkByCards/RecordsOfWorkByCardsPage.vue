@@ -137,6 +137,25 @@
         <v-btn @click="recalculationOfOutputForMonth">
           Пересчет выработки за месяц
         </v-btn>
+        <v-dialog
+          v-model="recalculationOfOutputForMonthDialog"
+          persistent
+          width="300"
+        >
+          <v-card
+            color="primary"
+            dark
+          >
+            <v-card-text>
+              Производится пересчет выработки, подождите...
+              <v-progress-linear
+                indeterminate
+                color="white"
+                class="mb-0"
+              />
+            </v-card-text>
+          </v-card>
+        </v-dialog>
       </div>
     </div>
 
@@ -492,7 +511,9 @@ export default {
         schId: 0
       },
 
-      goToNewPeriodDialog: false
+      goToNewPeriodDialog: false,
+
+      recalculationOfOutputForMonthDialog: false
     }
   },
 
@@ -748,8 +769,17 @@ export default {
       this.$refs.userNotification.showUserNotification('success', 'Выработка по филиалу')
     },
 
-    recalculationOfOutputForMonth() {
-      this.$refs.userNotification.showUserNotification('success', 'Пересчет выработки за месяц')
+    // Пересчет выработки за месяц
+    async recalculationOfOutputForMonth() {
+      this.recalculationOfOutputForMonthDialog = true
+      const params = this.createStructureForTechZarAllPereschet(this.variablesOfForm)
+      await this.$api.service.executeStashedFunctionWithReturnedDataSet(params).catch((error) => {
+        alert(error)
+        this.recalculationOfOutputForMonthDialog = false
+      })
+      await this.updateRecordsData()
+      this.$refs.userNotification.showUserNotification('success', 'Пересчет выработки за месяц выполнен!')
+      this.recalculationOfOutputForMonthDialog = false
     },
 
     updateSort(byDesc, event) {
