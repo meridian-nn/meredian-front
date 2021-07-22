@@ -659,7 +659,7 @@ export const factory = send => ({
 
         // Функция производит вызов хранимой процедуры в бд
         // без возврата набора данных
-        executedStashedFunction(params) {
+        executeStashedFunction(params) {
             return send('POST', '/sys/storedProcedure/executeProcedure', params)
         }
     }

@@ -137,27 +137,10 @@
         <v-btn @click="recalculationOfOutputForMonth">
           Пересчет выработки за месяц
         </v-btn>
-        <v-dialog
-          v-model="recalculationOfOutputForMonthDialog"
-          persistent
-          width="300"
-        >
-          <v-card
-            color="primary"
-            dark
-          >
-            <v-card-text>
-              Производится пересчет выработки, подождите...
-              <v-progress-linear
-                indeterminate
-                color="white"
-                class="mb-0"
-              />
-            </v-card-text>
-          </v-card>
-        </v-dialog>
       </div>
     </div>
+
+    <loading-dialog ref="loadingDialog" />
 
     <div class="records-of-work-by-cards-row">
       <div class="records-of-work-by-cards-label">
@@ -325,6 +308,7 @@
 import InfiniteLoading from 'vue-infinite-loading'
 import RecordsOfWorkOnOrder from '@/views/vcrm/TechnologyOfProduction/RecordsOfWorkOnOrder/RecordsOfWorkOnOrderPage.vue'
 import UserNotification from '~/components/information_window/UserNotification'
+import LoadingDialog from '~/components/loading_dialog/LoadingDialog'
 
 export default {
   name: 'RecordsOfWorkByCards',
@@ -332,7 +316,8 @@ export default {
   components: {
     UserNotification,
     InfiniteLoading,
-    RecordsOfWorkOnOrder
+    RecordsOfWorkOnOrder,
+    LoadingDialog
   },
 
   data() {
@@ -511,9 +496,7 @@ export default {
         schId: 0
       },
 
-      goToNewPeriodDialog: false,
-
-      recalculationOfOutputForMonthDialog: false
+      goToNewPeriodDialog: false
     }
   },
 
@@ -611,7 +594,7 @@ export default {
         params = this.createStructureForManufacturingInitDataProcedure(this.monthOfProizv)
       }
 
-      await this.$api.service.executedStashedFunction(params).catch((error) => {
+      await this.$api.service.executeStashedFunction(params).catch((error) => {
         alert(error)
       })
     },
@@ -743,6 +726,7 @@ export default {
     // Переход к новому периоду
     async goToNewPeriod() {
       this.goToNewPeriodDialog = false
+      this.$refs.loadingDialog.showLoadingDialog('Производится переход к новому периоду, подождите...')
       const paramsForProcedure = {}
 
       if (this.variablesOfForm.mesAnfb === 12) {
@@ -754,15 +738,17 @@ export default {
       }
 
       const params = this.createStructureForTechZarplSetPeriod(this.variablesOfForm, paramsForProcedure)
-      await this.$api.service.executedStashedFunction(params).catch((error) => {
+      await this.$api.service.executeStashedFunction(params).catch((error) => {
         alert(error)
+        this.$refs.loadingDialog.closeLoadingDialog()
       })
 
       await this.findMonthOfProizv()
       await this.initData()
       await this.updateRecordsData()
 
-      this.$refs.userNotification.showUserNotification('success', 'Переход к новому периоду произведен')
+      this.$refs.userNotification.showUserNotification('success', 'Переход к новому периоду выполнен!')
+      this.$refs.loadingDialog.closeLoadingDialog()
     },
 
     addProductionByBranch() {
@@ -771,15 +757,15 @@ export default {
 
     // Пересчет выработки за месяц
     async recalculationOfOutputForMonth() {
-      this.recalculationOfOutputForMonthDialog = true
+      this.$refs.loadingDialog.showLoadingDialog('Производится пересчет выработки за месяц, подождите...')
       const params = this.createStructureForTechZarAllPereschet(this.variablesOfForm)
-      await this.$api.service.executeStashedFunctionWithReturnedDataSet(params).catch((error) => {
+      await this.$api.service.executeStashedFunction(params).catch((error) => {
         alert(error)
-        this.recalculationOfOutputForMonthDialog = false
+        this.$refs.loadingDialog.closeLoadingDialog()
       })
       await this.updateRecordsData()
       this.$refs.userNotification.showUserNotification('success', 'Пересчет выработки за месяц выполнен!')
-      this.recalculationOfOutputForMonthDialog = false
+      this.$refs.loadingDialog.closeLoadingDialog()
     },
 
     updateSort(byDesc, event) {
