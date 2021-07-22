@@ -37,6 +37,18 @@
         </div>
       </div>
 
+      <div class="payment-menu-col-2">
+        <router-link :to="{ name: 'OutgoingPaymentDocuments' }">
+          <v-img :src="require('@/assets/img/payment/outgoing.png')" />
+        </router-link>
+        <div
+          class="payment-menu-v-subheader font-weight-medium text-subtitle-1"
+          align="center"
+        >
+          Исходящие платежные документы
+        </div>
+      </div>
+
       <div
         v-if="isHaveBudgetRole"
         class="payment-menu-col-2"
