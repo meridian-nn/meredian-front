@@ -1,6 +1,21 @@
 <template>
   <div class="outgoing-payment-documents-main-div">
     <v-row>
+      <v-col cols="2">
+        <v-btn
+          color="blue"
+          class="mt-5"
+          fab
+          dark
+          x-small
+          data-title="Создание нового исходящего документа"
+          @click="newOutgoingDocument"
+        >
+          <v-icon dark>
+            mdi-plus
+          </v-icon>
+        </v-btn>
+      </v-col>
       <v-spacer />
       <v-col cols="4">
         <div class="outgoing-payment-main">
@@ -17,59 +32,16 @@
     <div id="outgoing-payment-documents-table">
       <v-data-table
         :headers="headers"
-        height="650"
+        height="620"
         fixed-header
+        item-key="id"
         :items="outgoingDocuments"
         :show-select="false"
+        :single-select="false"
         hide-default-footer
+        no-data-text=""
         class="elevation-1"
       >
-        <template #body="{ items }">
-          <tbody>
-            <tr
-              v-for="(item, index) in items"
-              :key="item + index"
-              :value="item"
-            >
-              <td style="width: 4% !important;">
-                {{ item.test[0] }}
-              </td>
-              <td style="width: 6% !important;">
-                {{ item.test[1] }}
-              </td>
-              <td style="width: 10% !important;">
-                {{ item.test[2] }}
-              </td>
-              <td style="width: 10% !important;">
-                {{ item.test[3] }}
-              </td>
-              <td style="width: 7% !important;">
-                {{ item.test[4] }}
-              </td>
-              <td style="width: 13% !important;">
-                {{ item.test[5] }}
-              </td>
-              <td style="width: 7% !important;">
-                {{ item.test[6] }}
-              </td>
-              <td style="width: 5% !important;">
-                {{ item.test[7] }}
-              </td>
-              <td style="width: 12% !important;">
-                {{ item.test[8] }}
-              </td>
-              <td style="width: 7% !important;">
-                {{ item.test[9] }}
-              </td>
-              <td style="width: 10% !important;">
-                {{ item.test[10] }}
-              </td>
-              <td style="width: 8% !important;">
-                {{ item.test[11] }}
-              </td>
-            </tr>
-          </tbody>
-        </template>
       </v-data-table>
     </div>
 
@@ -115,79 +87,86 @@
       />
     </div>
     <user-notification ref="userNotification" />
+    <create-outgoing-payment-document
+      ref="createOutgoingPaymentDocument"
+      @save="saveOutgoingDocument"
+    />
   </div>
 </template>
 
 <script>
 import UserNotification from '@/components/information_window/UserNotification'
+import createOutgoingPaymentDocument from '@/views/vcrm/Payment/OutgoingPaymentDocuments/Modals/CreateOutgoingPaymentDocumentsPage.vue'
 
 export default {
   name: 'OutgoingPaymentDocuments',
-  components: { UserNotification },
+  components: {
+    UserNotification,
+    createOutgoingPaymentDocument
+  },
   data() {
     return {
-      outgoingDocuments: [
-        {
-          test: ['test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8', 'test9', 'test10', 'test11', 'test12']
-        },
-        {
-          test: ['test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8', 'test9', 'test10', 'test11', 'test12']
-        },
-        {
-          test: ['test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8', 'test9', 'test10', 'test11', 'test12']
-        },
-        {
-          test: ['test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8', 'test9', 'test10', 'test11', 'test12']
-        }
-      ],
+      outgoingDocuments: [],
       headers: [
         {
           text: 'Дескр',
-          value: 'descr'
+          value: 'descr',
+          width: '4%'
         },
         {
           text: 'Выписан',
-          value: 'released'
+          value: 'released',
+          width: '6%'
         },
         {
           text: 'Номер',
-          value: 'num'
+          value: 'num',
+          width: '10%'
         },
         {
           text: 'Сумма ',
-          value: 'summ'
+          value: 'summ',
+          width: '10%'
         },
         {
           text: 'Плательщик',
-          value: 'payer'
+          value: 'payer',
+          width: '7%'
         },
         {
           text: 'Получатель',
-          value: 'recipient'
+          value: 'recipient',
+          width: '13%'
         },
         {
           text: 'Испольнитель',
-          value: 'executor'
+          value: 'executor',
+          width: '7%'
         },
         {
           text: '№ вып.',
-          value: 'numExtract'
+          value: 'numExtract',
+          width: '5%'
         },
         {
           text: 'Комментарий',
-          value: 'comment'
+          value: 'comment',
+          width: '12%'
         },
         {
           text: 'Код элемента',
-          value: 'codeElmt'
+          value: 'codeElmt',
+          width: '7%'
         },
         {
           text: 'Элемент',
-          value: 'elmt'
+          value: 'elmt',
+          width: '10%'
         },
         {
           text: 'ЦФО',
-          value: 'cfo'
+          value: 'cfo',
+          width: '8%'
         }
       ],
       totalToSum: 0,
@@ -199,6 +178,12 @@ export default {
   methods: {
     generateBudget() {
       this.$refs.userNotification.showUserNotification('success', 'Бюджет сформирован')
+    },
+    newOutgoingDocument() {
+      this.$refs.createOutgoingPaymentDocument.newDocument()
+    },
+    saveOutgoingDocument() {
+      this.$refs.userNotification.showUserNotification('success', 'Новый исходящий платежный документ добавлен')
     }
   }
 }
@@ -255,7 +240,7 @@ export default {
 #outgoing-payment-documents-table td, #outgoing-payment-documents-table th {
   border: 1px solid #ddd;
   word-break: break-all !important;
-  padding: 0 0 !important;
+  padding: 0 !important;
   height: 0 !important;
 }
 

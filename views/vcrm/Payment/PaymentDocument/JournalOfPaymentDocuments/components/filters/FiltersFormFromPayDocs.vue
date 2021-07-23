@@ -87,7 +87,7 @@
             </v-col>
           </v-row>
 
-          <v-row>
+          <v-row class="date-filter">
             <v-col cols="6">
               <v-text-field
                 v-model="filterItem.dateFrom"
@@ -96,6 +96,8 @@
                 outlined
                 :max="filterItem.dateTo"
                 label="Дата документа начиная с"
+                :hint="filterItem.dateFrom > filterItem.dateTo ? `'Дата документа начиная с' должна быть меньше 'Даты документа заканчивая'` : ''"
+                persistent-hint
               />
             </v-col>
             <v-col cols="6">
@@ -150,6 +152,7 @@
         <v-btn
           color="blue darken-1"
           text
+          :disabled="filterItem.dateFrom > filterItem.dateTo"
           @click="saveFilters"
         >
           Применить фильтры
@@ -365,5 +368,7 @@ export default {
   padding-top: 15px;
   padding-left: 5px;
 }
-
+.date-filter .v-messages__message {
+  color: red;
+}
 </style>

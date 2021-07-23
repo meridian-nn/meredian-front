@@ -1,5 +1,18 @@
 <template>
   <div class="incoming-payment-documents-main-div">
+    <v-btn
+      color="blue"
+      class="my-3"
+      fab
+      dark
+      x-small
+      data-title="Создание нового входящего платежного документа"
+      @click="newIncomingDocument"
+    >
+      <v-icon dark>
+        mdi-plus
+      </v-icon>
+    </v-btn>
     <div class="incoming-payment-documents-row">
       <v-data-table
         id="incoming-payment-documents-data-table"
@@ -63,17 +76,24 @@
     </div>
 
     <user-notification ref="userNotification" />
+
+    <create-incoming-payment-document
+      ref="createIncomingPaymentDocument"
+      @save="saveIncomingDocument"
+    />
   </div>
 </template>
 
 <script>
 import UserNotification from '@/components/information_window/UserNotification'
+import createIncomingPaymentDocument from '@/views/vcrm/Payment/IncomingPaymentDocuments/Modals/CreateIncomingPaymentDocument.vue'
 
 export default {
   name: 'IncomingPaymentDocumentsPage',
 
   components: {
-    UserNotification
+    UserNotification,
+    createIncomingPaymentDocument
   },
 
   data() {
@@ -148,6 +168,14 @@ export default {
       coExecutor: '',
 
       purpose: ''
+    }
+  },
+  methods: {
+    newIncomingDocument() {
+      this.$refs.createIncomingPaymentDocument.newDocument()
+    },
+    saveIncomingDocument() {
+      this.$refs.userNotification.showUserNotification('success', 'Новый входящий документ добавлен')
     }
   }
 }
