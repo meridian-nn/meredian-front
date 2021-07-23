@@ -1,5 +1,18 @@
 <template>
   <div class="incoming-payment-documents-main-div">
+    <v-btn
+      color="blue"
+      class="my-3"
+      fab
+      dark
+      x-small
+      data-title="Создание нового входящего платежного документа"
+      @click="newIncomingDocument"
+    >
+      <v-icon dark>
+        mdi-plus
+      </v-icon>
+    </v-btn>
     <div class="incoming-payment-documents-row">
       <v-data-table
         id="incoming-payment-documents-data-table"
@@ -7,7 +20,7 @@
         :headers="dataTableHeaders"
         fixed-header
         :items="dataTableItems"
-        height="740"
+        height="690"
         item-key="id"
         :show-select="true"
         :single-select="false"
@@ -15,7 +28,23 @@
         hide-default-footer
         no-data-text=""
         class="elevation-1"
+        @contextmenu:row="showContextMenu"
       />
+      <v-menu
+        v-model="rightClickMenu"
+        :position-x="xRightClickMenu"
+        :position-y="yRightClickMenu"
+        absolute
+        offset-y
+      >
+        <v-list>
+          <v-list-item @click="profileOfContractorOpenForm">
+            <v-list-item-title>
+              Карточка контрагента
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
     </div>
 
     <div class="incoming-payment-documents-row">
@@ -29,6 +58,7 @@
           hide-details="auto"
           :readonly="true"
           outlined
+          dense
         />
       </div>
 
@@ -43,6 +73,7 @@
           height="20"
           :readonly="true"
           outlined
+          dense
         />
       </div>
     </div>
@@ -58,22 +89,33 @@
           hide-details="auto"
           :readonly="true"
           outlined
+          dense
         />
       </div>
     </div>
 
     <user-notification ref="userNotification" />
+    <profile-of-contractor ref="profileOfContractor" />
+
+    <create-incoming-payment-document
+      ref="createIncomingPaymentDocument"
+      @save="saveIncomingDocument"
+    />
   </div>
 </template>
 
 <script>
 import UserNotification from '@/components/information_window/UserNotification'
+import ProfileOfContractor from '@/views/vcrm/Payment/ProfileOfContractor/ProfileOfContractorPage'
+import createIncomingPaymentDocument from '@/views/vcrm/Payment/IncomingPaymentDocuments/Modal/CreateIncomingPaymentDocument.vue'
 
 export default {
   name: 'IncomingPaymentDocumentsPage',
 
   components: {
-    UserNotification
+    UserNotification,
+    ProfileOfContractor,
+    createIncomingPaymentDocument
   },
 
   data() {
@@ -141,13 +183,88 @@ export default {
           width: '60px'
         }
       ],
-      dataTableItems: [],
+      dataTableItems: [
+        {
+          id: 1,
+          descr: 'test1',
+          dataVipis: 'test1',
+          numFind: 'test1',
+          sumFind: 'test1',
+          platName: 'test1',
+          poluchName: 'test1',
+          fio: 'test1',
+          numOfDoc: 'test1',
+          comment: 'test1',
+          bud_celem: 'test1',
+          bud_nelem: 'test1',
+          bud_ncfo: 'test1'
+        },
+        {
+          id: 2,
+          descr: 'test2',
+          dataVipis: 'test2',
+          numFind: 'test2',
+          sumFind: 'test2',
+          platName: 'test2',
+          poluchName: 'test2',
+          fio: 'test2',
+          numOfDoc: 'test2',
+          comment: 'test2',
+          bud_celem: 'test2',
+          bud_nelem: 'test2',
+          bud_ncfo: 'test2'
+        },
+        {
+          id: 3,
+          descr: 'test3',
+          dataVipis: 'test3',
+          numFind: 'test3',
+          sumFind: 'test3',
+          platName: 'test3',
+          poluchName: 'test3',
+          fio: 'test3',
+          numOfDoc: 'test3',
+          comment: 'test3',
+          bud_celem: 'test3',
+          bud_nelem: 'test3',
+          bud_ncfo: 'test3'
+        }
+      ],
 
       sumOfDataTableItems: 0,
 
       coExecutor: '',
 
-      purpose: ''
+      purpose: '',
+
+      rightClickMenu: false,
+      xRightClickMenu: 0,
+      yRightClickMenu: 0,
+      currentRowOfTableForContextMenu: null
+    }
+  },
+
+  methods: {
+    showContextMenu(event, item) {
+      event.preventDefault()
+      this.rightClickMenu = false
+      this.currentRowOfTableForContextMenu = null
+      this.xRightClickMenu = event.clientX
+      this.yRightClickMenu = event.clientY
+      this.$nextTick(() => {
+        this.rightClickMenu = true
+        this.currentRowOfTableForContextMenu = item.item
+      })
+    },
+
+    profileOfContractorOpenForm() {
+      this.$refs.profileOfContractor.openForm(this.currentRowOfTableForContextMenu)
+    },
+    newIncomingDocument() {
+      this.$refs.createIncomingPaymentDocument.newDocument()
+    },
+    saveIncomingDocument() {
+      this.$refs.userNotification.showUserNotification('success', 'Новый входящий документ добавлен')
     }
   }
 }
@@ -178,7 +295,7 @@ export default {
 #incoming-payment-documents-data-table {
   border-collapse: collapse;
   width: 100%;
-  height: 740px;
+  height: 690px;
 }
 
 #incoming-payment-documents-data-table table {

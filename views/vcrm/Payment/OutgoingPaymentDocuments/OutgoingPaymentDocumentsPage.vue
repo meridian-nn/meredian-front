@@ -1,6 +1,21 @@
 <template>
   <div class="outgoing-payment-documents-main-div">
     <v-row>
+      <v-col cols="2">
+        <v-btn
+          color="blue"
+          class="mt-5"
+          fab
+          dark
+          x-small
+          data-title="Создание нового исходящего документа"
+          @click="newOutgoingDocument"
+        >
+          <v-icon dark>
+            mdi-plus
+          </v-icon>
+        </v-btn>
+      </v-col>
       <v-spacer />
       <v-col cols="4">
         <div class="outgoing-payment-main">
@@ -17,11 +32,14 @@
     <div id="outgoing-payment-documents-table">
       <v-data-table
         :headers="headers"
-        height="650"
+        height="620"
         fixed-header
+        item-key="id"
         :items="outgoingDocuments"
         :show-select="false"
+        :single-select="false"
         hide-default-footer
+        no-data-text=""
         class="elevation-1"
       >
         <template #body="{ items }">
@@ -30,6 +48,7 @@
               v-for="(item, index) in items"
               :key="item + index"
               :value="item"
+              @contextmenu="showContextMenu($event, item)"
             >
               <td style="width: 4% !important;">
                 {{ item.test[0] }}
@@ -73,6 +92,22 @@
       </v-data-table>
     </div>
 
+    <v-menu
+      v-model="rightClickMenu"
+      :position-x="xRightClickMenu"
+      :position-y="yRightClickMenu"
+      absolute
+      offset-y
+    >
+      <v-list>
+        <v-list-item @click="profileOfContractorOpenForm">
+          <v-list-item-title>
+            Карточка контрагента
+          </v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+
     <div class="outgoing-payment-documents-row mt-3">
       <p class="pt-2">
         Итого
@@ -115,15 +150,27 @@
       />
     </div>
     <user-notification ref="userNotification" />
+    <profile-of-contractor ref="profileOfContractor" />
+    <create-outgoing-payment-document
+      ref="createOutgoingPaymentDocument"
+      @save="saveOutgoingDocument"
+    />
   </div>
 </template>
 
 <script>
 import UserNotification from '@/components/information_window/UserNotification'
+import ProfileOfContractor from '@/views/vcrm/Payment/ProfileOfContractor/ProfileOfContractorPage'
+import createOutgoingPaymentDocument
+  from '@/views/vcrm/Payment/OutgoingPaymentDocuments/Modal/CreateOutgoingPaymentDocumentsPage.vue'
 
 export default {
   name: 'OutgoingPaymentDocuments',
-  components: { UserNotification },
+  components: {
+    UserNotification,
+    ProfileOfContractor,
+    createOutgoingPaymentDocument
+  },
   data() {
     return {
       outgoingDocuments: [
@@ -138,67 +185,106 @@ export default {
         },
         {
           test: ['test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8', 'test9', 'test10', 'test11', 'test12']
-        }
-      ],
+        }],
       headers: [
         {
           text: 'Дескр',
-          value: 'descr'
+          value: 'descr',
+          width: '4%'
         },
         {
           text: 'Выписан',
-          value: 'released'
+          value: 'released',
+          width: '6%'
         },
         {
           text: 'Номер',
-          value: 'num'
+          value: 'num',
+          width: '10%'
         },
         {
           text: 'Сумма ',
-          value: 'summ'
+          value: 'summ',
+          width: '10%'
         },
         {
           text: 'Плательщик',
-          value: 'payer'
+          value: 'payer',
+          width: '7%'
         },
         {
           text: 'Получатель',
-          value: 'recipient'
+          value: 'recipient',
+          width: '13%'
         },
         {
           text: 'Испольнитель',
-          value: 'executor'
+          value: 'executor',
+          width: '7%'
         },
         {
           text: '№ вып.',
-          value: 'numExtract'
+          value: 'numExtract',
+          width: '5%'
         },
         {
           text: 'Комментарий',
-          value: 'comment'
+          value: 'comment',
+          width: '12%'
         },
         {
           text: 'Код элемента',
-          value: 'codeElmt'
+          value: 'codeElmt',
+          width: '7%'
         },
         {
           text: 'Элемент',
-          value: 'elmt'
+          value: 'elmt',
+          width: '10%'
         },
         {
           text: 'ЦФО',
-          value: 'cfo'
+          value: 'cfo',
+          width: '8%'
         }
       ],
       totalToSum: 0,
       collaborator: null,
-      appointment: null
+      appointment: null,
+      rightClickMenu: false,
+      xRightClickMenu: 0,
+      yRightClickMenu: 0,
+      currentRowOfTableForContextMenu: null
     }
   },
 
   methods: {
     generateBudget() {
       this.$refs.userNotification.showUserNotification('success', 'Бюджет сформирован')
+    },
+
+    showContextMenu(event, item) {
+      event.preventDefault()
+      this.rightClickMenu = false
+      this.currentRowOfTableForContextMenu = null
+      this.xRightClickMenu = event.clientX
+      this.yRightClickMenu = event.clientY
+      this.$nextTick(() => {
+        this.rightClickMenu = true
+        this.currentRowOfTableForContextMenu = item.test
+      })
+    },
+
+    profileOfContractorOpenForm() {
+      this.$refs.profileOfContractor.openForm(this.currentRowOfTableForContextMenu)
+    },
+
+    newOutgoingDocument() {
+      this.$refs.createOutgoingPaymentDocument.newDocument()
+    },
+
+    saveOutgoingDocument() {
+      this.$refs.userNotification.showUserNotification('success', 'Новый исходящий платежный документ добавлен')
     }
   }
 }
@@ -255,7 +341,7 @@ export default {
 #outgoing-payment-documents-table td, #outgoing-payment-documents-table th {
   border: 1px solid #ddd;
   word-break: break-all !important;
-  padding: 0 0 !important;
+  padding: 0 !important;
   height: 0 !important;
 }
 
@@ -273,13 +359,6 @@ export default {
   text-align: left;
   background-color: #639db1 !important;
   color: white;
-}
-
-.outgoing-payment-documents-row {
-  display: flex;
-  flex-wrap: wrap;
-  flex: 1 1 auto;
-  margin: 0;
 }
 
 .outgoing-payment-documents-summ-results {
