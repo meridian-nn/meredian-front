@@ -29,6 +29,7 @@
             <tr
               v-for="(item, index) in items"
               :key="item + index"
+              @contextmenu="showContextMenu($event, item)"
               :value="item"
             >
               <td style="width: 4% !important;">
@@ -73,6 +74,22 @@
       </v-data-table>
     </div>
 
+    <v-menu
+      v-model="rightClickMenu"
+      :position-x="xRightClickMenu"
+      :position-y="yRightClickMenu"
+      absolute
+      offset-y
+    >
+      <v-list>
+        <v-list-item @click="profileOfContractorOpenForm">
+          <v-list-item-title>
+            Карточка контрагента
+          </v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+
     <div class="outgoing-payment-documents-row mt-3">
       <p class="pt-2">
         Итого
@@ -115,15 +132,20 @@
       />
     </div>
     <user-notification ref="userNotification" />
+    <profile-of-contractor ref="profileOfContractor" />
   </div>
 </template>
 
 <script>
 import UserNotification from '@/components/information_window/UserNotification'
+import ProfileOfContractor from '@/views/vcrm/Payment/ProfileOfContractor/ProfileOfContractorPage'
 
 export default {
   name: 'OutgoingPaymentDocuments',
-  components: { UserNotification },
+  components: {
+    UserNotification,
+    ProfileOfContractor
+  },
   data() {
     return {
       outgoingDocuments: [
@@ -192,13 +214,33 @@ export default {
       ],
       totalToSum: 0,
       collaborator: null,
-      appointment: null
+      appointment: null,
+      rightClickMenu: false,
+      xRightClickMenu: 0,
+      yRightClickMenu: 0,
+      currentRowOfTableForContextMenu: null
     }
   },
 
   methods: {
     generateBudget() {
       this.$refs.userNotification.showUserNotification('success', 'Бюджет сформирован')
+    },
+
+    showContextMenu(event, item) {
+      event.preventDefault()
+      this.rightClickMenu = false
+      this.currentRowOfTableForContextMenu = null
+      this.xRightClickMenu = event.clientX
+      this.yRightClickMenu = event.clientY
+      this.$nextTick(() => {
+        this.rightClickMenu = true
+        this.currentRowOfTableForContextMenu = item.test
+      })
+    },
+
+    profileOfContractorOpenForm() {
+      this.$refs.profileOfContractor.openForm(this.currentRowOfTableForContextMenu)
     }
   }
 }
@@ -273,13 +315,6 @@ export default {
   text-align: left;
   background-color: #639db1 !important;
   color: white;
-}
-
-.outgoing-payment-documents-row {
-  display: flex;
-  flex-wrap: wrap;
-  flex: 1 1 auto;
-  margin: 0;
 }
 
 .outgoing-payment-documents-summ-results {
