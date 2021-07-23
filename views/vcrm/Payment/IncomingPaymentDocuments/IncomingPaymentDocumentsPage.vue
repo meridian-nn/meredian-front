@@ -1,5 +1,18 @@
 <template>
   <div class="incoming-payment-documents-main-div">
+    <v-btn
+      color="blue"
+      class="my-3"
+      fab
+      dark
+      x-small
+      data-title="Создание нового входящего платежного документа"
+      @click="newIncomingDocument"
+    >
+      <v-icon dark>
+        mdi-plus
+      </v-icon>
+    </v-btn>
     <div class="incoming-payment-documents-row">
       <v-data-table
         id="incoming-payment-documents-data-table"
@@ -7,7 +20,7 @@
         :headers="dataTableHeaders"
         fixed-header
         :items="dataTableItems"
-        height="750"
+        height="690"
         item-key="id"
         :show-select="true"
         :single-select="false"
@@ -83,19 +96,26 @@
 
     <user-notification ref="userNotification" />
     <profile-of-contractor ref="profileOfContractor" />
+
+    <create-incoming-payment-document
+      ref="createIncomingPaymentDocument"
+      @save="saveIncomingDocument"
+    />
   </div>
 </template>
 
 <script>
 import UserNotification from '@/components/information_window/UserNotification'
 import ProfileOfContractor from '@/views/vcrm/Payment/ProfileOfContractor/ProfileOfContractorPage'
+import createIncomingPaymentDocument from '@/views/vcrm/Payment/IncomingPaymentDocuments/Modal/CreateIncomingPaymentDocument.vue'
 
 export default {
   name: 'IncomingPaymentDocumentsPage',
 
   components: {
     UserNotification,
-    ProfileOfContractor
+    ProfileOfContractor,
+    createIncomingPaymentDocument
   },
 
   data() {
@@ -239,6 +259,12 @@ export default {
 
     profileOfContractorOpenForm() {
       this.$refs.profileOfContractor.openForm(this.currentRowOfTableForContextMenu)
+    },
+    newIncomingDocument() {
+      this.$refs.createIncomingPaymentDocument.newDocument()
+    },
+    saveIncomingDocument() {
+      this.$refs.userNotification.showUserNotification('success', 'Новый входящий документ добавлен')
     }
   }
 }
@@ -269,7 +295,7 @@ export default {
 #incoming-payment-documents-data-table {
   border-collapse: collapse;
   width: 100%;
-  height: 750px;
+  height: 690px;
 }
 
 #incoming-payment-documents-data-table table {
