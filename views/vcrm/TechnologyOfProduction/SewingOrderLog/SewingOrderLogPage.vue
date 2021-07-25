@@ -27,6 +27,17 @@
             mdi-delete
           </v-icon>
         </v-btn>
+
+        <v-btn
+          fab
+          small
+          color="red"
+          @click="openPrintModal"
+        >
+          <v-icon color="white">
+            mdi-printer
+          </v-icon>
+        </v-btn>
       </div>
 
       <div class="sewing-order-log-page-checkbox mr-4">
@@ -156,6 +167,11 @@
       @success="removeSelectElement"
     />
 
+    <modal-print
+      :value="modals.print"
+      @close="closePrintModal"
+    />
+
     <user-notification ref="userNotification" />
   </div>
 </template>
@@ -164,12 +180,14 @@
 import UserNotification from '@/components/information_window/UserNotification'
 import ModalEdit from './modals/Edit'
 import ModalConfirm from './modals/Confirm'
+import ModalPrint from './modals/Print'
 export default {
   name: 'SewingOrderLogPage',
 
   components: {
     ModalEdit,
     ModalConfirm,
+    ModalPrint,
     UserNotification
   },
 
@@ -187,7 +205,8 @@ export default {
       selected: [],
       modals: {
         edit: false,
-        confirm: false
+        confirm: false,
+        print: false
       },
       headers: [
         {
@@ -502,6 +521,14 @@ export default {
 
     openConfirmModal() {
       this.modals.confirm = true
+    },
+
+    closePrintModal() {
+      this.modals.print = false
+    },
+
+    openPrintModal() {
+      this.modals.print = true
     },
 
     async removeSelectElement(params = this.selected) {
