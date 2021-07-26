@@ -1,36 +1,60 @@
 <template>
   <div class="sewing-order-log-page">
     <div class="sewing-order-log-page-row">
-      <div class="sewing-order-log-page-btn">
-        <v-btn>
-          <v-icon>mdi-ruler</v-icon>
+      <div class="sewing-order-log-page-btn mr-4">
+        <v-btn
+          fab
+          small
+          color="blue"
+        >
+          <v-icon
+            color="white"
+            @click="openEditModal"
+          >
+            mdi-pencil
+          </v-icon>
+        </v-btn>
+
+        <v-btn
+          fab
+          small
+          color="red"
+        >
+          <v-icon
+            color="white"
+            @click="openConfirmModal"
+          >
+            mdi-delete
+          </v-icon>
+        </v-btn>
+
+        <v-btn
+          fab
+          small
+          color="red"
+          @click="openPrintModal"
+        >
+          <v-icon color="white">
+            mdi-printer
+          </v-icon>
         </v-btn>
       </div>
 
-      <v-simple-checkbox
-        v-model="govContract"
-        style="padding-top: 5px"
-      />
-      <v-subheader
-        class="font-weight-medium text-subtitle-1"
-        style="margin-top: 10px"
-      >
-        ГОСКОНТРАКТ
-      </v-subheader>
+      <div class="sewing-order-log-page-checkbox mr-4">
+        <v-checkbox
+          v-model="govContract"
+          class="mr-2"
+          label="ГОСКОНТРАКТ"
+        />
 
-      <v-simple-checkbox
-        v-model="noOTK"
-        style="padding-top: 5px"
-      />
-      <v-subheader
-        class="font-weight-medium text-subtitle-1"
-        style="margin-top: 10px"
-      >
-        Нет проверки ОТК
-      </v-subheader>
+        <v-checkbox
+          v-model="noOTK"
+          label="Нет проверки ОТК"
+        />
+      </div>
 
       <div class="sewing-order-log-page-btn">
-        <v-btn>
+        <v-btn small>
           Формирование уведомления о приемке для склада
         </v-btn>
       </div>
@@ -41,7 +65,7 @@
         <v-data-table
           id="sewing-order-log-page-records-table"
           v-model="selected"
-          height="700"
+          height="650"
           fixed-header
           show-select
           :single-select="false"
@@ -50,6 +74,7 @@
           :headers="headers"
           :items="man"
           calculate-widths
+          :item-class="typeOrder"
           @contextmenu:row="rightClickHandler"
         >
           <template #[`item.dataZkzpsv`]="{ item }">
@@ -129,12 +154,42 @@
         Красным цветом подсвечены позиции, где есть замечания базы по браку
       </div>
     </div>
+
+    <modal-edit
+      :value="modals.edit"
+      @close="closeEditModal"
+      @save="saveEditForm"
+    />
+
+    <modal-confirm
+      :value="modals.confirm"
+      @close="closeConfirmModal"
+      @success="removeSelectElement"
+    />
+
+    <modal-print
+      :value="modals.print"
+      @close="closePrintModal"
+    />
+
+    <user-notification ref="userNotification" />
   </div>
 </template>
 
 <script>
+import UserNotification from '@/components/information_window/UserNotification'
+import ModalEdit from './modals/Edit'
+import ModalConfirm from './modals/Confirm'
+import ModalPrint from './modals/Print'
 export default {
   name: 'SewingOrderLogPage',
+
+  components: {
+    ModalEdit,
+    ModalConfirm,
+    ModalPrint,
+    UserNotification
+  },
 
   async asyncData({ $api }) {
     const manufacturs = await $api.manufacturing.manufacturingRequestJournalFindAll()
@@ -148,6 +203,11 @@ export default {
       xFromPayMenu: 0,
       yFromPayMenu: 0,
       selected: [],
+      modals: {
+        edit: false,
+        confirm: false,
+        print: false
+      },
       headers: [
         {
           text: 'План',
@@ -164,7 +224,7 @@ export default {
         {
           text: 'Дата',
           value: 'dataZkzpsv',
-          width: '92px',
+          width: '93px',
           sortable: false
         },
         {
@@ -176,7 +236,7 @@ export default {
         {
           text: 'Код',
           value: 'mcId',
-          width: '100px',
+          width: '60px',
           sortable: false
         },
         {
@@ -188,13 +248,13 @@ export default {
         {
           text: 'Ед.',
           value: 'nameProizv',
-          width: '100px',
+          width: '50px',
           sortable: false
         },
         {
           text: 'Кол-во',
           value: 'colvo',
-          width: '100px',
+          width: '60px',
           sortable: false
         },
         {
@@ -206,7 +266,7 @@ export default {
         {
           text: 'Факт',
           value: 'dataZkzpsv',
-          width: '125px'
+          width: '95px'
         },
         {
           text: 'Раскрой',
@@ -221,12 +281,12 @@ export default {
         {
           text: 'СводЗк',
           value: 'numSvod',
-          width: '100px'
+          width: '80px'
         },
         {
           text: 'Факт',
           value: 'dataRaskroyFact',
-          width: '125px'
+          width: '95px'
         },
         {
           text: 'Исполнитель',
@@ -445,6 +505,54 @@ export default {
       this.$nextTick(() => {
         this.fromPayMenu = true
       })
+    },
+
+    closeEditModal() {
+      this.modals.edit = false
+    },
+
+    openEditModal() {
+      this.modals.edit = true
+    },
+
+    closeConfirmModal() {
+      this.modals.confirm = false
+    },
+
+    openConfirmModal() {
+      this.modals.confirm = true
+    },
+
+    closePrintModal() {
+      this.modals.print = false
+    },
+
+    openPrintModal() {
+      this.modals.print = true
+    },
+
+    async removeSelectElement(params = this.selected) {
+      try {
+        await this.$api.manufacturing.manufacturingRequestJournalRemove(params)
+
+        this.closeConfirmModal()
+      } catch (e) {
+        this.$refs.userNotification.showUserNotification('warning', 'Ошибка сервера, попробуйте позже')
+      }
+    },
+
+    async saveEditForm(params = this.selected) {
+      try {
+        await this.$api.manufacturing.manufacturingRequestJournalSave(params)
+
+        this.closeEditModal()
+      } catch (e) {
+        this.$refs.userNotification.showUserNotification('warning', 'Ошибка сервера, попробуйте позже')
+      }
+    },
+
+    typeOrder(item) {
+      return item.gosKontrakt ? 'red' : 'blue'
     }
   }
 }
@@ -457,12 +565,17 @@ export default {
   &__table {
     overflow: auto;
   }
+
+  &-checkbox {
+    display: flex;
+    align-items: center;
+  }
 }
 
 #sewing-order-log-page-records-table {
   border-collapse: collapse;
   width: 100%;
-  height: 700px;
+  height: 650px;
 }
 
 #sewing-order-log-page-records-table table {
@@ -487,13 +600,10 @@ export default {
 .sewing-order-log-page-row {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   flex: 1 1 auto;
   margin: 0;
   min-width: 100%;
-}
-
-.sewing-order-log-page-btn {
-  padding-top: 13px;
 }
 
 .sewing-order-log-page-secondary-work-rectangle {
