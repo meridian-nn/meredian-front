@@ -888,7 +888,7 @@ Vue.mixin({
           operation: 'EQUALS',
           type: 'AND',
           values: [
-            '11'
+            this.getCurrentUser.id
           ]
         }
       ]
