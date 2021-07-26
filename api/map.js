@@ -638,7 +638,15 @@ export const factory = send => ({
         },
 
         manufacturingRequestJournalFindAll() {
-            return send('GET', '/oper/manufacturing/manufacturingRequestJournal/findAll')
+          return send('GET', '/oper/manufacturing/manufacturingRequestJournal/findAll')
+        },
+
+        manufacturingRequestJournalRemove(params) {
+          return send('GET', '/oper/manufacturing/manufacturingRequestJournal/save', params)
+        },
+
+        manufacturingRequestJournalEdit(params) {
+          return send('GET', '/oper/manufacturing/manufacturingRequestJournal/delete', params)
         }
     },
 
