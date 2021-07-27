@@ -588,8 +588,7 @@ export default {
 
     // Инициализация данных формы
     async initData(customParams) {
-      let params = {}
-      params = this.createStructureForManufacturingInitDataProcedure(customParams || this.monthOfProizv)
+      const params = this.createStructureForManufacturingInitDataProcedure(customParams || this.monthOfProizv)
       await this.$api.service.executeStashedFunction(params).catch((error) => {
         alert(error)
       })

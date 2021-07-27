@@ -525,6 +525,20 @@ export const factory = send => ({
             findById(id) {
                 return send('GET', `/oper/dir/paymentType/findById/${id}`)
             }
+        },
+
+        incomingPaymentDocuments: {
+          getInitIncomingPaymentDocumentProcedure() {
+            return 'dbo.init_incoming_payment_document'
+          },
+
+          findPageBySearchCriteriaList(params) {
+            return send('POST', `/oper/incomingPaymentDocument/findPageBySearchCriteriaList`, params);
+          },
+
+          findDocumentsWithGroupBy(params) {
+            return send('POST', `/oper/incomingPaymentDocument/groupBy`, params)
+          }
         }
     },
 

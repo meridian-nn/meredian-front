@@ -634,7 +634,7 @@ Vue.mixin({
       ]
     },
 
-    createCriteriasToGetResultsOfContent(searchCriterias) {
+    createCriteriasToGetResultsOfDocsFromPay(searchCriterias) {
       const aggregateFunctions = [
         {
           'field': 'sumDoc',
@@ -647,6 +647,23 @@ Vue.mixin({
         {
           'field': 'sumToPay',
           'function': 'SUM'
+        }
+      ]
+
+      return {
+        aggregateFunctions: aggregateFunctions,
+        searchCriteria: searchCriterias
+      }
+    },
+
+    createCriteriasToGetResultsOfIncomingPaymentDocuments(searchCriterias){
+      const aggregateFunctions = [
+        {
+          'field': 'sumFind',
+          'function': 'SUM'
+        },
+        { 'field': 'id',
+          'function': 'MIN'
         }
       ]
 
@@ -1308,6 +1325,22 @@ Vue.mixin({
           ]
         }
       ]
+    },
+
+    createCriteriasToSearchIncomingPaymentDocuments() {
+      const data = [
+        {
+          dataType: 'VARCHAR',
+          key: 'userId',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            this.getCurrentUser.id
+          ]
+        }
+      ]
+
+      return data
     }
   }
 })

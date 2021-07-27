@@ -124,6 +124,23 @@ Vue.mixin({
         year: variablesOfForm.godAnfb,
         ceh_id: 6
       }
+    },
+
+    createStructureForInitIncomingPaymentDocument() {
+      return {
+        params: this.createParamsForInitIncomingPaymentDocument(),
+        procName: this.$api.payment.incomingPaymentDocuments.getInitIncomingPaymentDocumentProcedure()
+      }
+    },
+
+    createParamsForInitIncomingPaymentDocument() {
+      return {
+        vid: 1,
+        my_descr: 'Larisa',
+        data1: '2020-09-01',
+        data2: '2020-09-30',
+        user_id: this.getCurrentUser.id
+      }
     }
   }
 
