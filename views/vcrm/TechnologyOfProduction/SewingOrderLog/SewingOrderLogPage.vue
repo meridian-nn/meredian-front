@@ -76,6 +76,8 @@
           calculate-widths
           :item-class="typeOrder"
           @contextmenu:row="rightClickHandler"
+          @update:sort-by="updateSort('by', $event)"
+          @update:sort-desc="updateSort('desc', $event)"
         >
           <template #[`item.dataZkzpsv`]="{ item }">
             {{ item.dataZkzpsv | formatDate('DD MMMM YYYY') }}
@@ -91,6 +93,15 @@
 
           <template #[`item.planData`]="{ item }">
             {{ item.planData | formatDate('DD MMMM YYYY') }}
+          </template>
+
+          <template #[`body.append`]>
+            <infinite-loading
+              :key="keyLoading"
+              spinner="spiral"
+              :identifier="infiniteIdData"
+              @infinite="findSpDocoplForPay"
+            />
           </template>
         </v-data-table>
 
@@ -199,6 +210,11 @@ export default {
 
   data() {
     return {
+      sortBy: [],
+      sortDesc: [],
+      infiniteIdData: 0,
+      keyLoading: Math.random(),
+      pageOfFromPayData: 0,
       fromPayMenu: false,
       xFromPayMenu: 0,
       yFromPayMenu: 0,
@@ -266,67 +282,80 @@ export default {
         {
           text: 'Факт',
           value: 'dataZkzpsv',
-          width: '95px'
+          width: '95px',
+          sort: () => false
         },
         {
           text: 'Раскрой',
           value: 'nameRaskroy',
-          width: '100px'
+          width: '100px',
+          sort: () => false
         },
         {
           text: 'Заявка',
           value: 'numZaivk',
-          width: '100px'
+          width: '100px',
+          sort: () => false
         },
         {
           text: 'СводЗк',
           value: 'numSvod',
-          width: '80px'
+          width: '80px',
+          sort: () => false
         },
         {
           text: 'Факт',
           value: 'dataRaskroyFact',
-          width: '95px'
+          width: '95px',
+          sort: () => false
         },
         {
           text: 'Исполнитель',
           value: 'numZaivk',
-          width: '100px'
+          width: '100px',
+          sort: () => false
         },
         {
           text: 'Отв.исп',
           value: 'otvIsp',
-          width: '100px'
+          width: '100px',
+          sort: () => false
         },
         {
           text: 'Заявка',
           value: 'numZaivk',
-          width: '100px'
+          width: '100px',
+          sort: () => false
         },
         {
           text: 'ГОСТ/ТУ',
           value: 'gostTu',
-          width: '100px'
+          width: '100px',
+          sort: () => false
         },
         {
           text: 'Код ЗП',
           value: 'codGra',
-          width: '100px'
+          width: '100px',
+          sort: () => false
         },
         {
           text: 'Фабрика',
           value: 'planData',
-          width: '125px'
+          width: '125px',
+          sort: () => false
         },
         {
           text: 'КК',
           value: 'numZaivk',
-          width: '40px'
+          width: '40px',
+          sort: () => false
         },
         {
           text: 'ТО',
           value: 'gotovTo',
-          width: '40px'
+          width: '40px',
+          sort: () => false
         },
         {
           text: 'МЛ',
@@ -495,6 +524,16 @@ export default {
     }
   },
 
+  computed: {
+    handleSortData() {
+      const { sortDesc } = this
+
+      return this.sortBy.map((item, i) => {
+        return { 'direction': sortDesc[i] ? 'ASC' : 'DESC', 'property': item }
+      })
+    }
+  },
+
   methods: {
     rightClickHandler(event, item) {
       event.preventDefault()
@@ -551,8 +590,46 @@ export default {
       }
     },
 
+    updateSort(byDesc, event) {
+      if (byDesc === 'by') {
+        this.sortBy = event
+      } else if (byDesc === 'desc') {
+        this.sortDesc = event
+      }
+      this.pageOfFromPayData = 0
+      // Очистить данные
+      this.keyLoading = Math.random()
+    },
+
     typeOrder(item) {
       return item.gosKontrakt ? 'red' : 'blue'
+    },
+
+    async findSpDocoplForPay($state) {
+      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
+        this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs(), this.getCurrentUser.id)
+      const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
+      const filtersParams = JSON.parse(response[0].settingValue)
+
+      const searchCriterias = this.createCriteriasForRequestToSearchDocsFromPay(filtersParams)
+
+      const data = { searchCriterias, page: this.pageOfFromPayData, orders: this.handleSortData }
+
+      this.isFiltersForFromPayDocsUsing = searchCriterias.length > 1
+
+      // await this.fillResultsOfDocumentsFromPay(searchCriterias)
+
+      const { content } = await this.$api.payment.docOplForPay.findDocumentsForPayForJournalTable(data)
+
+      if (content.length > 0) {
+        this.pageOfFromPayData += 1
+
+        this.fromPayData.push(...content)
+
+        $state.loaded()
+      } else {
+        $state.complete()
+      }
     }
   }
 }

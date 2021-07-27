@@ -345,10 +345,7 @@
                       spinner="spiral"
                       :identifier="infiniteIdOfFromPayData"
                       @infinite="findSpDocoplForPay"
-                    >
-                      <div slot="no-more" />
-                      <div slot="no-results" />
-                    </infinite-loading>
+                    />
                   </tbody>
                 </template>
               </v-data-table>
