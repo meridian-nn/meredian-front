@@ -160,7 +160,7 @@ Vue.mixin({
                   elemParam = elemParam.sumToPayValue
               }
 
-              const dataType = this.getDateForCriteriasToSearchDocsFromPay(elemParam, key)
+              const dataType = this.getDataTypeForRequestToSearchDocsFromPay(elemParam, key)
 
               const operation = this.getOperationTypeForRequestToSearchDocsFromPay(key)
 
