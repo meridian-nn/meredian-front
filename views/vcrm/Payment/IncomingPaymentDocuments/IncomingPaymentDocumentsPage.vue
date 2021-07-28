@@ -86,7 +86,7 @@
 
 <script>
 import UserNotification from '@/components/information_window/UserNotification'
-import createIncomingPaymentDocument from '@/views/vcrm/Payment/IncomingPaymentDocuments/Modals/CreateIncomingPaymentDocument.vue'
+import createIncomingPaymentDocument from '@/views/vcrm/Payment/IncomingPaymentDocuments/IncomingPaymentDocumentsPage.vue'
 
 export default {
   name: 'IncomingPaymentDocumentsPage',

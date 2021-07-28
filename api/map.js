@@ -525,7 +525,19 @@ export const factory = send => ({
             findById(id) {
                 return send('GET', `/oper/dir/paymentType/findById/${id}`)
             }
-        }
+        },
+
+        outgoingPayment: {
+            getOutgoingPaymentDocumentsInitDataProcedureName() {
+                return 'dbo.init_outgoing_payment_document'
+            },
+            findPageBySearchCriterias(params) {
+                return send('POST', `/oper/outgoingPaymentDocument/findPageBySearchCriteriaList`, params)
+            },
+            findDocumentsWithGroupBy(params) {
+                return send('POST', `/oper/outgoingPaymentDocument/groupBy`, params)
+            },
+        },
     },
 
     uiSettings: {
@@ -641,7 +653,7 @@ export const factory = send => ({
             return send('GET', '/oper/manufacturing/manufacturingRequestJournal/findAll')
         }
     },
-
+    
     service: {
         /* в params передавать объект вида
               {

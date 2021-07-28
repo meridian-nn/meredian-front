@@ -1308,6 +1308,84 @@ Vue.mixin({
           ]
         }
       ]
+    },
+    createCriteriasForFindOutgoingPaymentDocuments(filtersParams) {
+      const data = [
+        {
+          dataType: "VARCHAR",
+          key: "userId",
+          operation: "EQUALS",
+          type: "AND",
+          values: [
+            this.getCurrentUser.id
+          ]
+        }
+      ]
+
+      if (typeof filtersParams === 'object' && (filtersParams.dateFrom || filtersParams.dateTo)) {
+        const dateValue = [
+          filtersParams.dateFrom ?
+          new Date(filtersParams.dateFrom).toLocaleDateString() : this.getDateForCriteriasToSearchDocsFromPay().toLocaleDateString()
+        ]
+        
+        if (filtersParams.dateTo) {
+          dateValue.push(new Date(filtersParams.dateTo).toLocaleDateString())
+        }
+
+        const dateCriterias = {
+          'dataType': 'DATE',
+          'key': 'dataVipis',
+          'operation': filtersParams.dateTo ? 'BETWEEN' : 'GREATER_THAN',
+          'type': 'AND',
+          'values': dateValue
+        }
+
+        data.push(dateCriterias)
+      }
+      
+      if (filtersParams) {
+        for (const key in filtersParams) {
+            let elemParam = filtersParams[key]
+
+            if (!elemParam || key === 'dateTo' || key === 'dateFrom') {
+              continue
+            }
+
+            const dataType = this.getDataTypeForRequestToSearchDocsFromPay(elemParam, key)
+
+            const operation = this.getOperationTypeForRequestToSearchDocsFromPay(key)
+
+            const dataElem = {
+                dataType,
+                key,
+                operation,
+                'type': 'AND',
+                'values': [
+                    elemParam
+                ]
+            }
+            data.push(dataElem)
+        }
+      }
+
+      return data
+    },
+    createCriteriasToGetResultsOfContentForOutgoingPayment(searchCriterias) {
+      const aggregateFunctions = [
+        {
+          'field': 'sumFind',
+          'function': 'SUM'
+        },
+        {
+          'field': 'id',
+          'function': 'MAX'
+        }
+      ]
+
+      return {
+        aggregateFunctions: aggregateFunctions,
+        searchCriteria: searchCriterias
+      }
     }
   }
 })

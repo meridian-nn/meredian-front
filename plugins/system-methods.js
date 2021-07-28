@@ -7,7 +7,9 @@ Vue.mixin({
         getIdOfFromPayDocsTableOfJournalOfPaymentDocs() {
             return 'journal-of-payment-docs-from-pay-docs'
         },
-
+        getIdOfFromOutgoingDocumentsTable() {
+          return 'outgoing-payment-document'
+        },
         getIdOfRecordsTableOfRecordsOfWorkByCards() {
             return 'records-of-work-by-cards-table-of-records'
         },

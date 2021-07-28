@@ -221,7 +221,6 @@ export default {
       }
     }
   },
-
   methods: {
     init() {
       this.elementId = this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs()
@@ -288,8 +287,8 @@ export default {
         }
       }
 
-      if (!this.filterItem.date) {
-        this.filterItem.date = this.getDateForCriteriasToSearchDocsFromPay().toISOString().substr(0, 10)
+      if (!this.filterItem.dateFrom) {
+        this.filterItem.dateFrom = this.getDateForCriteriasToSearchDocsFromPay().toISOString().substr(0, 10)
       }
     },
 
