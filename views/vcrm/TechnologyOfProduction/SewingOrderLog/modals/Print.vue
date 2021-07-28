@@ -119,7 +119,6 @@
                 label="Самоклейка - новый шаблон"
                 value="radio-2"
               />
-
               <v-radio
                 label="Новая самоклейка"
                 value="radio-2"
