@@ -45,7 +45,7 @@ Vue.mixin({
 
     createStructureForTechTmkUpdData(chosenRecord, variablesOfForm) {
       if (!chosenRecord ||
-         !variablesOfForm) {
+        !variablesOfForm) {
         return false
       }
 
@@ -89,7 +89,7 @@ Vue.mixin({
 
     createStructureForTechZarplSetPeriod(variablesOfForm, paramsForProcedure) {
       if (!variablesOfForm ||
-          !paramsForProcedure) {
+        !paramsForProcedure) {
         return false
       }
 
@@ -141,7 +141,29 @@ Vue.mixin({
         data2: '2020-09-30',
         user_id: this.getCurrentUser.id
       }
-    }
-  }
+    },
 
+    createStructureForOutgoingPaymentDocumentsInitDataProcedure(paramsForRequest) {
+      return {
+        params: this.createParamsForOutgoingPaymentDocumentsInitDataProcedure(paramsForRequest),
+        procName: this.$api.payment.outgoingPayment.getOutgoingPaymentDocumentsInitDataProcedureName()
+      }
+    },
+
+    createParamsForOutgoingPaymentDocumentsInitDataProcedure(paramsForRequest) {
+      const params = {
+        user_id: this.getCurrentUser.id,
+        vid: 1,
+        data1: '2020-09-01',
+        data2: '2020-09-30'
+      }
+      if (paramsForRequest) {
+        params.vid = paramsForRequest.vid
+        params.data1 = paramsForRequest.data1
+        params.data2 = paramsForRequest.data2
+      }
+      return params
+    }
+
+  }
 })

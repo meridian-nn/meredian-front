@@ -1,10 +1,12 @@
 <template>
   <div class="outgoing-payment-documents-main-div">
     <v-row>
-      <v-col cols="2">
+      <v-col
+        cols="2"
+        class="mt-5"
+      >
         <v-btn
           color="blue"
-          class="mt-5"
           fab
           dark
           x-small
@@ -15,7 +17,25 @@
             mdi-plus
           </v-icon>
         </v-btn>
+
+        <v-btn
+          v-if="isFiltersForFromPayDocsUsing"
+          color="blue"
+          dark
+          class="ml-2"
+          @click="openFilterFormOutgoingDocument"
+        >
+          Фильтры
+        </v-btn>
+        <v-btn
+          v-else
+          class="ml-2"
+          @click="openFilterFormOutgoingDocument"
+        >
+          Фильтры
+        </v-btn>
       </v-col>
+
       <v-spacer />
       <v-col cols="4">
         <div class="outgoing-payment-main">
@@ -29,64 +49,85 @@
       </v-col>
     </v-row>
 
-    <div id="outgoing-payment-documents-table">
+    <div class="outgoing-payment-documents-row">
       <v-data-table
+        id="outgoing-payment-documents-table"
+        height="640"
         :headers="headers"
-        height="620"
         fixed-header
-        item-key="id"
+        loading-text="Документы загружаются, подождите"
         :items="outgoingDocuments"
         :show-select="false"
         :single-select="false"
+        disable-pagination
         hide-default-footer
-        no-data-text=""
         class="elevation-1"
+        @update:sort-by="updateSort('by', $event)"
+        @update:sort-desc="updateSort('desc', $event)"
       >
         <template #body="{ items }">
           <tbody>
             <tr
-              v-for="(item, index) in items"
-              :key="item + index"
+              v-for="item in items"
+              :key="item.id"
               :value="item"
               @contextmenu="showContextMenu($event, item)"
+              @click="fillAssignmentAndCollaboratorOfCurrentRow(item)"
             >
-              <td style="width: 4% !important;">
-                {{ item.test[0] }}
+              <td>
+                {{ item.descr }}
               </td>
-              <td style="width: 6% !important;">
-                {{ item.test[1] }}
+              <td>
+                {{ item.dataVipis }}
               </td>
-              <td style="width: 10% !important;">
-                {{ item.test[2] }}
+              <td>
+                {{ item.numFind }}
               </td>
-              <td style="width: 10% !important;">
-                {{ item.test[3] }}
+              <td>
+                <vue-numeric
+                  v-model="item.sumFind"
+                  separator="space"
+                  :precision="2"
+                  decimal-separator="."
+                  output-type="number"
+                  :read-only="true"
+                />
               </td>
-              <td style="width: 7% !important;">
-                {{ item.test[4] }}
+              <td>
+                {{ item.platName }}
               </td>
-              <td style="width: 13% !important;">
-                {{ item.test[5] }}
+              <td>
+                {{ item.poluchName }}
               </td>
-              <td style="width: 7% !important;">
-                {{ item.test[6] }}
+              <td>
+                {{ item.fio }}
               </td>
-              <td style="width: 5% !important;">
-                {{ item.test[7] }}
+              <td>
+                {{ item.numVipis }}
               </td>
-              <td style="width: 12% !important;">
-                {{ item.test[8] }}
+              <td>
+                {{ item.comment }}
               </td>
-              <td style="width: 7% !important;">
-                {{ item.test[9] }}
+              <td>
+                {{ item.budCodElem }}
               </td>
-              <td style="width: 10% !important;">
-                {{ item.test[10] }}
+              <td>
+                {{ item.budElemName }}
               </td>
-              <td style="width: 8% !important;">
-                {{ item.test[11] }}
+              <td>
+                {{ item.budCfo }}
               </td>
             </tr>
+
+            <infinite-loading
+              :key="keyLoading"
+              spinner="spiral"
+              :identifier="infiniteIdOfRecordsData"
+              @infinite="findOutgoingPaymentDocuments"
+            >
+              <div slot="no-more" />
+              <div slot="no-results" />
+            </infinite-loading>
           </tbody>
         </template>
       </v-data-table>
@@ -149,6 +190,11 @@
         readonly
       />
     </div>
+    <filters-form-from-outgoing-and-incoming-document
+      ref="filtersFormFromOutgoingDocument"
+      @cancel="closeFiltersFormOutgoingDocument"
+      @saveFilters="saveFiltersFormOutgoingDocument"
+    />
     <user-notification ref="userNotification" />
     <profile-of-contractor ref="profileOfContractor" />
     <create-outgoing-payment-document
@@ -159,93 +205,100 @@
 </template>
 
 <script>
+import InfiniteLoading from 'vue-infinite-loading'
 import UserNotification from '@/components/information_window/UserNotification'
 import ProfileOfContractor from '@/views/vcrm/Payment/ProfileOfContractor/ProfileOfContractorPage'
 import createOutgoingPaymentDocument
   from '@/views/vcrm/Payment/OutgoingPaymentDocuments/Modal/CreateOutgoingPaymentDocumentsPage.vue'
+import FiltersFormFromOutgoingAndIncomingDocument from '@/components/filters/FiltersFormFromOutgoingAndIncomingDocument.vue'
+// import LoadingDialog from '~/components/loading_dialog/LoadingDialog'
 
 export default {
   name: 'OutgoingPaymentDocuments',
   components: {
     UserNotification,
     ProfileOfContractor,
-    createOutgoingPaymentDocument
+    createOutgoingPaymentDocument,
+    InfiniteLoading,
+    FiltersFormFromOutgoingAndIncomingDocument
+    // LoadingDialog
   },
   data() {
     return {
-      outgoingDocuments: [
-        {
-          test: ['test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8', 'test9', 'test10', 'test11', 'test12']
-        },
-        {
-          test: ['test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8', 'test9', 'test10', 'test11', 'test12']
-        },
-        {
-          test: ['test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8', 'test9', 'test10', 'test11', 'test12']
-        },
-        {
-          test: ['test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8', 'test9', 'test10', 'test11', 'test12']
-        }],
+      outgoingDocuments: [],
       headers: [
         {
           text: 'Дескр',
           value: 'descr',
-          width: '4%'
+          width: '4%',
+          sort: () => false
+
         },
         {
           text: 'Выписан',
-          value: 'released',
-          width: '6%'
+          value: 'dataVipis',
+          width: '6%',
+          sort: () => false
         },
         {
           text: 'Номер',
-          value: 'num',
-          width: '10%'
+          value: 'numFind',
+          width: '10%',
+          sort: () => false
         },
         {
           text: 'Сумма ',
-          value: 'summ',
-          width: '10%'
+          value: 'sumFind',
+          width: '10%',
+          sort: () => false
         },
         {
           text: 'Плательщик',
-          value: 'payer',
-          width: '7%'
+          value: 'platName',
+          width: '7%',
+          sort: () => false
         },
         {
           text: 'Получатель',
-          value: 'recipient',
-          width: '13%'
+          value: 'poluchName',
+          width: '13%',
+          sort: () => false
         },
         {
           text: 'Испольнитель',
-          value: 'executor',
-          width: '7%'
+          value: 'fio',
+          width: '7%',
+          sort: () => false
         },
         {
           text: '№ вып.',
-          value: 'numExtract',
-          width: '5%'
+          value: 'numVipis',
+          width: '5%',
+          sort: () => false
         },
         {
           text: 'Комментарий',
           value: 'comment',
-          width: '12%'
+          width: '12%',
+          sort: () => false
         },
         {
           text: 'Код элемента',
-          value: 'codeElmt',
-          width: '7%'
+          value: 'budCodElem',
+          width: '7%',
+          sort: () => false
         },
         {
           text: 'Элемент',
-          value: 'elmt',
-          width: '10%'
+          value: 'budElemName',
+          width: '10%',
+          sort: () => false
         },
         {
           text: 'ЦФО',
-          value: 'cfo',
-          width: '8%'
+          value: 'budCfo',
+          width: '8%',
+          sort: () => false
         }
       ],
       totalToSum: 0,
@@ -254,11 +307,35 @@ export default {
       rightClickMenu: false,
       xRightClickMenu: 0,
       yRightClickMenu: 0,
-      currentRowOfTableForContextMenu: null
+      currentRowOfTableForContextMenu: null,
+      sortBy: [],
+      sortDesc: [],
+      keyLoading: Math.random(),
+      infiniteIdOfRecordsData: 0,
+      pageOfRecords: 0,
+      isFiltersForFromPayDocsUsing: false
     }
   },
-
+  computed: {
+    handleSortData() {
+      const { sortDesc } = this
+      return this.sortBy.map((item, i) => {
+        return {
+          'direction': sortDesc[i] ? 'ASC' : 'DESC',
+          'property': item
+        }
+      })
+    }
+  },
+  mounted() {
+    this.init()
+  },
   methods: {
+    async init() {
+      await this.initData()
+      // await this.updateRecordsData()
+      // await this.findOutgoingPaymentDocuments()
+    },
     generateBudget() {
       this.$refs.userNotification.showUserNotification('success', 'Бюджет сформирован')
     },
@@ -285,6 +362,104 @@ export default {
 
     saveOutgoingDocument() {
       this.$refs.userNotification.showUserNotification('success', 'Новый исходящий платежный документ добавлен')
+    },
+
+    // updateRecordsData() {
+    //   this.pageOfRecords = 0
+    //   this.outgoingDocuments = []
+    //   this.infiniteIdOfRecordsData += 1
+    // },
+
+    // Инициализация данных формы
+    async initData(customParams) {
+      let params = {}
+      if (customParams) {
+        params = this.createStructureForOutgoingPaymentDocumentsInitDataProcedure(customParams)
+      } else {
+        params = this.createStructureForOutgoingPaymentDocumentsInitDataProcedure()
+      }
+      await this.$api.service.executeStashedFunction(params).catch((error) => {
+        alert(error)
+      })
+    },
+
+    updateSort(byDesc, event) {
+      if (byDesc === 'by') {
+        this.sortBy = event
+      } else if (byDesc === 'desc') {
+        this.sortDesc = event
+      }
+      this.pageOfRecords = 0
+      this.outgoingDocuments = []
+      this.keyLoading = Math.random()
+    },
+
+    async findOutgoingPaymentDocuments($state) {
+      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
+        this.getIdOfFromOutgoingDocumentsTable(), this.getCurrentUser.id)
+      const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
+      let filtersParams
+
+      if (response.length) {
+        filtersParams = JSON.parse(response[0].settingValue)
+      }
+
+      const searchCriterias = this.createCriteriasForFindOutgoingPaymentDocuments(filtersParams)
+      const params = {
+        searchCriterias,
+        page: this.pageOfRecords,
+        orders: this.handleSortData
+      }
+
+      this.isFiltersForFromPayDocsUsing = searchCriterias.length > 1
+
+      await this.fillResultsOfOutgoingDocuments(searchCriterias)
+
+      const { content } = await this.$api.payment.outgoingPayment.findPageBySearchCriterias(params)
+
+      if (content.length > 0) {
+        this.pageOfRecords += 1
+        this.outgoingDocuments.push(...content)
+
+        $state.loaded()
+      } else {
+        $state.complete()
+      }
+    },
+    // Функция открытия формы фильтров таблицы "Документы на оплату"
+    openFilterFormOutgoingDocument() {
+      this.$refs.filtersFormFromOutgoingDocument.openForm()
+    },
+    // Функция отработки события "Закрытие формы фильтров таблицы "Документов на оплату""
+    closeFiltersFormOutgoingDocument() {
+      console.log('close filters for from pay docs')
+    },
+    // Функция отбработки события "Закрытие формы фильтров таблицы "Документов на оплату" с сохранением"
+    saveFiltersFormOutgoingDocument() {
+      this.updateOutgoingDocs()
+      console.log('save filters for from pay docs')
+    },
+    // Обновление таблицы "Документы к оплате
+    updateOutgoingDocs() {
+      this.pageOfRecords = 0
+      this.outgoingDocuments = []
+      this.infiniteIdOfRecordsData += 1
+    },
+    async fillResultsOfOutgoingDocuments(searchCriterias) {
+      const dataForResults = this.createCriteriasToGetResultsOfContentForOutgoingPayment(searchCriterias)
+      const response = await this.$api.payment.outgoingPayment.findDocumentsWithGroupBy(dataForResults)
+
+      if (response.length > 0) {
+        const results = response[0]
+        this.totalToSum = this.numberToSum(results.sum_sumFind)
+      } else {
+        this.totalToSum = 0
+      }
+    },
+    // Заполнение поля "Примечание" под таблице документов на оплату примечанием выбранного документа
+    fillAssignmentAndCollaboratorOfCurrentRow(item) {
+      this.collaborator = item.fioSoisp
+      this.appointment = item.nazn
     }
   }
 }
@@ -332,6 +507,7 @@ export default {
 #outgoing-payment-documents-table {
   border-collapse: collapse;
   width: 100%;
+  height: 640px;
 }
 
 #outgoing-payment-documents-table table {
