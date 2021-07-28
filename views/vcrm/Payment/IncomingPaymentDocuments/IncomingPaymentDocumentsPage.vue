@@ -16,20 +16,85 @@
     <div class="incoming-payment-documents-row">
       <v-data-table
         id="incoming-payment-documents-data-table"
-        v-model="dataTableSelectedRows"
+        height="690"
         :headers="dataTableHeaders"
         fixed-header
         :items="dataTableItems"
-        height="690"
-        item-key="id"
-        :show-select="true"
+        :show-select="false"
         :single-select="false"
         disable-pagination
         hide-default-footer
-        no-data-text=""
         class="elevation-1"
-        @contextmenu:row="showContextMenu"
-      />
+        @update:sort-by="updateSort('by', $event)"
+        @update:sort-desc="updateSort('desc', $event)"
+      >
+        <template #body="{ items }">
+          <tbody>
+            <tr
+              v-for="item in items"
+              :key="item.id"
+              :value="item"
+              @contextmenu="showContextMenu($event, item)"
+              @click="fillFooterParamsOfCurrentRow(item)"
+            >
+              <td>
+                {{ item.descr }}
+              </td>
+              <td>
+                {{ item.dataVipis }}
+              </td>
+              <td>
+                {{ item.numFind }}
+              </td>
+              <td>
+                <vue-numeric
+                  slot="endBalance"
+                  v-model.number="item.sumFind"
+                  :read-only="true"
+                  separator="space"
+                  :precision="2"
+                  decimal-separator="."
+                  output-type="number"
+                />
+              </td>
+              <td>
+                {{ item.platName }}
+              </td>
+              <td>
+                {{ item.poluchName }}
+              </td>
+              <td>
+                {{ item.fio }}
+              </td>
+              <td>
+                {{ item.numVipis }}
+              </td>
+              <td>
+                {{ item.comment }}
+              </td>
+              <td>
+                {{ item.budCodElem }}
+              </td>
+              <td>
+                {{ item.budElem }}
+              </td>
+              <td>
+                {{ item.budCfo }}
+              </td>
+            </tr>
+
+            <infinite-loading
+              :key="keyLoading"
+              spinner="spiral"
+              :identifier="infiniteIdOfRecordsData"
+              @infinite="findIncomingPaymentDocuments"
+            >
+              <div slot="no-more" />
+              <div slot="no-results" />
+            </infinite-loading>
+          </tbody>
+        </template>
+      </v-data-table>
       <v-menu
         v-model="rightClickMenu"
         :position-x="xRightClickMenu"
@@ -105,6 +170,7 @@
 </template>
 
 <script>
+import InfiniteLoading from 'vue-infinite-loading'
 import UserNotification from '@/components/information_window/UserNotification'
 import ProfileOfContractor from '@/views/vcrm/Payment/ProfileOfContractor/ProfileOfContractorPage'
 import createIncomingPaymentDocument from '@/views/vcrm/Payment/IncomingPaymentDocuments/Modal/CreateIncomingPaymentDocument.vue'
@@ -113,6 +179,7 @@ export default {
   name: 'IncomingPaymentDocumentsPage',
 
   components: {
+    InfiniteLoading,
     UserNotification,
     ProfileOfContractor,
     createIncomingPaymentDocument
@@ -120,116 +187,83 @@ export default {
 
   data() {
     return {
-      dataTableSelectedRows: [],
+      loadingType: {},
+
       dataTableHeaders: [
         {
           text: 'Дескр',
           value: 'descr',
-          width: '60px'
+          width: '60px',
+          sort: () => false
         },
         {
           text: 'Выписан',
           value: 'dataVipis',
-          width: '60px'
+          width: '60px',
+          sort: () => false
         },
         {
           text: 'Номер',
           value: 'numFind',
-          width: '60px'
+          width: '60px',
+          sort: () => false
         },
         {
           text: 'Сумма',
           value: 'sumFind',
-          width: '60px'
+          width: '60px',
+          sort: () => false
         },
         {
           text: 'Плательщик',
           value: 'platName',
-          width: '60px'
+          width: '60px',
+          sort: () => false
         },
         {
           text: 'Получатель',
           value: 'poluchName',
-          width: '60px'
+          width: '60px',
+          sort: () => false
         },
         {
           text: 'Исполнитель',
           value: 'fio',
-          width: '60px'
+          width: '60px',
+          sort: () => false
         },
         {
           text: '№ вып',
-          value: 'numOfDoc',
-          width: '60px'
+          value: 'numVipis',
+          width: '60px',
+          sort: () => false
         },
         {
           text: 'Комментарий',
           value: 'comment',
-          width: '60px'
+          width: '60px',
+          sort: () => false
         },
         {
           text: 'Код элем.',
-          value: 'bud_celem',
-          width: '60px'
+          value: 'budCodElem',
+          width: '60px',
+          sort: () => false
         },
         {
           text: 'Элемент',
-          value: 'bud_nelem',
-          width: '60px'
+          value: 'budElem',
+          width: '60px',
+          sort: () => false
         },
         {
           text: 'ЦФО',
-          value: 'bud_ncfo',
-          width: '60px'
+          value: 'budCfo',
+          width: '60px',
+          sort: () => false
         }
       ],
-      dataTableItems: [
-        {
-          id: 1,
-          descr: 'test1',
-          dataVipis: 'test1',
-          numFind: 'test1',
-          sumFind: 'test1',
-          platName: 'test1',
-          poluchName: 'test1',
-          fio: 'test1',
-          numOfDoc: 'test1',
-          comment: 'test1',
-          bud_celem: 'test1',
-          bud_nelem: 'test1',
-          bud_ncfo: 'test1'
-        },
-        {
-          id: 2,
-          descr: 'test2',
-          dataVipis: 'test2',
-          numFind: 'test2',
-          sumFind: 'test2',
-          platName: 'test2',
-          poluchName: 'test2',
-          fio: 'test2',
-          numOfDoc: 'test2',
-          comment: 'test2',
-          bud_celem: 'test2',
-          bud_nelem: 'test2',
-          bud_ncfo: 'test2'
-        },
-        {
-          id: 3,
-          descr: 'test3',
-          dataVipis: 'test3',
-          numFind: 'test3',
-          sumFind: 'test3',
-          platName: 'test3',
-          poluchName: 'test3',
-          fio: 'test3',
-          numOfDoc: 'test3',
-          comment: 'test3',
-          bud_celem: 'test3',
-          bud_nelem: 'test3',
-          bud_ncfo: 'test3'
-        }
-      ],
+      dataTableItems: [],
 
       sumOfDataTableItems: 0,
 
@@ -240,11 +274,39 @@ export default {
       rightClickMenu: false,
       xRightClickMenu: 0,
       yRightClickMenu: 0,
-      currentRowOfTableForContextMenu: null
+      currentRowOfTableForContextMenu: null,
+
+      keyLoading: Math.random(),
+      infiniteIdOfRecordsData: 0,
+      pageOfRecords: 0,
+
+      sortBy: [],
+      sortDesc: []
     }
   },
 
+  computed: {
+    handleSortData() {
+      const { sortDesc } = this
+      return this.sortBy.map((item, i) => {
+        return {
+          'direction': sortDesc[i] ? 'ASC' : 'DESC',
+          'property': item
+        }
+      })
+    }
+  },
+
+  mounted() {
+    this.init()
+  },
+
   methods: {
+    async init() {
+      await this.initData()
+      await this.fillResultsOfDataTableItems()
+    },
+
     showContextMenu(event, item) {
       event.preventDefault()
       this.rightClickMenu = false
@@ -265,6 +327,68 @@ export default {
     },
     saveIncomingDocument() {
       this.$refs.userNotification.showUserNotification('success', 'Новый входящий документ добавлен')
+    },
+
+    async initData() {
+      const params = this.createStructureForInitIncomingPaymentDocument()
+      await this.$api.service.executeStashedFunction(params).catch((error) => {
+        alert(error)
+      })
+    },
+
+    fillFooterParamsOfCurrentRow(item) {
+      this.coExecutor = item.fioSoisp
+      this.purpose = item.nazn
+    },
+
+    updateIncomingDocuments() {
+      this.pageOfRecords = 0
+      this.dataTableItems = []
+      this.infiniteIdOfRecordsData += 1
+    },
+
+    updateSort(byDesc, event) {
+      if (byDesc === 'by') {
+        this.sortBy = event
+      } else if (byDesc === 'desc') {
+        this.sortDesc = event
+      }
+      this.pageOfRecords = 0
+      this.dataTableItems = []
+      this.keyLoading = Math.random()
+    },
+
+    async findIncomingPaymentDocuments($state) {
+      const searchCriterias = this.createCriteriasToSearchIncomingPaymentDocuments()
+      const params = {
+        searchCriterias,
+        page: this.pageOfRecords,
+        orders: this.handleSortData,
+        size: 40
+      }
+      const { content } = await this.$api.payment.incomingPaymentDocuments.findPageBySearchCriteriaList(params)
+
+      if (content.length > 0) {
+        this.pageOfRecords += 1
+        this.dataTableItems.push(...content)
+
+        $state.loaded()
+      } else {
+        $state.complete()
+      }
+    },
+
+    async fillResultsOfDataTableItems() {
+      const searchCriterias = this.createCriteriasToSearchIncomingPaymentDocuments()
+      const paramsForResults = this.createCriteriasToGetResultsOfIncomingPaymentDocuments(searchCriterias)
+      const response = await this.$api.payment.incomingPaymentDocuments.findDocumentsWithGroupBy(paramsForResults)
+
+      if (response.length > 0) {
+        const results = response[0]
+        this.sumOfDataTableItems = this.numberToSum(results.sum_sumFind)
+      } else {
+        this.sumOfDataTableItems = 0
+      }
     }
   }
 }

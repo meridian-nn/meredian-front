@@ -110,7 +110,8 @@
               ВНИМАНИЕ!
             </v-card-title>
             <v-card-text class="text-h6">
-              После перехода к новому периоду все карточки швей текущего периода будут удалены без возможности восстановления! Перейти к новому периоду?
+              После перехода к новому периоду все карточки швей текущего периода будут удалены без возможности
+              восстановления! Перейти к новому периоду?
             </v-card-text>
             <v-card-actions>
               <v-spacer />
@@ -587,13 +588,7 @@ export default {
 
     // Инициализация данных формы
     async initData(customParams) {
-      let params = {}
-      if (customParams) {
-        params = this.createStructureForManufacturingInitDataProcedure(customParams)
-      } else {
-        params = this.createStructureForManufacturingInitDataProcedure(this.monthOfProizv)
-      }
-
+      const params = this.createStructureForManufacturingInitDataProcedure(customParams || this.monthOfProizv)
       await this.$api.service.executeStashedFunction(params).catch((error) => {
         alert(error)
       })
@@ -657,7 +652,7 @@ export default {
         })
 
         if (response &&
-           response.length) {
+          response.length) {
           curInsTmk = response[0]
         }
 
@@ -684,8 +679,10 @@ export default {
       }
     },
 
-    closeRecordsOfWorkOnOrder() {
+    async closeRecordsOfWorkOnOrder() {
       this.recordsSelectedRows = []
+      await this.initData()
+      await this.updateRecordsData()
     },
 
     updateInfo() {

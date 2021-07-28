@@ -1404,7 +1404,7 @@ export default {
     },
 
     async fillResultsOfDocumentsFromPay(searchCriterias) {
-      const dataForResults = this.createCriteriasToGetResultsOfContent(searchCriterias)
+      const dataForResults = this.createCriteriasToGetResultsOfDocsFromPay(searchCriterias)
       const response = await this.$api.payment.docOplForPay.findDocumentsWithGroupBy(dataForResults)
 
       if (response.length > 0) {
