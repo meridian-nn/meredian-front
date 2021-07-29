@@ -31,6 +31,51 @@
               </ul>
             </v-col>
           </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <span class="headline">12.07.2021</span>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <ul>
+                <li> Добавлена форма "Запись работы по заказу" </li>
+              </ul>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <span class="headline">19.07.2021</span>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <ul>
+                <li> Доработка добавленных форм </li>
+              </ul>
+              <ul>
+                <li> Уткин Д. - Добавлена форма "Журнал заказов на пошив" </li>
+              </ul>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <span class="headline">25.07.2021</span>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <ul>
+                <li> Добавлена форма печати отчетов на форму "Журнал заказов на пошив" </li>
+              </ul>
+            </v-col>
+          </v-row>
         </v-container>
       </div>
     </v-card>

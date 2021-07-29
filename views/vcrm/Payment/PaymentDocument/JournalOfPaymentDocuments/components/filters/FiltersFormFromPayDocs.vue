@@ -87,26 +87,27 @@
             </v-col>
           </v-row>
 
-          <v-row>
-            <v-col cols="12">
+          <v-row class="date-filter">
+            <v-col cols="6">
               <v-text-field
-                v-model="filterItem.prim"
-                :clearable="true"
-                outlined
-                label="Примечание"
-                hide-details="auto"
-              />
-            </v-col>
-          </v-row>
-
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                v-model="filterItem.date"
+                v-model="filterItem.dateFrom"
                 :clearable="true"
                 type="date"
                 outlined
+                :max="filterItem.dateTo"
                 label="Дата документа начиная с"
+                :hint="filterItem.dateFrom > filterItem.dateTo ? `'Дата документа начиная с' должна быть меньше 'Даты документа заканчивая'` : ''"
+                persistent-hint
+              />
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                v-model="filterItem.dateTo"
+                :clearable="true"
+                type="date"
+                :min="filterItem.dateFrom"
+                outlined
+                label="Дата документа заканчивая"
               />
             </v-col>
           </v-row>
@@ -151,6 +152,7 @@
         <v-btn
           color="blue darken-1"
           text
+          :disabled="filterItem.dateFrom > filterItem.dateTo"
           @click="saveFilters"
         >
           Применить фильтры
@@ -185,8 +187,8 @@ export default {
         executorName: '',
         'myOrg.id': null,
         creatorName: '',
-        prim: '',
-        date: null
+        dateFrom: null,
+        dateTo: null
       },
 
       // Значение фильтра по полю "К оплате"
@@ -219,7 +221,6 @@ export default {
       }
     }
   },
-
   methods: {
     init() {
       this.elementId = this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs()
@@ -286,8 +287,8 @@ export default {
         }
       }
 
-      if (!this.filterItem.date) {
-        this.filterItem.date = this.getDateForCriteriasToSearchDocsFromPay().toISOString().substr(0, 10)
+      if (!this.filterItem.dateFrom) {
+        this.filterItem.dateFrom = this.getDateForCriteriasToSearchDocsFromPay().toISOString().substr(0, 10)
       }
     },
 
@@ -366,5 +367,7 @@ export default {
   padding-top: 15px;
   padding-left: 5px;
 }
-
+.date-filter .v-messages__message {
+  color: red;
+}
 </style>

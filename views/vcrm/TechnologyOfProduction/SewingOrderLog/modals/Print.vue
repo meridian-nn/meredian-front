@@ -24,6 +24,13 @@
             Выполнить
           </v-btn>
 
+          <v-btn
+            small
+            @click="downloadReestPays"
+          >
+            Скачать реестр платежей
+          </v-btn>
+
           <v-btn small>
             Microsoft EXCEl
           </v-btn>
@@ -163,6 +170,17 @@ export default {
         num_plan: '',
         num_zkz: ''
       }
+    }
+  },
+
+  methods: {
+    downloadReestPays() {
+      const params = {
+        format: 'HTML',
+        pdReestrPays: '2021-06-30'
+      }
+
+      this.downloadReestPaysReport(params.format, params.pdReestrPays)
     }
   }
 }

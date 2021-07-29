@@ -110,7 +110,8 @@
               ВНИМАНИЕ!
             </v-card-title>
             <v-card-text class="text-h6">
-              После перехода к новому периоду все карточки швей текущего периода будут удалены без возможности восстановления! Перейти к новому периоду?
+              После перехода к новому периоду все карточки швей текущего периода будут удалены без возможности
+              восстановления! Перейти к новому периоду?
             </v-card-text>
             <v-card-actions>
               <v-spacer />
@@ -139,6 +140,8 @@
         </v-btn>
       </div>
     </div>
+
+    <loading-dialog ref="loadingDialog" />
 
     <div class="records-of-work-by-cards-row">
       <div class="records-of-work-by-cards-label">
@@ -254,7 +257,7 @@
                   {{ item.posledCode }}
                 </td>
                 <td>
-                  {{ item.namePosled }}
+                  {{ item.modelName }}
                 </td>
                 <td>
                   {{ item.colvoMc }}
@@ -306,6 +309,7 @@
 import InfiniteLoading from 'vue-infinite-loading'
 import RecordsOfWorkOnOrder from '@/views/vcrm/TechnologyOfProduction/RecordsOfWorkOnOrder/RecordsOfWorkOnOrderPage.vue'
 import UserNotification from '~/components/information_window/UserNotification'
+import LoadingDialog from '~/components/loading_dialog/LoadingDialog'
 
 export default {
   name: 'RecordsOfWorkByCards',
@@ -313,7 +317,8 @@ export default {
   components: {
     UserNotification,
     InfiniteLoading,
-    RecordsOfWorkOnOrder
+    RecordsOfWorkOnOrder,
+    LoadingDialog
   },
 
   data() {
@@ -410,7 +415,7 @@ export default {
         },
         {
           text: 'Наименование ТП',
-          value: 'namePosled',
+          value: 'modelName',
           width: '140px',
           sort: () => false
         },
@@ -539,6 +544,7 @@ export default {
       this.chosenOrgId = this.organizations[1].client_id
       await this.findMonthOfProizv()
       await this.initData()
+      await this.updateRecordsData()
     },
 
     // Поиск организации для текущего сотрудника
@@ -582,14 +588,8 @@ export default {
 
     // Инициализация данных формы
     async initData(customParams) {
-      let params = {}
-      if (customParams) {
-        params = this.createStructureForManufacturingInitDataProcedure(customParams)
-      } else {
-        params = this.createStructureForManufacturingInitDataProcedure(this.monthOfProizv)
-      }
-
-      await this.$api.service.executedStashedFunction(params).catch((error) => {
+      const params = this.createStructureForManufacturingInitDataProcedure(customParams || this.monthOfProizv)
+      await this.$api.service.executeStashedFunction(params).catch((error) => {
         alert(error)
       })
     },
@@ -652,7 +652,7 @@ export default {
         })
 
         if (response &&
-           response.length) {
+          response.length) {
           curInsTmk = response[0]
         }
 
@@ -679,8 +679,10 @@ export default {
       }
     },
 
-    closeRecordsOfWorkOnOrder() {
+    async closeRecordsOfWorkOnOrder() {
       this.recordsSelectedRows = []
+      await this.initData()
+      await this.updateRecordsData()
     },
 
     updateInfo() {
@@ -721,6 +723,7 @@ export default {
     // Переход к новому периоду
     async goToNewPeriod() {
       this.goToNewPeriodDialog = false
+      this.$refs.loadingDialog.showLoadingDialog('Производится переход к новому периоду, подождите...')
       const paramsForProcedure = {}
 
       if (this.variablesOfForm.mesAnfb === 12) {
@@ -732,23 +735,34 @@ export default {
       }
 
       const params = this.createStructureForTechZarplSetPeriod(this.variablesOfForm, paramsForProcedure)
-      await this.$api.service.executedStashedFunction(params).catch((error) => {
+      await this.$api.service.executeStashedFunction(params).catch((error) => {
         alert(error)
+        this.$refs.loadingDialog.closeLoadingDialog()
       })
 
       await this.findMonthOfProizv()
       await this.initData()
       await this.updateRecordsData()
 
-      this.$refs.userNotification.showUserNotification('success', 'Переход к новому периоду произведен')
+      this.$refs.userNotification.showUserNotification('success', 'Переход к новому периоду выполнен!')
+      this.$refs.loadingDialog.closeLoadingDialog()
     },
 
     addProductionByBranch() {
       this.$refs.userNotification.showUserNotification('success', 'Выработка по филиалу')
     },
 
-    recalculationOfOutputForMonth() {
-      this.$refs.userNotification.showUserNotification('success', 'Пересчет выработки за месяц')
+    // Пересчет выработки за месяц
+    async recalculationOfOutputForMonth() {
+      this.$refs.loadingDialog.showLoadingDialog('Производится пересчет выработки за месяц, подождите...')
+      const params = this.createStructureForTechZarAllPereschet(this.variablesOfForm)
+      await this.$api.service.executeStashedFunction(params).catch((error) => {
+        alert(error)
+        this.$refs.loadingDialog.closeLoadingDialog()
+      })
+      await this.updateRecordsData()
+      this.$refs.userNotification.showUserNotification('success', 'Пересчет выработки за месяц выполнен!')
+      this.$refs.loadingDialog.closeLoadingDialog()
     },
 
     updateSort(byDesc, event) {

@@ -39,5 +39,7 @@ For detailed explanation on how things work, check out [Nuxt.js docs](https://nu
 
 - plugins/user-access - плагин для работы с ролями пользователей
 
-- plugins/params-for-requests - плагин для создания параметров для вызова хранимых процедур из бд через методы API
+- plugins/params-for-stored-procedures-calls-from-db.js - плагин для создания параметров для вызова хранимых процедур из бд через методы API
+
+- plugins/jasperserver.js - плагин для работы с JasperServer
 

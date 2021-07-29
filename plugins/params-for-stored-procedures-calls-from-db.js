@@ -45,7 +45,7 @@ Vue.mixin({
 
     createStructureForTechTmkUpdData(chosenRecord, variablesOfForm) {
       if (!chosenRecord ||
-         !variablesOfForm) {
+        !variablesOfForm) {
         return false
       }
 
@@ -89,7 +89,7 @@ Vue.mixin({
 
     createStructureForTechZarplSetPeriod(variablesOfForm, paramsForProcedure) {
       if (!variablesOfForm ||
-          !paramsForProcedure) {
+        !paramsForProcedure) {
         return false
       }
 
@@ -107,7 +107,63 @@ Vue.mixin({
         raskroy: 0,
         proizv_id: variablesOfForm.proizvAnfb
       }
-    }
-  }
+    },
 
+    createStructureForTechZarAllPereschet(variablesOfForm) {
+      return {
+        params: this.createParamsForTechZarAllPereschet(variablesOfForm),
+        procName: this.$api.manufacturing.getTechZarAllPereschetName()
+      }
+    },
+
+    createParamsForTechZarAllPereschet(variablesOfForm) {
+      return {
+        firma_id: variablesOfForm.proizvAnfb === 146 ? 123 : variablesOfForm.orgAnfb,
+        proizv_id: variablesOfForm.proizvAnfb === 146 ? 146 : variablesOfForm.proizvAnfb,
+        month: variablesOfForm.mesAnfb,
+        year: variablesOfForm.godAnfb,
+        ceh_id: 6
+      }
+    },
+
+    createStructureForInitIncomingPaymentDocument() {
+      return {
+        params: this.createParamsForInitIncomingPaymentDocument(),
+        procName: this.$api.payment.incomingPaymentDocuments.getInitIncomingPaymentDocumentProcedure()
+      }
+    },
+
+    createParamsForInitIncomingPaymentDocument() {
+      return {
+        vid: 1,
+        my_descr: 'Larisa',
+        data1: '2020-09-01',
+        data2: '2020-09-30',
+        user_id: this.getCurrentUser.id
+      }
+    },
+
+    createStructureForOutgoingPaymentDocumentsInitDataProcedure(paramsForRequest) {
+      return {
+        params: this.createParamsForOutgoingPaymentDocumentsInitDataProcedure(paramsForRequest),
+        procName: this.$api.payment.outgoingPayment.getOutgoingPaymentDocumentsInitDataProcedureName()
+      }
+    },
+
+    createParamsForOutgoingPaymentDocumentsInitDataProcedure(paramsForRequest) {
+      const params = {
+        user_id: this.getCurrentUser.id,
+        vid: 1,
+        data1: '2020-09-01',
+        data2: '2020-09-30'
+      }
+      if (paramsForRequest) {
+        params.vid = paramsForRequest.vid
+        params.data1 = paramsForRequest.data1
+        params.data2 = paramsForRequest.data2
+      }
+      return params
+    }
+
+  }
 })

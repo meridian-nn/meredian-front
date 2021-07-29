@@ -525,7 +525,33 @@ export const factory = send => ({
             findById(id) {
                 return send('GET', `/oper/dir/paymentType/findById/${id}`)
             }
-        }
+        },
+
+        incomingPaymentDocuments: {
+            getInitIncomingPaymentDocumentProcedure() {
+                return 'dbo.init_incoming_payment_document'
+            },
+
+            findPageBySearchCriteriaList(params) {
+                return send('POST', `/oper/incomingPaymentDocument/findPageBySearchCriteriaList`, params);
+            },
+
+            findDocumentsWithGroupBy(params) {
+                return send('POST', `/oper/incomingPaymentDocument/groupBy`, params)
+            }
+        },
+
+        outgoingPayment: {
+            getOutgoingPaymentDocumentsInitDataProcedureName() {
+                return 'dbo.init_outgoing_payment_document'
+            },
+            findPageBySearchCriterias(params) {
+                return send('POST', `/oper/outgoingPaymentDocument/findPageBySearchCriteriaList`, params)
+            },
+            findDocumentsWithGroupBy(params) {
+                return send('POST', `/oper/outgoingPaymentDocument/groupBy`, params)
+            },
+        },
     },
 
     uiSettings: {
@@ -633,16 +659,20 @@ export const factory = send => ({
             return 'dbo.tech_zarpl_set_period'
         },
 
+        getTechZarAllPereschetName() {
+            return 'dbo.tech_zar_all_pereschet'
+        },
+
         manufacturingRequestJournalFindAll() {
-          return send('GET', '/oper/manufacturing/manufacturingRequestJournal/findAll')
+            return send('GET', '/oper/manufacturing/manufacturingRequestJournal/findAll')
         },
 
         manufacturingRequestJournalRemove(params) {
-          return send('GET', '/oper/manufacturing/manufacturingRequestJournal/save', params)
+            return send('GET', '/oper/manufacturing/manufacturingRequestJournal/save', params)
         },
 
         manufacturingRequestJournalEdit(params) {
-          return send('GET', '/oper/manufacturing/manufacturingRequestJournal/delete', params)
+            return send('GET', '/oper/manufacturing/manufacturingRequestJournal/delete', params)
         }
     },
 
@@ -663,7 +693,7 @@ export const factory = send => ({
 
         // Функция производит вызов хранимой процедуры в бд
         // без возврата набора данных
-        executedStashedFunction(params) {
+        executeStashedFunction(params) {
             return send('POST', '/sys/storedProcedure/executeProcedure', params)
         }
     }
