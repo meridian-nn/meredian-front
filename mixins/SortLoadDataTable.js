@@ -29,6 +29,18 @@ export default ({
       this.pageData = 0
       // Очистить данные
       this.keyLoading = Math.random()
+    },
+
+    infiniteHandler($state, api) {
+      api.then(({ data }) => {
+        if (data.hits.length) {
+          this.page += 1
+          this.list.push(...data.hits)
+          $state.loaded()
+        } else {
+          $state.complete()
+        }
+      })
     }
   }
 })

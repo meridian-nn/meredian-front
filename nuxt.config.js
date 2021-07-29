@@ -50,7 +50,8 @@ export default {
         { src: '~plugins/vue-tables-2.js', ssr: false },
         { src: '~plugins/vue-json-excel.js', ssr: false },
         { src: '~plugins/vue-html-to-paper.js', ssr: false },
-        { src: '~/plugins/pluralize', ssr: false }
+        { src: '~/plugins/pluralize', ssr: false },
+        { src: '~/plugins/exel-table', ssr: false }
         // { src: '~/plugins/bootstrap', mode: 'client' }
     ],
 
