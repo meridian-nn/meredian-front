@@ -76,6 +76,20 @@
               </ul>
             </v-col>
           </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <span class="headline">30.07.2021</span>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <ul>
+                <li> Уткин Д. - Добавлены формы "Редактирование заказа на дополнительную работу" и  "Редактирование заказа на пошив"</li>
+              </ul>
+            </v-col>
+          </v-row>
         </v-container>
       </div>
     </v-card>

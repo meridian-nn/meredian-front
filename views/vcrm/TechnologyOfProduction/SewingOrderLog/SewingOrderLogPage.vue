@@ -64,15 +64,15 @@
       <div class="sewing-order-log-page__table">
         <v-data-table
           id="sewing-order-log-page-records-table"
-          v-model="selected"
+          v-model="sewingOrderTableSelectedRecords"
           height="650"
           fixed-header
           show-select
           :single-select="false"
           disable-pagination
           hide-default-footer
-          :headers="headers"
-          :items="man"
+          :headers="sewingOrderTableHeaders"
+          :items="sewingOrderTableRecords"
           calculate-widths
           :item-class="typeOrder"
           @contextmenu:row="rightClickHandler"
@@ -106,9 +106,9 @@
         </v-data-table>
 
         <v-menu
-          v-model="fromPayMenu"
-          :position-x="xFromPayMenu"
-          :position-y="yFromPayMenu"
+          v-model="contextMenu"
+          :position-x="xContextMenu"
+          :position-y="yContextMenu"
           absolute
           offset-y
         >
@@ -116,6 +116,11 @@
             <v-list-item>
               <v-list-item-title>
                 Сформировать заказ на доп.работу
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="deleteRecord">
+              <v-list-item-title>
+                Удалить
               </v-list-item-title>
             </v-list-item>
           </v-list>
@@ -166,10 +171,16 @@
       </div>
     </div>
 
-    <modal-edit
+    <modal-edit-tailoring
       :value="modals.edit"
-      @close="closeEditModal"
-      @save="saveEditForm"
+      @close="closeModalEditTailoring"
+      @save="saveModalEditTailoring"
+    />
+
+    <modal-edit-work
+      :value="modals.editAdd"
+      @close="closeModalEditWork"
+      @save="saveModalEditWork"
     />
 
     <modal-confirm
@@ -184,19 +195,25 @@
     />
 
     <user-notification ref="userNotification" />
+    <message ref="message" />
   </div>
 </template>
 
 <script>
 import UserNotification from '@/components/information_window/UserNotification'
-import ModalEdit from './modals/Edit'
+import Message from '@/components/message/Message'
+import ModalEditOrderForTailoring from './modals/EditOrderForTailoring'
+import ModalEditOrderForAdditionalWork from './modals/EditOrderForAdditionalWork'
 import ModalConfirm from './modals/Confirm'
 import ModalPrint from './modals/Print'
+
 export default {
   name: 'SewingOrderLogPage',
 
   components: {
-    ModalEdit,
+    ModalEditTailoring: ModalEditOrderForTailoring,
+    ModalEditWork: ModalEditOrderForAdditionalWork,
+    Message,
     ModalConfirm,
     ModalPrint,
     UserNotification
@@ -215,16 +232,18 @@ export default {
       infiniteIdData: 0,
       keyLoading: Math.random(),
       pageOfFromPayData: 0,
-      fromPayMenu: false,
-      xFromPayMenu: 0,
-      yFromPayMenu: 0,
-      selected: [],
+      contextMenu: false,
+      xContextMenu: 0,
+      yContextMenu: 0,
+      currentRowOfTableForContextMenu: null,
       modals: {
         edit: false,
+        editAdd: false,
         confirm: false,
         print: false
       },
-      headers: [
+      sewingOrderTableSelectedRecords: [],
+      sewingOrderTableHeaders: [
         {
           text: 'План',
           value: 'numPlanpsv',
@@ -398,7 +417,7 @@ export default {
           width: '70px'
         }
       ],
-      man: [
+      sewingOrderTableRecords: [
         {
           'codGra': 'string',
           'colvo': 0,
@@ -415,7 +434,7 @@ export default {
           'gotovMlog': 0,
           'gotovTo': 0,
           'gotovTp': 0,
-          'id': 0,
+          'id': 1,
           'ispId': 0,
           'kontrId': 0,
           'korp': 0,
@@ -432,7 +451,7 @@ export default {
           'numPlanpsv': 0,
           'numSvod': 0,
           'numZaivk': 'string',
-          'numZkzpsv': 0,
+          'numZkzpsv': 110,
           'numdog': 'string',
           'orgId': 0,
           'otdId': 0,
@@ -454,7 +473,8 @@ export default {
           'tkanData': '2021-07-19T16:13:04.689Z',
           'userId': 0,
           'zkzpsvId': 0,
-          'zkzpsvOsn': 0
+          'zkzpsvOsn': 0,
+          'flagRet': 0
         },
 
         {
@@ -463,7 +483,7 @@ export default {
           'dataGotovFabr': '2021-07-19T16:13:04.689Z',
           'dataRaskroyFact': '2021-07-19T16:13:04.689Z',
           'dataZkzpsv': '2021-07-19T16:13:04.689Z',
-          'dopWork': 0,
+          'dopWork': 1,
           'factData': '2021-07-19T16:13:04.689Z',
           'fioIsp': 'string',
           'flagDel': 0,
@@ -473,7 +493,7 @@ export default {
           'gotovMlog': 0,
           'gotovTo': 0,
           'gotovTp': 0,
-          'id': 0,
+          'id': 2,
           'ispId': 0,
           'kontrId': 0,
           'korp': 0,
@@ -490,7 +510,7 @@ export default {
           'numPlanpsv': 0,
           'numSvod': 0,
           'numZaivk': 'string',
-          'numZkzpsv': 0,
+          'numZkzpsv': 120,
           'numdog': 'string',
           'orgId': 0,
           'otdId': 0,
@@ -512,7 +532,126 @@ export default {
           'tkanData': '2021-07-19T16:13:04.689Z',
           'userId': 0,
           'zkzpsvId': 0,
-          'zkzpsvOsn': 0
+          'zkzpsvOsn': 0,
+          'flagRet': 1
+        },
+
+        {
+          'codGra': 'string',
+          'colvo': 0,
+          'dataGotovFabr': '2021-07-19T16:13:04.689Z',
+          'dataRaskroyFact': '2021-07-19T16:13:04.689Z',
+          'dataZkzpsv': '2021-07-19T16:13:04.689Z',
+          'dopWork': 1,
+          'factData': '2021-07-19T16:13:04.689Z',
+          'fioIsp': 'string',
+          'flagDel': 0,
+          'gosKontrakt': 'string',
+          'gostTu': 'string',
+          'gotovKonfKarta': 0,
+          'gotovMlog': 0,
+          'gotovTo': 0,
+          'gotovTp': 0,
+          'id': 3,
+          'ispId': 0,
+          'kontrId': 0,
+          'korp': 0,
+          'mcId': 0,
+          'mcIdRaskroy': 0,
+          'nameKontr': 'string',
+          'nameMc': 'string',
+          'nameMcRaskroy': 'string',
+          'nameOrg': 'string',
+          'nameOrgRaskroy': 'string',
+          'nameProizv': 'string',
+          'nameRaskroy': 'string',
+          'numOsn': 0,
+          'numPlanpsv': 0,
+          'numSvod': 1,
+          'numZaivk': 'string',
+          'numZkzpsv': 130,
+          'numdog': 'string',
+          'orgId': 0,
+          'otdId': 0,
+          'otvIsp': 'string',
+          'parent': 0,
+          'planData': '2021-07-19T16:13:04.689Z',
+          'planDataManager': '2021-07-19T16:13:04.689Z',
+          'prEt': 0,
+          'prGotov': 0,
+          'prQuality': 0,
+          'prb': 0,
+          'primProv': 'string',
+          'procVip': 0,
+          'proizvId': 0,
+          'proizvRaskroy': 0,
+          'sbst': 0,
+          'socrName': 'string',
+          'spplnId': 0,
+          'tkanData': '2021-07-19T16:13:04.689Z',
+          'userId': 0,
+          'zkzpsvId': 0,
+          'zkzpsvOsn': 0,
+          'flagRet': 2
+        },
+
+        {
+          'codGra': 'string',
+          'colvo': 0,
+          'dataGotovFabr': '2021-07-19T16:13:04.689Z',
+          'dataRaskroyFact': '2021-07-19T16:13:04.689Z',
+          'dataZkzpsv': '2021-07-19T16:13:04.689Z',
+          'dopWork': 1,
+          'factData': '2021-07-19T16:13:04.689Z',
+          'fioIsp': 'string',
+          'flagDel': 0,
+          'gosKontrakt': 'string',
+          'gostTu': 'string',
+          'gotovKonfKarta': 0,
+          'gotovMlog': 0,
+          'gotovTo': 0,
+          'gotovTp': 0,
+          'id': 5,
+          'ispId': 0,
+          'kontrId': 0,
+          'korp': 0,
+          'mcId': 0,
+          'mcIdRaskroy': 0,
+          'nameKontr': 'string',
+          'nameMc': 'string',
+          'nameMcRaskroy': 'string',
+          'nameOrg': 'string',
+          'nameOrgRaskroy': 'string',
+          'nameProizv': 'string',
+          'nameRaskroy': 'string',
+          'numOsn': 0,
+          'numPlanpsv': 0,
+          'numSvod': 0,
+          'numZaivk': 'string',
+          'numZkzpsv': 140,
+          'numdog': 'string',
+          'orgId': 0,
+          'otdId': 0,
+          'otvIsp': 'string',
+          'parent': 0,
+          'planData': '2021-07-19T16:13:04.689Z',
+          'planDataManager': '2021-07-19T16:13:04.689Z',
+          'prEt': 0,
+          'prGotov': 0,
+          'prQuality': 0,
+          'prb': 0,
+          'primProv': 'string',
+          'procVip': 0,
+          'proizvId': 0,
+          'proizvRaskroy': 0,
+          'sbst': 0,
+          'socrName': 'string',
+          'spplnId': 0,
+          'tkanData': '2021-07-19T16:13:04.689Z',
+          'userId': 0,
+          'zkzpsvId': 0,
+          'zkzpsvOsn': 0,
+          'flagRet': 2
         }
       ],
 
@@ -529,7 +668,10 @@ export default {
       const { sortDesc } = this
 
       return this.sortBy.map((item, i) => {
-        return { 'direction': sortDesc[i] ? 'ASC' : 'DESC', 'property': item }
+        return {
+          'direction': sortDesc[i] ? 'ASC' : 'DESC',
+          'property': item
+        }
       })
     }
   },
@@ -538,20 +680,40 @@ export default {
     rightClickHandler(event, item) {
       event.preventDefault()
 
-      this.fromPayMenu = false
-      this.xFromPayMenu = event.clientX
-      this.yFromPayMenu = event.clientY
+      this.contextMenu = false
+      this.currentRowOfTableForContextMenu = null
+      this.xContextMenu = event.clientX
+      this.yContextMenu = event.clientY
       this.$nextTick(() => {
-        this.fromPayMenu = true
+        this.contextMenu = true
+        this.currentRowOfTableForContextMenu = item.item
       })
     },
 
-    closeEditModal() {
+    closeModalEditTailoring() {
+      this.sewingOrderTableSelectedRecords = []
       this.modals.edit = false
     },
 
+    closeModalEditWork() {
+      this.sewingOrderTableSelectedRecords = []
+      this.modals.editAdd = false
+    },
+
     openEditModal() {
-      this.modals.edit = true
+      if (!this.sewingOrderTableSelectedRecords ||
+        !this.sewingOrderTableSelectedRecords.length) {
+        this.$refs.userNotification.showUserNotification('warning', 'Выберите запись для редактирования!')
+        return
+      }
+
+      const editingRecord = this.sewingOrderTableSelectedRecords[0]
+
+      if (editingRecord.dopWork === 0) {
+        this.modals.edit = true
+      } else {
+        this.modals.editAdd = true
+      }
     },
 
     closeConfirmModal() {
@@ -570,7 +732,7 @@ export default {
       this.modals.print = true
     },
 
-    async removeSelectElement(params = this.selected) {
+    async removeSelectElement(params = this.sewingOrderTableSelectedRecords) {
       try {
         await this.$api.manufacturing.manufacturingRequestJournalRemove(params)
 
@@ -580,14 +742,18 @@ export default {
       }
     },
 
-    async saveEditForm(params = this.selected) {
+    async saveModalEditTailoring(params = this.sewingOrderTableSelectedRecords) {
       try {
         await this.$api.manufacturing.manufacturingRequestJournalSave(params)
 
-        this.closeEditModal()
+        this.closeModalEditTailoring()
       } catch (e) {
         this.$refs.userNotification.showUserNotification('warning', 'Ошибка сервера, попробуйте позже')
       }
+    },
+
+    saveModalEditWork() {
+      console.log('edit add save')
     },
 
     updateSort(byDesc, event) {
@@ -613,7 +779,11 @@ export default {
 
       const searchCriterias = this.createCriteriasForRequestToSearchDocsFromPay(filtersParams)
 
-      const data = { searchCriterias, page: this.pageOfFromPayData, orders: this.handleSortData }
+      const data = {
+        searchCriterias,
+        page: this.pageOfFromPayData,
+        orders: this.handleSortData
+      }
 
       this.isFiltersForFromPayDocsUsing = searchCriterias.length > 1
 
@@ -630,6 +800,24 @@ export default {
       } else {
         $state.complete()
       }
+    },
+
+    deleteRecord() {
+      if (this.currentRowOfTableForContextMenu.numSvod > 0) {
+        this.$refs.userNotification.showUserNotification('warning', 'Заказ входит в сводный заказ! Переформируйте сводный заказ!')
+        return
+      }
+
+      if (this.currentRowOfTableForContextMenu.flagRet === 0) {
+        this.$refs.userNotification.showUserNotification('success', 'Заказ на пошив №' + this.currentRowOfTableForContextMenu.numZkzpsv + ' удален!')
+        this.deleteElemFromArray(this.sewingOrderTableRecords, this.sewingOrderTableRecords.indexOf(this.currentRowOfTableForContextMenu))
+      } else if (this.currentRowOfTableForContextMenu.flagRet === 1) {
+        this.$refs.userNotification.showUserNotification('warning', 'Заказ на пошив №' + this.currentRowOfTableForContextMenu.numZkzpsv + ' помечен на удаление!')
+      } else {
+        this.$refs.userNotification.showUserNotification('error', 'Заказ на пошив №' + this.currentRowOfTableForContextMenu.numZkzpsv + ' не может быть удален! По нему сформированы накладные!')
+      }
+
+      this.currentRowOfTableForContextMenu = null
     }
   }
 }
