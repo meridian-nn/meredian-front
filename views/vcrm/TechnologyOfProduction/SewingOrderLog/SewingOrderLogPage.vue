@@ -22,7 +22,7 @@
         >
           <v-icon
             color="white"
-            @click="openConfirmModal"
+            @click="deleteRecord"
           >
             mdi-delete
           </v-icon>
@@ -803,21 +803,37 @@ export default {
     },
 
     deleteRecord() {
-      if (this.currentRowOfTableForContextMenu.numSvod > 0) {
+      if ((!this.sewingOrderTableSelectedRecords ||
+          !this.sewingOrderTableSelectedRecords.length) &&
+        !this.currentRowOfTableForContextMenu) {
+        this.$refs.userNotification.showUserNotification('error', 'Выберите заказ для удаления!')
+        return
+      }
+
+      let currentOrder
+
+      if (this.currentRowOfTableForContextMenu) {
+        currentOrder = this.currentRowOfTableForContextMenu
+      } else {
+        currentOrder = this.sewingOrderTableSelectedRecords[0]
+      }
+
+      if (currentOrder.numSvod > 0) {
         this.$refs.userNotification.showUserNotification('warning', 'Заказ входит в сводный заказ! Переформируйте сводный заказ!')
         return
       }
 
-      if (this.currentRowOfTableForContextMenu.flagRet === 0) {
-        this.$refs.userNotification.showUserNotification('success', 'Заказ на пошив №' + this.currentRowOfTableForContextMenu.numZkzpsv + ' удален!')
-        this.deleteElemFromArray(this.sewingOrderTableRecords, this.sewingOrderTableRecords.indexOf(this.currentRowOfTableForContextMenu))
+      if (currentOrder.flagRet === 0) {
+        this.$refs.userNotification.showUserNotification('success', 'Заказ на пошив №' + currentOrder.numZkzpsv + ' удален!')
+        this.deleteElemFromArray(this.sewingOrderTableRecords, this.sewingOrderTableRecords.indexOf(currentOrder))
       } else if (this.currentRowOfTableForContextMenu.flagRet === 1) {
-        this.$refs.userNotification.showUserNotification('warning', 'Заказ на пошив №' + this.currentRowOfTableForContextMenu.numZkzpsv + ' помечен на удаление!')
+        this.$refs.userNotification.showUserNotification('warning', 'Заказ на пошив №' + currentOrder.numZkzpsv + ' помечен на удаление!')
       } else {
-        this.$refs.userNotification.showUserNotification('error', 'Заказ на пошив №' + this.currentRowOfTableForContextMenu.numZkzpsv + ' не может быть удален! По нему сформированы накладные!')
+        this.$refs.userNotification.showUserNotification('error', 'Заказ на пошив №' + currentOrder.numZkzpsv + ' не может быть удален! По нему сформированы накладные!')
       }
 
       this.currentRowOfTableForContextMenu = null
+      this.sewingOrderTableSelectedRecords = []
     }
   }
 }
