@@ -38,6 +38,17 @@
             mdi-printer
           </v-icon>
         </v-btn>
+
+        <v-btn
+          fab
+          small
+          color="blue"
+          @click="openFilterModal"
+        >
+          <v-icon color="white">
+            mdi-filter
+          </v-icon>
+        </v-btn>
       </div>
 
       <div class="sewing-order-log-page-checkbox mr-4">
@@ -72,35 +83,19 @@
           disable-pagination
           hide-default-footer
           :headers="headers"
-          :items="man"
+          :items="manufactures"
           calculate-widths
           :item-class="typeOrder"
           @contextmenu:row="rightClickHandler"
           @update:sort-by="updateSort('by', $event)"
           @update:sort-desc="updateSort('desc', $event)"
         >
-          <template #[`item.dataZkzpsv`]="{ item }">
-            {{ item.dataZkzpsv | formatDate('DD MMMM YYYY') }}
-          </template>
-
-          <template #[`item.planDataManager`]="{ item }">
-            {{ item.planDataManager | formatDate('DD MMMM YYYY') }}
-          </template>
-
-          <template #[`item.dataRaskroyFact`]="{ item }">
-            {{ item.dataRaskroyFact | formatDate('DD MMMM YYYY') }}
-          </template>
-
-          <template #[`item.planData`]="{ item }">
-            {{ item.planData | formatDate('DD MMMM YYYY') }}
-          </template>
-
-          <template #[`body.append`]>
+          <template slot="body.append">
             <infinite-loading
               :key="keyLoading"
               spinner="spiral"
               :identifier="infiniteIdData"
-              @infinite="findSpDocoplForPay"
+              @infinite="findManufacture"
             />
           </template>
         </v-data-table>
@@ -183,15 +178,22 @@
       @close="closePrintModal"
     />
 
+    <modal-filter
+      :value="modals.filter"
+      @close="closeFilterModal"
+    />
+
     <user-notification ref="userNotification" />
   </div>
 </template>
 
 <script>
 import UserNotification from '@/components/information_window/UserNotification'
+import InfiniteLoading from 'vue-infinite-loading'
 import ModalEdit from './modals/Edit'
 import ModalConfirm from './modals/Confirm'
 import ModalPrint from './modals/Print'
+import ModalFilter from './modals/Filter'
 export default {
   name: 'SewingOrderLogPage',
 
@@ -199,13 +201,9 @@ export default {
     ModalEdit,
     ModalConfirm,
     ModalPrint,
-    UserNotification
-  },
-
-  async asyncData({ $api }) {
-    const manufacturs = await $api.manufacturing.manufacturingRequestJournalFindAll()
-
-    return { manufacturs }
+    ModalFilter,
+    UserNotification,
+    InfiniteLoading
   },
 
   data() {
@@ -214,7 +212,7 @@ export default {
       sortDesc: [],
       infiniteIdData: 0,
       keyLoading: Math.random(),
-      pageOfFromPayData: 0,
+      page: 0,
       fromPayMenu: false,
       xFromPayMenu: 0,
       yFromPayMenu: 0,
@@ -222,7 +220,8 @@ export default {
       modals: {
         edit: false,
         confirm: false,
-        print: false
+        print: false,
+        filter: false
       },
       headers: [
         {
@@ -258,7 +257,7 @@ export default {
         {
           text: 'Наименование МЦ',
           value: 'nameMc',
-          width: '120px',
+          width: '220px',
           sortable: false
         },
         {
@@ -398,130 +397,18 @@ export default {
           width: '70px'
         }
       ],
-      man: [
-        {
-          'codGra': 'string',
-          'colvo': 0,
-          'dataGotovFabr': '2021-07-19T16:13:04.689Z',
-          'dataRaskroyFact': '2021-07-19T16:13:04.689Z',
-          'dataZkzpsv': '2021-07-19T16:13:04.689Z',
-          'dopWork': 0,
-          'factData': '2021-07-19T16:13:04.689Z',
-          'fioIsp': 'string',
-          'flagDel': 0,
-          'gosKontrakt': 'string',
-          'gostTu': 'string',
-          'gotovKonfKarta': 0,
-          'gotovMlog': 0,
-          'gotovTo': 0,
-          'gotovTp': 0,
-          'id': 0,
-          'ispId': 0,
-          'kontrId': 0,
-          'korp': 0,
-          'mcId': 0,
-          'mcIdRaskroy': 0,
-          'nameKontr': 'string',
-          'nameMc': 'string',
-          'nameMcRaskroy': 'string',
-          'nameOrg': 'string',
-          'nameOrgRaskroy': 'string',
-          'nameProizv': 'string',
-          'nameRaskroy': 'string',
-          'numOsn': 0,
-          'numPlanpsv': 0,
-          'numSvod': 0,
-          'numZaivk': 'string',
-          'numZkzpsv': 0,
-          'numdog': 'string',
-          'orgId': 0,
-          'otdId': 0,
-          'otvIsp': 'string',
-          'parent': 0,
-          'planData': '2021-07-19T16:13:04.689Z',
-          'planDataManager': '2021-07-19T16:13:04.689Z',
-          'prEt': 0,
-          'prGotov': 0,
-          'prQuality': 0,
-          'prb': 0,
-          'primProv': 'string',
-          'procVip': 0,
-          'proizvId': 0,
-          'proizvRaskroy': 0,
-          'sbst': 0,
-          'socrName': 'string',
-          'spplnId': 0,
-          'tkanData': '2021-07-19T16:13:04.689Z',
-          'userId': 0,
-          'zkzpsvId': 0,
-          'zkzpsvOsn': 0
-        },
-
-        {
-          'codGra': 'string',
-          'colvo': 0,
-          'dataGotovFabr': '2021-07-19T16:13:04.689Z',
-          'dataRaskroyFact': '2021-07-19T16:13:04.689Z',
-          'dataZkzpsv': '2021-07-19T16:13:04.689Z',
-          'dopWork': 0,
-          'factData': '2021-07-19T16:13:04.689Z',
-          'fioIsp': 'string',
-          'flagDel': 0,
-          'gosKontrakt': 'string',
-          'gostTu': 'string',
-          'gotovKonfKarta': 0,
-          'gotovMlog': 0,
-          'gotovTo': 0,
-          'gotovTp': 0,
-          'id': 0,
-          'ispId': 0,
-          'kontrId': 0,
-          'korp': 0,
-          'mcId': 0,
-          'mcIdRaskroy': 0,
-          'nameKontr': 'string',
-          'nameMc': 'string',
-          'nameMcRaskroy': 'string',
-          'nameOrg': 'string',
-          'nameOrgRaskroy': 'string',
-          'nameProizv': 'string',
-          'nameRaskroy': 'string',
-          'numOsn': 0,
-          'numPlanpsv': 0,
-          'numSvod': 0,
-          'numZaivk': 'string',
-          'numZkzpsv': 0,
-          'numdog': 'string',
-          'orgId': 0,
-          'otdId': 0,
-          'otvIsp': 'string',
-          'parent': 0,
-          'planData': '2021-07-19T16:13:04.689Z',
-          'planDataManager': '2021-07-19T16:13:04.689Z',
-          'prEt': 0,
-          'prGotov': 0,
-          'prQuality': 0,
-          'prb': 0,
-          'primProv': 'string',
-          'procVip': 0,
-          'proizvId': 0,
-          'proizvRaskroy': 0,
-          'sbst': 0,
-          'socrName': 'string',
-          'spplnId': 0,
-          'tkanData': '2021-07-19T16:13:04.689Z',
-          'userId': 0,
-          'zkzpsvId': 0,
-          'zkzpsvOsn': 0
-        }
-      ],
 
       govContract: false,
 
       noOTK: false,
 
-      customerName: ''
+      customerName: '',
+      manufactures: []
     }
+  },
+
+  async fetch() {
+    await this.init()
   },
 
   computed: {
@@ -531,10 +418,26 @@ export default {
       return this.sortBy.map((item, i) => {
         return { 'direction': sortDesc[i] ? 'ASC' : 'DESC', 'property': item }
       })
+    },
+
+    getCurrentUser() {
+      return this.$store.state.profile.user
     }
   },
 
   methods: {
+    async init() {
+      const params = {
+        params: {
+          data1: '2021-06-01',
+          data2: '2021-06-30',
+          my_descr: 'Larisa',
+          user_id: this.getCurrentUser.id
+        },
+        procName: 'dbo.manufacturing_request_journal_init_data'
+      }
+      await this.$api.service.executeStashedFunction(params)
+    },
     rightClickHandler(event, item) {
       event.preventDefault()
 
@@ -570,9 +473,17 @@ export default {
       this.modals.print = true
     },
 
+    closeFilterModal() {
+      this.modals.filter = false
+    },
+
+    openFilterModal() {
+      this.modals.filter = true
+    },
+
     async removeSelectElement(params = this.selected) {
       try {
-        await this.$api.manufacturing.manufacturingRequestJournalRemove(params)
+        await this.$api.manufacturing.manufacturingRequestJournalRemove(params[0].id)
 
         this.closeConfirmModal()
       } catch (e) {
@@ -596,7 +507,7 @@ export default {
       } else if (byDesc === 'desc') {
         this.sortDesc = event
       }
-      this.pageOfFromPayData = 0
+      this.page = 0
       // Очистить данные
       this.keyLoading = Math.random()
     },
@@ -605,26 +516,26 @@ export default {
       return item.gosKontrakt ? 'red' : 'blue'
     },
 
-    async findSpDocoplForPay($state) {
+    async findManufacture($state) {
       const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
-        this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs(), this.getCurrentUser.id)
+        'filter-sewing-order-log', this.getCurrentUser.id)
+
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
-      const filtersParams = JSON.parse(response[0].settingValue)
 
-      const searchCriterias = this.createCriteriasForRequestToSearchDocsFromPay(filtersParams)
+      // let filtersParams
 
-      const data = { searchCriterias, page: this.pageOfFromPayData, orders: this.handleSortData }
+      if (response.length) {
+        // filtersParams = JSON.parse(response[0].settingValue)
+      }
 
-      this.isFiltersForFromPayDocsUsing = searchCriterias.length > 1
+      const data = { searchCriterias: [{ dataType: 'VARCHAR', key: 'userId', operation: 'EQUALS', type: 'AND', values: [this.getCurrentUser.id] }], page: this.page, orders: this.handleSortData }
 
-      // await this.fillResultsOfDocumentsFromPay(searchCriterias)
-
-      const { content } = await this.$api.payment.docOplForPay.findDocumentsForPayForJournalTable(data)
+      const { content } = await this.$api.manufacturing.manufacturingRequestJournalfindPageBySearchCriteriaList(data)
 
       if (content.length > 0) {
-        this.pageOfFromPayData += 1
+        this.page += 1
 
-        this.fromPayData.push(...content)
+        this.manufactures.push(...content)
 
         $state.loaded()
       } else {

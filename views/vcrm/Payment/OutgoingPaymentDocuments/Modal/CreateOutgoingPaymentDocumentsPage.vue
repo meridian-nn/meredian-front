@@ -1,5 +1,5 @@
 <template>
-   <v-dialog
+  <v-dialog
     v-model="dialog"
     :value="show"
     max-width="1200px"
@@ -56,7 +56,7 @@
           </v-row>
           <v-row>
             <v-col cols="6">
-               <v-autocomplete
+              <v-autocomplete
                 v-model="createdItem.payer"
                 label="Плательщик"
                 :loading="loadingType.payers"
@@ -68,7 +68,7 @@
               />
             </v-col>
             <v-col cols="6">
-               <v-autocomplete
+              <v-autocomplete
                 v-model="createdItem.recipient"
                 label="Получатель"
                 :loading="loadingType.recipients"
@@ -82,7 +82,7 @@
           </v-row>
           <v-row>
             <v-col cols="6">
-               <v-autocomplete
+              <v-autocomplete
                 v-model="createdItem.forWhom"
                 label="За кого"
                 :loading="loadingType.forWhoms"
@@ -94,7 +94,7 @@
               />
             </v-col>
             <v-col cols="6">
-               <v-autocomplete
+              <v-autocomplete
                 v-model="createdItem.recipient"
                 label="Исполнитель"
                 :loading="loadingType.recipients"
@@ -108,7 +108,7 @@
           </v-row>
           <v-row>
             <v-col cols="6">
-               <v-autocomplete
+              <v-autocomplete
                 v-model="createdItem.recipient2"
                 label="Исполнитель"
                 :loading="loadingType.recipients2"
@@ -270,7 +270,7 @@
                           v-model="createdItem.elementDate"
                           type="date"
                           outlined
-                        ></v-text-field>
+                        />
                       </v-col>
                       <v-spacer />
                       <v-col cols="7">
@@ -330,7 +330,7 @@
 
 <script>
 export default {
-  name: 'createIncomingPaymentDocument',
+  name: 'CreateIncomingPaymentDocument',
   props: {
     title: {
       type: String,
