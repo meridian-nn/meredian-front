@@ -43,14 +43,12 @@
           </v-btn>
 
           <v-checkbox
-            v-model="govContract"
             label="Печать ТП с доп блоком"
           />
         </div>
 
         <div class="modal-print__actions">
           <v-checkbox
-            v-model="govContract"
             label="Лист качества без учёта количества"
           />
 
@@ -71,22 +69,18 @@
           <form-control label="Для отчёта по браку: ">
             <form-control label="Период проверки">
               <v-text-field
-                v-model="endDate"
                 type="date"
               />
             </form-control>
 
             <form-control label="по">
               <v-text-field
-                v-model="endDate"
                 type="date"
               />
             </form-control>
           </form-control>
 
-          <v-radio-group
-            v-model="row"
-          >
+          <v-radio-group>
             <v-radio
               label="Фабрики"
               value="radio-1"
@@ -101,14 +95,12 @@
         <div class="modal-print__actions">
           <form-control label="Оперативный план до">
             <v-text-field
-              v-model="endDate"
               type="date"
             />
           </form-control>
 
           <form-control label="Для маркировки упавки :">
             <v-radio-group
-              v-model="row"
               row
             >
               <v-radio
@@ -129,9 +121,7 @@
 
         <div class="modal-print__actions">
           <form-control label="Сортировка:">
-            <v-radio-group
-              v-model="row"
-            >
+            <v-radio-group>
               <v-radio
                 label="Самоклейка - старый шаблон"
                 value="radio-1"

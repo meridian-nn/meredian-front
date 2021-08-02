@@ -19,6 +19,7 @@
           fab
           small
           color="red"
+          disabled
         >
           <v-icon
             color="white"
@@ -38,11 +39,23 @@
             mdi-printer
           </v-icon>
         </v-btn>
+
+        <v-btn
+          fab
+          small
+          color="blue"
+          @click="openFilterModal"
+        >
+          <v-icon color="white">
+            mdi-filter
+          </v-icon>
+        </v-btn>
       </div>
 
       <div class="sewing-order-log-page-checkbox mr-4">
         <v-checkbox
           v-model="govContract"
+          disabled
           class="mr-2"
           label="ГОСКОНТРАКТ"
         />
@@ -67,6 +80,8 @@
           v-model="sewingOrderTableSelectedRecords"
           height="650"
           fixed-header
+          :loading="loadingType.sewingOrderTableRecords"
+          loading-text="Заказы загружаются, подождите"
           show-select
           :single-select="false"
           disable-pagination
@@ -74,33 +89,16 @@
           :headers="sewingOrderTableHeaders"
           :items="sewingOrderTableRecords"
           calculate-widths
-          :item-class="typeOrder"
           @contextmenu:row="rightClickHandler"
           @update:sort-by="updateSort('by', $event)"
           @update:sort-desc="updateSort('desc', $event)"
         >
-          <template #[`item.dataZkzpsv`]="{ item }">
-            {{ item.dataZkzpsv | formatDate('DD MMMM YYYY') }}
-          </template>
-
-          <template #[`item.planDataManager`]="{ item }">
-            {{ item.planDataManager | formatDate('DD MMMM YYYY') }}
-          </template>
-
-          <template #[`item.dataRaskroyFact`]="{ item }">
-            {{ item.dataRaskroyFact | formatDate('DD MMMM YYYY') }}
-          </template>
-
-          <template #[`item.planData`]="{ item }">
-            {{ item.planData | formatDate('DD MMMM YYYY') }}
-          </template>
-
-          <template #[`body.append`]>
+          <template slot="body.append">
             <infinite-loading
               :key="keyLoading"
               spinner="spiral"
               :identifier="infiniteIdData"
-              @infinite="findSpDocoplForPay"
+              @infinite="findSewingOrderTableRecords"
             />
           </template>
         </v-data-table>
@@ -118,11 +116,11 @@
                 Сформировать заказ на доп.работу
               </v-list-item-title>
             </v-list-item>
-            <v-list-item @click="deleteRecord">
+            <!--v-list-item @click="deleteRecord">
               <v-list-item-title>
                 Удалить
               </v-list-item-title>
-            </v-list-item>
+            </v-list-item-->
           </v-list>
         </v-menu>
       </div>
@@ -186,12 +184,17 @@
     <modal-confirm
       :value="modals.confirm"
       @close="closeConfirmModal"
-      @success="removeSelectElement"
+      @success="deleteRecord"
     />
 
     <modal-print
       :value="modals.print"
       @close="closePrintModal"
+    />
+
+    <modal-filter
+      :value="modals.filter"
+      @close="closeFilterModal"
     />
 
     <user-notification ref="userNotification" />
@@ -202,10 +205,12 @@
 <script>
 import UserNotification from '@/components/information_window/UserNotification'
 import Message from '@/components/message/Message'
+import InfiniteLoading from 'vue-infinite-loading'
 import ModalEditOrderForTailoring from './modals/EditOrderForTailoring'
 import ModalEditOrderForAdditionalWork from './modals/EditOrderForAdditionalWork'
 import ModalConfirm from './modals/Confirm'
 import ModalPrint from './modals/Print'
+import ModalFilter from './modals/Filter'
 
 export default {
   name: 'SewingOrderLogPage',
@@ -216,22 +221,19 @@ export default {
     Message,
     ModalConfirm,
     ModalPrint,
-    UserNotification
-  },
-
-  async asyncData({ $api }) {
-    const manufacturs = await $api.manufacturing.manufacturingRequestJournalFindAll()
-
-    return { manufacturs }
+    ModalFilter,
+    UserNotification,
+    InfiniteLoading
   },
 
   data() {
     return {
+      loadingType: {},
       sortBy: [],
       sortDesc: [],
       infiniteIdData: 0,
       keyLoading: Math.random(),
-      pageOfFromPayData: 0,
+      page: 0,
       contextMenu: false,
       xContextMenu: 0,
       yContextMenu: 0,
@@ -240,7 +242,8 @@ export default {
         edit: false,
         editAdd: false,
         confirm: false,
-        print: false
+        print: false,
+        filter: false
       },
       sewingOrderTableSelectedRecords: [],
       sewingOrderTableHeaders: [
@@ -260,7 +263,7 @@ export default {
           text: 'Дата',
           value: 'dataZkzpsv',
           width: '93px',
-          sortable: false
+          sort: () => false
         },
         {
           text: 'Производство',
@@ -277,7 +280,7 @@ export default {
         {
           text: 'Наименование МЦ',
           value: 'nameMc',
-          width: '120px',
+          width: '220px',
           sortable: false
         },
         {
@@ -290,7 +293,7 @@ export default {
           text: 'Кол-во',
           value: 'colvo',
           width: '60px',
-          sortable: false
+          sort: () => false
         },
         {
           text: 'План',
@@ -417,250 +420,17 @@ export default {
           width: '70px'
         }
       ],
-      sewingOrderTableRecords: [
-        {
-          'codGra': 'string',
-          'colvo': 0,
-          'dataGotovFabr': '2021-07-19T16:13:04.689Z',
-          'dataRaskroyFact': '2021-07-19T16:13:04.689Z',
-          'dataZkzpsv': '2021-07-19T16:13:04.689Z',
-          'dopWork': 0,
-          'factData': '2021-07-19T16:13:04.689Z',
-          'fioIsp': 'string',
-          'flagDel': 0,
-          'gosKontrakt': 'string',
-          'gostTu': 'string',
-          'gotovKonfKarta': 0,
-          'gotovMlog': 0,
-          'gotovTo': 0,
-          'gotovTp': 0,
-          'id': 1,
-          'ispId': 0,
-          'kontrId': 0,
-          'korp': 0,
-          'mcId': 0,
-          'mcIdRaskroy': 0,
-          'nameKontr': 'string',
-          'nameMc': 'string',
-          'nameMcRaskroy': 'string',
-          'nameOrg': 'string',
-          'nameOrgRaskroy': 'string',
-          'nameProizv': 'string',
-          'nameRaskroy': 'string',
-          'numOsn': 0,
-          'numPlanpsv': 0,
-          'numSvod': 0,
-          'numZaivk': 'string',
-          'numZkzpsv': 110,
-          'numdog': 'string',
-          'orgId': 0,
-          'otdId': 0,
-          'otvIsp': 'string',
-          'parent': 0,
-          'planData': '2021-07-19T16:13:04.689Z',
-          'planDataManager': '2021-07-19T16:13:04.689Z',
-          'prEt': 0,
-          'prGotov': 0,
-          'prQuality': 0,
-          'prb': 0,
-          'primProv': 'string',
-          'procVip': 0,
-          'proizvId': 0,
-          'proizvRaskroy': 0,
-          'sbst': 0,
-          'socrName': 'string',
-          'spplnId': 0,
-          'tkanData': '2021-07-19T16:13:04.689Z',
-          'userId': 0,
-          'zkzpsvId': 0,
-          'zkzpsvOsn': 0,
-          'flagRet': 0
-        },
-
-        {
-          'codGra': 'string',
-          'colvo': 0,
-          'dataGotovFabr': '2021-07-19T16:13:04.689Z',
-          'dataRaskroyFact': '2021-07-19T16:13:04.689Z',
-          'dataZkzpsv': '2021-07-19T16:13:04.689Z',
-          'dopWork': 1,
-          'factData': '2021-07-19T16:13:04.689Z',
-          'fioIsp': 'string',
-          'flagDel': 0,
-          'gosKontrakt': 'string',
-          'gostTu': 'string',
-          'gotovKonfKarta': 0,
-          'gotovMlog': 0,
-          'gotovTo': 0,
-          'gotovTp': 0,
-          'id': 2,
-          'ispId': 0,
-          'kontrId': 0,
-          'korp': 0,
-          'mcId': 0,
-          'mcIdRaskroy': 0,
-          'nameKontr': 'string',
-          'nameMc': 'string',
-          'nameMcRaskroy': 'string',
-          'nameOrg': 'string',
-          'nameOrgRaskroy': 'string',
-          'nameProizv': 'string',
-          'nameRaskroy': 'string',
-          'numOsn': 0,
-          'numPlanpsv': 0,
-          'numSvod': 0,
-          'numZaivk': 'string',
-          'numZkzpsv': 120,
-          'numdog': 'string',
-          'orgId': 0,
-          'otdId': 0,
-          'otvIsp': 'string',
-          'parent': 0,
-          'planData': '2021-07-19T16:13:04.689Z',
-          'planDataManager': '2021-07-19T16:13:04.689Z',
-          'prEt': 0,
-          'prGotov': 0,
-          'prQuality': 0,
-          'prb': 0,
-          'primProv': 'string',
-          'procVip': 0,
-          'proizvId': 0,
-          'proizvRaskroy': 0,
-          'sbst': 0,
-          'socrName': 'string',
-          'spplnId': 0,
-          'tkanData': '2021-07-19T16:13:04.689Z',
-          'userId': 0,
-          'zkzpsvId': 0,
-          'zkzpsvOsn': 0,
-          'flagRet': 1
-        },
-
-        {
-          'codGra': 'string',
-          'colvo': 0,
-          'dataGotovFabr': '2021-07-19T16:13:04.689Z',
-          'dataRaskroyFact': '2021-07-19T16:13:04.689Z',
-          'dataZkzpsv': '2021-07-19T16:13:04.689Z',
-          'dopWork': 1,
-          'factData': '2021-07-19T16:13:04.689Z',
-          'fioIsp': 'string',
-          'flagDel': 0,
-          'gosKontrakt': 'string',
-          'gostTu': 'string',
-          'gotovKonfKarta': 0,
-          'gotovMlog': 0,
-          'gotovTo': 0,
-          'gotovTp': 0,
-          'id': 3,
-          'ispId': 0,
-          'kontrId': 0,
-          'korp': 0,
-          'mcId': 0,
-          'mcIdRaskroy': 0,
-          'nameKontr': 'string',
-          'nameMc': 'string',
-          'nameMcRaskroy': 'string',
-          'nameOrg': 'string',
-          'nameOrgRaskroy': 'string',
-          'nameProizv': 'string',
-          'nameRaskroy': 'string',
-          'numOsn': 0,
-          'numPlanpsv': 0,
-          'numSvod': 1,
-          'numZaivk': 'string',
-          'numZkzpsv': 130,
-          'numdog': 'string',
-          'orgId': 0,
-          'otdId': 0,
-          'otvIsp': 'string',
-          'parent': 0,
-          'planData': '2021-07-19T16:13:04.689Z',
-          'planDataManager': '2021-07-19T16:13:04.689Z',
-          'prEt': 0,
-          'prGotov': 0,
-          'prQuality': 0,
-          'prb': 0,
-          'primProv': 'string',
-          'procVip': 0,
-          'proizvId': 0,
-          'proizvRaskroy': 0,
-          'sbst': 0,
-          'socrName': 'string',
-          'spplnId': 0,
-          'tkanData': '2021-07-19T16:13:04.689Z',
-          'userId': 0,
-          'zkzpsvId': 0,
-          'zkzpsvOsn': 0,
-          'flagRet': 2
-        },
-
-        {
-          'codGra': 'string',
-          'colvo': 0,
-          'dataGotovFabr': '2021-07-19T16:13:04.689Z',
-          'dataRaskroyFact': '2021-07-19T16:13:04.689Z',
-          'dataZkzpsv': '2021-07-19T16:13:04.689Z',
-          'dopWork': 1,
-          'factData': '2021-07-19T16:13:04.689Z',
-          'fioIsp': 'string',
-          'flagDel': 0,
-          'gosKontrakt': 'string',
-          'gostTu': 'string',
-          'gotovKonfKarta': 0,
-          'gotovMlog': 0,
-          'gotovTo': 0,
-          'gotovTp': 0,
-          'id': 5,
-          'ispId': 0,
-          'kontrId': 0,
-          'korp': 0,
-          'mcId': 0,
-          'mcIdRaskroy': 0,
-          'nameKontr': 'string',
-          'nameMc': 'string',
-          'nameMcRaskroy': 'string',
-          'nameOrg': 'string',
-          'nameOrgRaskroy': 'string',
-          'nameProizv': 'string',
-          'nameRaskroy': 'string',
-          'numOsn': 0,
-          'numPlanpsv': 0,
-          'numSvod': 0,
-          'numZaivk': 'string',
-          'numZkzpsv': 140,
-          'numdog': 'string',
-          'orgId': 0,
-          'otdId': 0,
-          'otvIsp': 'string',
-          'parent': 0,
-          'planData': '2021-07-19T16:13:04.689Z',
-          'planDataManager': '2021-07-19T16:13:04.689Z',
-          'prEt': 0,
-          'prGotov': 0,
-          'prQuality': 0,
-          'prb': 0,
-          'primProv': 'string',
-          'procVip': 0,
-          'proizvId': 0,
-          'proizvRaskroy': 0,
-          'sbst': 0,
-          'socrName': 'string',
-          'spplnId': 0,
-          'tkanData': '2021-07-19T16:13:04.689Z',
-          'userId': 0,
-          'zkzpsvId': 0,
-          'zkzpsvOsn': 0,
-          'flagRet': 2
-        }
-      ],
-
+      sewingOrderTableRecords: [],
       govContract: false,
 
       noOTK: false,
 
       customerName: ''
     }
+  },
+
+  async fetch() {
+    await this.init()
   },
 
   computed: {
@@ -673,10 +443,23 @@ export default {
           'property': item
         }
       })
+    },
+
+    getCurrentUser() {
+      return this.$store.state.profile.user
     }
   },
 
   methods: {
+    async init() {
+      await this.initDataForCurrentUser()
+    },
+
+    async initDataForCurrentUser() {
+      const params = this.createStructureForSewingOrderLogPageInitDataProcedure()
+      await this.$api.service.executeStashedFunction(params)
+    },
+
     rightClickHandler(event, item) {
       event.preventDefault()
 
@@ -690,14 +473,23 @@ export default {
       })
     },
 
-    closeModalEditTailoring() {
-      this.sewingOrderTableSelectedRecords = []
+    async closeModalEditTailoring() {
       this.modals.edit = false
+      await this.fullUpdateTableOfRecordsWithInitData()
     },
 
-    closeModalEditWork() {
-      this.sewingOrderTableSelectedRecords = []
+    async closeModalEditWork() {
       this.modals.editAdd = false
+      await this.fullUpdateTableOfRecordsWithInitData()
+    },
+
+    async fullUpdateTableOfRecordsWithInitData() {
+      this.loadingType.sewingOrderTableRecords = true
+      this.sewingOrderTableRecords = []
+      this.sewingOrderTableSelectedRecords = []
+      await this.initDataForCurrentUser()
+      await this.updateSewingOrderTableRecords()
+      this.loadingType.sewingOrderTableRecords = false
     },
 
     openEditModal() {
@@ -732,21 +524,19 @@ export default {
       this.modals.print = true
     },
 
-    async removeSelectElement(params = this.sewingOrderTableSelectedRecords) {
-      try {
-        await this.$api.manufacturing.manufacturingRequestJournalRemove(params)
+    closeFilterModal() {
+      this.modals.filter = false
+    },
 
-        this.closeConfirmModal()
-      } catch (e) {
-        this.$refs.userNotification.showUserNotification('warning', 'Ошибка сервера, попробуйте позже')
-      }
+    openFilterModal() {
+      this.modals.filter = true
     },
 
     async saveModalEditTailoring(params = this.sewingOrderTableSelectedRecords) {
       try {
         await this.$api.manufacturing.manufacturingRequestJournalSave(params)
 
-        this.closeModalEditTailoring()
+        await this.closeModalEditTailoring()
       } catch (e) {
         this.$refs.userNotification.showUserNotification('warning', 'Ошибка сервера, попробуйте позже')
       }
@@ -762,39 +552,47 @@ export default {
       } else if (byDesc === 'desc') {
         this.sortDesc = event
       }
-      this.pageOfFromPayData = 0
-      // Очистить данные
+      this.page = 0
+      this.sewingOrderTableRecords = []
       this.keyLoading = Math.random()
     },
 
-    typeOrder(item) {
+    /* typeOrder(item) {
       return item.gosKontrakt ? 'red' : 'blue'
+    }, */
+
+    // Обновление таблицы "Заказы на пошив"
+    updateSewingOrderTableRecords() {
+      this.page = 0
+      this.sewingOrderTableRecords = []
+      this.infiniteIdData += 1
     },
 
-    async findSpDocoplForPay($state) {
-      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
-        this.getIdOfFromPayDocsTableOfJournalOfPaymentDocs(), this.getCurrentUser.id)
+    async findSewingOrderTableRecords($state) {
+      /* const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
+        'filter-sewing-order-log', this.getCurrentUser.id)
+
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
-      const filtersParams = JSON.parse(response[0].settingValue)
 
-      const searchCriterias = this.createCriteriasForRequestToSearchDocsFromPay(filtersParams)
+      let filtersParams
 
+      if (response.length) {
+        filtersParams = JSON.parse(response[0].settingValue)
+      } */
+
+      const searchCriterias = this.createCriteriasToSearchSewingOrderLogDataByPage()
       const data = {
         searchCriterias,
         page: this.pageOfFromPayData,
         orders: this.handleSortData
       }
 
-      this.isFiltersForFromPayDocsUsing = searchCriterias.length > 1
-
-      // await this.fillResultsOfDocumentsFromPay(searchCriterias)
-
-      const { content } = await this.$api.payment.docOplForPay.findDocumentsForPayForJournalTable(data)
+      const { content } = await this.$api.manufacturing.manufacturingRequestJournalFindPageBySearchCriteriaList(data)
 
       if (content.length > 0) {
-        this.pageOfFromPayData += 1
+        this.page += 1
 
-        this.fromPayData.push(...content)
+        this.sewingOrderTableRecords.push(...content)
 
         $state.loaded()
       } else {
@@ -802,7 +600,7 @@ export default {
       }
     },
 
-    deleteRecord() {
+    async deleteRecord() {
       if ((!this.sewingOrderTableSelectedRecords ||
           !this.sewingOrderTableSelectedRecords.length) &&
         !this.currentRowOfTableForContextMenu) {
@@ -823,17 +621,19 @@ export default {
         return
       }
 
-      if (currentOrder.flagRet === 0) {
+      const params = this.createStructureForDelZkzpsvProcedure(currentOrder.id)
+      const response = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params)
+
+      if (response.flagRet === 0) {
         this.$refs.userNotification.showUserNotification('success', 'Заказ на пошив №' + currentOrder.numZkzpsv + ' удален!')
-        this.deleteElemFromArray(this.sewingOrderTableRecords, this.sewingOrderTableRecords.indexOf(currentOrder))
-      } else if (this.currentRowOfTableForContextMenu.flagRet === 1) {
+      } else if (response.flagRet === 1) {
         this.$refs.userNotification.showUserNotification('warning', 'Заказ на пошив №' + currentOrder.numZkzpsv + ' помечен на удаление!')
       } else {
         this.$refs.userNotification.showUserNotification('error', 'Заказ на пошив №' + currentOrder.numZkzpsv + ' не может быть удален! По нему сформированы накладные!')
       }
 
       this.currentRowOfTableForContextMenu = null
-      this.sewingOrderTableSelectedRecords = []
+      await this.fullUpdateTableOfRecordsWithInitData()
     }
   }
 }
