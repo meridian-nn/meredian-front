@@ -240,7 +240,7 @@ export default {
           text: 'Дата',
           value: 'dataZkzpsv',
           width: '93px',
-          sortable: false
+          sort: () => false
         },
         {
           text: 'Производство',
@@ -270,7 +270,7 @@ export default {
           text: 'Кол-во',
           value: 'colvo',
           width: '60px',
-          sortable: false
+          sort: () => false
         },
         {
           text: 'План',
@@ -508,7 +508,7 @@ export default {
         this.sortDesc = event
       }
       this.page = 0
-      // Очистить данные
+      this.manufactures = []
       this.keyLoading = Math.random()
     },
 
