@@ -667,12 +667,24 @@ export const factory = send => ({
             return send('GET', '/oper/manufacturing/manufacturingRequestJournal/findAll')
         },
 
+        manufacturingRequestJournalFindPageBySearchCriteriaList(params) {
+          return send('POST', '/oper/manufacturing/manufacturingRequestJournal/findPageBySearchCriteriaList', params)
+        },
+
         manufacturingRequestJournalRemove(params) {
-            return send('GET', '/oper/manufacturing/manufacturingRequestJournal/save', params)
+            return send('POST', '/oper/manufacturing/manufacturingRequestJournal/delete', params)
         },
 
         manufacturingRequestJournalEdit(params) {
-            return send('GET', '/oper/manufacturing/manufacturingRequestJournal/delete', params)
+            return send('POST', '/oper/manufacturing/manufacturingRequestJournal/save', params)
+        },
+
+        getManufacturingRequestJournalInitDataProcedureName() {
+          return 'dbo.manufacturing_request_journal_init_data'
+        },
+
+        getDelZkzpsvProcedureName() {
+          return 'dbo.del_zkzpsv'
         }
     },
 

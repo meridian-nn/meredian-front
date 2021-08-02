@@ -8,9 +8,15 @@ Vue.mixin({
     getIdOfFromPayDocsTableOfJournalOfPaymentDocs() {
       return 'journal-of-payment-docs-from-pay-docs'
     },
-    getIdOfFromOutgoingDocumentsTable() {
+
+    getIdOfOutgoingDocumentsTable() {
       return 'outgoing-payment-document'
     },
+
+    getIdOfIncomingDocumentsTable() {
+      return 'incoming-payment-document'
+    },
+
     getIdOfRecordsTableOfRecordsOfWorkByCards() {
       return 'records-of-work-by-cards-table-of-records'
     },
@@ -68,13 +74,14 @@ Vue.mixin({
       return organizations
     },
 
-    getDateForCriteriasToSearchDocsFromPay() {
+    // Функция возвращает текущую дату минус 1 год
+    getCurrentDateMinusOneYearForSearchCriterias() {
       let currentDate = new Date()
       return new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), currentDate.getDate())
     },
 
     // Функция возвращает текущую дату минус 6 месяцев
-    getDateForCriteriasToSearchExecutorsByDataUvol() {
+    getCurrentDateMinusSixMonthsForSearchCriterias() {
       let currentDate = new Date()
       return new Date(currentDate.getFullYear(), currentDate.getMonth() - 6, currentDate.getDate())
     },

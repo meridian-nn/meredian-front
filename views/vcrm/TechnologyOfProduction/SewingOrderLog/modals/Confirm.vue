@@ -1,7 +1,7 @@
 <template>
   <v-dialog
-    :value="show"
-    max-width="600px"
+    :value="value"
+    max-width="500px"
   >
     <v-card>
       <v-card-title class="headline">
@@ -13,7 +13,7 @@
         <v-btn
           color="blue darken-1"
           text
-          @click="cancel"
+          @click="$emit('close')"
         >
           Отмена
         </v-btn>
@@ -21,7 +21,7 @@
         <v-btn
           color="blue darken-1"
           text
-          @click="success"
+          @click="$emit('success')"
         >
           OK
         </v-btn>
@@ -34,7 +34,14 @@
 
 <script>
 export default {
-  name: 'ModalConfirm'
+  name: 'ModalConfirm',
+
+  props: {
+    value: {
+      type: Boolean,
+      default: false
+    }
+  }
 }
 </script>
 

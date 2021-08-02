@@ -2,6 +2,7 @@
 // "/sys/storedProcedure/executeProcedure" - Выполнение процедуры без возвращаемого набора данных
 // "/sys/storedProcedure/queryForList" - Выполнение процедуры с возвращаемым набором данных
 import Vue from 'vue'
+
 Vue.mixin({
   methods: {
     createStructureForSelProizvOurProcedure(userParams) {
@@ -163,7 +164,36 @@ Vue.mixin({
         params.data2 = paramsForRequest.data2
       }
       return params
-    }
+    },
 
+    createStructureForSewingOrderLogPageInitDataProcedure() {
+      return {
+        params: this.createParamsForSewingOrderLogPageInitDataProcedure(),
+        procName: this.$api.manufacturing.getManufacturingRequestJournalInitDataProcedureName()
+      }
+    },
+
+    createParamsForSewingOrderLogPageInitDataProcedure() {
+      return {
+        data1: '2021-06-01',
+        data2: '2021-06-30',
+        my_descr: 'Larisa',
+        user_id: this.getCurrentUser.id
+      }
+    },
+
+    createStructureForDelZkzpsvProcedure(idOfRecordForDelete) {
+      return {
+        params: this.createParamsForDelZkzpsvProcedure(idOfRecordForDelete),
+        procName: this.$api.manufacturing.getDelZkzpsvProcedureName()
+      }
+    },
+
+    createParamsForDelZkzpsvProcedure(idOfRecordForDelete) {
+      return {
+        zkzpsv_id: idOfRecordForDelete
+      }
+    }
   }
+
 })
