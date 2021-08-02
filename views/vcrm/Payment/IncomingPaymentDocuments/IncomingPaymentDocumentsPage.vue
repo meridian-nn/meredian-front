@@ -1,18 +1,39 @@
 <template>
   <div class="incoming-payment-documents-main-div">
-    <v-btn
-      color="blue"
-      class="my-3"
-      fab
-      dark
-      x-small
-      data-title="Создание нового входящего платежного документа"
-      @click="newIncomingDocument"
-    >
-      <v-icon dark>
-        mdi-plus
-      </v-icon>
-    </v-btn>
+    <div class="incoming-payment-documents-row">
+      <v-btn
+        color="blue"
+        class="my-3"
+        fab
+        dark
+        x-small
+        data-title="Создание нового входящего платежного документа"
+        @click="newIncomingDocument"
+      >
+        <v-icon dark>
+          mdi-plus
+        </v-icon>
+      </v-btn>
+
+      <div class="incoming-payment-documents-filters-btn">
+        <v-btn
+          v-if="isFiltersUsing"
+          color="blue"
+          dark
+          class="ml-2"
+          @click="openFilterFormForIncomingDocuments"
+        >
+          Фильтры
+        </v-btn>
+        <v-btn
+          v-else
+          class="ml-2"
+          @click="openFilterFormForIncomingDocuments"
+        >
+          Фильтры
+        </v-btn>
+      </div>
+    </div>
     <div class="incoming-payment-documents-row">
       <v-data-table
         id="incoming-payment-documents-data-table"
@@ -118,12 +139,13 @@
       </v-subheader>
 
       <div class="incoming-payment-documents-sum-data-field">
-        <v-text-field
-          v-model.number="sumOfDataTableItems"
-          hide-details="auto"
-          :readonly="true"
-          outlined
-          dense
+        <vue-numeric
+          v-model="sumOfDataTableItems"
+          separator="space"
+          :precision="2"
+          decimal-separator="."
+          output-type="number"
+          :read-only="true"
         />
       </div>
 
@@ -143,7 +165,7 @@
       </div>
     </div>
 
-    <div class="incoming-payment-documents-row">
+    <div class="incoming-payment-documents-bottom-row">
       <v-subheader class="font-weight-medium text-subtitle-1">
         Назначение:
       </v-subheader>
@@ -166,6 +188,12 @@
       ref="createIncomingPaymentDocument"
       @save="saveIncomingDocument"
     />
+
+    <filters-form-from-outgoing-and-incoming-document
+      ref="filtersFormForIncomingDocuments"
+      @cancel="closeFiltersFormForIncomingDocuments"
+      @saveFilters="saveFiltersFormForIncomingDocuments"
+    />
   </div>
 </template>
 
@@ -173,7 +201,10 @@
 import InfiniteLoading from 'vue-infinite-loading'
 import UserNotification from '@/components/information_window/UserNotification'
 import ProfileOfContractor from '@/views/vcrm/Payment/ProfileOfContractor/ProfileOfContractorPage'
-import createIncomingPaymentDocument from '@/views/vcrm/Payment/IncomingPaymentDocuments/Modal/CreateIncomingPaymentDocument.vue'
+import createIncomingPaymentDocument
+  from '@/views/vcrm/Payment/IncomingPaymentDocuments/Modal/CreateIncomingPaymentDocument.vue'
+import FiltersFormFromOutgoingAndIncomingDocument
+  from '@/components/filters/FiltersFormFromOutgoingAndIncomingDocument.vue'
 
 export default {
   name: 'IncomingPaymentDocumentsPage',
@@ -182,7 +213,8 @@ export default {
     InfiniteLoading,
     UserNotification,
     ProfileOfContractor,
-    createIncomingPaymentDocument
+    createIncomingPaymentDocument,
+    FiltersFormFromOutgoingAndIncomingDocument
   },
 
   data() {
@@ -281,7 +313,9 @@ export default {
       pageOfRecords: 0,
 
       sortBy: [],
-      sortDesc: []
+      sortDesc: [],
+
+      isFiltersUsing: false
     }
   },
 
@@ -304,7 +338,22 @@ export default {
   methods: {
     async init() {
       await this.initData()
-      await this.fillResultsOfDataTableItems()
+    },
+
+    // Функция открытия формы фильтров таблицы с документами
+    openFilterFormForIncomingDocuments() {
+      this.$refs.filtersFormForIncomingDocuments.openForm('Входящие платежные документы', this.getIdOfIncomingDocumentsTable())
+    },
+
+    // Функция отработки события "Закрытие формы фильтров таблицы с документами"
+    closeFiltersFormForIncomingDocuments() {
+      console.log('close filters')
+    },
+
+    // Функция отбработки события "Закрытие формы фильтров таблицы с документами с сохранением"
+    saveFiltersFormForIncomingDocuments() {
+      this.updateIncomingDocuments()
+      console.log('save filters')
     },
 
     showContextMenu(event, item) {
@@ -359,13 +408,27 @@ export default {
     },
 
     async findIncomingPaymentDocuments($state) {
-      const searchCriterias = this.createCriteriasToSearchIncomingPaymentDocuments()
+      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
+        this.getIdOfIncomingDocumentsTable(), this.getCurrentUser.id)
+      const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
+      let filtersParams
+
+      if (response.length) {
+        filtersParams = JSON.parse(response[0].settingValue)
+      }
+
+      const searchCriterias = this.createCriteriasToSearchIncomingPaymentDocuments(filtersParams)
       const params = {
         searchCriterias,
         page: this.pageOfRecords,
         orders: this.handleSortData,
         size: 40
       }
+
+      this.isFiltersUsing = searchCriterias.length > 1
+
+      await this.fillResultsOfIncomingDocuments(searchCriterias)
+
       const { content } = await this.$api.payment.incomingPaymentDocuments.findPageBySearchCriteriaList(params)
 
       if (content.length > 0) {
@@ -378,16 +441,16 @@ export default {
       }
     },
 
-    async fillResultsOfDataTableItems() {
-      const searchCriterias = this.createCriteriasToSearchIncomingPaymentDocuments()
+    async fillResultsOfIncomingDocuments(searchCriterias) {
+      this.sumOfDataTableItems = 0
       const paramsForResults = this.createCriteriasToGetResultsOfIncomingPaymentDocuments(searchCriterias)
       const response = await this.$api.payment.incomingPaymentDocuments.findDocumentsWithGroupBy(paramsForResults)
 
       if (response.length > 0) {
         const results = response[0]
-        this.sumOfDataTableItems = this.numberToSum(results.sum_sumFind)
-      } else {
-        this.sumOfDataTableItems = 0
+        if (results.sum_sumFind) {
+          this.sumOfDataTableItems = results.sum_sumFind
+        }
       }
     }
   }
@@ -407,9 +470,17 @@ export default {
   min-width: 100%;
 }
 
+.incoming-payment-documents-bottom-row {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  min-width: 100%;
+}
+
 .incoming-payment-documents-sum-data-field {
   width: 250px;
   margin-right: 20px;
+  padding-top: 10px;
 }
 
 .incoming-payment-documents-co-executor-field {
@@ -443,5 +514,9 @@ export default {
 
 .incoming-payment-documents-purpose-field {
   width: 90%;
+}
+
+.incoming-payment-documents-filters-btn{
+  padding-top: 10px;
 }
 </style>

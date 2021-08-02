@@ -126,7 +126,7 @@ Vue.mixin({
         createCriteriasForRequestToSearchDocsFromPay(filtersParams) {
             const valuesDate = [
                 (typeof filtersParams === 'object' && filtersParams.dateFrom) ?
-                new Date(filtersParams.dateFrom).toLocaleDateString() : this.getDateForCriteriasToSearchDocsFromPay().toLocaleDateString()
+                new Date(filtersParams.dateFrom).toLocaleDateString() : this.getCurrentDateMinusOneYearForSearchCriterias().toLocaleDateString()
             ]
             const dateTo = (typeof filtersParams === 'object' && filtersParams.dateTo) ?
                 new Date(filtersParams.dateTo).toLocaleDateString() : null
@@ -541,7 +541,7 @@ Vue.mixin({
                     operation: 'GREATER_THAN',
                     type: 'OR',
                     values: [
-                        this.getDateForCriteriasToSearchExecutorsByDataUvol().toLocaleDateString()
+                        this.getCurrentDateMinusSixMonthsForSearchCriterias().toLocaleDateString()
                     ]
                 }
             ]
@@ -1280,8 +1280,8 @@ Vue.mixin({
             ]
         },
 
-        createCriteriasToSearchIncomingPaymentDocuments() {
-            return [{
+        createCriteriasToSearchIncomingPaymentDocuments(filtersParams) {
+            let data = [{
                 dataType: 'VARCHAR',
                 key: 'userId',
                 operation: 'EQUALS',
@@ -1290,10 +1290,14 @@ Vue.mixin({
                     this.getCurrentUser.id
                 ]
             }]
+
+           data = this.addUsersFiltersToSearchCriteriasForIncomingOutgoingPaymentDocuments(filtersParams, data)
+
+           return data
         },
 
         createCriteriasForFindOutgoingPaymentDocuments(filtersParams) {
-            const data = [{
+            let data = [{
                 dataType: "VARCHAR",
                 key: "userId",
                 operation: "EQUALS",
@@ -1303,53 +1307,74 @@ Vue.mixin({
                 ]
             }]
 
-            if (typeof filtersParams === 'object' && (filtersParams.dateFrom || filtersParams.dateTo)) {
-                const dateValue = [
-                    filtersParams.dateFrom ?
-                    new Date(filtersParams.dateFrom).toLocaleDateString() : this.getDateForCriteriasToSearchDocsFromPay().toLocaleDateString()
-                ]
-
-                if (filtersParams.dateTo) {
-                    dateValue.push(new Date(filtersParams.dateTo).toLocaleDateString())
-                }
-
-                const dateCriterias = {
-                    'dataType': 'DATE',
-                    'key': 'dataVipis',
-                    'operation': filtersParams.dateTo ? 'BETWEEN' : 'GREATER_THAN',
-                    'type': 'AND',
-                    'values': dateValue
-                }
-
-                data.push(dateCriterias)
-            }
-
-            if (filtersParams) {
-                for (const key in filtersParams) {
-                    let elemParam = filtersParams[key]
-
-                    if (!elemParam || key === 'dateTo' || key === 'dateFrom') {
-                        continue
-                    }
-
-                    const dataType = this.getDataTypeForRequestToSearchDocsFromPay(elemParam, key)
-
-                    const operation = this.getOperationTypeForRequestToSearchDocsFromPay(key)
-
-                    const dataElem = {
-                        dataType,
-                        key,
-                        operation,
-                        'type': 'AND',
-                        'values': [
-                            elemParam
-                        ]
-                    }
-                    data.push(dataElem)
-                }
-            }
+            data = this.addUsersFiltersToSearchCriteriasForIncomingOutgoingPaymentDocuments(filtersParams, data)
 
             return data
+        },
+
+        addUsersFiltersToSearchCriteriasForIncomingOutgoingPaymentDocuments(usersFiltersParams, searchCriterias){
+          if (typeof usersFiltersParams === 'object' && (usersFiltersParams.dateFrom || usersFiltersParams.dateTo)) {
+            const dateValue = [
+              usersFiltersParams.dateFrom ?
+                new Date(usersFiltersParams.dateFrom).toLocaleDateString() : this.getCurrentDateMinusOneYearForSearchCriterias().toLocaleDateString()
+            ]
+
+            if (usersFiltersParams.dateTo) {
+              dateValue.push(new Date(usersFiltersParams.dateTo).toLocaleDateString())
+            }
+
+            const dateCriterias = {
+              'dataType': 'DATE',
+              'key': 'dataVipis',
+              'operation': usersFiltersParams.dateTo ? 'BETWEEN' : 'GREATER_THAN',
+              'type': 'AND',
+              'values': dateValue
+            }
+
+            searchCriterias.push(dateCriterias)
+          }
+
+          if (usersFiltersParams) {
+            for (const key in usersFiltersParams) {
+              let elemParam = usersFiltersParams[key]
+
+              if (!elemParam || key === 'dateTo' || key === 'dateFrom') {
+                continue
+              }
+
+              const dataType = this.getDataTypeForRequestToSearchIncomingOutgoingPaymentDocuments(elemParam)
+
+              const operation = this.getOperationTypeForRequestToSearchIncomingOutgoingPaymentDocuments(key)
+
+              const dataElem = {
+                dataType,
+                key,
+                operation,
+                'type': 'AND',
+                'values': [
+                  elemParam
+                ]
+              }
+              searchCriterias.push(dataElem)
+            }
+          }
+
+          return searchCriterias
+        },
+
+        getDataTypeForRequestToSearchIncomingOutgoingPaymentDocuments(elemParam) {
+          return typeof elemParam === 'number' ? 'INTEGER' : 'VARCHAR'
+        },
+
+        getOperationTypeForRequestToSearchIncomingOutgoingPaymentDocuments(key) {
+          if (key === 'nameDoc' ||
+            key === 'creatorName' ||
+            key === 'executorName' ||
+            key === 'prim') {
+            return 'LIKE'
+          } else {
+            return 'EQUALS'
+          }
         },
 
         createCriteriasToGetResultsOfContentForOutgoingPayment(searchCriterias) {

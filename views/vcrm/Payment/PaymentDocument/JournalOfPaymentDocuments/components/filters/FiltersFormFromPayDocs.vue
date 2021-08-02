@@ -288,7 +288,7 @@ export default {
       }
 
       if (!this.filterItem.dateFrom) {
-        this.filterItem.dateFrom = this.getDateForCriteriasToSearchDocsFromPay().toISOString().substr(0, 10)
+        this.filterItem.dateFrom = this.getCurrentDateMinusOneYearForSearchCriterias().toISOString().substr(0, 10)
       }
     },
 

@@ -9,7 +9,7 @@
   >
     <v-card>
       <v-card-title>
-        <span class="headline">Фильтры для таблицы "Исходящие платежные документы"</span>
+        <span class="headline">Фильтры для таблицы "{{ nameOfTable }}"</span>
       </v-card-title>
       <v-card-text>
         <v-container class="container-data">
@@ -37,32 +37,66 @@
               />
             </v-col>
           </v-row>
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                v-model="filterItem.poluchName"
-                label="Получатель"
-                :clearable="true"
-                outlined
-                hide-details="auto"
-              />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12">
-              <v-autocomplete
-                v-model="filterItem.platName"
-                label="Плательщик"
-                :loading="loadingType.payers"
-                :items="payers"
-                :clearable="true"
-                item-value="clName8"
-                item-text="clName"
-                outlined
-                hide-details="auto"
-              />
-            </v-col>
-          </v-row>
+          <div
+            v-if="isIncomingDocuments"
+          >
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="filterItem.platName"
+                  label="Плательщик"
+                  :clearable="true"
+                  outlined
+                  hide-details="auto"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12">
+                <v-autocomplete
+                  v-model="filterItem.poluchName"
+                  label="Получатель"
+                  :loading="loadingType.recipients"
+                  :items="recipients"
+                  :clearable="true"
+                  item-value="clName8"
+                  item-text="clName"
+                  outlined
+                  hide-details="auto"
+                />
+              </v-col>
+            </v-row>
+          </div>
+          <div
+            v-else
+          >
+            <v-row>
+              <v-col cols="12">
+                <v-autocomplete
+                  v-model="filterItem.platName"
+                  label="Плательщик"
+                  :loading="loadingType.payers"
+                  :items="payers"
+                  :clearable="true"
+                  item-value="clName8"
+                  item-text="clName"
+                  outlined
+                  hide-details="auto"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="filterItem.poluchName"
+                  label="Получатель"
+                  :clearable="true"
+                  outlined
+                  hide-details="auto"
+                />
+              </v-col>
+            </v-row>
+          </div>
           <v-row>
             <v-col cols="12">
               <v-text-field
@@ -216,22 +250,26 @@ export default {
       dialog: false,
       departments: [],
       payers: [],
+      recipients: [],
       // !!! не понятно что должно быть в budgetElements
       budgetElements: [],
       // id элемента, для которого будут сохранены настроики фильтров
-      elementId: null
+      elementId: null,
+
+      isIncomingDocuments: false,
+
+      nameOfTable: ''
     }
   },
   mounted() {
     this.init()
   },
   methods: {
+    // функция инициализации формы
     init() {
-      this.elementId = this.getIdOfFromOutgoingDocumentsTable()
       this.findDepartments()
-      this.findPayers()
+      // this.findPayers()
       this.findBudgetElements()
-      this.findFiltersValues()
     },
     // Поиск подразделений для выбора пользователем
     async findDepartments() {
@@ -241,9 +279,15 @@ export default {
     },
     // Поиск плательщиков для выбора пользователем
     async findPayers() {
-      this.loadingType.platName = true
+      this.loadingType.payers = true
       this.payers = await this.$api.organizations.findInternalOrganizations()
-      this.loadingType.platName = null
+      this.loadingType.payers = null
+    },
+    // Поиск получателей для выбора пользователем
+    async findRecipients() {
+      this.loadingType.recipients = true
+      this.recipients = await this.$api.organizations.findInternalOrganizations()
+      this.loadingType.recipients = null
     },
     // Поиск элементов бюджета для выбора пользователем
     async findBudgetElements() {
@@ -256,6 +300,7 @@ export default {
       this.dialog = false
       this.$emit('cancel')
     },
+    // функция сохранения значений фильтров
     async saveFilters() {
       const filterEntityForSave = this.createFilterEntityForSave(this.elementId, this.$route.name, this.filterItem,
         this.getCurrentUser.id, this.getCurrentUser.id)
@@ -274,7 +319,25 @@ export default {
         this.filterItem = JSON.parse(response[0].settingValue)
       }
     },
-    openForm() {
+    // функция открытия формы
+    async openForm(nameOfTable, elementId) {
+      if (!nameOfTable ||
+          !elementId) {
+        return
+      }
+
+      this.elementId = elementId
+      this.nameOfTable = nameOfTable
+
+      if (this.elementId === this.getIdOfIncomingDocumentsTable()) {
+        this.isIncomingDocuments = true
+        await this.findRecipients()
+      } else {
+        this.isIncomingDocuments = false
+        await this.findPayers()
+      }
+
+      await this.findFiltersValues()
       this.dialog = true
     }
   }

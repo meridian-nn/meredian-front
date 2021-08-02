@@ -19,7 +19,7 @@
         </v-btn>
 
         <v-btn
-          v-if="isFiltersForFromPayDocsUsing"
+          v-if="isFiltersUsing"
           color="blue"
           dark
           class="ml-2"
@@ -313,7 +313,7 @@ export default {
       keyLoading: Math.random(),
       infiniteIdOfRecordsData: 0,
       pageOfRecords: 0,
-      isFiltersForFromPayDocsUsing: false
+      isFiltersUsing: false
     }
   },
   computed: {
@@ -396,7 +396,7 @@ export default {
 
     async findOutgoingPaymentDocuments($state) {
       const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
-        this.getIdOfFromOutgoingDocumentsTable(), this.getCurrentUser.id)
+        this.getIdOfOutgoingDocumentsTable(), this.getCurrentUser.id)
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
       let filtersParams
 
@@ -411,7 +411,7 @@ export default {
         orders: this.handleSortData
       }
 
-      this.isFiltersForFromPayDocsUsing = searchCriterias.length > 1
+      this.isFiltersUsing = searchCriterias.length > 1
 
       await this.fillResultsOfOutgoingDocuments(searchCriterias)
 
@@ -428,7 +428,7 @@ export default {
     },
     // Функция открытия формы фильтров таблицы "Документы на оплату"
     openFilterFormOutgoingDocument() {
-      this.$refs.filtersFormFromOutgoingDocument.openForm()
+      this.$refs.filtersFormFromOutgoingDocument.openForm('Исходящие платежные документы', this.getIdOfOutgoingDocumentsTable())
     },
     // Функция отработки события "Закрытие формы фильтров таблицы "Документов на оплату""
     closeFiltersFormOutgoingDocument() {
@@ -446,14 +446,15 @@ export default {
       this.infiniteIdOfRecordsData += 1
     },
     async fillResultsOfOutgoingDocuments(searchCriterias) {
+      this.totalToSum = 0
       const dataForResults = this.createCriteriasToGetResultsOfContentForOutgoingPayment(searchCriterias)
       const response = await this.$api.payment.outgoingPayment.findDocumentsWithGroupBy(dataForResults)
 
       if (response.length > 0) {
         const results = response[0]
-        this.totalToSum = this.numberToSum(results.sum_sumFind)
-      } else {
-        this.totalToSum = 0
+        if (results.sum_sumFind) {
+          this.totalToSum = this.numberToSum(results.sum_sumFind)
+        }
       }
     },
     // Заполнение поля "Примечание" под таблице документов на оплату примечанием выбранного документа
