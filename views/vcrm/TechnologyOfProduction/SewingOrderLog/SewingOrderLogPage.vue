@@ -19,7 +19,6 @@
           fab
           small
           color="red"
-          disabled
         >
           <v-icon
             color="white"
@@ -89,6 +88,7 @@
           :headers="sewingOrderTableHeaders"
           :items="sewingOrderTableRecords"
           calculate-widths
+          @click:row="fillCustomerName"
           @contextmenu:row="rightClickHandler"
           @update:sort-by="updateSort('by', $event)"
           @update:sort-desc="updateSort('desc', $event)"
@@ -116,11 +116,11 @@
                 Сформировать заказ на доп.работу
               </v-list-item-title>
             </v-list-item>
-            <!--v-list-item @click="deleteRecord">
+            <v-list-item @click="deleteRecord">
               <v-list-item-title>
                 Удалить
               </v-list-item-title>
-            </v-list-item-->
+            </v-list-item>
           </v-list>
         </v-menu>
       </div>
@@ -137,6 +137,7 @@
           hide-details="auto"
           :readonly="true"
           outlined
+          dense
         />
       </div>
     </div>
@@ -425,13 +426,15 @@ export default {
 
       noOTK: false,
 
-      customerName: ''
+      customerName: '',
+
+      canUpdate: false
     }
   },
 
-  async fetch() {
+  /* async fetch() {
     await this.init()
-  },
+  }, */
 
   computed: {
     handleSortData() {
@@ -450,9 +453,15 @@ export default {
     }
   },
 
+  mounted() {
+    this.init()
+  },
+
   methods: {
     async init() {
-      await this.initDataForCurrentUser()
+      await this.fullUpdateTableOfRecordsWithInitData()
+      this.canUpdate = true
+      this.updateSewingOrderTableRecords()
     },
 
     async initDataForCurrentUser() {
@@ -473,6 +482,10 @@ export default {
       })
     },
 
+    fillCustomerName(item) {
+      this.customerName = item.nameKontr
+    },
+
     async closeModalEditTailoring() {
       this.modals.edit = false
       await this.fullUpdateTableOfRecordsWithInitData()
@@ -484,9 +497,9 @@ export default {
     },
 
     async fullUpdateTableOfRecordsWithInitData() {
-      this.loadingType.sewingOrderTableRecords = true
       this.sewingOrderTableRecords = []
       this.sewingOrderTableSelectedRecords = []
+      this.loadingType.sewingOrderTableRecords = true
       await this.initDataForCurrentUser()
       await this.updateSewingOrderTableRecords()
       this.loadingType.sewingOrderTableRecords = false
@@ -580,6 +593,10 @@ export default {
         filtersParams = JSON.parse(response[0].settingValue)
       } */
 
+      if (!this.canUpdate) {
+        return
+      }
+
       const searchCriterias = this.createCriteriasToSearchSewingOrderLogDataByPage()
       const data = {
         searchCriterias,
@@ -621,7 +638,7 @@ export default {
         return
       }
 
-      const params = this.createStructureForDelZkzpsvProcedure(currentOrder.id)
+      const params = this.createStructureForDelZkzpsvProcedure(currentOrder.zkzpsvId)
       const response = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params)
 
       if (response.flagRet === 0) {
@@ -641,7 +658,7 @@ export default {
 
 <style lang="scss">
 .sewing-order-log-page {
-  padding: 20px;
+  padding: 10px;
 
   &__table {
     overflow: auto;
