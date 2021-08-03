@@ -77,7 +77,7 @@
         <v-data-table
           id="sewing-order-log-page-records-table"
           v-model="sewingOrderTableSelectedRecords"
-          height="650"
+          height="730"
           fixed-header
           :loading="loadingType.sewingOrderTableRecords"
           loading-text="Заказы загружаются, подождите"
@@ -171,12 +171,14 @@
     </div>
 
     <modal-edit-tailoring
+      :edit="sewingOrderTableSelectedRecords[0]"
       :value="modals.edit"
       @close="closeModalEditTailoring"
       @save="saveModalEditTailoring"
     />
 
     <modal-edit-work
+      :edit="sewingOrderTableSelectedRecords[0]"
       :value="modals.editAdd"
       @close="closeModalEditWork"
       @save="saveModalEditWork"
@@ -195,6 +197,7 @@
 
     <modal-filter
       :value="modals.filter"
+      @save="updateSewingOrderTableRecords"
       @close="closeFilterModal"
     />
 
@@ -286,7 +289,7 @@ export default {
         },
         {
           text: 'Ед.',
-          value: 'nameProizv',
+          value: '', // name_ed нет в респонсе
           width: '50px',
           sortable: false
         },
@@ -304,7 +307,7 @@ export default {
         },
         {
           text: 'Факт',
-          value: 'dataZkzpsv',
+          value: 'factData',
           width: '95px',
           sort: () => false
         },
@@ -334,19 +337,13 @@ export default {
         },
         {
           text: 'Исполнитель',
-          value: 'numZaivk',
+          value: 'fioIsp',
           width: '100px',
           sort: () => false
         },
         {
           text: 'Отв.исп',
           value: 'otvIsp',
-          width: '100px',
-          sort: () => false
-        },
-        {
-          text: 'Заявка',
-          value: 'numZaivk',
           width: '100px',
           sort: () => false
         },
@@ -370,7 +367,7 @@ export default {
         },
         {
           text: 'КК',
-          value: 'numZaivk',
+          value: 'gotovKonfKarta',
           width: '40px',
           sort: () => false
         },
@@ -582,8 +579,8 @@ export default {
     },
 
     async findSewingOrderTableRecords($state) {
-      /* const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
-        'filter-sewing-order-log', this.getCurrentUser.id)
+      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
+        this.getIdOfFilterSewingOrderLog(), this.getCurrentUser.id)
 
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
 
@@ -591,13 +588,13 @@ export default {
 
       if (response.length) {
         filtersParams = JSON.parse(response[0].settingValue)
-      } */
+      }
 
       if (!this.canUpdate) {
         return
       }
 
-      const searchCriterias = this.createCriteriasToSearchSewingOrderLogDataByPage()
+      const searchCriterias = this.createCriteriasToSearchSewingOrderLogDataByPage(filtersParams)
       const data = {
         searchCriterias,
         page: this.pageOfFromPayData,
@@ -673,7 +670,7 @@ export default {
 #sewing-order-log-page-records-table {
   border-collapse: collapse;
   width: 100%;
-  height: 650px;
+  height: 730px;
 }
 
 #sewing-order-log-page-records-table table {
