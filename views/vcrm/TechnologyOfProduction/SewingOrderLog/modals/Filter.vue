@@ -2,109 +2,143 @@
   <v-dialog
     max-width="600px"
     :value="value"
+    padding="0px"
+    persistent
     class="filters-modal"
     @input="$emit('close')"
   >
-    <v-card class="modal-card">
+    <v-card>
       <v-card-title>
-        <span class="headline">Фильтры для таблицы "Документы на оплату"</span>
+        <span class="headline">Фильтры для журнала заказов на пошив</span>
       </v-card-title>
 
       <v-card-text>
-        <v-row class="date-filter">
-          <v-col cols="6">
-            <v-text-field
-              v-model="form.dateFrom"
-              :clearable="true"
-              type="date"
-              outlined
-              label="Период с"
-            />
-          </v-col>
+        <v-container class="container-data">
+          <v-row class="date-filter">
+            <v-col cols="6">
+              <v-text-field
+                v-model="form.dateFrom"
+                :clearable="true"
+                type="date"
+                outlined
+                label="Период с"
+                :hint="form.dateFrom > form.dateTo ? `'Период с' должен быть меньше 'Период заканчивая'` : ''"
+                persistent-hint
+              />
+            </v-col>
 
-          <v-col cols="6">
-            <v-text-field
-              v-model="form.dateTo"
-              :clearable="true"
-              type="date"
-              outlined
-              label="Период заканчивая"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="12">
-            <v-text-field
-              v-model="form.numZaivk"
-              label="Исполнитель"
-              clearable
-              outlined
-            />
-          </v-col>
-        </v-row>
+            <v-col cols="6">
+              <v-text-field
+                v-model="form.dateTo"
+                :clearable="true"
+                type="date"
+                outlined
+                label="Период заканчивая"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                v-model="form.fioIsp"
+                label="Исполнитель"
+                clearable
+                outlined
+                hide-details="auto"
+              />
+            </v-col>
+          </v-row>
 
-        <v-row>
-          <v-col cols="12">
-            <v-text-field
-              v-model="form.otvIsp"
-              label="Отдел исполнителя"
-              :clearable="true"
-              outlined
-            />
-          </v-col>
-        </v-row>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                v-model="form.depOfIsp"
+                label="Отдел исполнителя"
+                :clearable="true"
+                disabled
+                outlined
+                hide-details="auto"
+              />
+            </v-col>
+          </v-row>
 
-        <v-row>
-          <v-col cols="12">
-            <v-text-field
-              v-model="form.nameProizv"
-              label="Производство"
-              clearable
-              outlined
-            />
-          </v-col>
-        </v-row>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                v-model="form.nameProizv"
+                label="Производство"
+                clearable
+                outlined
+                hide-details="auto"
+              />
+            </v-col>
+          </v-row>
 
-        <v-row>
-          <v-col cols="12">
-            <v-text-field
-              v-model="form.planData"
-              label="Фабрика"
-              clearable
-              outlined
-            />
-          </v-col>
-        </v-row>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                v-model="form.planData"
+                label="Фабрика"
+                clearable
+                outlined
+                hide-details="auto"
+              />
+            </v-col>
+          </v-row>
 
-        <v-row>
-          <v-col cols="6">
-            <v-checkbox
-              label="Наше производство"
-            />
-          </v-col>
-          <v-col cols="6">
-            <v-checkbox
-              label="Довальческое производство"
-            />
-          </v-col>
-        </v-row>
+          <v-row>
+            <v-col
+              cols="6"
+              class="pt-0"
+            >
+              <v-checkbox
+                class="mt-0"
+                label="Наше производство"
+                hide-details="auto"
+              />
+            </v-col>
+            <v-col
+              cols="6"
+              class="pt-0"
+            >
+              <v-checkbox
+                class="mt-0"
+                label="Давальческое производство"
+                hide-details="auto"
+              />
+            </v-col>
+          </v-row>
 
-        <v-row>
-          <v-col cols="6">
-            <v-checkbox
-              label="Заказы на удаление"
-            />
-          </v-col>
-          <v-col cols="6">
-            <v-checkbox
-              label="Раскрой"
-            />
-          </v-col>
-        </v-row>
+          <v-row>
+            <v-col
+              cols="6"
+              class="pt-0"
+            >
+              <v-checkbox
+                class="mt-0"
+                label="Заказы на удаление"
+                hide-details="auto"
+              />
+            </v-col>
+            <v-col
+              cols="6"
+              class="pt-0"
+            >
+              <v-checkbox
+                class="mt-0"
+                label="Раскрой"
+                hide-details="auto"
+              />
+            </v-col>
+          </v-row>
+        </v-container>
       </v-card-text>
 
       <v-card-actions>
-        <v-btn @click="saveFilters">
+        <v-btn
+          :disabled="form.dateFrom > form.dateTo"
+          @click="saveFilters"
+        >
           Применить фильтры
         </v-btn>
 
@@ -147,7 +181,7 @@ export default {
   methods: {
     async findFiltersValues() {
       const data = this.createCriteriasToSearchForFiltersValues(this.$route.name,
-        'filter-sewing-order-log', this.getCurrentUser.id)
+        this.getIdOfFilterSewingOrderLog(), this.getCurrentUser.id)
       const response = await this.$api.uiSettings.findBySearchCriterias(data)
 
       if (response.length) {
@@ -161,13 +195,12 @@ export default {
 
     async saveFilters() {
       try {
-        const filterEntityForSave = this.createFilterEntityForSave('filter-sewing-order-log', this.$route.name, this.form,
+        const filterEntityForSave = this.createFilterEntityForSave(this.getIdOfFilterSewingOrderLog(), this.$route.name, this.form,
           this.getCurrentUser.id, this.getCurrentUser.id)
 
         await this.$api.uiSettings.save(filterEntityForSave)
 
         this.$emit('save')
-
         this.$emit('close')
       } catch (e) {
         this.$emit('close')
@@ -177,18 +210,8 @@ export default {
 }
 </script>
 
-<style lang="scss" scope>
-.col {
-  padding: 0 12px !important;
-}
-.v-card__title {
-  margin-bottom: 30px;
-}
-.v-input--selection-controls {
-  margin-top: 0 !important;
-}
-
-.row + .row {
-  margin-top: 0;
+<style lang="scss">
+.date-filter .v-messages__message {
+  color: red;
 }
 </style>

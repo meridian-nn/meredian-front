@@ -21,6 +21,10 @@ Vue.mixin({
       return 'records-of-work-by-cards-table-of-records'
     },
 
+    getIdOfFilterSewingOrderLog() {
+      return 'filter-sewing-order-log'
+    },
+
     //Функция возвращает form id и element id для orgId и accId по умолчанию
     getObjectWithFormIdAndElementIdForDefaultOrgAndAcc() {
       return {

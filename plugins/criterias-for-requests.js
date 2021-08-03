@@ -927,29 +927,10 @@ Vue.mixin({
         ]
       }]
 
+      this.addFilterByDatesFromUsersFiltersParamsToSearchCriterias(usersFiltersParams, searchCriterias, 'dataZkzpsv')
+
       if (usersFiltersParams) {
-        for (const key in usersFiltersParams) {
-          let elemParam = usersFiltersParams[key]
-
-          if (!elemParam || key === 'dateTo' || key === 'dateFrom') {
-            continue
-          }
-
-          const dataType = this.getDataTypeForRequestToSearchIncomingOutgoingPaymentDocuments(elemParam)
-
-          const operation = this.getOperationTypeForRequestToSearchIncomingOutgoingPaymentDocuments(key)
-
-          const dataElem = {
-            dataType,
-            key,
-            operation,
-            'type': 'AND',
-            'values': [
-              elemParam
-            ]
-          }
-          searchCriterias.push(dataElem)
-        }
+        this.addUsersFiltersParamsToSearchCriterias(searchCriterias, usersFiltersParams)
       }
 
       return searchCriterias
@@ -1354,6 +1335,16 @@ Vue.mixin({
     },
 
     addUsersFiltersToSearchCriteriasForIncomingOutgoingPaymentDocuments(usersFiltersParams, searchCriterias) {
+      this.addFilterByDatesFromUsersFiltersParamsToSearchCriterias(usersFiltersParams, searchCriterias, 'dataVipis')
+
+      if (usersFiltersParams) {
+        this.addUsersFiltersParamsToSearchCriterias(searchCriterias, usersFiltersParams)
+      }
+
+      return searchCriterias
+    },
+
+    addFilterByDatesFromUsersFiltersParamsToSearchCriterias(usersFiltersParams, searchCriterias, key) {
       if (typeof usersFiltersParams === 'object' && (usersFiltersParams.dateFrom || usersFiltersParams.dateTo)) {
         const dateValue = [
           usersFiltersParams.dateFrom ?
@@ -1366,7 +1357,7 @@ Vue.mixin({
 
         const dateCriterias = {
           'dataType': 'DATE',
-          'key': 'dataVipis',
+          'key': key,
           'operation': usersFiltersParams.dateTo ? 'BETWEEN' : 'GREATER_THAN',
           'type': 'AND',
           'values': dateValue
@@ -1374,55 +1365,46 @@ Vue.mixin({
 
         searchCriterias.push(dateCriterias)
       }
-
-      if (usersFiltersParams) {
-        for (const key in usersFiltersParams) {
-          let elemParam = usersFiltersParams[key]
-
-          if (!elemParam || key === 'dateTo' || key === 'dateFrom') {
-            continue
-          }
-
-          const dataType = this.getDataTypeForRequestToSearchIncomingOutgoingPaymentDocuments(elemParam)
-
-          const operation = this.getOperationTypeForRequestToSearchIncomingOutgoingPaymentDocuments(key)
-
-          const dataElem = {
-            dataType,
-            key,
-            operation,
-            'type': 'AND',
-            'values': [
-              elemParam
-            ]
-          }
-          searchCriterias.push(dataElem)
-        }
-      }
-
-      return searchCriterias
     },
 
-    getDataTypeForRequestToSearchIncomingOutgoingPaymentDocuments(elemParam) {
+    addUsersFiltersParamsToSearchCriterias(searchCriterias, usersFiltersParams) {
+      for (const key in usersFiltersParams) {
+        let elemParam = usersFiltersParams[key]
+
+        if (!elemParam || key === 'dateTo' || key === 'dateFrom') {
+          continue
+        }
+
+        const dataType = this.getDataTypeForSearchCriteria(elemParam)
+
+        const operation = this.getOperationTypeForSearchCriteria(key)
+
+        const dataElem = {
+          dataType,
+          key,
+          operation,
+          'type': 'AND',
+          'values': [
+            elemParam
+          ]
+        }
+        searchCriterias.push(dataElem)
+      }
+    },
+
+    getDataTypeForSearchCriteria(elemParam) {
       return typeof elemParam === 'number' ? 'INTEGER' : 'VARCHAR'
     },
 
-    getOperationTypeForRequestToSearchIncomingOutgoingPaymentDocuments(key) {
-      if (key === 'nameDoc' ||
-        key === 'creatorName' ||
-        key === 'executorName' ||
-        key === 'prim') {
-        return 'LIKE'
-      } else {
-        return 'EQUALS'
-      }
+    getOperationTypeForSearchCriteria(key) {
+      return 'EQUALS'
     },
 
     createCriteriasToGetResultsOfContentForOutgoingPayment(searchCriterias) {
       const aggregateFunctions = [{
-        'field': 'sumFind',
-        'function': 'SUM'
-      },
+          'field': 'sumFind',
+          'function': 'SUM'
+        },
         {
           'field': 'id',
           'function': 'MAX'
@@ -1432,6 +1414,31 @@ Vue.mixin({
       return {
         aggregateFunctions: aggregateFunctions,
         searchCriteria: searchCriterias
+      }
+
+    },
+
+    creatCriteriasForGetExecutors2InCreatingNewOutgoingDocument() {
+        return {
+            dataType: 'VARCHAR',
+            key: 'status',
+            operation: 'GREATER_THAN',
+            type: 'AND',
+            values: [
+                '0'
+            ]
+        }
+    },
+
+    creatCriteriasForGetOrgInCreatingNewOutgoingDocument(orgIdf) {
+      return {
+        dataType: "VARCHAR",
+        key: "id",
+        operation: "EQUALS",
+        type: "AND",
+        values: [
+            orgIdf
+        ]
       }
     }
   }
