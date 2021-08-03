@@ -37,7 +37,6 @@
             <v-text-field
               v-model="form.numZaivk"
               label="Исполнитель"
-              :items="departments"
               clearable
               outlined
             />
@@ -49,7 +48,6 @@
             <v-text-field
               v-model="form.otvIsp"
               label="Отдел исполнителя"
-              :items="departments"
               :clearable="true"
               outlined
             />
@@ -61,7 +59,6 @@
             <v-text-field
               v-model="form.nameProizv"
               label="Производство"
-              :items="executors"
               clearable
               outlined
             />
@@ -73,7 +70,6 @@
             <v-text-field
               v-model="form.planData"
               label="Фабрика"
-              :items="payers"
               clearable
               outlined
             />
@@ -108,15 +104,11 @@
       </v-card-text>
 
       <v-card-actions>
-        <v-btn
-          @click="saveFilters"
-        >
+        <v-btn @click="saveFilters">
           Применить фильтры
         </v-btn>
 
-        <v-btn
-          @click="$emit('close')"
-        >
+        <v-btn @click="$emit('close')">
           Отмена
         </v-btn>
       </v-card-actions>
@@ -138,8 +130,8 @@ export default {
   data() {
     return {
       form: {
-        dateFrom: null,
-        dateTo: null,
+        from: null,
+        to: null,
         numZaivk: '',
         otvIsp: '',
         nameProizv: '',
@@ -148,26 +140,37 @@ export default {
     }
   },
 
+  fetch() {
+    this.findFiltersValues()
+  },
+
   methods: {
-    async saveFilet() {
-      const filterEntityForSave = this.createFilterEntityForSave('filter-sewing-order-log', this.$route.name, this.filterItem,
-        this.getCurrentUser.id, this.getCurrentUser.id)
-
-      await this.$api.uiSettings.save(filterEntityForSave)
-
-      this.$emit('save')
-    },
-
     async findFiltersValues() {
-      const data = this.createCriteriasToSearchForFiltersValues(this.$route.name, 'filter-sewing-order-log', this.getCurrentUser.id)
+      const data = this.createCriteriasToSearchForFiltersValues(this.$route.name,
+        'filter-sewing-order-log', this.getCurrentUser.id)
       const response = await this.$api.uiSettings.findBySearchCriterias(data)
 
       if (response.length) {
         this.form = JSON.parse(response[0].settingValue)
       }
 
-      if (!this.filterItem.dateFrom) {
-        this.filterItem.dateFrom = this.getDateForCriteriasToSearchDocsFromPay().toISOString().substr(0, 10)
+      if (!data.dateFrom) {
+        this.form.dateFrom = this.getCurrentDateMinusOneYearForSearchCriterias().toISOString().substr(0, 10)
+      }
+    },
+
+    async saveFilters() {
+      try {
+        const filterEntityForSave = this.createFilterEntityForSave('filter-sewing-order-log', this.$route.name, this.form,
+          this.getCurrentUser.id, this.getCurrentUser.id)
+
+        await this.$api.uiSettings.save(filterEntityForSave)
+
+        this.$emit('save')
+
+        this.$emit('close')
+      } catch (e) {
+        this.$emit('close')
       }
     }
   }

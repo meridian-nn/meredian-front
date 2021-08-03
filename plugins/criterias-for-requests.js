@@ -916,7 +916,7 @@ Vue.mixin({
       return data
     },
 
-    createCriteriasToSearchSewingOrderLogDataByPage() {
+    createCriteriasToSearchSewingOrderLogDataByPage(usersFiltersParams) {
       const searchCriterias = [{
         dataType: 'VARCHAR',
         key: 'userId',
@@ -926,6 +926,31 @@ Vue.mixin({
           this.getCurrentUser.id
         ]
       }]
+
+      if (usersFiltersParams) {
+        for (const key in usersFiltersParams) {
+          let elemParam = usersFiltersParams[key]
+
+          if (!elemParam || key === 'dateTo' || key === 'dateFrom') {
+            continue
+          }
+
+          const dataType = this.getDataTypeForRequestToSearchIncomingOutgoingPaymentDocuments(elemParam)
+
+          const operation = this.getOperationTypeForRequestToSearchIncomingOutgoingPaymentDocuments(key)
+
+          const dataElem = {
+            dataType,
+            key,
+            operation,
+            'type': 'AND',
+            'values': [
+              elemParam
+            ]
+          }
+          searchCriterias.push(dataElem)
+        }
+      }
 
       return searchCriterias
     },

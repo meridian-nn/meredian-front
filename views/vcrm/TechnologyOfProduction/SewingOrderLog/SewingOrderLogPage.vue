@@ -170,12 +170,14 @@
     </div>
 
     <modal-edit-tailoring
+      :edit="sewingOrderTableSelectedRecords[0]"
       :value="modals.edit"
       @close="closeModalEditTailoring"
       @save="saveModalEditTailoring"
     />
 
     <modal-edit-work
+      :edit="sewingOrderTableSelectedRecords[0]"
       :value="modals.editAdd"
       @close="closeModalEditWork"
       @save="saveModalEditWork"
@@ -194,6 +196,7 @@
 
     <modal-filter
       :value="modals.filter"
+      @save="updateSewingOrderTableRecords"
       @close="closeFilterModal"
     />
 
@@ -569,7 +572,7 @@ export default {
     },
 
     async findSewingOrderTableRecords($state) {
-      /* const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
+      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
         'filter-sewing-order-log', this.getCurrentUser.id)
 
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
@@ -578,9 +581,9 @@ export default {
 
       if (response.length) {
         filtersParams = JSON.parse(response[0].settingValue)
-      } */
+      }
 
-      const searchCriterias = this.createCriteriasToSearchSewingOrderLogDataByPage()
+      const searchCriterias = this.createCriteriasToSearchSewingOrderLogDataByPage(filtersParams)
       const data = {
         searchCriterias,
         page: this.pageOfFromPayData,

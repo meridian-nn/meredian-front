@@ -144,6 +144,11 @@ export default {
     value: {
       type: Boolean,
       default: false
+    },
+
+    edit: {
+      type: Object,
+      default: () => {}
     }
   },
 
