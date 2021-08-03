@@ -155,8 +155,8 @@ Vue.mixin({
       const params = {
         user_id: this.getCurrentUser.id,
         vid: 1,
-        data1: '2020-09-01',
-        data2: '2020-09-30'
+        data1: '2021-06-01',
+        data2: new Date().toISOString().slice(0, 10)
       }
       if (paramsForRequest) {
         params.vid = paramsForRequest.vid
@@ -192,6 +192,79 @@ Vue.mixin({
     createParamsForDelZkzpsvProcedure(idOfRecordForDelete) {
       return {
         zkzpsv_id: idOfRecordForDelete
+      }
+    },
+
+    createStructureForPayersInOutgoingPaymentDocumentsInitDataProcedure() {
+      return {
+        params: {},
+        procName: this.$api.payment.outgoingPayment.getPayersInOutgoingPaymentDocumentsInitDataProcedureName()
+      }
+    },
+
+    createStructureForExecutorsPaymentDocumentsInitDataProcedure(userParams) {
+      return {
+        params: userParams,
+        procName: this.$api.payment.outgoingPayment.getForWhomsInOutgoingPaymentDocumentsInitDataProcedureName()
+      }
+    },
+
+    createStructureForBudgetsDepartmentsInitDataProcedure() {
+      return {
+        params: {},
+        procName: this.$api.payment.outgoingPayment.getBudgetsDepartmentsInOutgoingPaymentDocumentsInitDataProcedureName()
+      }
+    },
+
+    createStructureForBudgetsArticlesInitDataProcedure() {
+      return {
+        params: {},
+        procName: this.$api.payment.outgoingPayment.getBudgetsArticlesInOutgoingPaymentDocumentsInitDataProcedureName()
+      }
+    },
+
+    createStructureForGenerateIdforNewOutgoingPaymentDocuments(params) {
+      return {
+        params: { 'cNameAliasGANN': 'sp_find' },
+        procName: 'dbo.getautonewnum'
+      }
+    },
+
+    createParamsForSaveNewOutgoingDocuments(createdItem) {
+      return {
+        numFind: createdItem.numFind ? createdItem.numFind : '',
+        dataVipis: createdItem.dataVipis ? new Date(createdItem.dataVipis).toLocaleDateString() : new Date().toLocaleDateString(),
+        dataOpl: createdItem.dataOpl ? new Date(createdItem.dataOpl).toLocaleDateString() : new Date().toLocaleDateString(),
+        sumFind: createdItem.sumFind ? createdItem.sumFind : 0,
+        orgId: createdItem.payer && createdItem.payer.client_id ? createdItem.payer.client_id : 0,
+        poluchId: createdItem.poluchId ? createdItem.poluchId : 0,
+        zaorgId: createdItem.forWhom && createdItem.forWhom.client_id ? createdItem.forWhom.client_id : 0,
+        ispId: createdItem.isp_id,
+        orgIsp: createdItem.payer && createdItem.payer.glbuch_id ? createdItem.payer.glbuch_id : 0,
+        zaorgIsp: createdItem.forWhom && createdItem.forWhom.glbuch_id ? createdItem.forWhom.glbuch_id : 0,
+        dispId: createdItem.executor && createdItem.executor.isp_id ? createdItem.executor.isp_id : 0,
+        dsoispId: createdItem.customerCollaborator && createdItem.customerCollaborator.id ? createdItem.customerCollaborator.id : 0,
+        soispId: createdItem.collaborator && createdItem.collaborator.id ? createdItem.collaborator.id : 0,
+        fss: 1,
+        fsn: createdItem.f_sn ? createdItem.f_sn : 0,
+        fosn: createdItem.f_osn ? createdItem.f_osn : 0,
+        descr: this.getCurrentUser.login,
+        dataEdit: new Date().toLocaleDateString(),
+        vidFind: createdItem.vid_find ? createdItem.vid_find : 0,
+        otdId: createdItem.otd_id ? createdItem.otd_id : 0,
+        statiId: createdItem.stati_id ? createdItem.stati_id : 0,
+        comment: createdItem.comment ? createdItem.comment : '',
+        budElem: createdItem.bud_elem ? createdItem.bud_elem : 0,
+        budCfo: createdItem.bud_cfo ? createdItem.bud_cfo : 0,
+        numVipis: createdItem.num_vipis ? createdItem.num_vipis : 0,
+        accId: 0,
+        direct: 0,
+        flagDel: 0,
+        paccId: 0,
+        tipFind: 1,
+        nameFind: 'Платежное поручение',
+        id: createdItem.find_id,
+        descrCreate: this.getCurrentUser.login
       }
     }
   }
