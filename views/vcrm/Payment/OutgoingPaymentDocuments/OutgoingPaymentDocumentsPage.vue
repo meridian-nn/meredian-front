@@ -133,22 +133,6 @@
       </v-data-table>
     </div>
 
-    <v-menu
-      v-model="rightClickMenu"
-      :position-x="xRightClickMenu"
-      :position-y="yRightClickMenu"
-      absolute
-      offset-y
-    >
-      <v-list>
-        <v-list-item @click="profileOfContractorOpenForm">
-          <v-list-item-title>
-            Карточка контрагента
-          </v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-menu>
-
     <div class="outgoing-payment-documents-row mt-3">
       <p class="pt-2">
         Итого
@@ -192,11 +176,9 @@
     </div>
     <filters-form-from-outgoing-and-incoming-document
       ref="filtersFormFromOutgoingDocument"
-      @cancel="closeFiltersFormOutgoingDocument"
       @saveFilters="saveFiltersFormOutgoingDocument"
     />
     <user-notification ref="userNotification" />
-    <profile-of-contractor ref="profileOfContractor" />
     <create-outgoing-payment-document
       ref="createOutgoingPaymentDocument"
       @save="saveOutgoingDocument"
@@ -207,21 +189,16 @@
 <script>
 import InfiniteLoading from 'vue-infinite-loading'
 import UserNotification from '@/components/information_window/UserNotification'
-import ProfileOfContractor from '@/views/vcrm/Payment/ProfileOfContractor/ProfileOfContractorPage'
-import createOutgoingPaymentDocument
-  from '@/views/vcrm/Payment/OutgoingPaymentDocuments/Modal/CreateOutgoingPaymentDocumentsPage.vue'
+import CreateOutgoingPaymentDocument from '@/views/vcrm/Payment/OutgoingPaymentDocuments/Modal/CreateOutgoingPaymentDocumentsPage.vue'
 import FiltersFormFromOutgoingAndIncomingDocument from '@/components/filters/FiltersFormFromOutgoingAndIncomingDocument.vue'
-// import LoadingDialog from '~/components/loading_dialog/LoadingDialog'
 
 export default {
   name: 'OutgoingPaymentDocuments',
   components: {
     UserNotification,
-    ProfileOfContractor,
-    createOutgoingPaymentDocument,
+    CreateOutgoingPaymentDocument,
     InfiniteLoading,
     FiltersFormFromOutgoingAndIncomingDocument
-    // LoadingDialog
   },
   data() {
     return {
@@ -333,51 +310,22 @@ export default {
   methods: {
     async init() {
       await this.initData()
-      // await this.updateRecordsData()
-      // await this.findOutgoingPaymentDocuments()
     },
     generateBudget() {
       this.$refs.userNotification.showUserNotification('success', 'Бюджет сформирован')
     },
-
-    showContextMenu(event, item) {
-      event.preventDefault()
-      this.rightClickMenu = false
-      this.currentRowOfTableForContextMenu = null
-      this.xRightClickMenu = event.clientX
-      this.yRightClickMenu = event.clientY
-      this.$nextTick(() => {
-        this.rightClickMenu = true
-        this.currentRowOfTableForContextMenu = item.test
-      })
-    },
-
-    profileOfContractorOpenForm() {
-      this.$refs.profileOfContractor.openForm(this.currentRowOfTableForContextMenu)
-    },
-
     newOutgoingDocument() {
       this.$refs.createOutgoingPaymentDocument.newDocument()
     },
-
-    saveOutgoingDocument() {
+    async saveOutgoingDocument() {
       this.$refs.userNotification.showUserNotification('success', 'Новый исходящий платежный документ добавлен')
+      await this.init()
+      this.updateOutgoingDocs()
     },
 
-    // updateRecordsData() {
-    //   this.pageOfRecords = 0
-    //   this.outgoingDocuments = []
-    //   this.infiniteIdOfRecordsData += 1
-    // },
-
     // Инициализация данных формы
-    async initData(customParams) {
-      let params = {}
-      if (customParams) {
-        params = this.createStructureForOutgoingPaymentDocumentsInitDataProcedure(customParams)
-      } else {
-        params = this.createStructureForOutgoingPaymentDocumentsInitDataProcedure()
-      }
+    async initData() {
+      const params = this.createStructureForOutgoingPaymentDocumentsInitDataProcedure()
       await this.$api.service.executeStashedFunction(params).catch((error) => {
         alert(error)
       })
@@ -416,7 +364,6 @@ export default {
       await this.fillResultsOfOutgoingDocuments(searchCriterias)
 
       const { content } = await this.$api.payment.outgoingPayment.findPageBySearchCriterias(params)
-
       if (content.length > 0) {
         this.pageOfRecords += 1
         this.outgoingDocuments.push(...content)
@@ -430,14 +377,9 @@ export default {
     openFilterFormOutgoingDocument() {
       this.$refs.filtersFormFromOutgoingDocument.openForm('Исходящие платежные документы', this.getIdOfOutgoingDocumentsTable())
     },
-    // Функция отработки события "Закрытие формы фильтров таблицы "Документов на оплату""
-    closeFiltersFormOutgoingDocument() {
-      console.log('close filters for from pay docs')
-    },
     // Функция отбработки события "Закрытие формы фильтров таблицы "Документов на оплату" с сохранением"
     saveFiltersFormOutgoingDocument() {
       this.updateOutgoingDocs()
-      console.log('save filters for from pay docs')
     },
     // Обновление таблицы "Документы к оплате
     updateOutgoingDocs() {
@@ -457,7 +399,7 @@ export default {
         }
       }
     },
-    // Заполнение поля "Примечание" под таблице документов на оплату примечанием выбранного документа
+    // Заполнение поля "Назначение" и "Соисполнитель" под таблицей исходящих платежных документов
     fillAssignmentAndCollaboratorOfCurrentRow(item) {
       this.collaborator = item.fioSoisp
       this.appointment = item.nazn
@@ -536,6 +478,13 @@ export default {
   text-align: left;
   background-color: #639db1 !important;
   color: white;
+}
+
+.outgoing-payment-documents-row {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  margin: 0;
 }
 
 .outgoing-payment-documents-summ-results {

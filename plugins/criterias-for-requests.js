@@ -1395,9 +1395,9 @@ Vue.mixin({
 
     createCriteriasToGetResultsOfContentForOutgoingPayment(searchCriterias) {
       const aggregateFunctions = [{
-        'field': 'sumFind',
-        'function': 'SUM'
-      },
+          'field': 'sumFind',
+          'function': 'SUM'
+        },
         {
           'field': 'id',
           'function': 'MAX'
@@ -1407,6 +1407,31 @@ Vue.mixin({
       return {
         aggregateFunctions: aggregateFunctions,
         searchCriteria: searchCriterias
+      }
+
+    },
+
+    creatCriteriasForGetExecutors2InCreatingNewOutgoingDocument() {
+        return {
+            dataType: 'VARCHAR',
+            key: 'status',
+            operation: 'GREATER_THAN',
+            type: 'AND',
+            values: [
+                '0'
+            ]
+        }
+    },   
+
+    creatCriteriasForGetOrgInCreatingNewOutgoingDocument(orgIdf) {
+      return {
+        dataType: "VARCHAR",
+        key: "id",
+        operation: "EQUALS",
+        type: "AND",
+        values: [
+            orgIdf
+        ]
       }
     }
   }
