@@ -19,7 +19,6 @@
           fab
           small
           color="red"
-          disabled
         >
           <v-icon
             color="white"
@@ -78,7 +77,7 @@
         <v-data-table
           id="sewing-order-log-page-records-table"
           v-model="sewingOrderTableSelectedRecords"
-          height="650"
+          height="730"
           fixed-header
           :loading="loadingType.sewingOrderTableRecords"
           loading-text="Заказы загружаются, подождите"
@@ -89,6 +88,7 @@
           :headers="sewingOrderTableHeaders"
           :items="sewingOrderTableRecords"
           calculate-widths
+          @click:row="fillCustomerName"
           @contextmenu:row="rightClickHandler"
           @update:sort-by="updateSort('by', $event)"
           @update:sort-desc="updateSort('desc', $event)"
@@ -116,11 +116,11 @@
                 Сформировать заказ на доп.работу
               </v-list-item-title>
             </v-list-item>
-            <!--v-list-item @click="deleteRecord">
+            <v-list-item @click="deleteRecord">
               <v-list-item-title>
                 Удалить
               </v-list-item-title>
-            </v-list-item-->
+            </v-list-item>
           </v-list>
         </v-menu>
       </div>
@@ -137,6 +137,7 @@
           hide-details="auto"
           :readonly="true"
           outlined
+          dense
         />
       </div>
     </div>
@@ -170,12 +171,14 @@
     </div>
 
     <modal-edit-tailoring
+      :edit="sewingOrderTableSelectedRecords[0]"
       :value="modals.edit"
       @close="closeModalEditTailoring"
       @save="saveModalEditTailoring"
     />
 
     <modal-edit-work
+      :edit="sewingOrderTableSelectedRecords[0]"
       :value="modals.editAdd"
       @close="closeModalEditWork"
       @save="saveModalEditWork"
@@ -194,6 +197,7 @@
 
     <modal-filter
       :value="modals.filter"
+      @save="updateSewingOrderTableRecords"
       @close="closeFilterModal"
     />
 
@@ -285,7 +289,7 @@ export default {
         },
         {
           text: 'Ед.',
-          value: 'nameProizv',
+          value: '', // name_ed нет в респонсе
           width: '50px',
           sortable: false
         },
@@ -303,7 +307,7 @@ export default {
         },
         {
           text: 'Факт',
-          value: 'dataZkzpsv',
+          value: 'factData',
           width: '95px',
           sort: () => false
         },
@@ -333,19 +337,13 @@ export default {
         },
         {
           text: 'Исполнитель',
-          value: 'numZaivk',
+          value: 'fioIsp',
           width: '100px',
           sort: () => false
         },
         {
           text: 'Отв.исп',
           value: 'otvIsp',
-          width: '100px',
-          sort: () => false
-        },
-        {
-          text: 'Заявка',
-          value: 'numZaivk',
           width: '100px',
           sort: () => false
         },
@@ -369,7 +367,7 @@ export default {
         },
         {
           text: 'КК',
-          value: 'numZaivk',
+          value: 'gotovKonfKarta',
           width: '40px',
           sort: () => false
         },
@@ -425,13 +423,15 @@ export default {
 
       noOTK: false,
 
-      customerName: ''
+      customerName: '',
+
+      canUpdate: false
     }
   },
 
-  async fetch() {
+  /* async fetch() {
     await this.init()
-  },
+  }, */
 
   computed: {
     handleSortData() {
@@ -450,9 +450,15 @@ export default {
     }
   },
 
+  mounted() {
+    this.init()
+  },
+
   methods: {
     async init() {
-      await this.initDataForCurrentUser()
+      await this.fullUpdateTableOfRecordsWithInitData()
+      this.canUpdate = true
+      this.updateSewingOrderTableRecords()
     },
 
     async initDataForCurrentUser() {
@@ -473,6 +479,10 @@ export default {
       })
     },
 
+    fillCustomerName(item) {
+      this.customerName = item.nameKontr
+    },
+
     async closeModalEditTailoring() {
       this.modals.edit = false
       await this.fullUpdateTableOfRecordsWithInitData()
@@ -484,9 +494,9 @@ export default {
     },
 
     async fullUpdateTableOfRecordsWithInitData() {
-      this.loadingType.sewingOrderTableRecords = true
       this.sewingOrderTableRecords = []
       this.sewingOrderTableSelectedRecords = []
+      this.loadingType.sewingOrderTableRecords = true
       await this.initDataForCurrentUser()
       await this.updateSewingOrderTableRecords()
       this.loadingType.sewingOrderTableRecords = false
@@ -569,8 +579,8 @@ export default {
     },
 
     async findSewingOrderTableRecords($state) {
-      /* const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
-        'filter-sewing-order-log', this.getCurrentUser.id)
+      const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
+        this.getIdOfFilterSewingOrderLog(), this.getCurrentUser.id)
 
       const response = await this.$api.uiSettings.findBySearchCriterias(dataForFiltersQuery)
 
@@ -578,9 +588,13 @@ export default {
 
       if (response.length) {
         filtersParams = JSON.parse(response[0].settingValue)
-      } */
+      }
 
-      const searchCriterias = this.createCriteriasToSearchSewingOrderLogDataByPage()
+      if (!this.canUpdate) {
+        return
+      }
+
+      const searchCriterias = this.createCriteriasToSearchSewingOrderLogDataByPage(filtersParams)
       const data = {
         searchCriterias,
         page: this.pageOfFromPayData,
@@ -621,7 +635,7 @@ export default {
         return
       }
 
-      const params = this.createStructureForDelZkzpsvProcedure(currentOrder.id)
+      const params = this.createStructureForDelZkzpsvProcedure(currentOrder.zkzpsvId)
       const response = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params)
 
       if (response.flagRet === 0) {
@@ -641,7 +655,7 @@ export default {
 
 <style lang="scss">
 .sewing-order-log-page {
-  padding: 20px;
+  padding: 10px;
 
   &__table {
     overflow: auto;
@@ -656,7 +670,7 @@ export default {
 #sewing-order-log-page-records-table {
   border-collapse: collapse;
   width: 100%;
-  height: 650px;
+  height: 730px;
 }
 
 #sewing-order-log-page-records-table table {

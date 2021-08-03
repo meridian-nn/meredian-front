@@ -497,7 +497,9 @@ export default {
         schId: 0
       },
 
-      goToNewPeriodDialog: false
+      goToNewPeriodDialog: false,
+
+      canUpdate: false
     }
   },
 
@@ -592,6 +594,7 @@ export default {
       await this.$api.service.executeStashedFunction(params).catch((error) => {
         alert(error)
       })
+      this.canUpdate = true
     },
 
     async organizationChange() {
@@ -785,6 +788,10 @@ export default {
 
     // Поиск заказов на пошив
     async findOrdersOnTailoring($state) {
+      if (!this.canUpdate) {
+        return
+      }
+
       let filtersParams
       if (this.updateRecordsDataWithUserCriterias) {
         filtersParams = await this.findUserCriteriasAndFillCriteriasFieldsOnForm()

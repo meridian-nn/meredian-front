@@ -134,6 +134,9 @@ export const factory = send => ({
         },
         findBySearchCriterias(params) {
             return send('POST', `/oper/dict/spOrg/findBySearchCriteriaList`, params)
+        },
+        findBySearchCriteria(params) {
+            return send('POST', `/oper/dict/spOrg/findBySearchCriteria`, params)
         }
     },
 
@@ -545,12 +548,33 @@ export const factory = send => ({
             getOutgoingPaymentDocumentsInitDataProcedureName() {
                 return 'dbo.init_outgoing_payment_document'
             },
+            getPayersInOutgoingPaymentDocumentsInitDataProcedureName() {
+                return 'dbo.payers_for_new_outgoing_payment_document'
+            },
+            getForWhomsInOutgoingPaymentDocumentsInitDataProcedureName() {
+                return 'dbo.v_ispf'
+            },
+            getBudgetsDepartmentsInOutgoingPaymentDocumentsInitDataProcedureName() {
+                return 'dbo.bud_sel_podr'
+            },
+            getBudgetsArticlesInOutgoingPaymentDocumentsInitDataProcedureName() {
+                return 'dbo.bud_sel_stati'
+            },
             findPageBySearchCriterias(params) {
                 return send('POST', `/oper/outgoingPaymentDocument/findPageBySearchCriteriaList`, params)
             },
             findDocumentsWithGroupBy(params) {
                 return send('POST', `/oper/outgoingPaymentDocument/groupBy`, params)
             },
+            findAllColoborators() {
+                return send('GET', `/oper/spSoisp/findAll`)
+            },
+            findAllBudElemends() {
+                return send('GET', `/oper/budElem/findAll`)
+            },
+            save(params) {
+                return send('POST', '/oper/spFind/save', params)
+            }
         },
     },
 
