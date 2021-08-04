@@ -25,6 +25,10 @@ Vue.mixin({
       return 'filter-sewing-order-log'
     },
 
+    getIdOfUserComplectsForPrintReports() {
+      return 'user-complect-for-print-reports'
+    },
+
     //Функция возвращает form id и element id для orgId и accId по умолчанию
     getObjectWithFormIdAndElementIdForDefaultOrgAndAcc() {
       return {
