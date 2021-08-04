@@ -138,8 +138,8 @@ Vue.mixin({
       return {
         vid: 1,
         my_descr: 'Larisa',
-        data1: '2020-09-01',
-        data2: '2020-09-30',
+        data1: '2021-06-01',
+        data2: new Date().toISOString().slice(0, 10),
         user_id: this.getCurrentUser.id
       }
     },
@@ -198,7 +198,7 @@ Vue.mixin({
     createStructureForPayersInOutgoingPaymentDocumentsInitDataProcedure() {
       return {
         params: {},
-        procName: this.$api.payment.outgoingPayment.getPayersInOutgoingPaymentDocumentsInitDataProcedureName()
+        procName: this.$api.payment.getPayersInPaymentDocumentsInitDataProcedureName()
       }
     },
 
@@ -223,7 +223,7 @@ Vue.mixin({
       }
     },
 
-    createStructureForGenerateIdforNewOutgoingPaymentDocuments(params) {
+    createStructureForGenerateIdforNewPaymentDocuments(params) {
       return {
         params: { 'cNameAliasGANN': 'sp_find' },
         procName: 'dbo.getautonewnum'
@@ -250,13 +250,14 @@ Vue.mixin({
         fosn: createdItem.f_osn ? createdItem.f_osn : 0,
         descr: this.getCurrentUser.login,
         dataEdit: new Date().toLocaleDateString(),
+        dataCreate: new Date().toLocaleDateString(),
         vidFind: createdItem.vid_find ? createdItem.vid_find : 0,
         otdId: createdItem.otd_id ? createdItem.otd_id : 0,
         statiId: createdItem.stati_id ? createdItem.stati_id : 0,
         comment: createdItem.comment ? createdItem.comment : '',
         budElem: createdItem.bud_elem ? createdItem.bud_elem : 0,
         budCfo: createdItem.bud_cfo ? createdItem.bud_cfo : 0,
-        numVipis: createdItem.num_vipis ? createdItem.num_vipis : 0,
+        numVipis: createdItem.num_vipis ? createdItem.num_vipis : '',
         accId: 0,
         direct: 0,
         flagDel: 0,
@@ -265,6 +266,63 @@ Vue.mixin({
         nameFind: 'Платежное поручение',
         id: createdItem.find_id,
         descrCreate: this.getCurrentUser.login
+      }
+    },
+
+    createParamsForSaveNewIncomingDocuments(createdItem) {
+      return {
+        poluchId: createdItem.recipient && createdItem.recipient.id ? createdItem.recipient.id : 0,
+        poluchName: createdItem.recipient && createdItem.recipient.clName ? createdItem.recipient.clName : '',
+        budElem: createdItem.bud_elem ? createdItem.bud_elem : 0,
+        budCfo: createdItem.namePodr ? createdItem.namePodr : 0,
+        dataVipis: createdItem.data_vipis ? new Date(createdItem.dateExtract).toLocaleDateString() : new Date().toLocaleDateString(),
+        dataOpl: createdItem.datePayment ? new Date(createdItem.datePayment).toLocaleDateString() : new Date().toLocaleDateString(),
+        numVipis: createdItem.extract ? createdItem.extract : '',
+        numFind: createdItem.number ? createdItem.number : 0,
+        platName: createdItem.plat_name ? createdItem.plat_name : '',
+        orgId: createdItem.org_id ? createdItem.org_id : 0,
+        ispId: createdItem.isp_id ? createdItem.isp_id : 0,
+        fio: this.createdItem.fio ? this.createdItem.fio : '',
+        soispId: this.createdItem.soisp_id ? this.createdItem.soisp_id : 0,
+        fioSoisp: createdItem.fio_soisp ? createdItem.fio_soisp : '',
+        sumFind: createdItem.sumToPay ? createdItem.sumToPay : 0,
+        vidFind: createdItem.vid_find,
+        comment: createdItem.comment ? createdItem.comment : '',
+        descr: this.getCurrentUser.login,
+        fss: 1,
+        dataEdit: new Date().toLocaleDateString(),
+        dataCreate: new Date().toLocaleDateString(),
+        id: createdItem.find_id,
+        tipFind: 2,
+        nameFind: 'Входящий документ',
+        direct: 1,
+        descrCreate: this.getCurrentUser.login,
+        accId: 0,
+        paccId: 0,
+        zaorgId: 0,
+        orgIsp: 0,
+        zaorgIsp: 0,
+        dispId: 0,
+        dsoispId: 0,
+        fsn: 0,
+        fosn: 0,
+        otdId: 0,
+        statiId: 0,
+        flagDel: 0
+      }
+    },
+
+    createStructureForPayersInIncomingPaymentDocumentsInitDataProcedure() {
+      return {
+        params: {},
+        procName: this.$api.payment.getPayersInPaymentDocumentsInitDataProcedureName()
+      }
+    },
+
+    createStructureForExecutorsPaymentIncomingDocumentsInitDataProcedure(userParams) {
+      return {
+        params: userParams,
+        procName: this.$api.payment.incomingPaymentDocuments.getVIspfInIncomingPaymentDocumentsInitDataProcedureName()
       }
     }
   }
