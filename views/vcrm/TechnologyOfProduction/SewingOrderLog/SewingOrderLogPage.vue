@@ -9,7 +9,7 @@
         >
           <v-icon
             color="white"
-            @click="openEditModal"
+            @click="openModal('edit')"
           >
             mdi-pencil
           </v-icon>
@@ -32,7 +32,7 @@
           fab
           small
           color="red"
-          @click="openPrintModal"
+          @click="openModal('print')"
         >
           <v-icon color="white">
             mdi-printer
@@ -43,7 +43,7 @@
           fab
           small
           color="blue"
-          @click="openFilterModal"
+          @click="openModal('filter')"
         >
           <v-icon color="white">
             mdi-filter
@@ -111,6 +111,18 @@
           offset-y
         >
           <v-list>
+            <v-list-item @click="openModal('size')">
+              <v-list-item-title>
+                Просмотр заказа по размерам
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item @click="openModal('planDate')">
+              <v-list-item-title>
+                Исполнение плана пошива
+              </v-list-item-title>
+            </v-list-item>
+
             <v-list-item>
               <v-list-item-title>
                 Сформировать заказ на доп.работу
@@ -173,33 +185,43 @@
     <modal-edit-tailoring
       :edit="sewingOrderTableSelectedRecords[0]"
       :value="modals.edit"
-      @close="closeModalEditTailoring"
+      @close="closeModal('edit')"
       @save="saveModalEditTailoring"
     />
 
     <modal-edit-work
       :edit="sewingOrderTableSelectedRecords[0]"
       :value="modals.editAdd"
-      @close="closeModalEditWork"
+      @close="closeModal('editAdd')"
       @save="saveModalEditWork"
     />
 
     <modal-confirm
       :value="modals.confirm"
-      @close="closeConfirmModal"
+      @close="closeModal('confirm')"
       @success="deleteRecord"
     />
 
     <modal-print
       :value="modals.print"
       :selected-records="sewingOrderTableSelectedRecords"
-      @close="closePrintModal"
+      @close="closeModal('print')"
     />
 
     <modal-filter
       :value="modals.filter"
       @save="updateSewingOrderTableRecords"
-      @close="closeFilterModal"
+      @close="closeModal('filter')"
+    />
+
+    <modal-plan-date
+      :value="modals.planDate"
+      @close="closeModal('planDate')"
+    />
+
+    <modal-size
+      :value="modals.size"
+      @close="closeModal('size')"
     />
 
     <user-notification ref="userNotification" />
@@ -216,7 +238,8 @@ import ModalEditOrderForAdditionalWork from './modals/EditOrderForAdditionalWork
 import ModalConfirm from './modals/Confirm'
 import ModalPrint from './modals/Print'
 import ModalFilter from './modals/Filter'
-
+import ModalSize from './modals/Size'
+import ModalPlanDate from './modals/PlanDate'
 export default {
   name: 'SewingOrderLogPage',
 
@@ -226,7 +249,9 @@ export default {
     Message,
     ModalConfirm,
     ModalPrint,
+    ModalSize,
     ModalFilter,
+    ModalPlanDate,
     UserNotification,
     InfiniteLoading
   },
@@ -248,7 +273,9 @@ export default {
         editAdd: false,
         confirm: false,
         print: false,
-        filter: false
+        filter: false,
+        size: false,
+        planDate: false
       },
       sewingOrderTableSelectedRecords: [],
       sewingOrderTableHeaders: [
@@ -484,18 +511,6 @@ export default {
       this.customerName = item.nameKontr
     },
 
-    async closeModalEditTailoring() {
-      this.modals.edit = false
-      this.canUpdate = false
-      await this.fullUpdateTableOfRecordsWithInitData()
-    },
-
-    async closeModalEditWork() {
-      this.modals.editAdd = false
-      this.canUpdate = false
-      await this.fullUpdateTableOfRecordsWithInitData()
-    },
-
     async fullUpdateTableOfRecordsWithInitData() {
       this.sewingOrderTableRecords = []
       this.sewingOrderTableSelectedRecords = []
@@ -504,6 +519,15 @@ export default {
       this.canUpdate = true
       await this.updateSewingOrderTableRecords()
       this.loadingType.sewingOrderTableRecords = false
+    },
+
+    openModal(name) {
+      if (name === 'edit' ||
+        name === 'editAdd') {
+        this.openEditModal()
+      } else {
+        this.modals[name] = true
+      }
     },
 
     openEditModal() {
@@ -522,35 +546,21 @@ export default {
       }
     },
 
-    closeConfirmModal() {
-      this.modals.confirm = false
-    },
-
-    openConfirmModal() {
-      this.modals.confirm = true
-    },
-
-    closePrintModal() {
-      this.modals.print = false
-    },
-
-    openPrintModal() {
-      this.modals.print = true
-    },
-
-    closeFilterModal() {
-      this.modals.filter = false
-    },
-
-    openFilterModal() {
-      this.modals.filter = true
+    closeModal(name) {
+      this.modals[name] = false
+      if (name === 'edit' ||
+      name === 'editAdd') {
+        this.canUpdate = false
+        this.fullUpdateTableOfRecordsWithInitData()
+      }
     },
 
     async saveModalEditTailoring(params = this.sewingOrderTableSelectedRecords) {
       try {
         await this.$api.manufacturing.manufacturingRequestJournalSave(params)
 
-        await this.closeModalEditTailoring()
+        this.canUpdate = false
+        await this.fullUpdateTableOfRecordsWithInitData()
       } catch (e) {
         this.$refs.userNotification.showUserNotification('warning', 'Ошибка сервера, попробуйте позже')
       }
