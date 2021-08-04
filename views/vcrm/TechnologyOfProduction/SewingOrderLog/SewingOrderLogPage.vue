@@ -77,7 +77,7 @@
         <v-data-table
           id="sewing-order-log-page-records-table"
           v-model="sewingOrderTableSelectedRecords"
-          height="730"
+          height="710"
           fixed-header
           :loading="loadingType.sewingOrderTableRecords"
           loading-text="Заказы загружаются, подождите"
@@ -192,6 +192,7 @@
 
     <modal-print
       :value="modals.print"
+      :selected-records="sewingOrderTableSelectedRecords"
       @close="closePrintModal"
     />
 
@@ -485,11 +486,13 @@ export default {
 
     async closeModalEditTailoring() {
       this.modals.edit = false
+      this.canUpdate = false
       await this.fullUpdateTableOfRecordsWithInitData()
     },
 
     async closeModalEditWork() {
       this.modals.editAdd = false
+      this.canUpdate = false
       await this.fullUpdateTableOfRecordsWithInitData()
     },
 
@@ -498,6 +501,7 @@ export default {
       this.sewingOrderTableSelectedRecords = []
       this.loadingType.sewingOrderTableRecords = true
       await this.initDataForCurrentUser()
+      this.canUpdate = true
       await this.updateSewingOrderTableRecords()
       this.loadingType.sewingOrderTableRecords = false
     },
@@ -670,7 +674,7 @@ export default {
 #sewing-order-log-page-records-table {
   border-collapse: collapse;
   width: 100%;
-  height: 730px;
+  height: 710px;
 }
 
 #sewing-order-log-page-records-table table {
