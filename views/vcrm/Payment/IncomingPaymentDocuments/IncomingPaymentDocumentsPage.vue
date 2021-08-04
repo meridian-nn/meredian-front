@@ -347,13 +347,11 @@ export default {
 
     // Функция отработки события "Закрытие формы фильтров таблицы с документами"
     closeFiltersFormForIncomingDocuments() {
-      console.log('close filters')
     },
 
     // Функция отбработки события "Закрытие формы фильтров таблицы с документами с сохранением"
     saveFiltersFormForIncomingDocuments() {
       this.updateIncomingDocuments()
-      console.log('save filters')
     },
 
     showContextMenu(event, item) {
@@ -374,7 +372,9 @@ export default {
     newIncomingDocument() {
       this.$refs.createIncomingPaymentDocument.newDocument()
     },
-    saveIncomingDocument() {
+    async saveIncomingDocument() {
+      await this.init()
+      this.updateIncomingDocuments()
       this.$refs.userNotification.showUserNotification('success', 'Новый входящий документ добавлен')
     },
 

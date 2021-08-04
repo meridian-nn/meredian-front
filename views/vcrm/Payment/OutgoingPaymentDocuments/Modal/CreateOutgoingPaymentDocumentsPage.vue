@@ -19,6 +19,7 @@
             <v-col cols="4">
               <v-text-field
                 v-model="createdItem.num_vipis"
+                type="number"
                 label="Выписка"
                 class="inputNumVipis"
                 outlined
@@ -96,7 +97,7 @@
                 hide-details="auto"
                 return-object
                 outlined
-                @change="findExecutors"
+                @change="createFioZisp"
               />
             </v-col>
             <v-col cols="6">
@@ -109,7 +110,7 @@
                 item-text="fio"
                 hide-details="auto"
                 outlined
-                @change="selectedExecutor ? createdItem.executor = selectedExecutor : createdItem.executor = null"
+                @change="loadDataExecutor"
               />
             </v-col>
           </v-row>
@@ -118,8 +119,8 @@
               <v-autocomplete
                 v-model="createdItem.executor2"
                 label="Исполнитель"
-                :loading="loadingType.executors2"
-                :items="executors2"
+                :loading="loadingType.executors"
+                :items="executors"
                 item-value="id"
                 item-text="fio"
                 hide-details="auto"
@@ -142,20 +143,31 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="4">
-              <v-text-field
-                v-model.number="createdItem.sumFind"
-                type="number"
-                label="Сумма по документу"
-                outlined
-                hide-details="auto"
-                class="summ-to-pay"
-              />
+            <v-col cols="7">
+              <v-row>
+                <v-col
+                  cols="4"
+                  class="sum-header"
+                >
+                  Сумма по документу
+                </v-col>
+                <v-col cols="4">
+                  <div class="sum-input">
+                    <vue-numeric
+                      v-model.number="createdItem.sumFind"
+                      separator="space"
+                      :precision="2"
+                      decimal-separator="."
+                      output-type="number"
+                    />
+                  </div>
+                </v-col>
+              </v-row>
             </v-col>
 
             <v-spacer />
 
-            <v-col cols="6">
+            <v-col cols="5">
               <v-row>
                 <v-col
                   cols="6"
@@ -164,8 +176,8 @@
                   <v-checkbox
                     v-model="createdItem.f_sn"
                     label="На собственные нужды"
-                    true-value="1"
-                    false-value="0"
+                    :true-value="1"
+                    :false-value="0"
                   />
                 </v-col>
                 <v-col
@@ -175,8 +187,8 @@
                   <v-checkbox
                     v-model="createdItem.vid_find"
                     label="Внутренний документ"
-                    true-value="1"
-                    false-value="0"
+                    :true-value="1"
+                    :false-value="0"
                   />
                 </v-col>
                 <v-col
@@ -187,8 +199,8 @@
                     v-model="createdItem.f_osn"
                     label="Основное средство"
                     class="mt-0"
-                    true-value="1"
-                    false-value="0"
+                    :true-value="1"
+                    :false-value="0"
                   />
                 </v-col>
               </v-row>
@@ -208,8 +220,8 @@
                         <v-autocomplete
                           v-model="createdItem.customerExecutor"
                           label="Исполнитель"
-                          :loading="loadingType.executors2"
-                          :items="executors2"
+                          :loading="loadingType.executors"
+                          :items="executors"
                           item-value="id"
                           item-text="fio"
                           hide-details="auto"
@@ -384,12 +396,10 @@ export default {
       },
       // массив плательщиков и За кого
       PayersAndForWhoms: [],
-      // массив получателей - ПОВТОРЯЕТСЯ НА СКРИНЕ ИЗ FOX PRO
+      // массив получателей
       recipients: [],
-      // массив за кого
+      // массив Исполнителей
       executors: [],
-      // массив получателей 2 - ПОВТОРЯЕТСЯ НА СКРИНЕ ИЗ FOX PRO
-      executors2: [],
       // массив соисполнителей
       collaborators: [],
       // массив исполнителей из подраздела "Заказчик покупки"
@@ -420,13 +430,10 @@ export default {
     this.init()
   },
   methods: {
-    test(tst) {
-      alert(tst)
-    },
     init() {
       this.findPayersAndForWhoms()
       this.findRecipients()
-      this.findExecutors2()
+      this.findExecutors()
       this.findBudgetsDepartments()
       this.findBudgetsArticles()
       this.findBudgetsCFO()
@@ -449,7 +456,7 @@ export default {
       let errorMessage = null
       const preparedData = { ...this.element[0], ...this.createdItem }
       const paramsForSave = this.createParamsForSaveNewOutgoingDocuments(preparedData)
-      await this.$api.payment.outgoingPayment.save(paramsForSave)
+      await this.$api.payment.saveNewDocument(paramsForSave)
         .catch((error) => {
           errorMessage = error
           alert(errorMessage)
@@ -464,7 +471,7 @@ export default {
     },
     // создание find_id
     async generateNewId() {
-      const paramsForGenerateId = this.createStructureForGenerateIdforNewOutgoingPaymentDocuments()
+      const paramsForGenerateId = this.createStructureForGenerateIdforNewPaymentDocuments()
       const newId = await this.$api.service.executeStashedFunctionWithReturnedDataSet(paramsForGenerateId)
       this.createdItem.find_id = newId[0].FINDZ_id1
     },
@@ -485,28 +492,27 @@ export default {
       this.loadingType.recipients = null
     },
 
-    // получение списка исполнителей2 для выбора пользователем
-    async findExecutors2() {
-      this.loadingType.executors2 = true
-      const params = this.creatCriteriasForGetExecutors2InCreatingNewOutgoingDocument()
-      this.executors2 = await this.$api.executors.findBySearchCriteria(params)
-      this.loadingType.executors2 = null
-    },
-    // получение и выбор Исполнителя
+    // получение Исполнителей
     async findExecutors() {
       this.loadingType.executors = true
-      const params = this.createStructureForExecutorsPaymentDocumentsInitDataProcedure({ ispId: this.createdItem.forWhom.client_id })
-      this.executors = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params)
+      const params = this.creatCriteriasForGetExecutorsInCreatingNewDocument()
+      this.executors = await this.$api.executors.findBySearchCriteria(params)
       this.loadingType.executors = null
-
-      this.selectedExecutor = this.executors[0]
-      this.createdItem.executor = this.selectedExecutor
-      this.createFioZisp()
     },
+    async loadDataExecutor() {
+      const params = this.createStructureForExecutorsPaymentDocumentsInitDataProcedure({ ispId: this.selectedExecutor })
+      const exec = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params)
+      this.createdItem.zaorg_isp = exec[0].isp_id
+      this.createdItem.fio_zisp = exec[0].fio
+      this.selectedExecutor = exec[0].isp_id
+    },
+    // автовыбор исполнителя по полю За кого
     async createFioZisp() {
       const paramsForFioZisp = this.createStructureForExecutorsPaymentDocumentsInitDataProcedure({ ispId: this.createdItem.forWhom.glbuch_id })
       const response = await this.$api.service.executeStashedFunctionWithReturnedDataSet(paramsForFioZisp)
+      this.createdItem.zaorg_isp = response[0].isp_id
       this.createdItem.fio_zisp = response[0].fio
+      this.selectedExecutor = response[0].isp_id
     },
     // получение подразделений бюджета
     async findBudgetsDepartments() {
@@ -542,9 +548,9 @@ export default {
       this.createdItem.poluchId = org[0].id
       this.createdItem.poluchName = org[0].clName + ',' + org[0].town
       if (this.createdItem.recipient.id === 10336 || org[0].korp === 1) {
-        this.createdItem.vid_find = true
+        this.createdItem.vid_find = 1
       } else {
-        this.createdItem.vid_find = false
+        this.createdItem.vid_find = 0
       }
     },
     // получение списка элементов бюджета
@@ -600,7 +606,7 @@ export default {
         this.$set(this.createdItem, 'bud_cfo', 846)
       }
     },
-    // сброс данных формы при открытии
+    // сброс данных формы
     reset() {
       this.createdItem = { isp_id: 0 }
       this.element = [{ id: null, codElem: null }]
@@ -636,5 +642,24 @@ export default {
   .inputNumVipis input::-webkit-outer-spin-button,
   .inputNumVipis input::-webkit-inner-spin-button {
       -webkit-appearance: none;
+  }
+
+  .sum-header {
+    font-size: 17px;
+    margin-top: 15px;
+  }
+  .sum-input input{
+    font-size: 17px;
+    margin-top: 16px;
+    border-bottom: solid 1px #999;
+    transition: all 0.1s;
+    padding-bottom: 5px;
+  }
+  .sum-input input:focus-visible{
+    font-size: 17px;
+    margin-top: 16px;
+    outline: none !important;
+    border-bottom: 3px solid #639db1;
+    transition: all 0.1s;
   }
 </style>

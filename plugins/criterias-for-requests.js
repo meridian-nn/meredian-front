@@ -1440,6 +1440,42 @@ Vue.mixin({
             orgIdf
         ]
       }
+    },
+
+    creatCriteriasForGetOrgInCreatingNewIncomingDocument(orgIdf) {
+      return {
+        dataType: "VARCHAR",
+        key: "id",
+        operation: "EQUALS",
+        type: "AND",
+        values: [
+            orgIdf
+        ]
+      }
+    },
+
+    creatCriteriasForGetExecutorsInCreatingNewDocument() {
+      return {
+          dataType: 'DATE',
+          key: 'dataUvol',
+          operation: 'LESS_THAN',
+          type: 'AND',
+          values: [
+              '02.01.1900'
+          ]
+      }
+    },
+
+    creatCriteriaForGetExecutorsInCreatingNewIncomingDocument(id) {
+      return {
+          dataType: 'VARCHAR',
+          key: 'id',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            id
+          ]
+      }
     }
   }
 })

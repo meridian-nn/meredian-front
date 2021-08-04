@@ -534,22 +534,26 @@ export const factory = send => ({
             getInitIncomingPaymentDocumentProcedure() {
                 return 'dbo.init_incoming_payment_document'
             },
-
             findPageBySearchCriteriaList(params) {
                 return send('POST', `/oper/incomingPaymentDocument/findPageBySearchCriteriaList`, params);
             },
-
             findDocumentsWithGroupBy(params) {
                 return send('POST', `/oper/incomingPaymentDocument/groupBy`, params)
+            },
+            findAllColoborators() {
+                return send('GET', `/oper/spSoisp/findAll`)
+            },
+            findColoboratorBySearchCriteria(criteria) {
+                return send('POST', '/oper/spSoisp/findBySearchCriteria', criteria)
+            },
+            getVIspfInIncomingPaymentDocumentsInitDataProcedureName() {
+                return 'dbo.v_ispf'
             }
         },
 
         outgoingPayment: {
             getOutgoingPaymentDocumentsInitDataProcedureName() {
                 return 'dbo.init_outgoing_payment_document'
-            },
-            getPayersInOutgoingPaymentDocumentsInitDataProcedureName() {
-                return 'dbo.payers_for_new_outgoing_payment_document'
             },
             getForWhomsInOutgoingPaymentDocumentsInitDataProcedureName() {
                 return 'dbo.v_ispf'
@@ -571,10 +575,14 @@ export const factory = send => ({
             },
             findAllBudElemends() {
                 return send('GET', `/oper/budElem/findAll`)
-            },
-            save(params) {
-                return send('POST', '/oper/spFind/save', params)
             }
+        },
+        
+        saveNewDocument(params) {
+            return send('POST', '/oper/spFind/save', params)
+        },
+        getPayersInPaymentDocumentsInitDataProcedureName() {
+            return 'dbo.payers_for_payment_documents'
         },
     },
 

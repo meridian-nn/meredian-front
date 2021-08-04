@@ -22,7 +22,9 @@
             <v-col cols="4">
               <v-text-field
                 v-model="createdItem.extract"
+                type="number"
                 label="Выписка"
+                class="inputNumVipis"
                 outlined
               />
             </v-col>
@@ -65,9 +67,11 @@
                 :loading="loadingType.payers"
                 :items="payers"
                 item-value="id"
-                item-text="clName"
+                item-text="cl_name"
                 hide-details="auto"
+                return-object
                 outlined
+                @input="getOrg"
               />
             </v-col>
           </v-row>
@@ -81,6 +85,7 @@
                 item-value="id"
                 item-text="clName"
                 hide-details="auto"
+                return-object
                 outlined
               />
             </v-col>
@@ -88,47 +93,62 @@
           <v-row>
             <v-col cols="6">
               <v-autocomplete
-                v-model="createdItem.executor"
+                v-model="executor"
                 label="Исполнитель"
                 :loading="loadingType.executors"
                 :items="executors"
                 item-value="id"
-                item-text="clName"
+                item-text="fio"
                 hide-details="auto"
                 outlined
+                @change="loadVIspf"
               />
             </v-col>
             <v-col cols="6">
               <v-autocomplete
-                v-model="createdItem.collaborator"
+                v-model="collaborator"
                 label="Соисполнитель"
                 :loading="loadingType.collaborators"
                 :items="collaborators"
                 item-value="id"
-                item-text="clName"
+                item-text="fio"
                 hide-details="auto"
                 outlined
+                @change="loadVSoispf"
               />
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="4">
-              <v-text-field
-                v-model.number="createdItem.sumToPay"
-                type="number"
-                label="Сумма по документу"
-                outlined
-                hide-details="auto"
-                class="summ-to-pay"
-              />
+            <v-col cols="7">
+              <v-row>
+                <v-col
+                  cols="4"
+                  class="sum-header"
+                >
+                  Сумма по документу
+                </v-col>
+                <v-col cols="4">
+                  <div class="sum-input">
+                    <vue-numeric
+                      v-model.number="createdItem.sumToPay"
+                      separator="space"
+                      :precision="2"
+                      decimal-separator="."
+                      output-type="number"
+                    />
+                  </div>
+                </v-col>
+              </v-row>
             </v-col>
 
             <v-spacer />
 
             <v-col cols="3">
               <v-checkbox
-                v-model="createdItem.internalDocument"
+                v-model="createdItem.vid_find"
                 label="Внутренний документ"
+                :true-value="1"
+                :false-value="0"
               />
             </v-col>
           </v-row>
@@ -154,34 +174,39 @@
                       </v-subheader>
                       <v-col cols="3">
                         <v-text-field
-                          v-model="createdItem.elementDate"
-                          type="date"
+                          v-model="elementCode"
+                          :disabled="disabledBudgetFields ? true : false"
                           outlined
-                        ></v-text-field>
+                          readonly
+                        />
                       </v-col>
                       <v-spacer />
                       <v-col cols="7">
                         <v-autocomplete
-                          v-model="createdItem.element"
+                          v-model="element[0]"
                           :loading="loadingType.elements"
                           :items="elements"
                           item-value="id"
-                          item-text="clName"
+                          item-text="nameElem"
                           hide-details="auto"
+                          :disabled="disabledBudgetFields ? true : false"
                           outlined
+                          return-object
+                          @change="selectElementCode"
                         />
                       </v-col>
                     </v-row>
                     <v-row>
                       <v-col cols="12">
                         <v-autocomplete
-                          v-model="createdItem.cfo"
+                          v-model="createdItem.namePodr"
                           label="ЦФО"
                           :loading="loadingType.cfo"
-                          :items="cfo"
+                          :items="cfo "
                           item-value="id"
-                          item-text="clName"
+                          item-text="namePodr"
                           hide-details="auto"
+                          :disabled="disabledBudgetFields ? true : false"
                           outlined
                         />
                       </v-col>
@@ -212,12 +237,18 @@
         </v-btn>
       </v-card-actions>
     </v-card>
+    <user-notification ref="userNotification" />
   </v-dialog>
 </template>
 
 <script>
+import UserNotification from '@/components/information_window/UserNotification'
+
 export default {
   name: 'CreateIncomingPaymentDocument',
+  components: {
+    UserNotification
+  },
   props: {
     title: {
       type: String,
@@ -235,7 +266,9 @@ export default {
       // переменная, отвечающая за отображениие модального окна
       dialog: false,
       // объект, в котором хранится создаваемый документ
-      createdItem: {},
+      createdItem: {
+        vid_find: 0
+      },
       // массив плательщиков
       payers: [],
       // массив получателей
@@ -247,23 +280,148 @@ export default {
       // массив элементов
       elements: [],
       // массив ЦФО
-      cfo: []
+      cfo: [],
+      disabledBudgetFields: false,
+      elementCode: null,
+      // объект с выбранным элементом
+      element: [{
+        id: null,
+        codElem: null
+      }],
+      // выбранный Исполнитель
+      executor: null,
+      // выбранный соисполнитель
+      collaborator: null
     }
   },
+  mounted() {
+    this.init()
+  },
   methods: {
+    init() {
+      this.findRecipients()
+      this.findBudElemends()
+      this.findBudgetsCFO()
+      this.findPayers()
+      this.findExecutors()
+      this.findCollaborators()
+      this.findCollaborators()
+    },
     // функция открытия формы для создания нового документа
     newDocument() {
       this.dialog = true
+      this.generateNewId()
     },
     // функция отработки события нажития на кнопку "отмена"
     cancel() {
+      this.reset()
       this.dialog = false
       this.$emit('cancel')
     },
 
-    save() {
-      this.dialog = false
-      this.$emit('save')
+    async save() {
+      let errorMessage = null
+      const paramsForSave = this.createParamsForSaveNewIncomingDocuments(this.createdItem)
+      await this.$api.payment.saveNewDocument(paramsForSave)
+        .catch((error) => {
+          errorMessage = error
+          alert(errorMessage)
+        })
+      if (!errorMessage) {
+        this.dialog = false
+        this.reset()
+        this.$emit('save')
+      } else {
+        this.$refs.userNotification.showUserNotification('error', 'При добавлении нового входящего платежного документа возникла ошибка')
+      }
+    },
+
+    // получение списка получателей для выбора пользователем
+    async findRecipients() {
+      this.loadingType.recipients = true
+      this.recipients = await this.$api.organizations.findAll()
+      this.loadingType.recipients = null
+    },
+
+    // получение списка элементов бюджета
+    async findBudElemends() {
+      this.loadingType.elements = true
+      this.elements = await this.$api.payment.outgoingPayment.findAllBudElemends()
+      this.loadingType.elements = null
+    },
+    // автовыбор Кода элемента
+    selectElementCode() {
+      this.createdItem.bud_elem = this.element[0].id
+      this.createdItem.cod_elem = this.element[0].codElem
+      this.elementCode = this.element[0].codElem
+    },
+
+    // получение ЦФО бюджета
+    async findBudgetsCFO() {
+      this.loadingType.cfo = true
+      this.cfo = await this.$api.departments.findAll()
+      this.loadingType.cfo = null
+    },
+
+    // получение списка Плательщиков для выбора пользователем (используется процедура исходящих ПД) !!!
+    async findPayers() {
+      this.loadingType.payers = true
+      const params = this.createStructureForPayersInIncomingPaymentDocumentsInitDataProcedure()
+      this.payers = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params)
+      this.loadingType.payers = null
+    },
+    async getOrg() {
+      const criteriasForVidFind = this.creatCriteriasForGetOrgInCreatingNewIncomingDocument(this.createdItem.payer.client_id)
+      const org = await this.$api.organizations.findBySearchCriteria(criteriasForVidFind)
+      this.createdItem.org_id = org[0].id
+      this.createdItem.plat_name = org[0].clName
+      if (this.createdItem.payer.client_id === 10336 || org[0].korp === 1) {
+        this.createdItem.vid_find = 1
+      } else {
+        this.createdItem.vid_find = 0
+      }
+    },
+
+    // получение Исполнителей
+    async findExecutors() {
+      this.loadingType.executors = true
+      const params = this.creatCriteriasForGetExecutorsInCreatingNewDocument()
+      this.executors = await this.$api.executors.findBySearchCriteria(params)
+      this.loadingType.executors = null
+    },
+
+    // получение списка Соисполнителей
+    async findCollaborators() {
+      this.loadingType.collaborators = true
+      this.collaborators = await this.$api.payment.incomingPaymentDocuments.findAllColoborators()
+      this.loadingType.collaborators = null
+    },
+
+    // загрузка данных при выборе Исполнителя
+    async loadVIspf() {
+      const paramsForGetVIspf = this.createStructureForExecutorsPaymentIncomingDocumentsInitDataProcedure({ ispId: this.executor })
+      const vIspf = await this.$api.service.executeStashedFunctionWithReturnedDataSet(paramsForGetVIspf)
+      this.createdItem.isp_id = vIspf[0].isp_id
+      this.createdItem.fio = vIspf[0].fio
+    },
+
+    // загрузка данных при выборе Соисполнителя
+    async loadVSoispf() {
+      const criteriaForGetVSoispf = this.creatCriteriaForGetExecutorsInCreatingNewIncomingDocument(this.collaborator)
+      const vSoispf = await this.$api.payment.incomingPaymentDocuments.findColoboratorBySearchCriteria(criteriaForGetVSoispf)
+      this.createdItem.soisp_id = vSoispf[0].id
+      this.createdItem.fio_soisp = vSoispf[0].fio
+    },
+    // сброс данных формы
+    reset() {
+      this.createdItem = { vid_find: 0 }
+      this.element = [{ id: null, codElem: null }]
+    },
+    // создание find_id
+    async generateNewId() {
+      const paramsForGenerateId = this.createStructureForGenerateIdforNewPaymentDocuments()
+      const newId = await this.$api.service.executeStashedFunctionWithReturnedDataSet(paramsForGenerateId)
+      this.createdItem.find_id = newId[0].FINDZ_id1
     }
   }
 }
@@ -292,5 +450,23 @@ export default {
   font-weight: bold;
   font-size: 18px;
   padding-top: 32px;
+}
+.sum-header {
+  font-size: 17px;
+  margin-top: 15px;
+}
+.sum-input input{
+  font-size: 17px;
+  margin-top: 16px;
+  border-bottom: solid 1px #999;
+  transition: all 0.1s;
+  padding-bottom: 5px;
+}
+.sum-input input:focus-visible{
+  font-size: 17px;
+  margin-top: 16px;
+  outline: none !important;
+  border-bottom: 3px solid #639db1;
+  transition: all 0.1s;
 }
 </style>
