@@ -81,6 +81,7 @@
           fixed-header
           :loading="loadingType.sewingOrderTableRecords"
           loading-text="Заказы загружаются, подождите"
+          no-data-text="Заказы не найдены"
           show-select
           :single-select="false"
           disable-pagination
@@ -246,6 +247,7 @@ import ModalPrint from './modals/Print'
 import ModalFilter from './modals/Filter'
 import ModalSize from './modals/Size'
 import ModalPlanDate from './modals/PlanDate'
+
 export default {
   name: 'SewingOrderLogPage',
 
@@ -264,7 +266,9 @@ export default {
 
   data() {
     return {
-      loadingType: {},
+      loadingType: {
+        sewingOrderTableRecords: false
+      },
       sortBy: [],
       sortDesc: [],
       infiniteIdData: 0,
@@ -457,9 +461,7 @@ export default {
 
       noOTK: false,
 
-      customerName: '',
-
-      canUpdate: false
+      customerName: ''
     }
   },
 
@@ -490,14 +492,8 @@ export default {
 
   methods: {
     async init() {
-      await this.fullUpdateTableOfRecordsWithInitData()
-      this.canUpdate = true
-      this.updateSewingOrderTableRecords()
-    },
-
-    async initDataForCurrentUser() {
-      const params = this.createStructureForSewingOrderLogPageInitDataProcedure()
-      await this.$api.service.executeStashedFunction(params)
+      // await this.fullUpdateTableOfRecordsWithInitData()
+      // this.updateSewingOrderTableRecords()
     },
 
     rightClickHandler(event, item) {
@@ -515,16 +511,6 @@ export default {
 
     fillCustomerName(item) {
       this.customerName = item.nameKontr
-    },
-
-    async fullUpdateTableOfRecordsWithInitData() {
-      this.sewingOrderTableRecords = []
-      this.sewingOrderTableSelectedRecords = []
-      this.loadingType.sewingOrderTableRecords = true
-      await this.initDataForCurrentUser()
-      this.canUpdate = true
-      await this.updateSewingOrderTableRecords()
-      this.loadingType.sewingOrderTableRecords = false
     },
 
     openModal(name) {
@@ -555,9 +541,10 @@ export default {
     closeModal(name) {
       this.modals[name] = false
       if (name === 'edit' ||
-      name === 'editAdd') {
-        this.canUpdate = false
-        this.fullUpdateTableOfRecordsWithInitData()
+        name === 'editAdd') {
+        // this.canUpdate = false
+        // this.fullUpdateTableOfRecordsWithInitData()
+        this.updateSewingOrderTableRecords()
       }
     },
 
@@ -565,8 +552,7 @@ export default {
       try {
         await this.$api.manufacturing.manufacturingRequestJournalSave(params)
 
-        this.canUpdate = false
-        await this.fullUpdateTableOfRecordsWithInitData()
+        this.updateSewingOrderTableRecords()
       } catch (e) {
         this.$refs.userNotification.showUserNotification('warning', 'Ошибка сервера, попробуйте позже')
       }
@@ -584,6 +570,7 @@ export default {
       }
       this.page = 0
       this.sewingOrderTableRecords = []
+      this.sewingOrderTableSelectedRecords = []
       this.keyLoading = Math.random()
     },
 
@@ -595,10 +582,16 @@ export default {
     updateSewingOrderTableRecords() {
       this.page = 0
       this.sewingOrderTableRecords = []
+      this.sewingOrderTableSelectedRecords = []
       this.infiniteIdData += 1
     },
 
     async findSewingOrderTableRecords($state) {
+      this.loadingType.sewingOrderTableRecords = true
+      // Инициализация данных для текущего пользователя
+      await this.initDataForCurrentUser()
+
+      // Поиск пользовательских настроек фильтров
       const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
         this.getIdOfFilterSewingOrderLog(), this.getCurrentUser.id)
 
@@ -610,10 +603,7 @@ export default {
         filtersParams = JSON.parse(response[0].settingValue)
       }
 
-      if (!this.canUpdate) {
-        return
-      }
-
+      // Поиск данных в таблице "manufacturing_request_journal"
       const searchCriterias = this.createCriteriasToSearchSewingOrderLogDataByPage(filtersParams)
       const data = {
         searchCriterias,
@@ -627,11 +617,16 @@ export default {
         this.page += 1
 
         this.sewingOrderTableRecords.push(...content)
-
         $state.loaded()
       } else {
         $state.complete()
       }
+      this.loadingType.sewingOrderTableRecords = false
+    },
+
+    async initDataForCurrentUser() {
+      const params = this.createStructureForSewingOrderLogPageInitDataProcedure()
+      await this.$api.service.executeStashedFunction(params)
     },
 
     async deleteRecord() {
@@ -667,7 +662,7 @@ export default {
       }
 
       this.currentRowOfTableForContextMenu = null
-      await this.fullUpdateTableOfRecordsWithInitData()
+      this.updateSewingOrderTableRecords()
     }
   }
 }
