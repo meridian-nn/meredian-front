@@ -242,6 +242,28 @@ Vue.mixin({
         params: userParams,
         procName: this.$api.payment.incomingPaymentDocuments.getVIspfInIncomingPaymentDocumentsInitDataProcedureName()
       }
+    },
+
+    createStructureForPrepareDeleteOutgoingPaymentDocumentInitDataProcedure(paramsForRequest) {
+      return {
+        params: this.createParamsForPrepareDeleteOutgoingPaymentDocumentsInitDataProcedure(paramsForRequest),
+        procName: this.$api.payment.outgoingPayment.getPrepareDeleteOutgoingPaymentDocumentsInitDataProcedureName()
+      }
+    },
+
+    createParamsForPrepareDeleteOutgoingPaymentDocumentsInitDataProcedure(paramsForRequest) {
+      return {
+        tip_doc: 2,
+        doc_id: paramsForRequest.findId,
+        priznak: 1
+      }
+    },
+
+    createStructureForDeleteOutgoingPaymentDocumentInitDataProcedure(paramsForRequest) {
+      return {
+        params: paramsForRequest,
+        procName: this.$api.payment.outgoingPayment.getDeleteOutgoingPaymentDocumentsInitDataProcedureName()
+      }
     }
   }
 

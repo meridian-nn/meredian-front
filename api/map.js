@@ -558,6 +558,12 @@ export const factory = send => ({
             getForWhomsInOutgoingPaymentDocumentsInitDataProcedureName() {
                 return 'dbo.v_ispf'
             },
+            getPrepareDeleteOutgoingPaymentDocumentsInitDataProcedureName() {
+                return 'dbo.ins_opnds_day'
+            },
+            getDeleteOutgoingPaymentDocumentsInitDataProcedureName() {
+                return 'dbo.del_find'
+            },
             getBudgetsDepartmentsInOutgoingPaymentDocumentsInitDataProcedureName() {
                 return 'dbo.bud_sel_podr'
             },

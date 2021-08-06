@@ -19,17 +19,38 @@
         </v-btn>
 
         <v-btn
+          :color="statusForEditBtn ? 'blue' : 'grey'"
+          class="mx-3"
+          fab
+          dark
+          x-small
+          @click="editOutgoingPaymentDocument(outgoingDocsRows[0], statusForEditBtn)"
+        >
+          <v-icon>mdi-file-edit</v-icon>
+        </v-btn>
+
+        <v-btn
+          :color="statusForDltBtn ? 'blue' : 'grey'"
+          fab
+          dark
+          x-small
+          @click="deleteOutgoingDocuments(statusForDltBtn)"
+        >
+          <v-icon>mdi-delete-forever</v-icon>
+        </v-btn>
+
+        <v-btn
           v-if="isFiltersUsing"
           color="blue"
           dark
-          class="ml-2"
+          class="ml-3"
           @click="openFilterFormOutgoingDocument"
         >
           Фильтры
         </v-btn>
         <v-btn
           v-else
-          class="ml-2"
+          class="ml-3"
           @click="openFilterFormOutgoingDocument"
         >
           Фильтры
@@ -52,12 +73,13 @@
     <div class="outgoing-payment-documents-row">
       <v-data-table
         id="outgoing-payment-documents-table"
+        v-model="outgoingDocsRows"
         height="640"
         :headers="headers"
         fixed-header
         loading-text="Документы загружаются, подождите"
         :items="outgoingDocuments"
-        :show-select="false"
+        :show-select="true"
         :single-select="false"
         disable-pagination
         hide-default-footer
@@ -74,6 +96,13 @@
               @contextmenu="showContextMenu($event, item)"
               @click="fillAssignmentAndCollaboratorOfCurrentRow(item)"
             >
+              <td>
+                <v-checkbox
+                  v-model="outgoingDocsRows"
+                  :value="item"
+                  hide-details
+                />
+              </td>
               <td>
                 {{ item.descr }}
               </td>
@@ -131,6 +160,35 @@
           </tbody>
         </template>
       </v-data-table>
+      <v-menu
+        v-model="rightClickMenu"
+        :position-x="xRightClickMenu"
+        :position-y="yRightClickMenu"
+        absolute
+        offset-y
+      >
+        <v-list>
+          <v-list-item @click="profileOfContractorOpenForm">
+            <v-list-item-title>
+              Карточка контрагента
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
+        <v-list>
+          <v-list-item @click="editOutgoingPaymentDocument(currentRowOfTableForContextMenu, true)">
+            <v-list-item-title>
+              Редактировать документ
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
+        <v-list>
+          <v-list-item @click="deleteOutgoingDocuments(true, outgoingDocsRows.length > 1 ? null : currentRowOfTableForContextMenu)">
+            <v-list-item-title>
+              Удалить {{ outgoingDocsRows.length > 1 ? 'документы' : 'документ' }}
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
     </div>
 
     <div class="outgoing-payment-documents-row mt-3">
@@ -179,8 +237,9 @@
       @saveFilters="saveFiltersFormOutgoingDocument"
     />
     <user-notification ref="userNotification" />
-    <create-outgoing-payment-document
-      ref="createOutgoingPaymentDocument"
+    <profile-of-contractor ref="profileOfContractor" />
+    <create-or-edit-outgoing-payment-document
+      ref="createOrEditOutgoingPaymentDocument"
       @save="saveOutgoingDocument"
     />
   </div>
@@ -189,20 +248,23 @@
 <script>
 import InfiniteLoading from 'vue-infinite-loading'
 import UserNotification from '@/components/information_window/UserNotification'
-import CreateOutgoingPaymentDocument from '@/views/vcrm/Payment/OutgoingPaymentDocuments/Modal/CreateOutgoingPaymentDocumentsPage.vue'
+import ProfileOfContractor from '@/views/vcrm/Payment/ProfileOfContractor/ProfileOfContractorPage'
+import CreateOrEditOutgoingPaymentDocument from '@/views/vcrm/Payment/OutgoingPaymentDocuments/Modal/CreateOrEditOutgoingPaymentDocumentsPage.vue'
 import FiltersFormFromOutgoingAndIncomingDocument from '@/components/filters/FiltersFormFromOutgoingAndIncomingDocument.vue'
 
 export default {
   name: 'OutgoingPaymentDocuments',
   components: {
     UserNotification,
-    CreateOutgoingPaymentDocument,
+    CreateOrEditOutgoingPaymentDocument,
     InfiniteLoading,
-    FiltersFormFromOutgoingAndIncomingDocument
+    FiltersFormFromOutgoingAndIncomingDocument,
+    ProfileOfContractor
   },
   data() {
     return {
       outgoingDocuments: [],
+      outgoingDocsRows: [],
       headers: [
         {
           text: 'Дескр',
@@ -238,7 +300,7 @@ export default {
         {
           text: 'Получатель',
           value: 'poluchName',
-          width: '13%',
+          width: '12%',
           sort: () => false
         },
         {
@@ -256,7 +318,7 @@ export default {
         {
           text: 'Комментарий',
           value: 'comment',
-          width: '12%',
+          width: '11%',
           sort: () => false
         },
         {
@@ -294,6 +356,12 @@ export default {
     }
   },
   computed: {
+    statusForDltBtn() {
+      return this.outgoingDocsRows.length > 0
+    },
+    statusForEditBtn() {
+      return this.outgoingDocsRows.length === 1
+    },
     handleSortData() {
       const { sortDesc } = this
       return this.sortBy.map((item, i) => {
@@ -304,6 +372,7 @@ export default {
       })
     }
   },
+  watch: {},
   mounted() {
     this.init()
   },
@@ -315,10 +384,12 @@ export default {
       this.$refs.userNotification.showUserNotification('success', 'Бюджет сформирован')
     },
     newOutgoingDocument() {
-      this.$refs.createOutgoingPaymentDocument.newDocument()
+      this.fillAssignmentAndCollaboratorOfCurrentRow()
+      this.$refs.createOrEditOutgoingPaymentDocument.newOrEditDocument()
     },
     async saveOutgoingDocument() {
       this.$refs.userNotification.showUserNotification('success', 'Новый исходящий платежный документ добавлен')
+      this.currentRowOfTableForContextMenu = null
       await this.init()
       this.updateOutgoingDocs()
     },
@@ -375,6 +446,7 @@ export default {
     },
     // Функция открытия формы фильтров таблицы "Документы на оплату"
     openFilterFormOutgoingDocument() {
+      this.fillAssignmentAndCollaboratorOfCurrentRow()
       this.$refs.filtersFormFromOutgoingDocument.openForm('Исходящие платежные документы', this.getIdOfOutgoingDocumentsTable())
     },
     // Функция отбработки события "Закрытие формы фильтров таблицы "Документов на оплату" с сохранением"
@@ -401,8 +473,68 @@ export default {
     },
     // Заполнение поля "Назначение" и "Соисполнитель" под таблицей исходящих платежных документов
     fillAssignmentAndCollaboratorOfCurrentRow(item) {
-      this.collaborator = item.fioSoisp
-      this.appointment = item.nazn
+      if (!item) {
+        this.collaborator = null
+        this.appointment = null
+      } else {
+        this.collaborator = item.fioSoisp
+        this.appointment = item.nazn
+      }
+    },
+    showContextMenu(event, item) {
+      event.preventDefault()
+      this.rightClickMenu = false
+      this.currentRowOfTableForContextMenu = null
+      this.xRightClickMenu = event.clientX
+      this.yRightClickMenu = event.clientY
+      this.$nextTick(() => {
+        this.rightClickMenu = true
+        this.currentRowOfTableForContextMenu = item
+      })
+    },
+    profileOfContractorOpenForm() {
+      this.$refs.profileOfContractor.openForm(this.currentRowOfTableForContextMenu)
+    },
+    editOutgoingPaymentDocument(dataForEdit, btnStatus) {
+      if (!btnStatus) {
+        this.$refs.userNotification.showUserNotification('error', 'Выберите один документ для редактирования')
+        return
+      }
+      this.fillAssignmentAndCollaboratorOfCurrentRow()
+      this.$refs.createOrEditOutgoingPaymentDocument.newOrEditDocument(dataForEdit)
+    },
+    async deleteOutgoingDocuments(statusBtn, dataFromContextMenu) {
+      if (!statusBtn) {
+        this.$refs.userNotification.showUserNotification('error', 'Выберите документ(ы) на удаление')
+        return
+      }
+      if (dataFromContextMenu) {
+        this.outgoingDocsRows.push(dataFromContextMenu)
+      }
+      if (confirm(`Вы действительно хотите удалить ${this.outgoingDocsRows.length > 1 ? 'выбранные документы' : 'выбранный документ'}?`)) {
+        for (const doc of this.outgoingDocsRows) {
+          if (this.checkClosedPeriod(doc.dataVipis)) {
+            this.$refs.userNotification.showUserNotification('error', `Удаление документа №${doc.numFind} невозможно! Нельзя удалять в закрытом периоде!`)
+            continue
+          }
+          const params = this.createStructureForPrepareDeleteOutgoingPaymentDocumentInitDataProcedure(doc)
+          await this.$api.service.executeStashedFunction(params).catch((error) => {
+            alert(error)
+          })
+          const paramsForDelete = this.createStructureForDeleteOutgoingPaymentDocumentInitDataProcedure({ find_id: doc.findId })
+          await this.$api.service.executeStashedFunction(paramsForDelete).catch((error) => {
+            alert(error)
+          })
+          if (doc.findId === this.outgoingDocsRows[this.outgoingDocsRows.length - 1].findId) {
+            this.$refs.userNotification.showUserNotification('success', this.outgoingDocsRows.length > 1 ? 'Документы были удалены' : 'Документ был удален')
+            this.initData()
+            this.outgoingDocsRows = []
+            this.updateOutgoingDocs()
+          }
+        }
+      } else {
+        this.$refs.userNotification.showUserNotification('error', 'Удаление было отменено')
+      }
     }
   }
 }
@@ -488,8 +620,8 @@ export default {
 }
 
 .outgoing-payment-documents-summ-results {
-  flex: 0 0 18%;
-  max-width: 18%;
+  flex: 0 0 20.6%;
+  max-width: 20.6%;
 }
 
 .outgoing-payment-documents-row p {
