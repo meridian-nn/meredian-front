@@ -119,7 +119,13 @@
 
             <v-list-item @click="openModal('planDate')">
               <v-list-item-title>
-                Исполнение плана пошива
+                Отметка о выполнении пошива
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item @click="openModal('planDate')">
+              <v-list-item-title>
+                Отметка о выполнении раскроя
               </v-list-item-title>
             </v-list-item>
 

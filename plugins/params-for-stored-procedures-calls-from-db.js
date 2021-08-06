@@ -137,7 +137,7 @@ Vue.mixin({
     createParamsForInitIncomingPaymentDocument() {
       return {
         vid: 1,
-        my_descr: 'Larisa',
+        my_descr: '',
         data1: '2021-06-01',
         data2: new Date().toISOString().slice(0, 10),
         user_id: this.getCurrentUser.id
