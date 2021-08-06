@@ -6,6 +6,7 @@
           fab
           small
           color="blue"
+          :disabled="sewingOrderTableSelectedRecords.length === 0"
         >
           <v-icon
             color="white"
@@ -19,6 +20,7 @@
           fab
           small
           color="red"
+          :disabled="sewingOrderTableSelectedRecords.length === 0"
         >
           <v-icon
             color="white"
@@ -123,6 +125,18 @@
               </v-list-item-title>
             </v-list-item>
 
+            <v-list-item @click="openModal('tailoringOrder')">
+              <v-list-item-title>
+                Заказ на пошив
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item @click="openModal('rawMaterials')">
+              <v-list-item-title>
+                Обеспечение заказа сырьем
+              </v-list-item-title>
+            </v-list-item>
+
             <v-list-item>
               <v-list-item-title>
                 Сформировать заказ на доп.работу
@@ -223,6 +237,18 @@
       @close="closeModal('size')"
     />
 
+    <modal-tailoring-order
+      :data="currentRowOfTableForContextMenu"
+      :value="modals.tailoringOrder"
+      @close="closeModal('tailoringOrder')"
+    />
+
+    <modal-raw-materials
+      :data="currentRowOfTableForContextMenu"
+      :value="modals.tailoringOrder"
+      @close="closeModal('rawMaterials')"
+    />
+
     <user-notification ref="userNotification" />
     <message ref="message" />
   </div>
@@ -239,6 +265,8 @@ import ModalPrint from './modals/Print'
 import ModalFilter from './modals/Filter'
 import ModalSize from './modals/Size'
 import ModalPlanDate from './modals/PlanDate'
+import ModalTailoringOrder from './modals/TailoringOrder'
+import ModalRawMaterials from './modals/RawMaterials'
 export default {
   name: 'SewingOrderLogPage',
 
@@ -251,7 +279,9 @@ export default {
     ModalSize,
     ModalFilter,
     ModalPlanDate,
+    ModalTailoringOrder,
     UserNotification,
+    ModalRawMaterials,
     InfiniteLoading
   },
 
@@ -274,7 +304,9 @@ export default {
         print: false,
         filter: false,
         size: false,
-        planDate: false
+        planDate: false,
+        tailoringOrder: false,
+        rawMaterials: false
       },
       sewingOrderTableSelectedRecords: [],
       sewingOrderTableHeaders: [
@@ -493,16 +525,14 @@ export default {
       await this.$api.service.executeStashedFunction(params)
     },
 
-    rightClickHandler(event, item) {
-      event.preventDefault()
-
+    rightClickHandler(event, { item }) {
       this.contextMenu = false
       this.currentRowOfTableForContextMenu = null
       this.xContextMenu = event.clientX
       this.yContextMenu = event.clientY
       this.$nextTick(() => {
         this.contextMenu = true
-        this.currentRowOfTableForContextMenu = item.item
+        this.currentRowOfTableForContextMenu = item
       })
     },
 

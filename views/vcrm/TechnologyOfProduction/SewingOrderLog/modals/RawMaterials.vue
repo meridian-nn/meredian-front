@@ -1,39 +1,47 @@
 <template>
   <v-dialog
     :value="value"
-    max-width="550px"
+    max-width="850px"
     @input="$emit('close')"
   >
     <v-card>
       <v-card-title>
-        Просмотр заказа по размерам
+        Заказ На Пошив №{{ data.numZkzpsv }}
       </v-card-title>
 
       <v-card-text>
+        <div>
+          <v-btn
+            fab
+            small
+            color="red"
+          >
+            <v-icon color="white">
+              mdi-printer
+            </v-icon>
+          </v-btn>
+        </div>
+
         <vue-excel-editor v-model="jsondata">
           <vue-excel-column
-            field="size"
-            label="Размер"
+            field="type"
+            label="Тип обеспечения"
             type="string"
             width="150px"
           />
           <vue-excel-column
-            field="growth"
-            label="Рост"
-            type="string"
+            field="readiness"
+            label="Готовность"
+            type="date"
+            width="100px"
+          />
+          <vue-excel-column
+            field="user"
+            label="Пользователь"
+            type="date"
             width="120px"
           />
-          <vue-excel-column
-            field="quantity"
-            label="Количество"
-            type="number"
-            width="150px"
-          />
         </vue-excel-editor>
-
-        <form-control label="Общее количество">
-          {{ totalQuantity }}
-        </form-control>
       </v-card-text>
 
       <v-card-actions>
@@ -51,7 +59,7 @@
           text
           @click="$emit('close')"
         >
-          OK
+          Ввод
         </v-btn>
 
         <v-spacer />
@@ -62,12 +70,16 @@
 
 <script>
 export default {
-  name: 'ModalSize',
+  name: 'RawMaterials',
 
   props: {
     value: {
       type: Boolean,
       default: false
+    },
+    data: {
+      type: Object,
+      default: () => {}
     }
   },
 
@@ -75,29 +87,21 @@ export default {
     return {
       jsondata: [
         {
-          size: '',
-          growth: '',
-          quantity: 25
+          type: 'Сырье',
+          readiness: '',
+          user: ''
         },
         {
-          size: '',
-          growth: '',
-          quantity: 20
+          type: 'Сырье',
+          readiness: '',
+          user: ''
         },
         {
-          size: '',
-          growth: '',
-          quantity: 19
+          type: 'Сырье',
+          readiness: '',
+          user: ''
         }
       ]
-    }
-  },
-
-  computed: {
-    totalQuantity() {
-      return this.jsondata.reduce((acc, item) => {
-        return acc + item.quantity
-      }, 0)
     }
   }
 }
