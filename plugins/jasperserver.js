@@ -32,6 +32,28 @@ Vue.mixin({
       this.forceJasperReportDownload(report, format, 'Реестр_оплат_от_' + pdReestrPays)
     },
 
+    async downloadOrderOnSewing(format, zkzpsvId) {
+      if (!zkzpsvId) {
+        return
+      }
+
+      if (!format) {
+        format = 'HTML'
+      }
+
+      const link = this.getJasperRootUrl() +
+        'Zakaz_na_poshiv.' +
+        format + '?' + 'zkzpsv_id=' + zkzpsvId
+
+      const config = {
+        headers: this.getJasperLoginAndPasswordForHeaders(),
+        responseType: 'blob'
+      }
+
+      const report = await this.$axios.$get(link, config)
+      this.forceJasperReportDownload(report, format, 'Заказ_на_пошив_' + zkzpsvId)
+    },
+
     forceJasperReportDownload(report, format, fileName) {
       const url = window.URL.createObjectURL(new Blob([report]))
       const link = document.createElement('a')

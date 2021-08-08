@@ -79,7 +79,7 @@
         <v-data-table
           id="sewing-order-log-page-records-table"
           v-model="sewingOrderTableSelectedRecords"
-          height="730"
+          height="710"
           fixed-header
           :loading="loadingType.sewingOrderTableRecords"
           loading-text="Заказы загружаются, подождите"
@@ -224,6 +224,7 @@
 
     <modal-print
       :value="modals.print"
+      :selected-records="sewingOrderTableSelectedRecords"
       @close="closeModal('print')"
     />
 
@@ -562,23 +563,23 @@ export default {
       this.customerName = item.nameKontr
     },
 
-    async closeModalEditTailoring() {
-      this.modals.edit = false
-      await this.fullUpdateTableOfRecordsWithInitData()
-    },
-
-    async closeModalEditWork() {
-      this.modals.editAdd = false
-      await this.fullUpdateTableOfRecordsWithInitData()
-    },
-
     async fullUpdateTableOfRecordsWithInitData() {
       this.sewingOrderTableRecords = []
       this.sewingOrderTableSelectedRecords = []
       this.loadingType.sewingOrderTableRecords = true
       await this.initDataForCurrentUser()
+      this.canUpdate = true
       await this.updateSewingOrderTableRecords()
       this.loadingType.sewingOrderTableRecords = false
+    },
+
+    openModal(name) {
+      if (name === 'edit' ||
+        name === 'editAdd') {
+        this.openEditModal()
+      } else {
+        this.modals[name] = true
+      }
     },
 
     openEditModal() {
@@ -597,19 +598,21 @@ export default {
       }
     },
 
-    openModal(name) {
-      this.modals[name] = true
-    },
-
     closeModal(name) {
       this.modals[name] = false
+      if (name === 'edit' ||
+      name === 'editAdd') {
+        this.canUpdate = false
+        this.fullUpdateTableOfRecordsWithInitData()
+      }
     },
 
     async saveModalEditTailoring(params = this.sewingOrderTableSelectedRecords) {
       try {
         await this.$api.manufacturing.manufacturingRequestJournalSave(params)
 
-        await this.closeModalEditTailoring()
+        this.canUpdate = false
+        await this.fullUpdateTableOfRecordsWithInitData()
       } catch (e) {
         this.$refs.userNotification.showUserNotification('warning', 'Ошибка сервера, попробуйте позже')
       }
@@ -733,7 +736,7 @@ export default {
 #sewing-order-log-page-records-table {
   border-collapse: collapse;
   width: 100%;
-  height: 730px;
+  height: 710px;
 }
 
 #sewing-order-log-page-records-table table {
