@@ -6,7 +6,7 @@
   >
     <v-card>
       <v-card-title>
-        Заказ На Пошив №{{ data.numZkzpsv }}
+        Заказ На Пошив №
       </v-card-title>
 
       <v-card-text>

@@ -1,7 +1,7 @@
 <template>
   <v-dialog
     :value="value"
-    :fullscreen="true"
+    fullscreen
     class="edit-order-for-additional-work-main-div"
     @input="$emit('close')"
   >

@@ -137,9 +137,15 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item>
+            <v-list-item @click="openModal('actualConsumptionRawMaterials')">
               <v-list-item-title>
-                Сформировать заказ на доп.работу
+                Фактический расход сырья
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item @click="openModal('oldOrderCard')">
+              <v-list-item-title>
+                Карточка заказа старая
               </v-list-item-title>
             </v-list-item>
             <v-list-item @click="deleteRecord">
@@ -237,6 +243,16 @@
       @close="closeModal('size')"
     />
 
+    <modal-actual-consumption-raw-materials
+      :value="modals.actualConsumptionRawMaterials"
+      @close="closeModal('actualConsumptionRawMaterials')"
+    />
+
+    <modal-old-order-card
+      :value="modals.oldOrderCard"
+      @close="closeModal('oldOrderCard')"
+    />
+
     <modal-tailoring-order
       :data="currentRowOfTableForContextMenu"
       :value="modals.tailoringOrder"
@@ -267,6 +283,8 @@ import ModalSize from './modals/Size'
 import ModalPlanDate from './modals/PlanDate'
 import ModalTailoringOrder from './modals/TailoringOrder'
 import ModalRawMaterials from './modals/RawMaterials'
+import ModalActualConsumptionRawMaterials from './modals/ActualConsumptionRawMaterials'
+import ModalOldOrderCard from './modals/OldOrderCard'
 export default {
   name: 'SewingOrderLogPage',
 
@@ -280,6 +298,8 @@ export default {
     ModalFilter,
     ModalPlanDate,
     ModalTailoringOrder,
+    ModalActualConsumptionRawMaterials,
+    ModalOldOrderCard,
     UserNotification,
     ModalRawMaterials,
     InfiniteLoading
@@ -306,7 +326,9 @@ export default {
         size: false,
         planDate: false,
         tailoringOrder: false,
-        rawMaterials: false
+        rawMaterials: false,
+        actualConsumptionRawMaterials: false,
+        oldOrderCard: false
       },
       sewingOrderTableSelectedRecords: [],
       sewingOrderTableHeaders: [
