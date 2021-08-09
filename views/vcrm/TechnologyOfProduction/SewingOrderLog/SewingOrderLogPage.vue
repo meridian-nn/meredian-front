@@ -6,6 +6,7 @@
           fab
           small
           color="blue"
+          :disabled="sewingOrderTableSelectedRecords.length === 0"
         >
           <v-icon
             color="white"
@@ -19,6 +20,7 @@
           fab
           small
           color="red"
+          :disabled="sewingOrderTableSelectedRecords.length === 0"
         >
           <v-icon
             color="white"
@@ -130,16 +132,35 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item>
+            <v-list-item @click="openModal('actualConsumptionRawMaterials')">
               <v-list-item-title>
-                Сформировать заказ на доп.работу
+                Фактический расход сырья
               </v-list-item-title>
             </v-list-item>
-            <v-list-item @click="deleteRecord">
+
+            <v-list-item @click="openModal('tailoringOrder')">
+              <v-list-item-title>
+                Обеспечение заказа сырьем
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item @click="openModal('oldOrderCard')">
+              <v-list-item-title>
+                Карточка заказа старая
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item @click="openModal('rawMaterials')">
+              <v-list-item-title>
+                Заказ на пошив
+              </v-list-item-title>
+            </v-list-item>
+
+            <!--v-list-item @click="deleteRecord">
               <v-list-item-title>
                 Удалить
               </v-list-item-title>
-            </v-list-item>
+            </v-list-item-->
           </v-list>
         </v-menu>
       </div>
@@ -231,6 +252,28 @@
       @close="closeModal('size')"
     />
 
+    <modal-actual-consumption-raw-materials
+      :value="modals.actualConsumptionRawMaterials"
+      @close="closeModal('actualConsumptionRawMaterials')"
+    />
+
+    <modal-old-order-card
+      :value="modals.oldOrderCard"
+      @close="closeModal('oldOrderCard')"
+    />
+
+    <modal-tailoring-order
+      :data="currentRowOfTableForContextMenu"
+      :value="modals.tailoringOrder"
+      @close="closeModal('tailoringOrder')"
+    />
+
+    <modal-raw-materials
+      :data="currentRowOfTableForContextMenu"
+      :value="modals.rawMaterials"
+      @close="closeModal('rawMaterials')"
+    />
+
     <user-notification ref="userNotification" />
     <message ref="message" />
   </div>
@@ -247,7 +290,10 @@ import ModalPrint from './modals/Print'
 import ModalFilter from './modals/Filter'
 import ModalSize from './modals/Size'
 import ModalPlanDate from './modals/PlanDate'
-
+import ModalTailoringOrder from './modals/TailoringOrder'
+import ModalRawMaterials from './modals/RawMaterials'
+import ModalActualConsumptionRawMaterials from './modals/ActualConsumptionRawMaterials'
+import ModalOldOrderCard from './modals/OldOrderCard'
 export default {
   name: 'SewingOrderLogPage',
 
@@ -260,7 +306,11 @@ export default {
     ModalSize,
     ModalFilter,
     ModalPlanDate,
+    ModalTailoringOrder,
+    ModalActualConsumptionRawMaterials,
+    ModalOldOrderCard,
     UserNotification,
+    ModalRawMaterials,
     InfiniteLoading
   },
 
@@ -285,7 +335,11 @@ export default {
         print: false,
         filter: false,
         size: false,
-        planDate: false
+        planDate: false,
+        tailoringOrder: false,
+        rawMaterials: false,
+        actualConsumptionRawMaterials: false,
+        oldOrderCard: false
       },
       sewingOrderTableSelectedRecords: [],
       sewingOrderTableHeaders: [
@@ -496,7 +550,7 @@ export default {
       // this.updateSewingOrderTableRecords()
     },
 
-    rightClickHandler(event, item) {
+    rightClickHandler(event, { item }) {
       event.preventDefault()
 
       this.contextMenu = false
@@ -505,7 +559,7 @@ export default {
       this.yContextMenu = event.clientY
       this.$nextTick(() => {
         this.contextMenu = true
-        this.currentRowOfTableForContextMenu = item.item
+        this.currentRowOfTableForContextMenu = item
       })
     },
 
