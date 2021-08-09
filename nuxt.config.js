@@ -44,6 +44,7 @@ export default {
         '~/plugins/jasperserver',
         '~/plugins/mapping-for-responses',
         '~/plugins/mapping-for-queryes-params',
+        '~/plugins/global-variables',
         '~/plugins/system-methods',
         '~/plugins/user-access',
         { src: '~/plugins/api', mode: 'client' },

@@ -13,12 +13,12 @@
         <v-container class="container-data">
           <v-row>
             <v-col cols="7">
-              <span class="headline">Ввод нового исходящего платежного документа</span>
+              <span class="headline">{{ header }}</span>
             </v-col>
             <v-spacer />
             <v-col cols="4">
               <v-text-field
-                v-model="createdItem.num_vipis"
+                v-model="createdItem.numVipis"
                 type="number"
                 label="Выписка"
                 class="inputNumVipis"
@@ -63,7 +63,7 @@
                 label="Плательщик"
                 :loading="loadingType.payers"
                 :items="PayersAndForWhoms"
-                item-value="id"
+                item-value="client_id"
                 item-text="cl_name"
                 hide-details="auto"
                 return-object
@@ -117,7 +117,7 @@
           <v-row>
             <v-col cols="6">
               <v-autocomplete
-                v-model="createdItem.executor2"
+                v-model="createdItem.ispId"
                 label="Исполнитель"
                 :loading="loadingType.executors"
                 :items="executors"
@@ -134,7 +134,7 @@
                 label="Соисполнитель"
                 :loading="loadingType.collaborators"
                 :items="collaborators"
-                item-value="id"
+                item-value="fio"
                 item-text="fio"
                 hide-details="auto"
                 return-object
@@ -174,7 +174,7 @@
                   class="pb-0"
                 >
                   <v-checkbox
-                    v-model="createdItem.f_sn"
+                    v-model="createdItem.fsn"
                     label="На собственные нужды"
                     :true-value="1"
                     :false-value="0"
@@ -185,7 +185,7 @@
                   class="pb-0"
                 >
                   <v-checkbox
-                    v-model="createdItem.vid_find"
+                    v-model="createdItem.vidFind"
                     label="Внутренний документ"
                     :true-value="1"
                     :false-value="0"
@@ -196,7 +196,7 @@
                   class="pt-0"
                 >
                   <v-checkbox
-                    v-model="createdItem.f_osn"
+                    v-model="createdItem.fosn"
                     label="Основное средство"
                     class="mt-0"
                     :true-value="1"
@@ -218,7 +218,7 @@
                     <v-row>
                       <v-col cols="6">
                         <v-autocomplete
-                          v-model="createdItem.customerExecutor"
+                          v-model="createdItem.dispId"
                           label="Исполнитель"
                           :loading="loadingType.executors"
                           :items="executors"
@@ -230,14 +230,13 @@
                       </v-col>
                       <v-col cols="6">
                         <v-autocomplete
-                          v-model="createdItem.customerCollaborator"
+                          v-model="createdItem.dsoispId"
                           label="Соисполнитель"
                           :loading="loadingType.collaborators"
                           :items="collaborators"
                           item-value="id"
                           item-text="fio"
                           hide-details="auto"
-                          return-object
                           outlined
                         />
                       </v-col>
@@ -259,7 +258,7 @@
                     <v-row>
                       <v-col cols="6">
                         <v-autocomplete
-                          v-model="createdItem.otd_id"
+                          v-model="createdItem.otdId"
                           label="Отдел"
                           :loading="loadingType.departments"
                           :items="departments"
@@ -272,7 +271,7 @@
                       </v-col>
                       <v-col cols="6">
                         <v-autocomplete
-                          v-model="createdItem.stati_id"
+                          v-model="createdItem.statiId"
                           label="Статья"
                           :loading="loadingType.articles"
                           :items="articles"
@@ -322,7 +321,7 @@
                     <v-row>
                       <v-col cols="12">
                         <v-autocomplete
-                          v-model="createdItem.bud_cfo"
+                          v-model="createdItem.budCfo"
                           label="ЦФО"
                           :loading="loadingType.cfo"
                           :items="cfo "
@@ -373,10 +372,6 @@ export default {
     UserNotification
   },
   props: {
-    title: {
-      type: String,
-      default: ''
-    },
     show: {
       type: Boolean,
       default: false
@@ -423,7 +418,8 @@ export default {
         id: null,
         codElem: null
       }],
-      disabledBudgetFields: false
+      disabledBudgetFields: false,
+      header: ''
     }
   },
   mounted() {
@@ -440,10 +436,28 @@ export default {
       this.findColoborators()
       this.findBudElemends()
     },
-    // функция открытия формы для создания нового документа
-    newDocument() {
+    // функция открытия формы для создания или редактирования нового документа
+    newOrEditDocument(dataForEdit) {
+      if (dataForEdit) {
+        this.header = 'Редактирование исходящего платежного документа'
+        this.createdItem = { ...dataForEdit }
+        this.createdItem.dataVipis = this.convertLocaleDateStringinISODateString(dataForEdit.dataVipis.toString())
+        if (dataForEdit.dataOpl) { this.createdItem.dataOpl = this.convertLocaleDateStringinISODateString(dataForEdit.dataOpl.toString()) }
+        this.createdItem.payer = { 'client_id': dataForEdit.orgId }
+        this.createdItem.recipient = { 'id': dataForEdit.poluchId }
+        this.createdItem.forWhom = { 'client_id': dataForEdit.zaorgId } // zaorgId нету
+        this.selectedExecutor = dataForEdit.zaorgIsp // zaorgIsp нету
+        this.createdItem.collaborator = { 'fio': dataForEdit.fioSoisp }
+        this.element[0] = { id: dataForEdit.budElem, codElem: dataForEdit.budCodElem }
+        this.selectElementCode()
+        this.createdItem.objId = dataForEdit.findId
+        this.createdItem.dataCreate = dataForEdit.dataCreate
+        this.createdItem.descrCreate = dataForEdit.descrCreate
+      } else {
+        this.header = 'Ввод нового исходящего платежного документа'
+        this.generateNewId()
+      }
       this.dialog = true
-      this.generateNewId()
     },
     // функция отработки события нажития на кнопку "отмена"
     cancel() {
@@ -451,7 +465,6 @@ export default {
       this.dialog = false
       this.$emit('cancel')
     },
-
     async save() {
       let errorMessage = null
       const preparedData = { ...this.element[0], ...this.createdItem }
@@ -469,11 +482,11 @@ export default {
         this.$refs.userNotification.showUserNotification('error', 'При добавлении нового исходящего платежного документа возникла ошибка')
       }
     },
-    // создание find_id
+    // создание id
     async generateNewId() {
       const paramsForGenerateId = this.createStructureForGenerateIdforNewPaymentDocuments()
       const newId = await this.$api.service.executeStashedFunctionWithReturnedDataSet(paramsForGenerateId)
-      this.createdItem.find_id = newId[0].FINDZ_id1
+      this.createdItem.objId = newId[0].FINDZ_id1
     },
     // получение списка Плательщиков и За кого для выбора пользователем
     async findPayersAndForWhoms() {
@@ -561,15 +574,15 @@ export default {
     },
     // автовыбор Кода элемента
     selectElementCode() {
-      this.createdItem.bud_elem = this.element[0].id
+      this.createdItem.budElem = this.element[0].id
       this.elementCode = this.element[0].codElem
     },
     // автозаполнение полей в разделе Бюджет при выборе Исполнителей
     async selectingBudgetFields() {
-      const params = this.createStructureForExecutorsPaymentDocumentsInitDataProcedure({ ispId: this.createdItem.executor2 })
+      const params = this.createStructureForExecutorsPaymentDocumentsInitDataProcedure({ ispId: this.createdItem.ispId })
       const results = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params)
 
-      this.createdItem.isp_id = results[0].isp_id
+      this.createdItem.ispId = results[0].isp_id
       this.createdItem.fio = results[0].fio
 
       if (results[0].otd_id === 21) {

@@ -152,7 +152,7 @@
           <v-row>
             <v-col cols="4">
               <v-text-field
-                v-model="filterItem.numFind"
+                v-model="filterItem.numVipis"
                 label="Номер выписки"
                 :clearable="true"
                 outlined
