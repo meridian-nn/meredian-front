@@ -173,16 +173,14 @@
               Карточка контрагента
             </v-list-item-title>
           </v-list-item>
-        </v-list>
-        <v-list>
-          <v-list-item @click="editOutgoingPaymentDocument(currentRowOfTableForContextMenu, true)">
+
+          <v-list-item @click="editOutgoingPaymentDocument(currentRowOfOutgoingDocsForContextMenu, true)">
             <v-list-item-title>
               Редактировать документ
             </v-list-item-title>
           </v-list-item>
-        </v-list>
-        <v-list>
-          <v-list-item @click="deleteOutgoingDocuments(true, outgoingDocsRows.length > 1 ? null : currentRowOfTableForContextMenu)">
+
+          <v-list-item @click="deleteOutgoingDocuments(true, outgoingDocsRows.length > 1 ? null : currentRowOfOutgoingDocsForContextMenu)">
             <v-list-item-title>
               Удалить {{ outgoingDocsRows.length > 1 ? 'документы' : 'документ' }}
             </v-list-item-title>
@@ -346,7 +344,7 @@ export default {
       rightClickMenu: false,
       xRightClickMenu: 0,
       yRightClickMenu: 0,
-      currentRowOfTableForContextMenu: null,
+      currentRowOfOutgoingDocsForContextMenu: null,
       sortBy: [],
       sortDesc: [],
       keyLoading: Math.random(),
@@ -389,7 +387,7 @@ export default {
     },
     async saveOutgoingDocument() {
       this.$refs.userNotification.showUserNotification('success', 'Новый исходящий платежный документ добавлен')
-      this.currentRowOfTableForContextMenu = null
+      this.currentRowOfOutgoingDocsForContextMenu = null
       await this.init()
       this.updateOutgoingDocs()
     },
@@ -410,6 +408,7 @@ export default {
       }
       this.pageOfRecords = 0
       this.outgoingDocuments = []
+      this.outgoingDocsRows = []
       this.keyLoading = Math.random()
     },
 
@@ -457,6 +456,7 @@ export default {
     updateOutgoingDocs() {
       this.pageOfRecords = 0
       this.outgoingDocuments = []
+      this.outgoingDocsRows = []
       this.infiniteIdOfRecordsData += 1
     },
     async fillResultsOfOutgoingDocuments(searchCriterias) {
@@ -484,16 +484,16 @@ export default {
     showContextMenu(event, item) {
       event.preventDefault()
       this.rightClickMenu = false
-      this.currentRowOfTableForContextMenu = null
+      this.currentRowOfOutgoingDocsForContextMenu = null
       this.xRightClickMenu = event.clientX
       this.yRightClickMenu = event.clientY
       this.$nextTick(() => {
         this.rightClickMenu = true
-        this.currentRowOfTableForContextMenu = item
+        this.currentRowOfOutgoingDocsForContextMenu = item
       })
     },
     profileOfContractorOpenForm() {
-      this.$refs.profileOfContractor.openForm(this.currentRowOfTableForContextMenu)
+      this.$refs.profileOfContractor.openForm(this.currentRowOfOutgoingDocsForContextMenu)
     },
     editOutgoingPaymentDocument(dataForEdit, btnStatus) {
       if (!btnStatus) {
@@ -509,6 +509,7 @@ export default {
         return
       }
       if (dataFromContextMenu) {
+        this.outgoingDocsRows = []
         this.outgoingDocsRows.push(dataFromContextMenu)
       }
       if (confirm(`Вы действительно хотите удалить ${this.outgoingDocsRows.length > 1 ? 'выбранные документы' : 'выбранный документ'}?`)) {
@@ -517,17 +518,17 @@ export default {
             this.$refs.userNotification.showUserNotification('error', `Удаление документа №${doc.numFind} невозможно! Нельзя удалять в закрытом периоде!`)
             continue
           }
-          const params = this.createStructureForPrepareDeleteOutgoingPaymentDocumentInitDataProcedure(doc)
+          const params = this.createStructureForPrepareDeleteIncomingOutgoingPaymentDocumentInitDataProcedure(doc)
           await this.$api.service.executeStashedFunction(params).catch((error) => {
             alert(error)
           })
-          const paramsForDelete = this.createStructureForDeleteOutgoingPaymentDocumentInitDataProcedure({ find_id: doc.findId })
+          const paramsForDelete = this.createStructureForDeleteIncomingOutgoingPaymentDocumentInitDataProcedure({ find_id: doc.findId })
           await this.$api.service.executeStashedFunction(paramsForDelete).catch((error) => {
             alert(error)
           })
           if (doc.findId === this.outgoingDocsRows[this.outgoingDocsRows.length - 1].findId) {
             this.$refs.userNotification.showUserNotification('success', this.outgoingDocsRows.length > 1 ? 'Документы были удалены' : 'Документ был удален')
-            this.initData()
+            await this.initData()
             this.outgoingDocsRows = []
             this.updateOutgoingDocs()
           }

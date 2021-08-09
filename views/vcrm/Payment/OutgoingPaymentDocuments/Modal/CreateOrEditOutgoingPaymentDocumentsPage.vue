@@ -479,7 +479,8 @@ export default {
         this.reset()
         this.$emit('save')
       } else {
-        this.$refs.userNotification.showUserNotification('error', 'При добавлении нового исходящего платежного документа возникла ошибка')
+        const text = this.header === 'Ввод нового исходящего платежного документа' ? 'При добавлении нового исходящего платежного документа возникла ошибка' : 'При сохранении отредактированного исходящего документа с id ' + this.createdItem.objId + ', произошла ошибка'
+        this.$refs.userNotification.showUserNotification('error', text)
       }
     },
     // создание id

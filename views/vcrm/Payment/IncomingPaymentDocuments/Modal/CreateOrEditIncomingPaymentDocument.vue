@@ -15,13 +15,13 @@
       <v-card-title>
         <v-container class="container-data">
           <v-row>
-            <v-col cols="6">
-              <span class="headline">Ввод нового входящего платежного документ</span>
+            <v-col cols="7">
+              <span class="headline">{{ header }}</span>
             </v-col>
             <v-spacer />
             <v-col cols="4">
               <v-text-field
-                v-model="createdItem.extract"
+                v-model="createdItem.numVipis"
                 type="number"
                 label="Выписка"
                 class="inputNumVipis"
@@ -37,14 +37,14 @@
           <v-row>
             <v-col cols="4">
               <v-text-field
-                v-model="createdItem.number"
+                v-model="createdItem.numFind"
                 label="Номер"
                 outlined
               />
             </v-col>
             <v-col cols="4">
               <v-text-field
-                v-model="createdItem.dateExtract"
+                v-model="createdItem.dataVipis"
                 type="date"
                 label="Дата банковской выписки"
                 outlined
@@ -52,7 +52,7 @@
             </v-col>
             <v-col cols="4">
               <v-text-field
-                v-model="createdItem.datePayment"
+                v-model="createdItem.dataOpl"
                 type="date"
                 label="Дата оплаты"
                 outlined
@@ -67,7 +67,7 @@
                 :loading="loadingType.payers"
                 :items="payers"
                 item-value="id"
-                item-text="cl_name"
+                item-text="clName"
                 hide-details="auto"
                 return-object
                 outlined
@@ -82,8 +82,8 @@
                 label="Получатель"
                 :loading="loadingType.recipients"
                 :items="recipients"
-                item-value="id"
-                item-text="clName"
+                item-value="client_id"
+                item-text="cl_name"
                 hide-details="auto"
                 return-object
                 outlined
@@ -93,7 +93,7 @@
           <v-row>
             <v-col cols="6">
               <v-autocomplete
-                v-model="executor"
+                v-model="createdItem.ispId"
                 label="Исполнитель"
                 :loading="loadingType.executors"
                 :items="executors"
@@ -106,7 +106,7 @@
             </v-col>
             <v-col cols="6">
               <v-autocomplete
-                v-model="collaborator"
+                v-model="createdItem.soispId"
                 label="Соисполнитель"
                 :loading="loadingType.collaborators"
                 :items="collaborators"
@@ -130,7 +130,7 @@
                 <v-col cols="4">
                   <div class="sum-input">
                     <vue-numeric
-                      v-model.number="createdItem.sumToPay"
+                      v-model.number="createdItem.sumFind"
                       separator="space"
                       :precision="2"
                       decimal-separator="."
@@ -145,7 +145,7 @@
 
             <v-col cols="3">
               <v-checkbox
-                v-model="createdItem.vid_find"
+                v-model="createdItem.vidFind"
                 label="Внутренний документ"
                 :true-value="1"
                 :false-value="0"
@@ -202,7 +202,7 @@
                           v-model="createdItem.namePodr"
                           label="ЦФО"
                           :loading="loadingType.cfo"
-                          :items="cfo "
+                          :items="cfo"
                           item-value="id"
                           item-text="namePodr"
                           hide-details="auto"
@@ -288,10 +288,9 @@ export default {
         id: null,
         codElem: null
       }],
-      // выбранный Исполнитель
-      executor: null,
-      // выбранный соисполнитель
-      collaborator: null
+
+      // Заголовок формы
+      header: ''
     }
   },
   mounted() {
@@ -305,12 +304,28 @@ export default {
       this.findPayers()
       this.findExecutors()
       this.findCollaborators()
-      this.findCollaborators()
     },
     // функция открытия формы для создания нового документа
-    newDocument() {
+    newOrEditDocument(dataForEdit) {
+      if (dataForEdit) {
+        this.header = 'Редактирование входящего платежного документа'
+        this.createdItem = { ...dataForEdit }
+        this.createdItem.dataVipis = this.convertLocaleDateStringinISODateString(dataForEdit.dataVipis.toString())
+        if (dataForEdit.dataOpl) { this.createdItem.dataOpl = this.convertLocaleDateStringinISODateString(dataForEdit.dataOpl.toString()) }
+        this.createdItem.recipient = { 'client_id': dataForEdit.poluchId, 'cl_name': dataForEdit.poluchName }
+        this.createdItem.payer = { id: dataForEdit.orgId, clName: dataForEdit.platName }
+        this.createdItem.ispId = dataForEdit.ispId
+        this.createdItem.soispId = dataForEdit.soispId // soispId нет
+        this.element[0] = { id: dataForEdit.budElem, codElem: dataForEdit.budCodElem }
+        this.selectElementCode()
+        this.createdItem.objId = dataForEdit.findId
+        this.createdItem.dataCreate = dataForEdit.dataCreate
+        this.createdItem.descrCreate = dataForEdit.descrCreate
+      } else {
+        this.header = 'Ввод нового входящего платежного документа'
+        this.generateNewId()
+      }
       this.dialog = true
-      this.generateNewId()
     },
     // функция отработки события нажития на кнопку "отмена"
     cancel() {
@@ -332,14 +347,16 @@ export default {
         this.reset()
         this.$emit('save')
       } else {
-        this.$refs.userNotification.showUserNotification('error', 'При добавлении нового входящего платежного документа возникла ошибка')
+        const text = this.header === 'Ввод нового входящего платежного документа' ? 'При добавлении нового входящего платежного документа возникла ошибка' : 'При сохранении отредактированного входящего документа с id ' + this.createdItem.objId + ', произошла ошибка'
+        this.$refs.userNotification.showUserNotification('error', text)
       }
     },
 
     // получение списка получателей для выбора пользователем
     async findRecipients() {
       this.loadingType.recipients = true
-      this.recipients = await this.$api.organizations.findAll()
+      const params = this.createStructureForPayersInIncomingPaymentDocumentsInitDataProcedure()
+      this.recipients = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params)
       this.loadingType.recipients = null
     },
 
@@ -351,8 +368,7 @@ export default {
     },
     // автовыбор Кода элемента
     selectElementCode() {
-      this.createdItem.bud_elem = this.element[0].id
-      this.createdItem.cod_elem = this.element[0].codElem
+      this.createdItem.budElem = this.element[0].id
       this.elementCode = this.element[0].codElem
     },
 
@@ -366,19 +382,17 @@ export default {
     // получение списка Плательщиков для выбора пользователем (используется процедура исходящих ПД) !!!
     async findPayers() {
       this.loadingType.payers = true
-      const params = this.createStructureForPayersInIncomingPaymentDocumentsInitDataProcedure()
-      this.payers = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params)
+      this.payers = await this.$api.organizations.findAll()
       this.loadingType.payers = null
     },
     async getOrg() {
-      const criteriasForVidFind = this.creatCriteriasForGetOrgInCreatingNewIncomingDocument(this.createdItem.payer.client_id)
+      const criteriasForVidFind = this.creatCriteriasForGetOrgInCreatingNewIncomingDocument(this.createdItem.payer.id)
       const org = await this.$api.organizations.findBySearchCriteria(criteriasForVidFind)
-      this.createdItem.org_id = org[0].id
-      this.createdItem.plat_name = org[0].clName
-      if (this.createdItem.payer.client_id === 10336 || org[0].korp === 1) {
-        this.createdItem.vid_find = 1
+      this.createdItem.clName = org[0].clName
+      if (this.createdItem.payer.id === 10336 || org[0].korp === 1) {
+        this.createdItem.vidFind = 1
       } else {
-        this.createdItem.vid_find = 0
+        this.createdItem.vidFind = 0
       }
     },
 
@@ -399,29 +413,28 @@ export default {
 
     // загрузка данных при выборе Исполнителя
     async loadVIspf() {
-      const paramsForGetVIspf = this.createStructureForExecutorsPaymentIncomingDocumentsInitDataProcedure({ ispId: this.executor })
+      const paramsForGetVIspf = this.createStructureForExecutorsPaymentIncomingDocumentsInitDataProcedure({ ispId: this.createdItem.ispId })
       const vIspf = await this.$api.service.executeStashedFunctionWithReturnedDataSet(paramsForGetVIspf)
-      this.createdItem.isp_id = vIspf[0].isp_id
-      this.createdItem.fio = vIspf[0].fio
+      this.createdItem.fioIsp = vIspf[0].fio
     },
 
     // загрузка данных при выборе Соисполнителя
     async loadVSoispf() {
-      const criteriaForGetVSoispf = this.creatCriteriaForGetExecutorsInCreatingNewIncomingDocument(this.collaborator)
+      const criteriaForGetVSoispf = this.creatCriteriaForGetExecutorsInCreatingNewIncomingDocument(this.createdItem.soispId)
       const vSoispf = await this.$api.payment.incomingPaymentDocuments.findColoboratorBySearchCriteria(criteriaForGetVSoispf)
-      this.createdItem.soisp_id = vSoispf[0].id
-      this.createdItem.fio_soisp = vSoispf[0].fio
+      this.createdItem.fioSoisp = vSoispf[0].fio
     },
     // сброс данных формы
     reset() {
-      this.createdItem = { vid_find: 0 }
+      this.createdItem = { vidFind: 0 }
       this.element = [{ id: null, codElem: null }]
+      this.elementCode = null
     },
     // создание find_id
     async generateNewId() {
       const paramsForGenerateId = this.createStructureForGenerateIdforNewPaymentDocuments()
       const newId = await this.$api.service.executeStashedFunctionWithReturnedDataSet(paramsForGenerateId)
-      this.createdItem.find_id = newId[0].FINDZ_id1
+      this.createdItem.objId = newId[0].FINDZ_id1
     }
   }
 }

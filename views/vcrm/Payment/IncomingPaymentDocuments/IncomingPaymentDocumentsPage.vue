@@ -15,6 +15,28 @@
         </v-icon>
       </v-btn>
 
+      <v-btn
+        :color="statusForEditBtn ? 'blue' : 'grey'"
+        class="my-3 mx-3"
+        fab
+        dark
+        x-small
+        @click="editIncomingPaymentDocument(selectedIncomingDocuments[0], statusForEditBtn)"
+      >
+        <v-icon>mdi-file-edit</v-icon>
+      </v-btn>
+
+      <v-btn
+        :color="statusForDltBtn ? 'blue' : 'grey'"
+        class="my-3"
+        fab
+        dark
+        x-small
+        @click="deleteIncomingDocuments(statusForDltBtn)"
+      >
+        <v-icon>mdi-delete-forever</v-icon>
+      </v-btn>
+
       <div class="incoming-payment-documents-filters-btn">
         <v-btn
           v-if="isFiltersUsing"
@@ -37,11 +59,12 @@
     <div class="incoming-payment-documents-row">
       <v-data-table
         id="incoming-payment-documents-data-table"
+        v-model="selectedIncomingDocuments"
         height="690"
-        :headers="dataTableHeaders"
+        :headers="incomingDocumentsHeaders"
         fixed-header
-        :items="dataTableItems"
-        :show-select="false"
+        :items="incomingDocuments"
+        :show-select="true"
         :single-select="false"
         disable-pagination
         hide-default-footer
@@ -58,6 +81,13 @@
               @contextmenu="showContextMenu($event, item)"
               @click="fillFooterParamsOfCurrentRow(item)"
             >
+              <td>
+                <v-checkbox
+                  v-model="selectedIncomingDocuments"
+                  :value="item"
+                  hide-details
+                />
+              </td>
               <td>
                 {{ item.descr }}
               </td>
@@ -129,6 +159,20 @@
               Карточка контрагента
             </v-list-item-title>
           </v-list-item>
+          <v-list>
+            <v-list-item @click="editIncomingPaymentDocument(currentRowOfIncomingDocsForContextMenu, true)">
+              <v-list-item-title>
+                Редактировать документ
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+          <v-list>
+            <v-list-item @click="deleteIncomingDocuments(true, selectedIncomingDocuments.length > 1 ? null : currentRowOfIncomingDocsForContextMenu)">
+              <v-list-item-title>
+                Удалить {{ selectedIncomingDocuments.length > 1 ? 'документы' : 'документ' }}
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
         </v-list>
       </v-menu>
     </div>
@@ -184,8 +228,8 @@
     <user-notification ref="userNotification" />
     <profile-of-contractor ref="profileOfContractor" />
 
-    <create-incoming-payment-document
-      ref="createIncomingPaymentDocument"
+    <create-or-edit-incoming-payment-document
+      ref="createOrEditIncomingPaymentDocument"
       @save="saveIncomingDocument"
     />
 
@@ -201,10 +245,10 @@
 import InfiniteLoading from 'vue-infinite-loading'
 import UserNotification from '@/components/information_window/UserNotification'
 import ProfileOfContractor from '@/views/vcrm/Payment/ProfileOfContractor/ProfileOfContractorPage'
-import createIncomingPaymentDocument
-  from '@/views/vcrm/Payment/IncomingPaymentDocuments/Modal/CreateIncomingPaymentDocument.vue'
 import FiltersFormFromOutgoingAndIncomingDocument
   from '@/components/filters/FiltersFormFromOutgoingAndIncomingDocument.vue'
+import createOrEditIncomingPaymentDocument
+  from '@/views/vcrm/Payment/IncomingPaymentDocuments/Modal/CreateOrEditIncomingPaymentDocument.vue'
 
 export default {
   name: 'IncomingPaymentDocumentsPage',
@@ -213,7 +257,7 @@ export default {
     InfiniteLoading,
     UserNotification,
     ProfileOfContractor,
-    createIncomingPaymentDocument,
+    createOrEditIncomingPaymentDocument,
     FiltersFormFromOutgoingAndIncomingDocument
   },
 
@@ -221,7 +265,7 @@ export default {
     return {
       loadingType: {},
 
-      dataTableHeaders: [
+      incomingDocumentsHeaders: [
         {
           text: 'Дескр',
           value: 'descr',
@@ -295,7 +339,8 @@ export default {
           sort: () => false
         }
       ],
-      dataTableItems: [],
+      incomingDocuments: [],
+      selectedIncomingDocuments: [],
 
       sumOfDataTableItems: 0,
 
@@ -306,7 +351,7 @@ export default {
       rightClickMenu: false,
       xRightClickMenu: 0,
       yRightClickMenu: 0,
-      currentRowOfTableForContextMenu: null,
+      currentRowOfIncomingDocsForContextMenu: null,
 
       keyLoading: Math.random(),
       infiniteIdOfRecordsData: 0,
@@ -328,6 +373,14 @@ export default {
           'property': item
         }
       })
+    },
+
+    statusForEditBtn() {
+      return this.selectedIncomingDocuments.length === 1
+    },
+
+    statusForDltBtn() {
+      return this.selectedIncomingDocuments.length > 0
     }
   },
 
@@ -357,20 +410,20 @@ export default {
     showContextMenu(event, item) {
       event.preventDefault()
       this.rightClickMenu = false
-      this.currentRowOfTableForContextMenu = null
+      this.currentRowOfIncomingDocsForContextMenu = null
       this.xRightClickMenu = event.clientX
       this.yRightClickMenu = event.clientY
       this.$nextTick(() => {
         this.rightClickMenu = true
-        this.currentRowOfTableForContextMenu = item.item
+        this.currentRowOfIncomingDocsForContextMenu = item
       })
     },
 
     profileOfContractorOpenForm() {
-      this.$refs.profileOfContractor.openForm(this.currentRowOfTableForContextMenu)
+      this.$refs.profileOfContractor.openForm(this.currentRowOfIncomingDocsForContextMenu)
     },
     newIncomingDocument() {
-      this.$refs.createIncomingPaymentDocument.newDocument()
+      this.$refs.createOrEditIncomingPaymentDocument.newOrEditDocument()
     },
     async saveIncomingDocument() {
       await this.init()
@@ -392,7 +445,8 @@ export default {
 
     updateIncomingDocuments() {
       this.pageOfRecords = 0
-      this.dataTableItems = []
+      this.incomingDocuments = []
+      this.selectedIncomingDocuments = []
       this.infiniteIdOfRecordsData += 1
     },
 
@@ -403,7 +457,8 @@ export default {
         this.sortDesc = event
       }
       this.pageOfRecords = 0
-      this.dataTableItems = []
+      this.incomingDocuments = []
+      this.selectedIncomingDocuments = []
       this.keyLoading = Math.random()
     },
 
@@ -433,7 +488,7 @@ export default {
 
       if (content.length > 0) {
         this.pageOfRecords += 1
-        this.dataTableItems.push(...content)
+        this.incomingDocuments.push(...content)
 
         $state.loaded()
       } else {
@@ -451,6 +506,50 @@ export default {
         if (results.sum_sumFind) {
           this.sumOfDataTableItems = results.sum_sumFind
         }
+      }
+    },
+
+    editIncomingPaymentDocument(dataForEdit, btnStatus) {
+      if (!btnStatus) {
+        this.$refs.userNotification.showUserNotification('error', 'Выберите один документ для редактирования')
+        return
+      }
+      this.$refs.createOrEditIncomingPaymentDocument.newOrEditDocument(dataForEdit)
+    },
+
+    async deleteIncomingDocuments(statusBtn, dataFromContextMenu) {
+      if (!statusBtn) {
+        this.$refs.userNotification.showUserNotification('error', 'Выберите документ(ы) на удаление')
+        return
+      }
+      if (dataFromContextMenu) {
+        this.selectedIncomingDocuments = []
+        this.selectedIncomingDocuments.push(dataFromContextMenu)
+      }
+
+      if (confirm(`Вы действительно хотите удалить ${this.selectedIncomingDocuments.length > 1 ? 'выбранные документы' : 'выбранный документ'}?`)) {
+        for (const doc of this.selectedIncomingDocuments) {
+          if (this.checkClosedPeriod(doc.dataVipis)) {
+            this.$refs.userNotification.showUserNotification('error', `Удаление документа №${doc.numFind} невозможно! Нельзя удалять в закрытом периоде!`)
+            continue
+          }
+          const params = this.createStructureForPrepareDeleteIncomingOutgoingPaymentDocumentInitDataProcedure(doc)
+          await this.$api.service.executeStashedFunction(params).catch((error) => {
+            alert(error)
+          })
+          const paramsForDelete = this.createStructureForDeleteIncomingOutgoingPaymentDocumentInitDataProcedure({ find_id: doc.findId })
+          await this.$api.service.executeStashedFunction(paramsForDelete).catch((error) => {
+            alert(error)
+          })
+          if (doc.findId === this.selectedIncomingDocuments[this.selectedIncomingDocuments.length - 1].findId) {
+            this.$refs.userNotification.showUserNotification('success', this.selectedIncomingDocuments.length > 1 ? 'Документы были удалены' : 'Документ был удален')
+            await this.initData()
+            this.selectedIncomingDocuments = []
+            this.updateIncomingDocuments()
+          }
+        }
+      } else {
+        this.$refs.userNotification.showUserNotification('error', 'Удаление было отменено')
       }
     }
   }
