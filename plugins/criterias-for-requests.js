@@ -929,8 +929,19 @@ Vue.mixin({
 
       this.addFilterByDatesFromUsersFiltersParamsToSearchCriterias(usersFiltersParams, searchCriterias, 'dataZkzpsv')
 
+      const customOperations = [
+        {
+          key: 'nameProizv',
+          typeOfOperation: 'LIKE'
+        },
+        {
+          key: 'fioIsp',
+          typeOfOperation: 'LIKE'
+        }
+      ]
+
       if (usersFiltersParams) {
-        this.addUsersFiltersParamsToSearchCriterias(searchCriterias, usersFiltersParams)
+        this.addUsersFiltersParamsToSearchCriterias(searchCriterias, usersFiltersParams, customOperations)
       }
 
       return searchCriterias
@@ -1367,7 +1378,7 @@ Vue.mixin({
       }
     },
 
-    addUsersFiltersParamsToSearchCriterias(searchCriterias, usersFiltersParams) {
+    addUsersFiltersParamsToSearchCriterias(searchCriterias, usersFiltersParams, customOperations) {
       for (const key in usersFiltersParams) {
         let elemParam = usersFiltersParams[key]
 
@@ -1377,7 +1388,7 @@ Vue.mixin({
 
         const dataType = this.getDataTypeForSearchCriteria(elemParam)
 
-        const operation = this.getOperationTypeForSearchCriteria(key)
+        const operation = this.getOperationTypeForSearchCriteria(key, customOperations)
 
         const dataElem = {
           dataType,
@@ -1396,8 +1407,18 @@ Vue.mixin({
       return typeof elemParam === 'number' ? 'INTEGER' : 'VARCHAR'
     },
 
-    getOperationTypeForSearchCriteria(key) {
-      return 'EQUALS'
+    getOperationTypeForSearchCriteria(key, customOperations) {
+      if (!customOperations) {
+        return 'EQUALS'
+      }
+
+      const elem = customOperations.find(elem => elem.key === key)
+
+      if (!elem) {
+        return 'EQUALS'
+      } else {
+        return elem.typeOfOperation
+      }
     },
 
     createCriteriasToGetResultsOfContentForOutgoingPayment(searchCriterias) {

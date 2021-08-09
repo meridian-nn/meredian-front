@@ -6,6 +6,7 @@
           fab
           small
           color="blue"
+          :disabled="sewingOrderTableSelectedRecords.length === 0"
         >
           <v-icon
             color="white"
@@ -19,6 +20,7 @@
           fab
           small
           color="red"
+          :disabled="sewingOrderTableSelectedRecords.length === 0"
         >
           <v-icon
             color="white"
@@ -81,6 +83,7 @@
           fixed-header
           :loading="loadingType.sewingOrderTableRecords"
           loading-text="Заказы загружаются, подождите"
+          no-data-text="Заказы не найдены"
           show-select
           :single-select="false"
           disable-pagination
@@ -119,20 +122,45 @@
 
             <v-list-item @click="openModal('planDate')">
               <v-list-item-title>
-                Исполнение плана пошива
+                Отметка о выполнении пошива
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item>
+            <v-list-item @click="openModal('planDate')">
               <v-list-item-title>
-                Сформировать заказ на доп.работу
+                Отметка о выполнении раскроя
               </v-list-item-title>
             </v-list-item>
-            <v-list-item @click="deleteRecord">
+
+            <v-list-item @click="openModal('actualConsumptionRawMaterials')">
+              <v-list-item-title>
+                Фактический расход сырья
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item @click="openModal('tailoringOrder')">
+              <v-list-item-title>
+                Обеспечение заказа сырьем
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item @click="openModal('oldOrderCard')">
+              <v-list-item-title>
+                Карточка заказа старая
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item @click="openModal('rawMaterials')">
+              <v-list-item-title>
+                Заказ на пошив
+              </v-list-item-title>
+            </v-list-item>
+
+            <!--v-list-item @click="deleteRecord">
               <v-list-item-title>
                 Удалить
               </v-list-item-title>
-            </v-list-item>
+            </v-list-item-->
           </v-list>
         </v-menu>
       </div>
@@ -224,6 +252,28 @@
       @close="closeModal('size')"
     />
 
+    <modal-actual-consumption-raw-materials
+      :value="modals.actualConsumptionRawMaterials"
+      @close="closeModal('actualConsumptionRawMaterials')"
+    />
+
+    <modal-old-order-card
+      :value="modals.oldOrderCard"
+      @close="closeModal('oldOrderCard')"
+    />
+
+    <modal-tailoring-order
+      :data="currentRowOfTableForContextMenu"
+      :value="modals.tailoringOrder"
+      @close="closeModal('tailoringOrder')"
+    />
+
+    <modal-raw-materials
+      :data="currentRowOfTableForContextMenu"
+      :value="modals.rawMaterials"
+      @close="closeModal('rawMaterials')"
+    />
+
     <user-notification ref="userNotification" />
     <message ref="message" />
   </div>
@@ -240,6 +290,10 @@ import ModalPrint from './modals/Print'
 import ModalFilter from './modals/Filter'
 import ModalSize from './modals/Size'
 import ModalPlanDate from './modals/PlanDate'
+import ModalTailoringOrder from './modals/TailoringOrder'
+import ModalRawMaterials from './modals/RawMaterials'
+import ModalActualConsumptionRawMaterials from './modals/ActualConsumptionRawMaterials'
+import ModalOldOrderCard from './modals/OldOrderCard'
 export default {
   name: 'SewingOrderLogPage',
 
@@ -252,13 +306,19 @@ export default {
     ModalSize,
     ModalFilter,
     ModalPlanDate,
+    ModalTailoringOrder,
+    ModalActualConsumptionRawMaterials,
+    ModalOldOrderCard,
     UserNotification,
+    ModalRawMaterials,
     InfiniteLoading
   },
 
   data() {
     return {
-      loadingType: {},
+      loadingType: {
+        sewingOrderTableRecords: false
+      },
       sortBy: [],
       sortDesc: [],
       infiniteIdData: 0,
@@ -275,7 +335,11 @@ export default {
         print: false,
         filter: false,
         size: false,
-        planDate: false
+        planDate: false,
+        tailoringOrder: false,
+        rawMaterials: false,
+        actualConsumptionRawMaterials: false,
+        oldOrderCard: false
       },
       sewingOrderTableSelectedRecords: [],
       sewingOrderTableHeaders: [
@@ -451,9 +515,7 @@ export default {
 
       noOTK: false,
 
-      customerName: '',
-
-      canUpdate: false
+      customerName: ''
     }
   },
 
@@ -484,17 +546,11 @@ export default {
 
   methods: {
     async init() {
-      await this.fullUpdateTableOfRecordsWithInitData()
-      this.canUpdate = true
-      this.updateSewingOrderTableRecords()
+      // await this.fullUpdateTableOfRecordsWithInitData()
+      // this.updateSewingOrderTableRecords()
     },
 
-    async initDataForCurrentUser() {
-      const params = this.createStructureForSewingOrderLogPageInitDataProcedure()
-      await this.$api.service.executeStashedFunction(params)
-    },
-
-    rightClickHandler(event, item) {
+    rightClickHandler(event, { item }) {
       event.preventDefault()
 
       this.contextMenu = false
@@ -503,22 +559,12 @@ export default {
       this.yContextMenu = event.clientY
       this.$nextTick(() => {
         this.contextMenu = true
-        this.currentRowOfTableForContextMenu = item.item
+        this.currentRowOfTableForContextMenu = item
       })
     },
 
     fillCustomerName(item) {
       this.customerName = item.nameKontr
-    },
-
-    async fullUpdateTableOfRecordsWithInitData() {
-      this.sewingOrderTableRecords = []
-      this.sewingOrderTableSelectedRecords = []
-      this.loadingType.sewingOrderTableRecords = true
-      await this.initDataForCurrentUser()
-      this.canUpdate = true
-      await this.updateSewingOrderTableRecords()
-      this.loadingType.sewingOrderTableRecords = false
     },
 
     openModal(name) {
@@ -549,9 +595,10 @@ export default {
     closeModal(name) {
       this.modals[name] = false
       if (name === 'edit' ||
-      name === 'editAdd') {
-        this.canUpdate = false
-        this.fullUpdateTableOfRecordsWithInitData()
+        name === 'editAdd') {
+        // this.canUpdate = false
+        // this.fullUpdateTableOfRecordsWithInitData()
+        this.updateSewingOrderTableRecords()
       }
     },
 
@@ -559,8 +606,7 @@ export default {
       try {
         await this.$api.manufacturing.manufacturingRequestJournalSave(params)
 
-        this.canUpdate = false
-        await this.fullUpdateTableOfRecordsWithInitData()
+        this.updateSewingOrderTableRecords()
       } catch (e) {
         this.$refs.userNotification.showUserNotification('warning', 'Ошибка сервера, попробуйте позже')
       }
@@ -578,6 +624,7 @@ export default {
       }
       this.page = 0
       this.sewingOrderTableRecords = []
+      this.sewingOrderTableSelectedRecords = []
       this.keyLoading = Math.random()
     },
 
@@ -589,10 +636,16 @@ export default {
     updateSewingOrderTableRecords() {
       this.page = 0
       this.sewingOrderTableRecords = []
+      this.sewingOrderTableSelectedRecords = []
       this.infiniteIdData += 1
     },
 
     async findSewingOrderTableRecords($state) {
+      this.loadingType.sewingOrderTableRecords = true
+      // Инициализация данных для текущего пользователя
+      await this.initDataForCurrentUser()
+
+      // Поиск пользовательских настроек фильтров
       const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
         this.getIdOfFilterSewingOrderLog(), this.getCurrentUser.id)
 
@@ -604,10 +657,7 @@ export default {
         filtersParams = JSON.parse(response[0].settingValue)
       }
 
-      if (!this.canUpdate) {
-        return
-      }
-
+      // Поиск данных в таблице "manufacturing_request_journal"
       const searchCriterias = this.createCriteriasToSearchSewingOrderLogDataByPage(filtersParams)
       const data = {
         searchCriterias,
@@ -621,11 +671,16 @@ export default {
         this.page += 1
 
         this.sewingOrderTableRecords.push(...content)
-
         $state.loaded()
       } else {
         $state.complete()
       }
+      this.loadingType.sewingOrderTableRecords = false
+    },
+
+    async initDataForCurrentUser() {
+      const params = this.createStructureForSewingOrderLogPageInitDataProcedure()
+      await this.$api.service.executeStashedFunction(params)
     },
 
     async deleteRecord() {
@@ -661,7 +716,7 @@ export default {
       }
 
       this.currentRowOfTableForContextMenu = null
-      await this.fullUpdateTableOfRecordsWithInitData()
+      this.updateSewingOrderTableRecords()
     }
   }
 }

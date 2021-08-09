@@ -36,6 +36,18 @@
           Запись работы по карточкам
         </div>
       </div>
+
+      <div class="technology-of-production-menu-col-2">
+        <router-link :to="{ name: 'SewingOrderLog'} ">
+          <v-img :src="require('@/assets/img/payment/journal.png')" />
+        </router-link>
+        <div
+          class="technology-of-production-menu-v-subheader font-weight-medium text-subtitle-1"
+          align="center"
+        >
+          Журнал заказов на пошив
+        </div>
+      </div>
     </v-row>
   </div>
 
