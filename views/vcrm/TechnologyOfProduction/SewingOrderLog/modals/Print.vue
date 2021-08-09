@@ -247,12 +247,13 @@
                   Отмена
                 </v-btn>
               </v-card-actions>
+              <user-notification ref="userNotification" />
             </v-card>
           </v-dialog>
         </div>
       </v-card-text>
+      <user-notification ref="userNotification" />
     </v-card>
-    <user-notification ref="userNotification" />
   </v-dialog>
 </template>
 
@@ -330,7 +331,8 @@ export default {
     downloadReport() {
       const markedReports = this.reports.filter(item => item.marked)
 
-      if (!markedReports) {
+      if (!markedReports ||
+        markedReports.length === 0) {
         this.$refs.userNotification.showUserNotification('error', 'Выберите отчет для печати!')
         return
       }
