@@ -44,6 +44,7 @@ Vue.mixin({
         dispId: createdItem.dispId ? createdItem.dispId : 0,
         dsoispId: createdItem.dsoispId ? createdItem.dsoispId : 0,
         soispId: createdItem.collaborator && createdItem.collaborator.id ? createdItem.collaborator.id : 0,
+        fioSoisp: createdItem.collaborator && createdItem.collaborator.fio ? createdItem.collaborator.fio : '',
         fss: 1,
         fsn: createdItem.fsn ? createdItem.fsn : 0,
         fosn: createdItem.fosn ? createdItem.fosn : 0,
