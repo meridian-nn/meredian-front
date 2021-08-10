@@ -846,7 +846,7 @@ export default {
   width: 90px !important
 }
 
-.journal-of-payment-docs-from-pay-docs-nameDoc {
+.journal-of-payment-docs-table-cell-truncate {
   width: 170px !important
 }
 

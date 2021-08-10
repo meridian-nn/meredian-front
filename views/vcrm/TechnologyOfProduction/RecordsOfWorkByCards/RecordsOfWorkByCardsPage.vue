@@ -225,6 +225,7 @@
           fixed-header
           :loading="loadingType.recordsData"
           loading-text="Заказы загружаются, подождите"
+          no-data-text="Заказы не найдены"
           :items="recordsData"
           :show-select="true"
           :single-select="false"
@@ -246,6 +247,7 @@
                   <v-checkbox
                     v-model="recordsSelectedRows"
                     :value="item"
+                    class="records-of-work-by-cards-table-of-records-checkbox"
                     color="black"
                     hide-details
                   />
@@ -256,8 +258,18 @@
                 <td>
                   {{ item.posledCode }}
                 </td>
-                <td>
-                  {{ item.modelName }}
+                <td
+                  class="records-of-work-by-cards-table-of-records-cell-truncate"
+                >
+                  <v-tooltip bottom>
+                    <template #activator="{ on, attrs }">
+                      <span
+                        v-bind="attrs"
+                        v-on="on"
+                      >{{ item.modelName }}</span>
+                    </template>
+                    <span>{{ item.modelName }}</span>
+                  </v-tooltip>
                 </td>
                 <td>
                   {{ item.colvoMc }}
@@ -271,14 +283,34 @@
                 <td>
                   {{ item.mcId }}
                 </td>
-                <td>
-                  {{ item.nameMc }}
+                <td
+                  class="records-of-work-by-cards-table-of-records-cell-truncate"
+                >
+                  <v-tooltip bottom>
+                    <template #activator="{ on, attrs }">
+                      <span
+                        v-bind="attrs"
+                        v-on="on"
+                      >{{ item.nameMc }}</span>
+                    </template>
+                    <span>{{ item.nameMc }}</span>
+                  </v-tooltip>
                 </td>
                 <td>
                   {{ item.numZaivk }}
                 </td>
-                <td>
-                  {{ item.nameScheme }}
+                <td
+                  class="records-of-work-by-cards-table-of-records-cell-truncate"
+                >
+                  <v-tooltip bottom>
+                    <template #activator="{ on, attrs }">
+                      <span
+                        v-bind="attrs"
+                        v-on="on"
+                      >{{ item.nameScheme }}</span>
+                    </template>
+                    <span>{{ item.nameScheme }}</span>
+                  </v-tooltip>
                 </td>
               </tr>
 
@@ -323,7 +355,9 @@ export default {
 
   data() {
     return {
-      loadingType: {},
+      loadingType: {
+        recordsData: false
+      },
 
       months: [
         {
@@ -801,7 +835,8 @@ export default {
       const params = {
         searchCriterias,
         page: this.pageOfRecords,
-        orders: this.handleSortData
+        orders: this.handleSortData,
+        size: 200
       }
 
       const { content } = await this.$api.manufacturing.findPageBySearchCriterias(params)
@@ -932,5 +967,17 @@ export default {
 
 .records-of-work-by-cards-td-green-background-class {
   background-color: green;
+}
+
+.records-of-work-by-cards-table-of-records-cell-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 1px;
+}
+
+.records-of-work-by-cards-table-of-records-checkbox {
+  margin:0;
+  padding:0;
 }
 </style>

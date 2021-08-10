@@ -558,17 +558,18 @@ export const factory = send => ({
             getForWhomsInOutgoingPaymentDocumentsInitDataProcedureName() {
                 return 'dbo.v_ispf'
             },
-            getPrepareDeleteOutgoingPaymentDocumentsInitDataProcedureName() {
-                return 'dbo.ins_opnds_day'
-            },
-            getDeleteOutgoingPaymentDocumentsInitDataProcedureName() {
-                return 'dbo.del_find'
-            },
+
             getBudgetsDepartmentsInOutgoingPaymentDocumentsInitDataProcedureName() {
                 return 'dbo.bud_sel_podr'
             },
             getBudgetsArticlesInOutgoingPaymentDocumentsInitDataProcedureName() {
                 return 'dbo.bud_sel_stati'
+            },
+            getForGenerateBudgetInOutgoingPaymentDocumentsInitDataProcedureName() {
+                return 'dbo.bud_ins_temp'
+            },
+            getDataAfterGenerateBudgetInOutgoingPaymentDocumentsInitDataProcedureName() {
+                return 'dbo.bud_form'
             },
             findPageBySearchCriterias(params) {
                 return send('POST', `/oper/outgoingPaymentDocument/findPageBySearchCriteriaList`, params)
@@ -583,7 +584,13 @@ export const factory = send => ({
                 return send('GET', `/oper/budElem/findAll`)
             }
         },
-        
+
+        getPrepareDeletePaymentDocumentsInitDataProcedureName() {
+          return 'dbo.ins_opnds_day'
+        },
+        getDeletePaymentDocumentsInitDataProcedureName() {
+          return 'dbo.del_find'
+        },
         saveNewDocument(params) {
             return send('POST', '/oper/spFind/save', params)
         },

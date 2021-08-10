@@ -445,9 +445,9 @@ export default {
         if (dataForEdit.dataOpl) { this.createdItem.dataOpl = this.convertLocaleDateStringinISODateString(dataForEdit.dataOpl.toString()) }
         this.createdItem.payer = { 'client_id': dataForEdit.orgId }
         this.createdItem.recipient = { 'id': dataForEdit.poluchId }
-        this.createdItem.forWhom = { 'client_id': dataForEdit.zaorgId } // zaorgId нету
+        this.createdItem.forWhom = { 'client_id': dataForEdit.zaorgId }
         this.selectedExecutor = dataForEdit.zaorgIsp // zaorgIsp нету
-        this.createdItem.collaborator = { 'fio': dataForEdit.fioSoisp }
+        this.createdItem.collaborator = { 'fio': dataForEdit.fioSoisp, 'id': dataForEdit.soispId }
         this.element[0] = { id: dataForEdit.budElem, codElem: dataForEdit.budCodElem }
         this.selectElementCode()
         this.createdItem.objId = dataForEdit.findId
@@ -466,6 +466,14 @@ export default {
       this.$emit('cancel')
     },
     async save() {
+      if (this.checkClosedPeriodAll(this.createdItem.dataVipis)) {
+        this.$refs.userNotification.showUserNotification('error', 'Нельзя редактировать в закрытом периоде!!!')
+        return
+      }
+      if (this.checkClosedPeriod(this.createdItem.dataVipis)) {
+        this.$refs.userNotification.showUserNotification('error', 'Период закрыт!!!')
+        return
+      }
       let errorMessage = null
       const preparedData = { ...this.element[0], ...this.createdItem }
       const paramsForSave = this.createParamsForSaveNewOutgoingDocuments(preparedData)
@@ -479,7 +487,8 @@ export default {
         this.reset()
         this.$emit('save')
       } else {
-        this.$refs.userNotification.showUserNotification('error', 'При добавлении нового исходящего платежного документа возникла ошибка')
+        const text = this.header === 'Ввод нового исходящего платежного документа' ? 'При добавлении нового исходящего платежного документа возникла ошибка' : 'При сохранении отредактированного исходящего документа с id ' + this.createdItem.objId + ', произошла ошибка'
+        this.$refs.userNotification.showUserNotification('error', text)
       }
     },
     // создание id

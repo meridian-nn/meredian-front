@@ -101,6 +101,7 @@
                 id="journal-of-payment-docs-v-data-table-to-pay-docs"
                 v-model="toPaySelectedRows"
                 :headers="toPayHeaders"
+                height="452"
                 fixed-header
                 :items="toPayData"
                 item-key="keyId"
@@ -112,6 +113,18 @@
                 class="elevation-1"
                 @contextmenu:row="showPayMenu"
               >
+                <template #[`item.nameDoc`]="{item}">
+                  <v-tooltip bottom>
+                    <template #activator="{ on, attrs }">
+                      <span
+                        v-bind="attrs"
+                        v-on="on"
+                      >{{ item.nameDoc }}</span>
+                    </template>
+                    <span>{{ item.nameDoc }}</span>
+                  </v-tooltip>
+                </template>
+
                 <template #[`item.sumOplatMask`]="props">
                   <v-edit-dialog
                     :return-value.sync="props.item.sumOplat"
@@ -314,8 +327,18 @@
                       <td class="journal-of-payment-docs-from-pay-docs-dataDoc">
                         {{ item.dataDoc }}
                       </td>
-                      <td class="journal-of-payment-docs-from-pay-docs-nameDoc">
-                        {{ item.nameDoc }}
+                      <td
+                        class="journal-of-payment-docs-table-cell-truncate"
+                      >
+                        <v-tooltip bottom>
+                          <template #activator="{ on, attrs }">
+                            <span
+                              v-bind="attrs"
+                              v-on="on"
+                            >{{ item.nameDoc }}</span>
+                          </template>
+                          <span>{{ item.nameDoc }}</span>
+                        </v-tooltip>
                       </td>
                       <td class="journal-of-payment-docs-from-pay-docs-payerName">
                         {{ item.payerName }}
@@ -623,6 +646,7 @@ export default {
         {
           text: 'Номер',
           value: 'nameDoc',
+          cellClass: 'journal-of-payment-docs-table-cell-truncate',
           width: '60px'
         },
         {
@@ -656,6 +680,7 @@ export default {
         {
           text: 'Номер',
           value: 'nameDoc',
+          width: '170px',
           sort: () => false
         },
         {
@@ -1364,7 +1389,7 @@ export default {
 
       const searchCriterias = this.createCriteriasForRequestToSearchDocsFromPay(filtersParams)
 
-      const data = { searchCriterias, page: this.pageOfFromPayData, orders: this.handleSortData }
+      const data = { searchCriterias, page: this.pageOfFromPayData, orders: this.handleSortData, size: 200 }
 
       this.isFiltersForFromPayDocsUsing = searchCriterias.length > 1
 
@@ -1671,8 +1696,11 @@ export default {
   width: 90px !important
 }
 
-.journal-of-payment-docs-from-pay-docs-nameDoc {
-  width: 170px !important
+.journal-of-payment-docs-table-cell-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 1px;
 }
 
 .journal-of-payment-docs-from-pay-docs-payerName {
