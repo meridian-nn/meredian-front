@@ -101,6 +101,7 @@
                 id="journal-of-payment-docs-v-data-table-to-pay-docs"
                 v-model="toPaySelectedRows"
                 :headers="toPayHeaders"
+                height="452"
                 fixed-header
                 :items="toPayData"
                 item-key="keyId"
