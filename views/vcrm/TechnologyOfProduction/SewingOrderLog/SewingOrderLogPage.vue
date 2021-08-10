@@ -90,12 +90,59 @@
           hide-default-footer
           :headers="sewingOrderTableHeaders"
           :items="sewingOrderTableRecords"
-          calculate-widths
           @click:row="fillCustomerName"
           @contextmenu:row="rightClickHandler"
           @update:sort-by="updateSort('by', $event)"
           @update:sort-desc="updateSort('desc', $event)"
         >
+          <template #[`item.nameMc`]="{item}">
+            <v-tooltip bottom>
+              <template #activator="{ on, attrs }">
+                <span
+                  v-bind="attrs"
+                  v-on="on"
+                >{{ item.nameMc }}</span>
+              </template>
+              <span>{{ item.nameMc }}</span>
+            </v-tooltip>
+          </template>
+
+          <template #[`item.gostTu`]="{item}">
+            <v-tooltip bottom>
+              <template #activator="{ on, attrs }">
+                <span
+                  v-bind="attrs"
+                  v-on="on"
+                >{{ item.gostTu }}</span>
+              </template>
+              <span>{{ item.gostTu }}</span>
+            </v-tooltip>
+          </template>
+
+          <template #[`item.codGra`]="{item}">
+            <v-tooltip bottom>
+              <template #activator="{ on, attrs }">
+                <span
+                  v-bind="attrs"
+                  v-on="on"
+                >{{ item.codGra }}</span>
+              </template>
+              <span>{{ item.codGra }}</span>
+            </v-tooltip>
+          </template>
+
+          <template #[`item.nameRaskroy`]="{item}">
+            <v-tooltip bottom>
+              <template #activator="{ on, attrs }">
+                <span
+                  v-bind="attrs"
+                  v-on="on"
+                >{{ item.nameRaskroy }}</span>
+              </template>
+              <span>{{ item.nameRaskroy }}</span>
+            </v-tooltip>
+          </template>
+
           <template slot="body.append">
             <infinite-loading
               :key="keyLoading"
@@ -294,6 +341,7 @@ import ModalTailoringOrder from './modals/TailoringOrder'
 import ModalRawMaterials from './modals/RawMaterials'
 import ModalActualConsumptionRawMaterials from './modals/ActualConsumptionRawMaterials'
 import ModalOldOrderCard from './modals/OldOrderCard'
+
 export default {
   name: 'SewingOrderLogPage',
 
@@ -364,7 +412,7 @@ export default {
         {
           text: 'Производство',
           value: 'nameProizv',
-          width: '100px',
+          width: '150px',
           sortable: false
         },
         {
@@ -376,7 +424,8 @@ export default {
         {
           text: 'Наименование МЦ',
           value: 'nameMc',
-          width: '220px',
+          width: '200px',
+          cellClass: 'sewing-order-log-page-records-table-cell-truncate',
           sortable: false
         },
         {
@@ -406,7 +455,8 @@ export default {
         {
           text: 'Раскрой',
           value: 'nameRaskroy',
-          width: '100px',
+          width: '130px',
+          cellClass: 'sewing-order-log-page-records-table-cell-truncate',
           sort: () => false
         },
         {
@@ -430,25 +480,27 @@ export default {
         {
           text: 'Исполнитель',
           value: 'fioIsp',
-          width: '100px',
+          width: '120px',
           sort: () => false
         },
         {
           text: 'Отв.исп',
           value: 'otvIsp',
-          width: '100px',
+          width: '120px',
           sort: () => false
         },
         {
           text: 'ГОСТ/ТУ',
           value: 'gostTu',
-          width: '100px',
+          width: '150px',
+          cellClass: 'sewing-order-log-page-records-table-cell-truncate',
           sort: () => false
         },
         {
           text: 'Код ЗП',
           value: 'codGra',
-          width: '100px',
+          width: '150px',
+          cellClass: 'sewing-order-log-page-records-table-cell-truncate',
           sort: () => false
         },
         {
@@ -661,8 +713,9 @@ export default {
       const searchCriterias = this.createCriteriasToSearchSewingOrderLogDataByPage(filtersParams)
       const data = {
         searchCriterias,
-        page: this.pageOfFromPayData,
-        orders: this.handleSortData
+        page: this.page,
+        orders: this.handleSortData,
+        size: 100
       }
 
       const { content } = await this.$api.manufacturing.manufacturingRequestJournalFindPageBySearchCriteriaList(data)
@@ -801,4 +854,12 @@ export default {
 .sewing-order-log-page-customer-field {
   width: 1000px;
 }
+
+.sewing-order-log-page-records-table-cell-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 1px;
+}
+
 </style>
