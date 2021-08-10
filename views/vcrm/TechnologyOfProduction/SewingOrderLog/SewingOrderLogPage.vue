@@ -96,7 +96,126 @@
           @update:sort-by="updateSort('by', $event)"
           @update:sort-desc="updateSort('desc', $event)"
         >
-          <template slot="body.append">
+          <template #body="{ items }">
+            <tbody>
+              <tr
+                v-for="item in items"
+                :key="item.id"
+                :value="item"
+                :class="getBackgroundAndFontClass(item)"
+                @dblclick="fillingBrackForOrder"
+              >
+                <td>
+                  <v-checkbox
+                    v-model="sewingOrderTableSelectedRecords"
+                    :value="item"
+                    hide-details
+                  />
+                </td>
+                <td>
+                  <v-icon
+                    v-if="item.prEt === 1"
+                    color="rgb(0,0,255)"
+                  >
+                    mdi-check
+                  </v-icon>
+                </td>
+                <td>
+                  <v-icon
+                    v-if="item.prQuality === 1"
+                  >
+                    mdi-check
+                  </v-icon>
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.numPlanpsv }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.numZkzpsv }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.dataZkzpsv }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.nameProizv }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.mcId }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.nameMc }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.nameEd }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.colvo }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.planDataManager }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.factData }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract' : ''">
+                  {{ item.nameRaskroy }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.numZaivk }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.numSvod }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.dataRaskroyFact }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.fioIsp }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.otvIsp }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.gostTu }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.codGra }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.planData }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.gotovKonfKarta }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.gotovTo }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.gotovMl }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.gotovTp }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.gotovOtk }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.print }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.kroy }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.nameKroy }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.govcontract }}
+                </td>
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                  {{ item.contract }}
+                </td>
+              </tr>
+            </tbody>
             <infinite-loading
               :key="keyLoading"
               spinner="spiral"
@@ -274,6 +393,12 @@
       @close="closeModal('rawMaterials')"
     />
 
+    <filling-defect-on-order-for-tailoring
+      :data="currentRowOfTableForContextMenu"
+      :value="modals.fillingDefectOnOrderForTailoring"
+      @close="closeModal('fillingDefectOnOrderForTailoring')"
+    />
+
     <user-notification ref="userNotification" />
     <message ref="message" />
   </div>
@@ -294,6 +419,8 @@ import ModalTailoringOrder from './modals/TailoringOrder'
 import ModalRawMaterials from './modals/RawMaterials'
 import ModalActualConsumptionRawMaterials from './modals/ActualConsumptionRawMaterials'
 import ModalOldOrderCard from './modals/OldOrderCard'
+import FillingDefectOnOrderForTailoring from './modals/FillingDefectOnOrderForTailoring'
+
 export default {
   name: 'SewingOrderLogPage',
 
@@ -311,6 +438,7 @@ export default {
     ModalOldOrderCard,
     UserNotification,
     ModalRawMaterials,
+    FillingDefectOnOrderForTailoring,
     InfiniteLoading
   },
 
@@ -339,10 +467,23 @@ export default {
         tailoringOrder: false,
         rawMaterials: false,
         actualConsumptionRawMaterials: false,
-        oldOrderCard: false
+        oldOrderCard: false,
+        fillingDefectOnOrderForTailoring: false
       },
       sewingOrderTableSelectedRecords: [],
       sewingOrderTableHeaders: [
+        {
+          text: 'Эт',
+          value: 'prEt',
+          width: '20px',
+          sortable: false
+        },
+        {
+          text: 'К',
+          value: 'prQuality',
+          width: '20px',
+          sortable: false
+        },
         {
           text: 'План',
           value: 'numPlanpsv',
@@ -518,11 +659,6 @@ export default {
       customerName: ''
     }
   },
-
-  /* async fetch() {
-    await this.init()
-  }, */
-
   computed: {
     handleSortData() {
       const { sortDesc } = this
@@ -539,6 +675,10 @@ export default {
       return this.$store.state.profile.user
     }
   },
+
+  /* async fetch() {
+    await this.init()
+  }, */
 
   mounted() {
     this.init()
@@ -661,7 +801,7 @@ export default {
       const searchCriterias = this.createCriteriasToSearchSewingOrderLogDataByPage(filtersParams)
       const data = {
         searchCriterias,
-        page: this.pageOfFromPayData,
+        page: this.page,
         orders: this.handleSortData
       }
 
@@ -717,6 +857,43 @@ export default {
 
       this.currentRowOfTableForContextMenu = null
       this.updateSewingOrderTableRecords()
+    },
+
+    getBackgroundAndFontClass(data) {
+      let classes = []
+      if (data.flagDel === 0) {
+        if (data.factData === '01.01.1900') {
+          if (data.parent === 0) {
+            if (data.dopWork === 1) {
+              classes = 'background-pink'
+            } else {
+              classes = 'background-white'
+            }
+          } else {
+            classes = 'background-green-blue'
+          }
+        } else {
+          classes = 'background-yellow'
+        }
+      } else {
+        classes = 'background-grey'
+      }
+
+      if (data.prb === 0) {
+        classes += ' font-black'
+      }
+      if (data.prb === 1) {
+        classes += ' font-vinous'
+      }
+      if (data.prb === 2) {
+        classes += ' font-red'
+      }
+
+      return classes
+    },
+
+    fillingBrackForOrder() {
+      this.modals.fillingDefectOnOrderForTailoring = true
     }
   }
 }
@@ -800,5 +977,39 @@ export default {
 
 .sewing-order-log-page-customer-field {
   width: 1000px;
+}
+
+.background-pink {
+  background-color: rgb(251,198,199);
+}
+.background-white {
+  background-color: rgb(255, 255, 255);
+}
+.background-green-blue {
+  background-color: rgb(175,236,239);
+}
+.background-yellow {
+  background-color: rgb(248,248,190);
+}
+.background-grey {
+  background-color: rgb(192,192,192);
+}
+.font-red {
+  color: rgb(255,0,0);
+}
+.font-black {
+  color: rgb(0,0,0);
+}
+.font-vinous {
+  color: rgb(128,0,64);
+}
+.font-size-for-govcontract {
+  font-size: 1rem;
+}
+.font-bold-for-govcontract {
+  font-weight: bold;
+}
+#sewing-order-log-page-records-table tr:hover {
+  border-color: inherit;
 }
 </style>
