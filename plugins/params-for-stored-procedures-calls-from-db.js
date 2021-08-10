@@ -264,6 +264,30 @@ Vue.mixin({
         params: paramsForRequest,
         procName: this.$api.payment.outgoingPayment.getDeleteOutgoingPaymentDocumentsInitDataProcedureName()
       }
+    },
+
+    createStructureForGenerateBudgetInOutgoingPaymentDocumentInitDataProcedure(paramsForRequest) {
+      return {
+        params: this.createParamsForGenerateBudgetInOutgoingPaymentDocumentInitDataProcedure(paramsForRequest),
+        procName: this.$api.payment.outgoingPayment.getForGenerateBudgetInOutgoingPaymentDocumentsInitDataProcedureName()
+      }
+    },
+
+    createParamsForGenerateBudgetInOutgoingPaymentDocumentInitDataProcedure(paramsForRequest) {
+      return {
+        descr: this.getCurrentUser.login,
+        doc_id: paramsForRequest.findId,
+        viddoc: '1'
+      }
+    },
+
+    createStructureForLoadDataAfterGenerateBudgetInOutgoingPaymentDocumentInitDataProcedure() {
+      return {
+        params: {
+          descr: this.getCurrentUser.login
+        },
+        procName: this.$api.payment.outgoingPayment.getDataAfterGenerateBudgetInOutgoingPaymentDocumentsInitDataProcedureName()
+      }
     }
   }
 

@@ -125,7 +125,10 @@
               <td>
                 {{ item.platName }}
               </td>
-              <td>
+              <td
+                class="outgoing-document-table-poluchName"
+                :title="item.poluchName"
+              >
                 {{ item.poluchName }}
               </td>
               <td>
@@ -300,7 +303,8 @@ export default {
         {
           text: 'Получатель',
           value: 'poluchName',
-          width: '12%',
+          width: '210px',
+          cellClass: 'outgoing-document-table-poluchName',
           sort: () => false
         },
         {
@@ -380,7 +384,23 @@ export default {
     async init() {
       await this.initData()
     },
-    generateBudget() {
+    async generateBudget() {
+      if (this.outgoingDocsRows.length === 0) {
+        this.$refs.userNotification.showUserNotification('error', 'Выберите документы для формирования записей в бюджет')
+        return
+      }
+      this.$refs.userNotification.showUserNotification('warn', 'Формирование записей в бюджет')
+      for (const doc of this.outgoingDocsRows) {
+        const params = this.createStructureForGenerateBudgetInOutgoingPaymentDocumentInitDataProcedure(doc)
+        await this.$api.service.executeStashedFunction(params).catch((error) => {
+          alert(error)
+        })
+      }
+      const paramsForLoadData = this.createStructureForLoadDataAfterGenerateBudgetInOutgoingPaymentDocumentInitDataProcedure()
+      const dataForReport = await this.$api.service.executeStashedFunction(paramsForLoadData).catch((error) => {
+        alert(error)
+      })
+      console.log('ВОТ ЧЁ ', dataForReport)
       this.$refs.userNotification.showUserNotification('success', 'Бюджет сформирован')
     },
     newOutgoingDocument() {
@@ -513,7 +533,7 @@ export default {
       }
       if (confirm(`Вы действительно хотите удалить ${this.outgoingDocsRows.length > 1 ? 'выбранные документы' : 'выбранный документ'}?`)) {
         for (const doc of this.outgoingDocsRows) {
-          if (this.checkClosedPeriod(doc.dataVipis)) {
+          if (this.checkClosedPeriodAll(doc.dataVipis)) {
             this.$refs.userNotification.showUserNotification('error', `Удаление документа №${doc.numFind} невозможно! Нельзя удалять в закрытом периоде!`)
             continue
           }
@@ -626,5 +646,12 @@ export default {
 
 .outgoing-payment-documents-row p {
   font-weight: bold;
+}
+
+.outgoing-document-table-poluchName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 1px;
 }
 </style>

@@ -570,6 +570,12 @@ export const factory = send => ({
             getBudgetsArticlesInOutgoingPaymentDocumentsInitDataProcedureName() {
                 return 'dbo.bud_sel_stati'
             },
+            getForGenerateBudgetInOutgoingPaymentDocumentsInitDataProcedureName() {
+                return 'dbo.bud_ins_temp'
+            },
+            getDataAfterGenerateBudgetInOutgoingPaymentDocumentsInitDataProcedureName() {
+                return 'dbo.bud_form'
+            },
             findPageBySearchCriterias(params) {
                 return send('POST', `/oper/outgoingPaymentDocument/findPageBySearchCriteriaList`, params)
             },
