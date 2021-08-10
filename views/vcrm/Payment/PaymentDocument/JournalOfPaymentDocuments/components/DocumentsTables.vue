@@ -1389,7 +1389,7 @@ export default {
 
       const searchCriterias = this.createCriteriasForRequestToSearchDocsFromPay(filtersParams)
 
-      const data = { searchCriterias, page: this.pageOfFromPayData, orders: this.handleSortData }
+      const data = { searchCriterias, page: this.pageOfFromPayData, orders: this.handleSortData, size: 200 }
 
       this.isFiltersForFromPayDocsUsing = searchCriterias.length > 1
 
