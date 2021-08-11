@@ -6,7 +6,7 @@
           fab
           small
           color="blue"
-          :disabled="sewingOrderTableSelectedRecords.length === 0"
+          :disabled="sewingOrderTableSelectedRecords.length === 0 || sewingOrderTableSelectedRecords.length > 1"
         >
           <v-icon
             color="white"
@@ -680,6 +680,7 @@ export default {
         }
       ],
       sewingOrderTableRecords: [],
+      isNeedToInitDataForSewingOrderTable: true,
       govContract: false,
 
       noOTK: false,
@@ -713,10 +714,7 @@ export default {
   },
 
   methods: {
-    async init() {
-      // await this.fullUpdateTableOfRecordsWithInitData()
-      // this.updateSewingOrderTableRecords()
-    },
+    async init() {},
 
     rightClickHandler(event, { item }) {
       event.preventDefault()
@@ -762,10 +760,10 @@ export default {
 
     closeModal(name) {
       this.modals[name] = false
+      this.sewingOrderTableSelectedRecords = []
       if (name === 'edit' ||
         name === 'editAdd') {
-        // this.canUpdate = false
-        // this.fullUpdateTableOfRecordsWithInitData()
+        this.isNeedToInitDataForSewingOrderTable = true
         this.updateSewingOrderTableRecords()
       }
     },
@@ -774,7 +772,7 @@ export default {
       try {
         await this.$api.manufacturing.manufacturingRequestJournalSave(params)
 
-        this.updateSewingOrderTableRecords()
+        await this.updateSewingOrderTableRecords()
       } catch (e) {
         this.$refs.userNotification.showUserNotification('warning', 'Ошибка сервера, попробуйте позже')
       }
@@ -806,6 +804,7 @@ export default {
       this.sewingOrderTableRecords = []
       this.sewingOrderTableSelectedRecords = []
       this.infiniteIdData += 1
+      this.loadingType.sewingOrderTableRecords = false
     },
 
     async findSewingOrderTableRecords($state) {
@@ -848,8 +847,13 @@ export default {
     },
 
     async initDataForCurrentUser() {
+      if (!this.isNeedToInitDataForSewingOrderTable) {
+        return
+      }
+
       const params = this.createStructureForSewingOrderLogPageInitDataProcedure()
       await this.$api.service.executeStashedFunction(params)
+      this.isNeedToInitDataForSewingOrderTable = false
     },
 
     async deleteRecord() {
@@ -885,6 +889,7 @@ export default {
       }
 
       this.currentRowOfTableForContextMenu = null
+      this.isNeedToInitDataForSewingOrderTable = true
       this.updateSewingOrderTableRecords()
     },
 

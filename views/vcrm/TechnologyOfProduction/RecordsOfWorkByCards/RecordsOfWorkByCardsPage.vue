@@ -24,12 +24,14 @@
           color="blue"
           class="mx-2"
           fab
-          dark
           x-small
-          @click="editRecord"
+          :disabled="recordsSelectedRows.length === 0 || recordsSelectedRows.length > 1"
         >
-          <v-icon dark>
-            mdi-file-edit
+          <v-icon
+            color="white"
+            @click="editRecord"
+          >
+            mdi-pencil
           </v-icon>
         </v-btn>
       </div>
