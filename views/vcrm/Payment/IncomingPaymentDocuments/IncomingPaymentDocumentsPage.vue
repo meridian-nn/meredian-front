@@ -84,6 +84,7 @@
               <td>
                 <v-checkbox
                   v-model="selectedIncomingDocuments"
+                  class="mt-0 pt-0"
                   :value="item"
                   hide-details
                 />

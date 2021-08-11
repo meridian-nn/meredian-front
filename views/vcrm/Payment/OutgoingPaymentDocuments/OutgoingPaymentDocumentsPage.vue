@@ -99,6 +99,7 @@
               <td>
                 <v-checkbox
                   v-model="outgoingDocsRows"
+                  class="mt-0 pt-0"
                   :value="item"
                   hide-details
                 />
@@ -473,7 +474,8 @@ export default {
       const params = {
         searchCriterias,
         page: this.pageOfRecords,
-        orders: this.handleSortData
+        orders: this.handleSortData,
+        size: 40
       }
 
       this.isFiltersUsing = searchCriterias.length > 1
