@@ -220,8 +220,13 @@ export default {
 
     async findDataAboutFromPayDocForChart() {
       const filtersParams = {
-        dateFrom: new Date()
+        dateFrom: new Date(),
+        sumToPay: {
+          sumToPayValue: '0.00',
+          isSumToPayUsed: true
+        }
       }
+
       const data = this.createCriteriasForRequestToSearchDocsFromPay(filtersParams)
       const response = await this.$api.payment.docOplForPay.findDocumentsForPayByCriterias(data)
       const dataForChart = this.convertFromPayDataResponseToDataForChart(response)

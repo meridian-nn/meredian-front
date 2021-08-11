@@ -813,6 +813,7 @@ export default {
     this.init()
   },
   methods: {
+    // Функция инициализации данных формы
     async init() {
       await this.selOplat()
       await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
@@ -829,6 +830,7 @@ export default {
       }
     },
 
+    // Функция для реализации серверной сортировки данных
     updateSort(byDesc, event) {
       if (byDesc === 'by') {
         this.sortBy = event
@@ -1028,9 +1030,9 @@ export default {
 
       const sumDocs = this.countSumOfArrayElements(this.fromPaySelectedRows.map(value => value.sumToPayNumber))
 
-      if (sumDocs > this.currentPaymentAccountBalance) {
+      /* if (sumDocs > this.currentPaymentAccountBalance) {
         this.$refs.userNotification.showUserNotification('warning', 'Сумма выбранных документов на оплату превышает сумму остатка по выбранному р/с!', 4000)
-      }
+      } */
 
       await this.addPayments()
       const responseSpOplatSave = await this.changeSumToPayOfPaymentAccount(this.accId, sumDocs, 'SUM', new Date())
@@ -1155,6 +1157,7 @@ export default {
       }
     },
 
+    // Функция удаления документа вн. перемещение
     async deleteVnpl(vnplDocs) {
       for (const vnplDocArr of vnplDocs) {
         const vnplDoc = await this.$api.payment.docOplForPay.findById(vnplDocArr.id)
@@ -1167,6 +1170,7 @@ export default {
       }
     },
 
+    // Функция удаления документов на оплату
     async deleteDocFromPay(docsFromPay) {
       const selectedRows = docsFromPay
       const isDeletionPossible = this.checkSelectedRowsBeforeDelete(selectedRows)
@@ -1182,6 +1186,7 @@ export default {
       // await this.$axios.$post(this.$api.payment.docOplForPay.getDeletePaymentUrl(), ids)
     },
 
+    // Функция проверки выбранных документов на оплату на возможность удаления
     checkSelectedRowsBeforeDelete(selectedRows) {
       let isDeletionPossible = true
 
@@ -1223,12 +1228,12 @@ export default {
       if (!this.currentRowForContextMenu.isDoc) {
         this.deletePaymentByCashbox(this.currentRowForContextMenu)
       } else {
-        this.deleteFromPay(this.currentRowForContextMenu)
+        this.deleteToPayDocs(this.currentRowForContextMenu)
       }
     },
 
+    // Функция удаления документа оплаты по кассе
     async deletePaymentByCashbox(curRow) {
-      console.log(curRow.dataOplat)
       const dateOfDoc = this.convertLocaleDateStringToDate(curRow.dataOplat)
       await this.changeSumToPayOfPaymentAccount(curRow.accId, curRow.sumOplat, 'DEDUCT', dateOfDoc)
       await this.$api.payment.deletePaymentUrl(curRow.id)
@@ -1236,7 +1241,8 @@ export default {
       await this.$refs.journalOfPaymentDocumentsHeader.findOrgAccInfo(this.date)
     },
 
-    deleteFromPay(curRow) {
+    // Функция удаления документов из таблицы "Документы к оплате"
+    deleteToPayDocs(curRow) {
       this.toPaySelectedRows = []
       this.toPaySelectedRows.push(curRow)
       this.deleteSelectedPayments()
@@ -1304,6 +1310,7 @@ export default {
       this.loadingType.paymentAccounts = null
     },
 
+    // Функция автовыбора первого расчетного счета из списка счетов выбранной организации
     selectFirstPaymentAccount() {
       if (!this.paymentAccounts) {
         return
@@ -1428,6 +1435,7 @@ export default {
       }
     },
 
+    // Функция подсчета сумм всех документов на оплату, которые удовлетворяют критерии отбора (searchCriterias)
     async fillResultsOfDocumentsFromPay(searchCriterias) {
       const dataForResults = this.createCriteriasToGetResultsOfDocsFromPay(searchCriterias)
       const response = await this.$api.payment.docOplForPay.findDocumentsWithGroupBy(dataForResults)

@@ -32,7 +32,7 @@ Vue.mixin({
       this.forceJasperReportDownload(report, format, 'Реестр_оплат_от_' + pdReestrPays)
     },
 
-    async downloadOrderOnSewing(format, zkzpsvId) {
+    async downloadOrderOnOurProductionFromJasperserver(format, zkzpsvId) {
       if (!zkzpsvId) {
         return
       }
@@ -51,7 +51,51 @@ Vue.mixin({
       }
 
       const report = await this.$axios.$get(link, config)
-      this.forceJasperReportDownload(report, format, 'Заказ_на_пошив_' + zkzpsvId)
+      this.forceJasperReportDownload(report, format, 'Заказ_на_наше_производство_' + zkzpsvId)
+    },
+
+    async downloadOrderOnGiversRawMaterialsFromJasperserver(format, zkzpsvId) {
+      if (!zkzpsvId) {
+        return
+      }
+
+      if (!format) {
+        format = 'HTML'
+      }
+
+      const link = this.getJasperRootUrl() +
+        'Zkzpsv_ds.' +
+        format + '?' + 'zkzpsv_id=' + zkzpsvId
+
+      const config = {
+        headers: this.getJasperLoginAndPasswordForHeaders(),
+        responseType: 'blob'
+      }
+
+      const report = await this.$axios.$get(link, config)
+      this.forceJasperReportDownload(report, format, 'Заказ_на_пошив_из_дав_сырья_' + zkzpsvId)
+    },
+
+    async downloadInvoiceForReleaseOfFinishedProductionsFromJasperserver(format, zkzpsvId) {
+      if (!zkzpsvId) {
+        return
+      }
+
+      if (!format) {
+        format = 'HTML'
+      }
+
+      const link = this.getJasperRootUrl() +
+        'Zkzpsv_nakl.' +
+        format + '?' + 'zkzpsv_id=' + zkzpsvId
+
+      const config = {
+        headers: this.getJasperLoginAndPasswordForHeaders(),
+        responseType: 'blob'
+      }
+
+      const report = await this.$axios.$get(link, config)
+      this.forceJasperReportDownload(report, format, 'Накладная_на_отпуск_готовой_продукции_' + zkzpsvId)
     },
 
     forceJasperReportDownload(report, format, fileName) {
