@@ -289,23 +289,28 @@ export default {
       selectedReport: 1,
       reports: [
         {
-          text: 'Реестр оплат',
-          value: 'ReestrPays',
+          text: 'Заказ на наше производство',
+          value: 'OrderOnOurProduction',
           marked: false
         },
         {
-          text: 'Заказ на пошив',
-          value: 'ZakazNaPoshiv',
+          text: 'Конфекционная карта',
+          value: 'KonfectionCard',
           marked: false
         },
         {
-          text: 'Заказ на пошив1',
-          value: 'ZakazNaPoshiv1',
+          text: 'Отчет по браку',
+          value: 'DefectiveReport',
           marked: false
         },
         {
-          text: 'Заказ на пошив2',
-          value: 'ZakazNaPoshiv2',
+          text: 'Заказ на давальческое сырье',
+          value: 'OrderOnGiversRawMaterials',
+          marked: false
+        },
+        {
+          text: 'Накладная на отпуск готовой продукции',
+          value: 'InvoiceForReleaseOfFinishedProductions',
           marked: false
         }
       ],
@@ -338,10 +343,16 @@ export default {
       }
 
       for (const report of markedReports) {
-        if (report.value === 'ReestrPays') {
-          this.downloadReestPays()
-        } else if (report.value === 'ZakazNaPoshiv') {
-          this.downloadZakazNaPoshiv()
+        if (report.value === 'OrderOnOurProduction') {
+          this.downloadOrderOnOurProduction() // Требуется доработка sql запроса
+        } else if (report.value === 'KonfectionCard') {
+          // Отчет не реализован
+        } else if (report.value === 'DefectiveReport') {
+          // Отчет не реализован
+        } else if (report.value === 'OrderOnGiversRawMaterials') {
+          this.downloadOrderOnGiversRawMaterials() // Требуется доработка sql запроса
+        } else if (report.value === 'InvoiceForReleaseOfFinishedProductions') {
+          this.downloadInvoiceForReleaseOfFinishedProductions() // Требуется доработка sql запроса
         }
       }
     },
@@ -355,14 +366,36 @@ export default {
       this.downloadReestPaysReport(params.format, params.pdReestrPays)
     },
 
-    downloadZakazNaPoshiv() {
+    async downloadOrderOnOurProduction() {
       for (const selectedRecord of this.selectedRecords) {
         const params = {
           format: 'HTML',
           zkzpsvId: selectedRecord.zkzpsvId
         }
 
-        this.downloadOrderOnSewing(params.format, params.zkzpsvId)
+        await this.downloadOrderOnOurProductionFromJasperserver(params.format, params.zkzpsvId)
+      }
+    },
+
+    async downloadOrderOnGiversRawMaterials() {
+      for (const selectedRecord of this.selectedRecords) {
+        const params = {
+          format: 'HTML',
+          zkzpsvId: selectedRecord.zkzpsvId
+        }
+
+        await this.downloadOrderOnGiversRawMaterialsFromJasperserver(params.format, params.zkzpsvId)
+      }
+    },
+
+    async downloadInvoiceForReleaseOfFinishedProductions() {
+      for (const selectedRecord of this.selectedRecords) {
+        const params = {
+          format: 'HTML',
+          zkzpsvId: selectedRecord.zkzpsvId
+        }
+
+        await this.downloadInvoiceForReleaseOfFinishedProductionsFromJasperserver(params.format, params.zkzpsvId)
       }
     },
 
