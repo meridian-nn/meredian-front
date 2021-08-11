@@ -425,6 +425,12 @@
       @close="closeModal('rawMaterials')"
     />
 
+    <filling-defect-on-order-for-tailoring
+      :data="currentRowOfTableForContextMenu"
+      :value="modals.fillingDefectOnOrderForTailoring"
+      @close="closeModal('fillingDefectOnOrderForTailoring')"
+    />
+
     <user-notification ref="userNotification" />
     <message ref="message" />
   </div>
@@ -445,6 +451,7 @@ import ModalTailoringOrder from './modals/TailoringOrder'
 import ModalRawMaterials from './modals/RawMaterials'
 import ModalActualConsumptionRawMaterials from './modals/ActualConsumptionRawMaterials'
 import ModalOldOrderCard from './modals/OldOrderCard'
+import FillingDefectOnOrderForTailoring from './modals/FillingDefectOnOrderForTailoring'
 
 export default {
   name: 'SewingOrderLogPage',
@@ -463,6 +470,7 @@ export default {
     ModalOldOrderCard,
     UserNotification,
     ModalRawMaterials,
+    FillingDefectOnOrderForTailoring,
     InfiniteLoading
   },
 
