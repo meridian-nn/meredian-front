@@ -126,13 +126,30 @@
                 {{ item.platName }}
               </td>
               <td
-                class="outgoing-document-table-poluchName"
-                :title="item.poluchName"
+                class="outgoing-document-table-text-inline"
               >
-                {{ item.poluchName }}
+                <v-tooltip bottom>
+                  <template #activator="{ on, attrs }">
+                    <span
+                      v-bind="attrs"
+                      v-on="on"
+                    >{{ item.poluchName }}</span>
+                  </template>
+                  <span>{{ item.poluchName }}</span>
+                </v-tooltip>
               </td>
-              <td>
-                {{ item.fio }}
+              <td
+                class="outgoing-document-table-text-inline"
+              >
+                <v-tooltip bottom>
+                  <template #activator="{ on, attrs }">
+                    <span
+                      v-bind="attrs"
+                      v-on="on"
+                    >{{ item.fio }}</span>
+                  </template>
+                  <span>{{ item.fio }}</span>
+                </v-tooltip>
               </td>
               <td>
                 {{ item.numVipis }}
@@ -143,8 +160,18 @@
               <td>
                 {{ item.budCodElem }}
               </td>
-              <td>
-                {{ item.budElemName }}
+              <td
+                class="outgoing-document-table-text-inline"
+              >
+                <v-tooltip bottom>
+                  <template #activator="{ on, attrs }">
+                    <span
+                      v-bind="attrs"
+                      v-on="on"
+                    >{{ item.budElemName }}</span>
+                  </template>
+                  <span>{{ item.budElemName }}</span>
+                </v-tooltip>
               </td>
               <td>
                 {{ item.budCfo }}
@@ -302,11 +329,11 @@ export default {
           text: 'Получатель',
           value: 'poluchName',
           width: '210px',
-          cellClass: 'outgoing-document-table-poluchName',
+          cellClass: 'outgoing-document-table-text-inline',
           sort: () => false
         },
         {
-          text: 'Испольнитель',
+          text: 'Исполнитель',
           value: 'fio',
           width: '7%',
           sort: () => false
@@ -649,7 +676,7 @@ export default {
   font-weight: bold;
 }
 
-.outgoing-document-table-poluchName {
+.outgoing-document-table-text-inline {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

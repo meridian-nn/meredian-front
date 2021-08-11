@@ -108,8 +108,18 @@
                   output-type="number"
                 />
               </td>
-              <td>
-                {{ item.platName }}
+              <td
+                class="incoming-document-table-text-inline"
+              >
+                <v-tooltip bottom>
+                  <template #activator="{ on, attrs }">
+                    <span
+                      v-bind="attrs"
+                      v-on="on"
+                    >{{ item.platName }}</span>
+                  </template>
+                  <span>{{ item.platName }}</span>
+                </v-tooltip>
               </td>
               <td>
                 {{ item.poluchName }}
@@ -617,5 +627,11 @@ export default {
 
 .incoming-payment-documents-filters-btn{
   padding-top: 10px;
+}
+.incoming-document-table-text-inline {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 1px;
 }
 </style>
