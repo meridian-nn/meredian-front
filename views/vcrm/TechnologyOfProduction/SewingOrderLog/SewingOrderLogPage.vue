@@ -1,57 +1,97 @@
 <template>
   <div class="sewing-order-log-page">
     <div class="sewing-order-log-page-row">
-      <div class="sewing-order-log-page-btn mr-4">
-        <v-btn
-          fab
-          small
-          color="blue"
-          :disabled="sewingOrderTableSelectedRecords.length === 0 || sewingOrderTableSelectedRecords.length > 1"
-        >
-          <v-icon
-            color="white"
-            @click="openModal('edit')"
+      <v-tooltip bottom>
+        <template #activator="{ on, attrs }">
+          <div
+            class="mr-1"
+            v-bind="attrs"
+            v-on="on"
           >
-            mdi-pencil
-          </v-icon>
-        </v-btn>
+            <v-btn
+              style="border-radius:50%; width: 40px; height: 40px;"
+              min-width="40px"
+              small
+              color="blue"
+              :disabled="sewingOrderTableSelectedRecords.length === 0 || sewingOrderTableSelectedRecords.length > 1"
+            >
+              <v-icon
+                color="white"
+                @click="openModal('edit')"
+              >
+                mdi-pencil
+              </v-icon>
+            </v-btn>
+          </div>
+        </template>
+        <span>Редактирование выбранного заказа на пошив</span>
+      </v-tooltip>
 
-        <v-btn
-          fab
-          small
-          color="red"
-          :disabled="sewingOrderTableSelectedRecords.length === 0"
-        >
-          <v-icon
-            color="white"
-            @click="deleteRecord"
+      <v-tooltip bottom>
+        <template #activator="{ on, attrs }">
+          <div
+            class="mr-1"
+            v-bind="attrs"
+            v-on="on"
           >
-            mdi-delete
-          </v-icon>
-        </v-btn>
+            <v-btn
+              style="border-radius:50%; width: 40px; height: 40px;"
+              min-width="40px"
+              small
+              color="red"
+              :disabled="sewingOrderTableSelectedRecords.length === 0"
+            >
+              <v-icon
+                color="white"
+                @click="deleteRecord"
+              >
+                mdi-delete
+              </v-icon>
+            </v-btn>
+          </div>
+        </template>
+        <span>Удаление выбранных заказов на пошив</span>
+      </v-tooltip>
 
-        <v-btn
-          fab
-          small
-          color="red"
-          @click="openModal('print')"
-        >
-          <v-icon color="white">
-            mdi-printer
-          </v-icon>
-        </v-btn>
+      <v-tooltip bottom>
+        <template #activator="{ on, attrs }">
+          <v-btn
+            class="mr-1"
+            style="border-radius:50%; width: 40px; height: 40px;"
+            min-width="40px"
+            small
+            color="red"
+            v-bind="attrs"
+            @click="openModal('print')"
+            v-on="on"
+          >
+            <v-icon color="white">
+              mdi-printer
+            </v-icon>
+          </v-btn>
+        </template>
+        <span>Открытие формы печати</span>
+      </v-tooltip>
 
-        <v-btn
-          fab
-          small
-          color="blue"
-          @click="openModal('filter')"
-        >
-          <v-icon color="white">
-            mdi-filter
-          </v-icon>
-        </v-btn>
-      </div>
+      <v-tooltip bottom>
+        <template #activator="{ on, attrs }">
+          <v-btn
+            class="mr-1"
+            style="border-radius:50%; width: 40px; height: 40px;"
+            min-width="40px"
+            small
+            color="blue"
+            v-bind="attrs"
+            @click="openModal('filter')"
+            v-on="on"
+          >
+            <v-icon color="white">
+              mdi-filter
+            </v-icon>
+          </v-btn>
+        </template>
+        <span>Фильтры для заказов на пошив</span>
+      </v-tooltip>
 
       <div class="sewing-order-log-page-checkbox mr-4">
         <v-checkbox
@@ -1065,5 +1105,10 @@ export default {
 }
 #sewing-order-log-page-records-table tr:hover {
   border-color: inherit;
+}
+
+.sewing-order-log-page-btn {
+  flex: 0 0 10%;
+  max-width: 10%;
 }
 </style>
