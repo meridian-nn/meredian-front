@@ -137,7 +137,7 @@ Vue.mixin({
     createParamsForInitIncomingPaymentDocument() {
       return {
         vid: 1,
-        my_descr: 'Larisa',
+        my_descr: '',
         data1: '2021-06-01',
         data2: new Date().toISOString().slice(0, 10),
         user_id: this.getCurrentUser.id
@@ -241,6 +241,52 @@ Vue.mixin({
       return {
         params: userParams,
         procName: this.$api.payment.incomingPaymentDocuments.getVIspfInIncomingPaymentDocumentsInitDataProcedureName()
+      }
+    },
+
+    createStructureForPrepareDeleteIncomingOutgoingPaymentDocumentInitDataProcedure(paramsForRequest) {
+      return {
+        params: this.createParamsForPrepareDeleteIncomingOutgoingPaymentDocumentsInitDataProcedure(paramsForRequest),
+        procName: this.$api.payment.getPrepareDeletePaymentDocumentsInitDataProcedureName()
+      }
+    },
+
+    createParamsForPrepareDeleteIncomingOutgoingPaymentDocumentsInitDataProcedure(paramsForRequest) {
+      return {
+        tip_doc: 2,
+        doc_id: paramsForRequest.findId,
+        priznak: 1
+      }
+    },
+
+    createStructureForDeleteIncomingOutgoingPaymentDocumentInitDataProcedure(paramsForRequest) {
+      return {
+        params: paramsForRequest,
+        procName: this.$api.payment.getDeletePaymentDocumentsInitDataProcedureName()
+      }
+    },
+
+    createStructureForGenerateBudgetInOutgoingPaymentDocumentInitDataProcedure(paramsForRequest) {
+      return {
+        params: this.createParamsForGenerateBudgetInOutgoingPaymentDocumentInitDataProcedure(paramsForRequest),
+        procName: this.$api.payment.outgoingPayment.getForGenerateBudgetInOutgoingPaymentDocumentsInitDataProcedureName()
+      }
+    },
+
+    createParamsForGenerateBudgetInOutgoingPaymentDocumentInitDataProcedure(paramsForRequest) {
+      return {
+        descr: this.getCurrentUser.login,
+        doc_id: paramsForRequest.findId,
+        viddoc: '1'
+      }
+    },
+
+    createStructureForLoadDataAfterGenerateBudgetInOutgoingPaymentDocumentInitDataProcedure() {
+      return {
+        params: {
+          descr: this.getCurrentUser.login
+        },
+        procName: this.$api.payment.outgoingPayment.getDataAfterGenerateBudgetInOutgoingPaymentDocumentsInitDataProcedureName()
       }
     }
   }

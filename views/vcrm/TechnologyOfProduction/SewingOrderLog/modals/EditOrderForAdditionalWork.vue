@@ -95,27 +95,21 @@
             v-model="jsondata"
           >
             <vue-excel-column
-              field="kod"
+              field="num_zkzvsv"
               label="Код"
-              type="string"
+              type="number"
               width="200px"
             />
             <vue-excel-column
-              field="name"
+              field="tovar"
               label="Наименование"
               type="string"
               width="1200px"
             />
             <vue-excel-column
-              field="quantity"
+              field="colvo"
               label="Количество"
-              type="string"
-              width="200px"
-            />
-            <vue-excel-column
-              field="order"
-              label="№ Заказа"
-              type="string"
+              type="number"
               width="200px"
             />
           </vue-excel-editor>
@@ -168,29 +162,37 @@ export default {
       },
       jsondata: [
         {
-          kod: '',
-          name: '',
-          quantity: 25
+          mc_id: 22,
+          tovar: '',
+          colvo: 25,
+          num_zkzvsv: 22
         },
         {
-          kod: '',
-          name: '',
-          quantity: 20
-        },
-        {
-          kod: '',
-          name: '',
-          quantity: 19
+          mc_id: 22,
+          tovar: '',
+          colvo: 25,
+          num_zkzvsv: 22
         }
       ],
       formOpened: this.value
     }
   },
 
+  mounted() {
+    this.init()
+  },
+
   methods: {
     close() {
       this.formOpened = false
       this.$emit('close')
+    },
+
+    async init() {
+      this.jsondata = await this.$api.service.executeStashedFunctionWithReturnedDataSet({
+        'params': { 'zkzpsv_id': this.edit.zkzpsvId },
+        'procName': 'dbo.zn_sel_zkzpsv'
+      })
     }
   }
 }

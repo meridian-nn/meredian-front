@@ -98,6 +98,11 @@ Vue.mixin({
       const parts = date.split('.')
       return new Date(parts[2], parts[1] - 1, parts[0])
     },
+    // конвертирование даты из формата ДАТА.МЕСЯЦ.ГОД в формат ГОД-МЕСЯЦ-ДАТА
+    convertLocaleDateStringinISODateString(date) {
+      let parts = date.split('.')
+      return `${parts[2]}-${parts[1]}-${parts[0]}`
+    },
 
     async changeSumToPayOfPaymentAccount(accId, sumOfPaymentDocs, operationType, date) {
       if (sumOfPaymentDocs === 0) {

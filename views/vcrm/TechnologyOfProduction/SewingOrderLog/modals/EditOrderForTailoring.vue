@@ -244,10 +244,21 @@ export default {
     }
   },
 
+  mounted() {
+    this.init()
+  },
+
   methods: {
     close() {
       this.formOpened = false
       this.$emit('close')
+    },
+
+    async init() {
+      await this.$api.service.executeStashedFunctionWithReturnedDataSet({
+        'params': { 'zkzpsv_id': this.edit.zkzpsvId },
+        'procName': 'dbo.zn_sel_zkzpsv'
+      })
     }
   }
 }

@@ -545,6 +545,7 @@ export default {
 
     async initDataForCurrentUser() {
       const params = this.createStructureForSewingOrderLogPageInitDataProcedure()
+
       await this.$api.service.executeStashedFunction(params)
     },
 
@@ -600,11 +601,11 @@ export default {
 
     closeModal(name) {
       this.modals[name] = false
-      if (name === 'edit' ||
-      name === 'editAdd') {
-        this.canUpdate = false
-        this.fullUpdateTableOfRecordsWithInitData()
-      }
+      // if (name === 'edit' ||
+      // name === 'editAdd') {
+      //   this.canUpdate = false
+      //   this.fullUpdateTableOfRecordsWithInitData()
+      // }
     },
 
     async saveModalEditTailoring(params = this.sewingOrderTableSelectedRecords) {
