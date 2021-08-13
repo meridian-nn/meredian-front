@@ -446,7 +446,8 @@ export default {
         this.createdItem.payer = { 'client_id': dataForEdit.orgId }
         this.createdItem.recipient = { 'id': dataForEdit.poluchId }
         this.createdItem.forWhom = { 'client_id': dataForEdit.zaorgId }
-        this.selectedExecutor = dataForEdit.zaorgIsp // zaorgIsp нету
+        this.createdItem.zaorg_isp = dataForEdit.zaorgIsp
+        this.selectedExecutor = this.createdItem.zaorg_isp
         this.createdItem.collaborator = { 'fio': dataForEdit.fioSoisp, 'id': dataForEdit.soispId }
         this.element[0] = { id: dataForEdit.budElem, codElem: dataForEdit.budCodElem }
         this.selectElementCode()
@@ -632,6 +633,7 @@ export default {
     reset() {
       this.createdItem = { isp_id: 0 }
       this.element = [{ id: null, codElem: null }]
+      this.selectedExecutor = null
     }
   }
 }

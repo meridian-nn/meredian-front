@@ -286,7 +286,7 @@
               hide-default-footer
               no-data-text=""
               class="elevation-1"
-              @click:row="selectOrgOperationEvent"
+              @click:row="getDressMakersDataTable"
             />
           </div>
 
@@ -374,13 +374,46 @@
                 disable-pagination
                 hide-default-footer
                 class="elevation-1"
-              />
+                @update:sort-by="updateSortListDressmaker('by', $event)"
+                @update:sort-desc="updateSortListDressmaker('desc', $event)"
+              >
+                <template #body="{ items }">
+                  <tbody>
+                    <tr
+                      v-for="item in items"
+                      :key="item.id"
+                      :value="item"
+                    >
+                      <td>
+                        {{ item.tabN }}
+                      </td>
+                      <td>
+                        {{ item.fio }}
+                      </td>
+                      <td>
+                        {{ item.ur2Name }}
+                      </td>
+                    </tr>
+                    <infinite-loading
+                      :key="keyLoading"
+                      spinner="spiral"
+                      :identifier="infiniteIdOfListOfDressmakersData"
+                      @infinite="getListOfDressmakersDataTable"
+                    >
+                      <div slot="no-more" />
+                      <div slot="no-results" />
+                    </infinite-loading>
+                  </tbody>
+                </template>
+              </v-data-table>
             </div>
           </div>
         </div>
       </div>
 
       <user-notification ref="userNotification" />
+
+      <loading-dialog ref="loadingDialog" />
 
       <div class="records-of-work-on-order-row">
         <v-spacer />
@@ -396,13 +429,17 @@
   </v-dialog>
 </template>
 <script>
+import InfiniteLoading from 'vue-infinite-loading'
 import UserNotification from '~/components/information_window/UserNotification'
+import LoadingDialog from '~/components/loading_dialog/LoadingDialog'
 
 export default {
   name: 'RecordsOfWorkOnOrder',
 
   components: {
-    UserNotification
+    UserNotification,
+    InfiniteLoading,
+    LoadingDialog
   },
 
   props: {
@@ -414,7 +451,17 @@ export default {
 
   data() {
     return {
-      loadingType: {},
+      loadingType: {
+        listOfDressmakersData: false
+      },
+
+      keyLoading: Math.random(),
+
+      infiniteIdOfListOfDressmakersData: 0,
+
+      pageOfRecordsListDressmaker: 0,
+
+      sortBy: [],
 
       months: [
         'Январь',
@@ -505,27 +552,27 @@ export default {
       dressmakersHeaders: [
         {
           text: 'Таб. номер',
-          value: 'tabNumber'
+          value: 'tabN'
         },
         {
           text: 'ФИО',
-          value: 'fullName'
+          value: 'fio'
         },
         {
           text: 'Код операции',
-          value: 'operationCode'
+          value: 'codOp'
         },
         {
           text: 'Кол-во',
-          value: 'count'
+          value: 'colvoOp'
         },
         {
           text: '+/-',
-          value: 'plusMinus'
+          value: 'colvoNew'
         },
         {
           text: 'Всего',
-          value: 'amount'
+          value: 'colvoOst' // нет в респонсе
         }
       ],
 
@@ -534,15 +581,15 @@ export default {
       listOfDressmakersHeaders: [
         {
           text: 'Таб. номер',
-          value: 'tabNumber'
+          value: 'tabN'
         },
         {
           text: 'ФИО',
-          value: 'fullName'
+          value: 'fio'
         },
         {
           text: 'Бригада',
-          value: 'brigade'
+          value: 'ur2Name'
         }
       ],
 
@@ -564,11 +611,36 @@ export default {
 
       orgOperation: [],
 
-      recordedWork: []
+      recordedWork: [],
+
+      monthOfProizv: {},
+
+      selectedSeparationSchemeObj: {}
     }
   },
-
+  computed: {
+    handleSortData() {
+      const { sortDesc } = this
+      return this.sortBy.map((item, i) => {
+        return {
+          'direction': sortDesc[i] ? 'ASC' : 'DESC',
+          'property': item
+        }
+      })
+    }
+  },
   methods: {
+    updateSortListDressmaker(byDesc, event) {
+      if (byDesc === 'by') {
+        this.sortBy = event
+      } else if (byDesc === 'desc') {
+        this.sortDesc = event
+      }
+      this.pageOfRecordsListDressmaker = 0
+      this.listOfDressmakersData = []
+      this.keyLoading = Math.random()
+    },
+
     async openWithObject(order, varsOfForm, chosenRecord) {
       if (!order) {
         return
@@ -586,7 +658,6 @@ export default {
       await this.updateSeparationScheme()
       this.selectSeparationSchemeOfChosenRecord()
     },
-
     close() {
       this.reset()
       this.dialog = false
@@ -706,8 +777,8 @@ export default {
     },
 
     async separationSchemeChange() {
-      const selectedSeparationSchemeObj = this.separationScheme.find(separationScheme => separationScheme.id === this.chosenSeparationScheme)
-      await this.initOrgOperationData(selectedSeparationSchemeObj)
+      this.selectedSeparationSchemeObj = this.separationScheme.find(separationScheme => separationScheme.id === this.chosenSeparationScheme)
+      await this.initOrgOperationData(this.selectedSeparationSchemeObj)
       await this.updateOrgOperationsData()
     },
 
@@ -728,6 +799,59 @@ export default {
       this.operationsSumsData = []
       this.separationScheme = []
       this.chosenSeparationScheme = {}
+
+      // нужно сбросит таблицу список швей
+      this.dressmakersData = []
+    },
+
+    async getListOfDressmakersDataTable($state) {
+      const dataForGetParams = { ...this.orderFromRecordsOfWorkByCards, ...this.varsOfForm }
+      const paramsForInit = this.createStructureForListOfDressmakersInitDataProcedure(dataForGetParams)
+
+      await this.$api.service.executeStashedFunction(paramsForInit).catch((error) => {
+        alert(error)
+      })
+
+      const searchCriterias = this.createCriteriasToGetListOfDressmakers()
+
+      const params = {
+        searchCriterias,
+        page: this.pageOfRecordsListDressmaker,
+        orders: this.handleSortData,
+        size: 30
+      }
+      const { content } = await this.$api.manufacturing.recordingTheWorkOnTheOrder.findBySearchCriteriaForListOfDressmaker(params)
+
+      if (content.length > 0) {
+        this.listOfDressmakersData.push(...content)
+        this.pageOfRecordsListDressmaker += 1
+
+        $state.loaded()
+      } else {
+        $state.complete()
+      }
+    },
+
+    async getDressMakersDataTable(item) {
+      this.dressmakersData = []
+      const dataForParams = {
+        ...this.chosenRecord,
+        ...item,
+        ...this.varsOfForm,
+        ...this.orderFromRecordsOfWorkByCards,
+        ...this.selectedSeparationSchemeObj
+      }
+      const paramsForInit = this.createStructureForDressMakersInitDataProcedure(dataForParams)
+      await this.$api.service.executeStashedFunction(paramsForInit).catch((error) => {
+        alert(error)
+      })
+
+      const searchCriterias = this.createCriteriasToGetDressMakers()
+
+      const content = await this.$api.manufacturing.recordingTheWorkOnTheOrder.findBySearchCriteriaForGetDressmaker(searchCriterias)
+      if (content.length > 0) {
+        this.dressmakersData.push(...content)
+      }
     }
   }
 }

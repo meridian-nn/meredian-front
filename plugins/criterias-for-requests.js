@@ -1497,6 +1497,34 @@ Vue.mixin({
             id
           ]
       }
-    }
+    },
+
+    createCriteriasToGetListOfDressmakers() {
+      const data = [{
+        dataType: 'VARCHAR',
+        key: 'userId',
+        operation: 'EQUALS',
+        type: 'AND',
+        values: [
+          this.getCurrentUser.id
+        ]
+      }]
+
+      return data
+    },
+
+    createCriteriasToGetDressMakers() {
+      const data = {
+        dataType: 'VARCHAR',
+        key: 'userId',
+        operation: 'EQUALS',
+        type: 'AND',
+        values: [
+          this.getCurrentUser.id
+        ]
+      }
+
+      return data
+    },
   }
 })

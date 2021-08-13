@@ -316,6 +316,55 @@ Vue.mixin({
         },
         procName: this.$api.payment.outgoingPayment.getDataAfterGenerateBudgetInOutgoingPaymentDocumentsInitDataProcedureName()
       }
+    },
+
+    createStructureForDressMakersInitDataProcedure(paramsForRequest) {
+      return {
+        params: this.createParamsForDressMakersInitDataProcedure(paramsForRequest),
+        procName: this.$api.manufacturing.getManufacturingRequestInitDataProcedureName()
+      }
+    },
+    createParamsForDressMakersInitDataProcedure(paramsForRequest) {
+      const params = {
+        priznak_1: 4,
+        user_id: this.getCurrentUser.id
+      }
+      if (paramsForRequest) {
+        params.mes_1 = paramsForRequest.mesAnfb
+        params.god_1 = paramsForRequest.godAnfb
+        params.ceh_id_1 = paramsForRequest.cehId
+        params.pr_upak_1 = paramsForRequest.prUpak
+        params.tmk_id_1 = paramsForRequest.tmkId1
+        params.org_oper_id_1 = paramsForRequest.orgOperId
+        params.zkzpsv_id_1 = paramsForRequest.zkzpsvId
+        params.proizv_id_1 = paramsForRequest.proizvAnfb
+        params.scheme_cards_id_1 = paramsForRequest.schemeCardsId
+        params.scheme_id_1 = paramsForRequest.schemeId
+        params.zar_sch_cards_id_1 = paramsForRequest.zarSchCardsId
+        params.firma_id_1 = paramsForRequest.orgAnfb
+      }
+      return params
+    },
+
+    createStructureForListOfDressmakersInitDataProcedure(paramsForRequest) {
+      return {
+        params: this.createParamsForListOfDressmakersInitDataProcedure(paramsForRequest),
+        procName: this.$api.manufacturing.getManufacturingRequestInitDataProcedureName()
+      }
+    },
+    createParamsForListOfDressmakersInitDataProcedure(paramsForRequest) {
+      const params = {
+        priznak_1: 5,
+        user_id: this.getCurrentUser.id
+      }
+      if (paramsForRequest) {
+        params.tmk_id_1 = paramsForRequest.tmkId1
+        params.proizv_id_1 = paramsForRequest.proizvAnfb
+        params.mes_1 = paramsForRequest.mesAnfb
+        params.god_1 = paramsForRequest.godAnfb
+        params.firma_id_1 = paramsForRequest.orgAnfb
+      }
+      return params
     }
   }
 
