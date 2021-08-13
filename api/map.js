@@ -742,6 +742,16 @@ export const factory = send => ({
 
         findSeparationSchemeBySearchCriterias(params) {
           return send('POST', '/oper/manufacturing/divisionScheme/findBySearchCriteriaList', params)
+        },
+
+        recordingTheWorkOnTheOrder: {
+          findBySearchCriteriaForListOfDressmaker(params) {
+            return send('POST', '/oper/manufacturing/seamstressesChoice/findPageBySearchCriteriaList', params)
+          },
+
+          findBySearchCriteriaForGetDressmaker(params) {
+            return send('POST', '/oper/manufacturing/recordedWork/findBySearchCriteria', params)
+          },
         }
     },
 
