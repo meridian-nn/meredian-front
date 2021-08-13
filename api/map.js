@@ -738,6 +738,10 @@ export const factory = send => ({
 
         findOperationsSumsBySearchCriterias(params) {
           return send('POST', '/oper/manufacturing/operationSum/findBySearchCriteriaList', params)
+        },
+
+        findSeparationSchemeBySearchCriterias(params) {
+          return send('POST', '/oper/manufacturing/divisionScheme/findBySearchCriteriaList', params)
         }
     },
 

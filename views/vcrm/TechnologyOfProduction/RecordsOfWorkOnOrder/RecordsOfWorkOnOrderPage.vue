@@ -72,7 +72,8 @@
 
             <div class="records-of-work-on-order-indentation-for-inputs">
               <v-text-field
-                v-model.number="numberOfOrder"
+                v-model.number="chosenRecord.numZkzpsv"
+                readonly
                 hide-details="auto"
               />
             </div>
@@ -85,7 +86,8 @@
 
             <div class="records-of-work-on-order-indentation-for-inputs">
               <v-text-field
-                v-model.number="numberOfApplication"
+                v-model.number="chosenRecord.numZaivk"
+                readonly
                 hide-details="auto"
               />
             </div>
@@ -100,7 +102,8 @@
 
             <div class="records-of-work-on-order-indentation-for-inputs">
               <v-text-field
-                v-model.number="countOfProductions"
+                v-model.number="chosenRecord.colvoMc"
+                readonly
                 hide-details="auto"
               />
             </div>
@@ -113,7 +116,8 @@
 
             <div class="records-of-work-on-order-coefficient-input">
               <v-text-field
-                v-model.number="coefficient"
+                v-model.number="chosenRecord.coeff"
+                readonly
                 hide-details="auto"
               />
             </div>
@@ -144,7 +148,8 @@
 
             <div class="records-of-work-on-order-indentation-for-inputs">
               <v-text-field
-                v-model.number="codeOfProduction"
+                v-model.number="chosenRecord.coeff"
+                readonly
                 hide-details="auto"
                 outlined
               />
@@ -152,7 +157,8 @@
 
             <div class="records-of-work-on-order-descr-of-production-input">
               <v-text-field
-                v-model.number="descrOfProduction"
+                v-model.number="chosenRecord.nameMc"
+                readonly
                 hide-details="auto"
                 outlined
               />
@@ -217,7 +223,8 @@
 
             <div class="records-of-work-on-order-tpid-input">
               <v-text-field
-                v-model.number="TPid"
+                v-model.number="chosenRecord.posledCode"
+                readonly
                 hide-details="auto"
                 outlined
               />
@@ -225,7 +232,8 @@
 
             <div class="records-of-work-on-order-tpname-input">
               <v-text-field
-                v-model.number="TPname"
+                v-model.number="chosenRecord.modelName"
+                readonly
                 hide-details="auto"
                 outlined
               />
@@ -248,10 +256,12 @@
                 v-model="chosenSeparationScheme"
                 :loading="loadingType.separationScheme"
                 :items="separationScheme"
+                auto-select-first
                 item-value="id"
-                item-text="name"
+                item-text="nameScheme"
                 hide-details="auto"
                 outlined
+                @change="separationSchemeChange"
               />
             </div>
           </div>
@@ -572,8 +582,9 @@ export default {
       this.chosenOrg = this.varsOfForm.orgName
       this.dialog = true
 
-      await this.initOrgOperationData()
-      await this.updateOrgOperationsData()
+      await this.initSeparationScheme()
+      await this.updateSeparationScheme()
+      this.selectSeparationSchemeOfChosenRecord()
     },
 
     close() {
@@ -582,14 +593,18 @@ export default {
       this.$emit('close')
     },
 
-    async initOrgOperationData() {
+    async initOrgOperationData(selectedSeparationShemeObj) {
       const paramsForRequest = {
         proizvId: this.varsOfForm.proizvAnfb,
         monthCurr: this.varsOfForm.mesAnfb,
         yearCurr: this.varsOfForm.godAnfb,
         firmaId: this.varsOfForm.orgAnfb,
         priznak: 2,
-        tmkId: this.orderFromRecordsOfWorkByCards.tmkId1
+        tmkId: this.orderFromRecordsOfWorkByCards.tmkId1,
+        zkzpsvId: this.chosenRecord.zkzpsvId,
+        schemeCardsId: selectedSeparationShemeObj.schemeCardsId,
+        schemeId: selectedSeparationShemeObj.schemeId,
+        zarSchCardsId: selectedSeparationShemeObj.zarSchCardsId
       }
       const params = this.createStructureForManufacturingInitDataProcedure(paramsForRequest)
       await this.$api.service.executeStashedFunction(params).catch((error) => {
@@ -648,6 +663,54 @@ export default {
       this.operationsSumsData = await this.$api.manufacturing.findOperationsSumsBySearchCriterias(criterias)
     },
 
+    async initSeparationScheme() {
+      const paramsForRequest = {
+        proizvId: this.varsOfForm.proizvAnfb,
+        monthCurr: this.varsOfForm.mesAnfb,
+        yearCurr: this.varsOfForm.godAnfb,
+        firmaId: this.varsOfForm.orgAnfb,
+        priznak: 6,
+        zkzpsvId: this.chosenRecord.zkzpsvId,
+        tmkId: this.orderFromRecordsOfWorkByCards.tmkId1
+      }
+      const params = this.createStructureForManufacturingInitDataProcedure(paramsForRequest)
+      await this.$api.service.executeStashedFunction(params).catch((error) => {
+        alert(error)
+      })
+    },
+
+    async updateSeparationScheme() {
+      const criterias = [
+        {
+          dataType: 'VARCHAR',
+          key: 'userId',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            this.getCurrentUser.id
+          ]
+        }
+      ]
+
+      this.separationScheme = await this.$api.manufacturing.findSeparationSchemeBySearchCriterias(criterias)
+    },
+
+    selectSeparationSchemeOfChosenRecord() {
+      if (!this.separationScheme) {
+        return
+      }
+
+      const chosenSeparationSchemeObj = this.separationScheme.find(separationScheme => separationScheme.schemeId === this.chosenRecord.schemeId)
+      this.chosenSeparationScheme = chosenSeparationSchemeObj.id
+      this.separationSchemeChange()
+    },
+
+    async separationSchemeChange() {
+      const selectedSeparationSchemeObj = this.separationScheme.find(separationScheme => separationScheme.id === this.chosenSeparationScheme)
+      await this.initOrgOperationData(selectedSeparationSchemeObj)
+      await this.updateOrgOperationsData()
+    },
+
     reset() {
       this.chosenRecord = {}
       this.orderFromRecordsOfWorkByCards = {}
@@ -661,6 +724,10 @@ export default {
       this.chosenMonth = {}
       this.chosenYear = {}
       this.chosenOrg = {}
+      this.orgOperationsData = []
+      this.operationsSumsData = []
+      this.separationScheme = []
+      this.chosenSeparationScheme = {}
     }
   }
 }

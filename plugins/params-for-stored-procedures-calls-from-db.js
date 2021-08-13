@@ -39,6 +39,11 @@ Vue.mixin({
         params.mes_1 = paramsForRequest.monthCurr
         params.god_1 = paramsForRequest.yearCurr
         params.firma_id_1 = paramsForRequest.firmaId
+
+        if (paramsForRequest.zkzpsvId) {
+          params.zkzpsv_id_1 = paramsForRequest.zkzpsvId
+        }
+
         if (paramsForRequest.priznak) {
           params.priznak_1 = paramsForRequest.priznak
         }
@@ -49,6 +54,18 @@ Vue.mixin({
 
         if (paramsForRequest.orgOperId) {
           params.org_oper_id_1 = paramsForRequest.orgOperId
+        }
+
+        if (paramsForRequest.schemeCardsId || paramsForRequest.schemeCardsId === 0) {
+          params.scheme_cards_id_1 = paramsForRequest.schemeCardsId
+        }
+
+        if (paramsForRequest.schemeId || paramsForRequest.schemeId === 0) {
+          params.scheme_id_1 = paramsForRequest.schemeId
+        }
+
+        if (paramsForRequest.zarSchCardsId || paramsForRequest.zarSchCardsId === 0) {
+          params.zar_sch_cards_id_1 = paramsForRequest.zarSchCardsId
         }
       }
 
