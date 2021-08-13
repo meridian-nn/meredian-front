@@ -145,28 +145,28 @@
             v-model="jsondata"
           >
             <vue-excel-column
-              field="kod"
+              field="mc_id"
               label="Код"
-              type="string"
+              type="number"
               width="200px"
             />
             <vue-excel-column
-              field="name"
+              field="tovar"
               label="Наименование"
               type="string"
               width="1200px"
             />
             <vue-excel-column
-              field="quantity"
+              field="colvo"
               label="Количество"
-              type="string"
-              width="200px"
+              type="number"
+              width="100px"
             />
             <vue-excel-column
-              field="order"
+              field="num_zkzvsv"
               label="№ Заказа"
-              type="string"
-              width="200px"
+              type="number"
+              width="100px"
             />
           </vue-excel-editor>
         </div>
@@ -214,33 +214,15 @@ export default {
         contract: '',
         kroyOnPaper: false,
         dateOfTheOrderForTailoring: new Date().toISOString().substr(0, 10),
-        note: '',
+        note: this.primProv,
         coefficientForTailoring: 0,
         coefficientForRaskroy: 0,
         dateOfRelease: new Date().toISOString().substr(0, 10),
         allowedToPrintOnFactory: false
       },
-      jsondata: [
-        {
-          kod: '',
-          name: '',
-          quantity: 25,
-          order: ''
-        },
-        {
-          kod: '',
-          name: '',
-          quantity: 20,
-          order: ''
-        },
-        {
-          kod: '',
-          name: '',
-          quantity: 19,
-          order: ''
-        }
-      ],
-      formOpened: this.value
+      jsondata: [],
+      formOpened: this.value,
+      raskroyList: []
     }
   },
 
@@ -255,10 +237,12 @@ export default {
     },
 
     async init() {
-      await this.$api.service.executeStashedFunctionWithReturnedDataSet({
+      this.jsondata = await this.$api.service.executeStashedFunctionWithReturnedDataSet({
         'params': { 'zkzpsv_id': this.edit.zkzpsvId },
         'procName': 'dbo.zn_sel_zkzpsv'
       })
+
+      this.raskroylist = this.$api.productionDepartments.findBySearchCriteriaList(this.creatCriteriaEqualList('proizvRaskroy', [this.edit.proizvRaskroy]))
     }
   }
 }

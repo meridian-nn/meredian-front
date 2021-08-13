@@ -212,6 +212,12 @@ export const factory = send => ({
         }
     },
 
+    productionDepartments: {
+      findBySearchCriteriaList(params) {
+        return send('POST', '/oper/dict/vrOtd/findBySearchCriteriaList', params)
+      }
+    },
+
     payment: {
         selOplat() {
             return send('POST', this.getSelOplatUrl())

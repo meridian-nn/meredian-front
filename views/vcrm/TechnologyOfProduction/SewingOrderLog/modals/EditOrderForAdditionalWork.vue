@@ -174,7 +174,8 @@ export default {
           num_zkzvsv: 22
         }
       ],
-      formOpened: this.value
+      formOpened: this.value,
+      productionList: []
     }
   },
 
@@ -188,11 +189,13 @@ export default {
       this.$emit('close')
     },
 
-    async init() {
-      this.jsondata = await this.$api.service.executeStashedFunctionWithReturnedDataSet({
+    init() {
+      this.jsondata = this.$api.service.executeStashedFunctionWithReturnedDataSet({
         'params': { 'zkzpsv_id': this.edit.zkzpsvId },
         'procName': 'dbo.zn_sel_zkzpsv'
       })
+
+      this.productionList = this.$api.productionDepartments.findBySearchCriteriaList(this.creatCriteriaEqualList('tipotdId', [2]))
     }
   }
 }

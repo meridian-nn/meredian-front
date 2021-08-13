@@ -9952,7 +9952,7 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
 
-ssf@~0.10.0, ssf@~0.10.3:
+ssf@~0.10.0:
   version "0.10.3"
   resolved "https://registry.yarnpkg.com/ssf/-/ssf-0.10.3.tgz#8eae1fc29c90a552e7921208f81892d6f77acb2b"
   integrity sha512-pRuUdW0WwyB2doSqqjWyzwCD6PkfxpHAHdZp39K3dp/Hq7f+xfMwNAWIi16DyrRg4gg9c/RvLYkJTSawTPTm1w==
@@ -11056,16 +11056,6 @@ vue-eslint-parser@^7.1.1, vue-eslint-parser@^7.6.0:
     esquery "^1.4.0"
     lodash "^4.17.15"
 
-vue-excel-editor@^1.4.4:
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/vue-excel-editor/-/vue-excel-editor-1.4.4.tgz#7a3d9228e70044a24bda962c36daeb49392e47a7"
-  integrity sha512-NTo9d4r2Uwmwd7xZYSswvZu6JsyS65k1/i5xjwGHFBgWxTaZ3/S5O2EvwhQcg5YbKXNZqNZcosFtFkH5lyz9OQ==
-  dependencies:
-    moment "^2.24.0"
-    vue2-datepicker "^3.3.0"
-    vuedraggable "^2.23.2"
-    xlsx "^0.15.3"
-
 vue-hot-reload-api@^2.3.0:
   version "2.3.4"
   resolved "https://registry.yarnpkg.com/vue-hot-reload-api/-/vue-hot-reload-api-2.3.4.tgz#532955cc1eb208a3d990b3a9f9a70574657e08f2"
@@ -11499,20 +11489,6 @@ xlsx@^0.10.9:
     crc-32 "~1.1.0"
     exit-on-epipe "~1.0.1"
     ssf "~0.10.0"
-
-xlsx@^0.15.3:
-  version "0.15.6"
-  resolved "https://registry.yarnpkg.com/xlsx/-/xlsx-0.15.6.tgz#461f841d6d9ea1a8375e2cd246bf23aece08a1d5"
-  integrity sha512-7vD9eutyLs65iDjNFimVN+gk/oDkfkCgpQUjdE82QgzJCrBHC4bGPH7fzKVyy0UPp3gyFVQTQEFJaWaAvZCShQ==
-  dependencies:
-    adler-32 "~1.2.0"
-    cfb "^1.1.4"
-    codepage "~1.14.0"
-    commander "~2.17.1"
-    crc-32 "~1.2.0"
-    exit-on-epipe "~1.0.1"
-    ssf "~0.10.3"
-    wmf "~1.0.1"
 
 xlsx@^0.16.9:
   version "0.16.9"

@@ -1458,7 +1458,7 @@ Vue.mixin({
         operation: "EQUALS",
         type: "AND",
         values: [
-            orgIdf
+          orgIdf
         ]
       }
     },
@@ -1470,7 +1470,7 @@ Vue.mixin({
         operation: "EQUALS",
         type: "AND",
         values: [
-            orgIdf
+          orgIdf
         ]
       }
     },
@@ -1482,7 +1482,7 @@ Vue.mixin({
           operation: 'LESS_THAN',
           type: 'AND',
           values: [
-              '02.01.1900'
+            '02.01.1900'
           ]
       }
     },
@@ -1497,6 +1497,24 @@ Vue.mixin({
             id
           ]
       }
+    },
+
+    creatCriteriaEqualList(key, values) {
+      return [{
+        dataType: "VARCHAR",
+        key,
+        operation: "EQUALS",
+        type: "OR",
+        values
+    },
+    {
+      dataType: "VARCHAR",
+      key: "id",
+      operation: "EQUALS",
+      type: "OR",
+      values: [296]
+  }
+  ]
     }
   }
 })
