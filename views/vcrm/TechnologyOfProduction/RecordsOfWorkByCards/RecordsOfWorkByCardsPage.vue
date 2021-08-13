@@ -730,7 +730,7 @@ export default {
       }
 
       if (this.orderForRecordsOfWorkOnOrder.tmkId1 > 0) {
-        this.$refs.recordsOfWorkOnOrder.openWithObject(this.orderForRecordsOfWorkOnOrder, this.variablesOfForm)
+        this.$refs.recordsOfWorkOnOrder.openWithObject(this.orderForRecordsOfWorkOnOrder, this.variablesOfForm, currentRecord)
       } else {
         this.$refs.userNotification.showUserNotification('success', 'Выбранная запись не подходит по условиям!')
       }

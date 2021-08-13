@@ -274,7 +274,9 @@
               :single-select="false"
               disable-pagination
               hide-default-footer
+              no-data-text=""
               class="elevation-1"
+              @click:row="selectOrgOperationEvent"
             />
           </div>
 
@@ -282,13 +284,14 @@
             <v-data-table
               id="records-of-work-on-order-operations"
               height="200"
-              :headers="operationsHeaders"
+              :headers="operationsSumsHeaders"
               fixed-header
-              :items="operationsData"
+              :items="operationsSumsData"
               :show-select="false"
               :single-select="false"
               disable-pagination
               hide-default-footer
+              no-data-text=""
               class="elevation-1"
             />
           </div>
@@ -458,17 +461,17 @@ export default {
       orgOperationsHeaders: [
         {
           text: 'Цех',
-          value: 'ceh'
+          value: 'cehNum'
         },
         {
           text: 'Орг. операция',
-          value: 'orgOperation'
+          value: 'operName'
         }
       ],
 
       orgOperationsData: [],
 
-      operationsHeaders: [
+      operationsSumsHeaders: [
         {
           text: 'Операция',
           value: 'operation'
@@ -487,7 +490,7 @@ export default {
         }
       ],
 
-      operationsData: [],
+      operationsSumsData: [],
 
       dressmakersHeaders: [
         {
@@ -539,33 +542,125 @@ export default {
 
       orderFromRecordsOfWorkByCards: {},
 
+      chosenRecord: {},
+
       varsOfForm: {
         orgAnfb: null,
         orgName: null,
         proizvAnfb: null,
         mesAnfb: null,
         godAnfb: null
-      }
+      },
+
+      orgOperation: [],
+
+      recordedWork: []
     }
   },
 
   methods: {
-    openWithObject(order, varsOfForm) {
+    async openWithObject(order, varsOfForm, chosenRecord) {
       if (!order) {
         return
       }
 
+      this.chosenRecord = chosenRecord
       this.orderFromRecordsOfWorkByCards = order
       this.varsOfForm = varsOfForm
       this.chosenMonth = this.varsOfForm.mesAnfb
       this.chosenYear = this.varsOfForm.godAnfb
       this.chosenOrg = this.varsOfForm.orgName
       this.dialog = true
+
+      await this.initOrgOperationData()
+      await this.updateOrgOperationsData()
     },
 
     close() {
+      this.reset()
       this.dialog = false
       this.$emit('close')
+    },
+
+    async initOrgOperationData() {
+      const paramsForRequest = {
+        proizvId: this.varsOfForm.proizvAnfb,
+        monthCurr: this.varsOfForm.mesAnfb,
+        yearCurr: this.varsOfForm.godAnfb,
+        firmaId: this.varsOfForm.orgAnfb,
+        priznak: 2,
+        tmkId: this.orderFromRecordsOfWorkByCards.tmkId1
+      }
+      const params = this.createStructureForManufacturingInitDataProcedure(paramsForRequest)
+      await this.$api.service.executeStashedFunction(params).catch((error) => {
+        alert(error)
+      })
+    },
+
+    async updateOrgOperationsData() {
+      const criterias = [
+        {
+          dataType: 'VARCHAR',
+          key: 'userId',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            this.getCurrentUser.id
+          ]
+        }
+      ]
+      this.orgOperationsData = await this.$api.manufacturing.findOrgOperationsBySearchCriterias(criterias)
+    },
+
+    async selectOrgOperationEvent(selectedRow) {
+      /* await this.initOperationsSumsData(selectedRow.orgOperId)
+      await this.updateOperationsSumsData() */
+    },
+
+    async initOperationsSumsData(orgOperId) {
+      const paramsForRequest = {
+        proizvId: this.varsOfForm.proizvAnfb,
+        monthCurr: this.varsOfForm.mesAnfb,
+        yearCurr: this.varsOfForm.godAnfb,
+        firmaId: this.varsOfForm.orgAnfb,
+        priznak: 7,
+        tmkId: this.orderFromRecordsOfWorkByCards.tmkId1,
+        orgOperId
+      }
+      const params = this.createStructureForManufacturingInitDataProcedure(paramsForRequest)
+      await this.$api.service.executeStashedFunction(params).catch((error) => {
+        alert(error)
+      })
+    },
+
+    async updateOperationsSumsData() {
+      const criterias = [
+        {
+          dataType: 'VARCHAR',
+          key: 'userId',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            this.getCurrentUser.id
+          ]
+        }
+      ]
+      this.operationsSumsData = await this.$api.manufacturing.findOperationsSumsBySearchCriterias(criterias)
+    },
+
+    reset() {
+      this.chosenRecord = {}
+      this.orderFromRecordsOfWorkByCards = {}
+      this.varsOfForm = {
+        orgAnfb: null,
+        orgName: null,
+        proizvAnfb: null,
+        mesAnfb: null,
+        godAnfb: null
+      }
+      this.chosenMonth = {}
+      this.chosenYear = {}
+      this.chosenOrg = {}
     }
   }
 }

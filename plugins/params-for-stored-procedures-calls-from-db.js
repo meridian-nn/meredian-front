@@ -39,6 +39,17 @@ Vue.mixin({
         params.mes_1 = paramsForRequest.monthCurr
         params.god_1 = paramsForRequest.yearCurr
         params.firma_id_1 = paramsForRequest.firmaId
+        if (paramsForRequest.priznak) {
+          params.priznak_1 = paramsForRequest.priznak
+        }
+
+        if (paramsForRequest.tmkId) {
+          params.tmk_id_1 = paramsForRequest.tmkId
+        }
+
+        if (paramsForRequest.orgOperId) {
+          params.org_oper_id_1 = paramsForRequest.orgOperId
+        }
       }
 
       return params

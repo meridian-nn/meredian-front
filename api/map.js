@@ -730,6 +730,14 @@ export const factory = send => ({
 
         getDelZkzpsvProcedureName() {
           return 'dbo.del_zkzpsv'
+        },
+
+        findOrgOperationsBySearchCriterias(params) {
+          return send('POST', '/oper/manufacturing/orgOperation/findBySearchCriteriaList', params)
+        },
+
+        findOperationsSumsBySearchCriterias(params) {
+          return send('POST', '/oper/manufacturing/operationSum/findBySearchCriteriaList', params)
         }
     },
 
