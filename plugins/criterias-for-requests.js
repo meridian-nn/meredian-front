@@ -1500,7 +1500,7 @@ Vue.mixin({
     },
 
     createCriteriasToGetListOfDressmakers() {
-      const data = [{
+      const data = {
         dataType: 'VARCHAR',
         key: 'userId',
         operation: 'EQUALS',
@@ -1508,7 +1508,7 @@ Vue.mixin({
         values: [
           this.getCurrentUser.id
         ]
-      }]
+      }
 
       return data
     },

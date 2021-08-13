@@ -746,7 +746,7 @@ export const factory = send => ({
 
         recordingTheWorkOnTheOrder: {
           findBySearchCriteriaForListOfDressmaker(params) {
-            return send('POST', '/oper/manufacturing/seamstressesChoice/findPageBySearchCriteriaList', params)
+            return send('POST', '/oper/manufacturing/seamstressesChoice/findBySearchCriteria', params)
           },
 
           findBySearchCriteriaForGetDressmaker(params) {
