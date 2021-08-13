@@ -92,8 +92,16 @@
                   <td class="journal-of-payment-docs-from-pay-docs-dataDoc">
                     {{ item.dataDoc }}
                   </td>
-                  <td class="journal-of-payment-docs-from-pay-docs-nameDoc">
-                    {{ item.nameDoc }}
+                  <td class="journal-of-payment-docs-table-cell-truncate">
+                    <v-tooltip bottom>
+                      <template #activator="{ on, attrs }">
+                        <span
+                          v-bind="attrs"
+                          v-on="on"
+                        >{{ item.nameDoc }}</span>
+                      </template>
+                      <span>{{ item.nameDoc }}</span>
+                    </v-tooltip>
                   </td>
                   <td class="journal-of-payment-docs-from-pay-docs-payerName">
                     {{ item.payerName }}
@@ -166,197 +174,241 @@
       <div class="journal-of-payment-docs-buttons-of-table-docs-for-pay">
         <v-subheader class="font-weight-medium text-subtitle-1" />
         <div align="center">
-          <div
-            class="journal-of-payment-docs-buttons-edit-button"
-            data-title="Редактирование выбранного документа на оплату"
-          >
-            <v-btn
-              color="blue"
-              class="mr-2 mb-2"
-              fab
-              dark
-              small
-              @click="editDocument"
-            >
-              <v-icon>mdi-file-edit</v-icon>
-            </v-btn>
-          </div>
+          <v-tooltip left>
+            <template #activator="{ on, attrs }">
+              <v-btn
+                color="blue"
+                class="mr-2 mb-2"
+                style="border-radius:50%; width: 40px; height: 40px;"
+                min-width="40px"
+                dark
+                small
+                v-bind="attrs"
+                v-on="on"
+                @click="editDocument"
+              >
+                <v-icon>mdi-file-edit</v-icon>
+              </v-btn>
+            </template>
+            <span>Редактирование выбранного документа на оплату</span>
+          </v-tooltip>
 
           <br>
-          <div
-            class="journal-of-payment-docs-buttons-copy-button"
-            data-title="Копирование выбранного документа на оплату"
-          >
-            <v-btn
-              color="blue"
-              class="mr-2 mb-2"
-              fab
-              dark
-              small
-              @click="copyDocument"
-            >
-              <v-icon>mdi-content-copy</v-icon>
-            </v-btn>
-          </div>
+          <v-tooltip left>
+            <template #activator="{ on, attrs }">
+              <v-btn
+                color="blue"
+                class="mr-2 mb-2"
+                style="border-radius:50%; width: 40px; height: 40px;"
+                min-width="40px"
+                dark
+                small
+                v-bind="attrs"
+                v-on="on"
+                @click="copyDocument"
+              >
+                <v-icon>mdi-content-copy</v-icon>
+              </v-btn>
+            </template>
+            <span>Копирование выбранного документа на оплату</span>
+          </v-tooltip>
 
           <br>
-          <div
-            class="journal-of-payment-docs-buttons-delete-button"
-            data-title="Удаление выбранных документов на оплату"
-          >
-            <v-btn
-              color="blue"
-              class="mr-2 mb-2"
-              fab
-              dark
-              small
-              @click="deleteDocument"
-            >
-              <v-icon>mdi-delete-forever</v-icon>
-            </v-btn>
-          </div>
+          <v-tooltip left>
+            <template #activator="{ on, attrs }">
+              <v-btn
+                color="blue"
+                class="mr-2 mb-2"
+                style="border-radius:50%; width: 40px; height: 40px;"
+                min-width="40px"
+                dark
+                small
+                v-bind="attrs"
+                v-on="on"
+                @click="deleteDocument"
+              >
+                <v-icon>mdi-delete-forever</v-icon>
+              </v-btn>
+            </template>
+            <span>Удаление выбранных документов на оплату</span>
+          </v-tooltip>
 
           <div
             v-if="isHaveBudgetRole"
             class="add-group"
           >
-            <label
-              for="add"
-              class="add-group__btn"
-              data-title="Создание новых документов"
-            > +
-            </label>
+            <v-tooltip left>
+              <template #activator="{ on, attrs }">
+                <label
+                  for="add"
+                  class="add-group__btn"
+                  v-bind="attrs"
+                  data-title="Создание новых документов"
+                  v-on="on"
+                > +
+                </label>
+              </template>
+              <span>Создание новых документов</span>
+            </v-tooltip>
             <input
               id="add"
               v-model="addGroupShow"
               class="add-group__input"
               type="checkbox"
             >
-            <button
-              class="add-group__link doc_for_pay"
-              @click="newDocument"
-            >
-              опл
-            </button>
-            <button
-              class="add-group__link pay_by_cashbox"
-              @click="payedByCashboxForContextMenuOnly"
-            >
-              нал
-            </button>
-            <button
-              v-if="isHaveBudgetRole()"
-              class="add-group__link internal_payment"
-              @click="internalMovementForContextMenuOnly"
-            >
-              внт
-            </button>
+            <v-tooltip left>
+              <template #activator="{ on, attrs }">
+                <button
+                  class="add-group__link doc_for_pay"
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="newDocument"
+                >
+                  опл
+                </button>
+              </template>
+              <span>Создание нового документа на оплату</span>
+            </v-tooltip>
+            <v-tooltip left>
+              <template #activator="{ on, attrs }">
+                <button
+                  class="add-group__link pay_by_cashbox"
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="payedByCashboxForContextMenuOnly"
+                >
+                  нал
+                </button>
+              </template>
+              <span>Создание новой оплаты по кассе</span>
+            </v-tooltip>
+            <v-tooltip left>
+              <template #activator="{ on, attrs }">
+                <button
+                  v-if="isHaveBudgetRole()"
+                  class="add-group__link internal_payment"
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="internalMovementForContextMenuOnly"
+                >
+                  внт
+                </button>
+              </template>
+              <span>Создание нового внутреннего платежа</span>
+            </v-tooltip>
           </div>
 
           <div
             v-else
-            class="journal-of-payment-docs-buttons-create-button"
             data-title="Добавление нового документа на оплату"
           >
-            <v-btn
-              color="blue"
-              class="mr-2 mb-2"
-              fab
-              dark
-              small
-              @click="newDocument"
-            >
-              <v-icon>mdi-plus</v-icon>
-            </v-btn>
+            <v-tooltip left>
+              <template #activator="{ on, attrs }">
+                <v-btn
+                  color="blue"
+                  class="mr-2 mb-2"
+                  style="border-radius:50%; width: 40px; height: 40px;"
+                  min-width="40px"
+                  dark
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="newDocument"
+                >
+                  <v-icon>mdi-plus</v-icon>
+                </v-btn>
+              </template>
+              <span>Добавление нового документа на оплату</span>
+            </v-tooltip>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="journal-of-payment-docs-row">
-      <div>
-        <th>Итого</th>
+      <div class="journal-of-payment-docs-row">
+        <div>
+          <th>Итого</th>
+        </div>
+
+        <div class="journal-of-payment-docs-from-pay-docs-bottom-spacer-for-fromPay-results" />
+
+        <div class="journal-of-payment-docs-from-pay-docs-result-text">
+          <th>
+            <vue-numeric
+              v-model="totalSumDoc"
+              separator="space"
+              :precision="2"
+              decimal-separator="."
+              output-type="number"
+              :read-only="true"
+            />
+          </th>
+        </div>
+
+        <div class="journal-of-payment-docs-from-pay-docs-result-text">
+          <th>
+            <vue-numeric
+              v-model="totalSumPaid"
+              separator="space"
+              :precision="2"
+              decimal-separator="."
+              output-type="number"
+              :read-only="true"
+            />
+          </th>
+        </div>
+
+        <div class="journal-of-payment-docs-from-pay-docs-result-text">
+          <th>
+            <vue-numeric
+              v-model="totalSumToPay"
+              separator="space"
+              :precision="2"
+              decimal-separator="."
+              output-type="number"
+              :read-only="true"
+            />
+          </th>
+        </div>
       </div>
 
-      <div class="journal-of-payment-docs-from-pay-docs-bottom-spacer-for-fromPay-results" />
-
-      <div class="journal-of-payment-docs-from-pay-docs-result-text">
-        <th>
-          <vue-numeric
-            v-model="totalSumDoc"
-            separator="space"
-            :precision="2"
-            decimal-separator="."
-            output-type="number"
-            :read-only="true"
+      <div class="journal-of-payment-docs-row">
+        <div class="journal-of-payment-docs-from-pay-docs-bottom-comment">
+          <v-text-field
+            v-model="commentOfCurrentRowFromPay"
+            readonly
+            label="Примечание"
           />
-        </th>
+        </div>
       </div>
 
-      <div class="journal-of-payment-docs-from-pay-docs-result-text">
-        <th>
-          <vue-numeric
-            v-model="totalSumPaid"
-            separator="space"
-            :precision="2"
-            decimal-separator="."
-            output-type="number"
-            :read-only="true"
-          />
-        </th>
-      </div>
+      <user-notification ref="userNotification" />
 
-      <div class="journal-of-payment-docs-from-pay-docs-result-text">
-        <th>
-          <vue-numeric
-            v-model="totalSumToPay"
-            separator="space"
-            :precision="2"
-            decimal-separator="."
-            output-type="number"
-            :read-only="true"
-          />
-        </th>
-      </div>
+      <edit-payment-document
+        ref="editPaymentDocument"
+        @close="closePaymentDocument"
+        @cancel="closePaymentDocument"
+        @save="savePaymentDocument"
+      />
+
+      <payment-card-by-document
+        ref="paymentCardByDocument"
+        @close="closePaymentCardByDocument"
+      />
+
+      <payment-by-cashbox
+        ref="paymentByCashbox"
+        @close="closePaymentByCashbox"
+        @cancel="closePaymentByCashbox"
+        @save="savePaymentByCashbox"
+      />
+
+      <internal-payment
+        ref="internalPayment"
+        @close="closeInternalPayment"
+        @cancel="closeInternalPayment"
+        @save="saveInternalPayment"
+      />
     </div>
-
-    <div class="journal-of-payment-docs-row">
-      <div class="journal-of-payment-docs-from-pay-docs-bottom-comment">
-        <v-text-field
-          v-model="commentOfCurrentRowFromPay"
-          readonly
-          label="Примечание"
-        />
-      </div>
-    </div>
-
-    <user-notification ref="userNotification" />
-
-    <edit-payment-document
-      ref="editPaymentDocument"
-      @close="closePaymentDocument"
-      @cancel="closePaymentDocument"
-      @save="savePaymentDocument"
-    />
-
-    <payment-card-by-document
-      ref="paymentCardByDocument"
-      @close="closePaymentCardByDocument"
-    />
-
-    <payment-by-cashbox
-      ref="paymentByCashbox"
-      @close="closePaymentByCashbox"
-      @cancel="closePaymentByCashbox"
-      @save="savePaymentByCashbox"
-    />
-
-    <internal-payment
-      ref="internalPayment"
-      @close="closeInternalPayment"
-      @cancel="closeInternalPayment"
-      @save="saveInternalPayment"
-    />
   </div>
 </template>
 
@@ -401,6 +453,7 @@ export default {
         {
           text: 'Номер',
           value: 'nameDoc',
+          width: '250px',
           sort: () => false
         },
         {
@@ -802,7 +855,7 @@ export default {
 
       const searchCriterias = this.createCriteriasForRequestToSearchDocsFromPay(filtersParams)
 
-      const data = { searchCriterias, page: this.pageOfFromPayData, orders: this.handleSortData }
+      const data = { searchCriterias, page: this.pageOfFromPayData, orders: this.handleSortData, size: 200 }
 
       this.isFiltersForFromPayDocsUsing = searchCriterias.length > 1
 
@@ -965,8 +1018,8 @@ export default {
 }
 
 .journal-of-payment-docs-from-pay-docs-bottom-spacer-for-fromPay-results{
-  flex: 0 0 58%;
-  max-width: 58%;
+  flex: 0 0 59%;
+  max-width: 59%;
 }
 
 .journal-of-payment-docs-from-pay-docs-result-text{
@@ -1001,19 +1054,6 @@ export default {
   cursor: pointer;
   box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.6);
   z-index:2;
-}
-
-.add-group__btn:hover::after {
-  content: attr(data-title);
-  position: absolute;
-  right: 100%; top: -200%;
-  z-index: 1;
-  background: rgba(255,255,230,0.9);
-  font-family: Arial, sans-serif;
-  color: black;
-  font-size: 11px;
-  padding: 5px 10px;
-  border: 1px solid #333;
 }
 
 .add-group__btn:active {
@@ -1063,75 +1103,10 @@ export default {
   flex: 0 0 58%;
 }
 
-.journal-of-payment-docs-buttons-edit-button {
-  display: inline-block; /* Строчно-блочный элемент */
-  position: relative; /* Относительное позиционирование */
-}
-
-.journal-of-payment-docs-buttons-edit-button:hover::after {
-  content: attr(data-title);
-  position: absolute; /* Абсолютное позиционирование */
-  right: 100%; top: -160%; /* Положение подсказки */
-  z-index: 1; /* Отображаем подсказку поверх других элементов */
-  background: rgba(255,255,230,0.9); /* Полупрозрачный цвет фона */
-  color: black;
-  font-family: Arial, sans-serif; /* Гарнитура шрифта */
-  font-size: 11px; /* Размер текста подсказки */
-  padding: 5px 10px; /* Поля */
-  border: 1px solid #333; /* Параметры рамки */
-}
-
-.journal-of-payment-docs-buttons-copy-button {
-  display: inline-block; /* Строчно-блочный элемент */
-  position: relative; /* Относительное позиционирование */
-}
-
-.journal-of-payment-docs-buttons-copy-button:hover::after {
-  content: attr(data-title);
-  position: absolute; /* Абсолютное позиционирование */
-  right: 100%; top: -50%; /* Положение подсказки */
-  z-index: 1; /* Отображаем подсказку поверх других элементов */
-  background: rgba(255,255,230,0.9); /* Полупрозрачный цвет фона */
-  color: black;
-  font-family: Arial, sans-serif; /* Гарнитура шрифта */
-  font-size: 11px; /* Размер текста подсказки */
-  padding: 5px 10px; /* Поля */
-  border: 1px solid #333; /* Параметры рамки */
-}
-
-.journal-of-payment-docs-buttons-delete-button {
-  display: inline-block; /* Строчно-блочный элемент */
-  position: relative; /* Относительное позиционирование */
-}
-
-.journal-of-payment-docs-buttons-delete-button:hover::after {
-  content: attr(data-title);
-  position: absolute; /* Абсолютное позиционирование */
-  right: 100%; top: -50%; /* Положение подсказки */
-  z-index: 1; /* Отображаем подсказку поверх других элементов */
-  background: rgba(255,255,230,0.9); /* Полупрозрачный цвет фона */
-  color: black;
-  font-family: Arial, sans-serif; /* Гарнитура шрифта */
-  font-size: 11px; /* Размер текста подсказки */
-  padding: 5px 10px; /* Поля */
-  border: 1px solid #333; /* Параметры рамки */
-}
-
-.journal-of-payment-docs-buttons-create-button {
-  display: inline-block; /* Строчно-блочный элемент */
-  position: relative; /* Относительное позиционирование */
-}
-
-.journal-of-payment-docs-buttons-create-button:hover::after {
-  content: attr(data-title);
-  position: absolute; /* Абсолютное позиционирование */
-  right: 100%; top: -50%; /* Положение подсказки */
-  z-index: 1; /* Отображаем подсказку поверх других элементов */
-  background: rgba(255,255,230,0.9); /* Полупрозрачный цвет фона */
-  color: black;
-  font-family: Arial, sans-serif; /* Гарнитура шрифта */
-  font-size: 11px; /* Размер текста подсказки */
-  padding: 5px 10px; /* Поля */
-  border: 1px solid #333; /* Параметры рамки */
+.journal-of-payment-docs-table-cell-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 1px;
 }
 </style>

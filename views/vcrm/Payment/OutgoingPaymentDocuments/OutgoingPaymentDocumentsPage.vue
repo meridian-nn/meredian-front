@@ -270,6 +270,7 @@
     <create-or-edit-outgoing-payment-document
       ref="createOrEditOutgoingPaymentDocument"
       @save="saveOutgoingDocument"
+      @cancel="closeOutgoingDocument"
     />
   </div>
 </template>
@@ -438,6 +439,10 @@ export default {
       this.currentRowOfOutgoingDocsForContextMenu = null
       await this.init()
       this.updateOutgoingDocs()
+    },
+
+    closeOutgoingDocument() {
+      this.outgoingDocsRows = []
     },
 
     // Инициализация данных формы

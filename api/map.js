@@ -730,6 +730,28 @@ export const factory = send => ({
 
         getDelZkzpsvProcedureName() {
           return 'dbo.del_zkzpsv'
+        },
+
+        findOrgOperationsBySearchCriterias(params) {
+          return send('POST', '/oper/manufacturing/orgOperation/findBySearchCriteriaList', params)
+        },
+
+        findOperationsSumsBySearchCriterias(params) {
+          return send('POST', '/oper/manufacturing/operationSum/findBySearchCriteriaList', params)
+        },
+
+        findSeparationSchemeBySearchCriterias(params) {
+          return send('POST', '/oper/manufacturing/divisionScheme/findBySearchCriteriaList', params)
+        },
+
+        recordingTheWorkOnTheOrder: {
+          findBySearchCriteriaForListOfDressmaker(params) {
+            return send('POST', '/oper/manufacturing/seamstressesChoice/findPageBySearchCriteriaList', params)
+          },
+
+          findBySearchCriteriaForGetDressmaker(params) {
+            return send('POST', '/oper/manufacturing/recordedWork/findBySearchCriteria', params)
+          },
         }
     },
 

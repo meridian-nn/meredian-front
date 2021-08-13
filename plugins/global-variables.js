@@ -21,10 +21,8 @@ Vue.mixin({
         // Функция проверки закрытого периода All
         checkClosedPeriodAll(date) {
             if (date[2] === '.') {
-                console.log('ТЕСТ1')
                 return new Date(this.convertLocaleDateStringinISODateString(date.toString())) < this.getDateClosedPeriod()
             }
-            console.log('ТЕСТ2')
             return new Date(date.toString()) < this.getDateClosedPeriod()
         },   
         // Функция проверки закрытого периода

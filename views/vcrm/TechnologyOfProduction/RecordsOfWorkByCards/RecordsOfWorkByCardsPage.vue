@@ -5,36 +5,54 @@
   >
     <div class="records-of-work-by-cards-row">
       <div class="records-of-work-by-cards-header-btn">
-        <v-btn
-          color="blue"
-          class="mx-2"
-          fab
-          dark
-          x-small
-          :to="{ name: 'SewingOrderLog' }"
-        >
-          <v-icon dark>
-            mdi-plus
-          </v-icon>
-        </v-btn>
+        <v-tooltip bottom>
+          <template #activator="{ on, attrs }">
+            <v-btn
+              color="blue"
+              class="mx-2"
+              style="border-radius:50%; width: 32px; height: 32px;"
+              min-width="32"
+              dark
+              x-small
+              v-bind="attrs"
+              :to="{ name: 'SewingOrderLog' }"
+              v-on="on"
+            >
+              <v-icon dark>
+                mdi-plus
+              </v-icon>
+            </v-btn>
+          </template>
+          <span>Переход в "Журнал заказов на пошив"</span>
+        </v-tooltip>
       </div>
 
-      <div class="records-of-work-by-cards-header-btn">
-        <v-btn
-          color="blue"
-          class="mx-2"
-          fab
-          x-small
-          :disabled="recordsSelectedRows.length === 0 || recordsSelectedRows.length > 1"
-        >
-          <v-icon
-            color="white"
-            @click="editRecord"
+      <v-tooltip bottom>
+        <template #activator="{ on, attrs }">
+          <div
+            class="records-of-work-by-cards-header-btn"
+            v-bind="attrs"
+            v-on="on"
           >
-            mdi-pencil
-          </v-icon>
-        </v-btn>
-      </div>
+            <v-btn
+              color="blue"
+              class="mx-2"
+              style="border-radius:50%; width: 32px; height: 32px;"
+              min-width="32"
+              x-small
+              :disabled="recordsSelectedRows.length === 0 || recordsSelectedRows.length > 1"
+            >
+              <v-icon
+                color="white"
+                @click="editRecord"
+              >
+                mdi-pencil
+              </v-icon>
+            </v-btn>
+          </div>
+        </template>
+        <span>Редактирование выбранной записи работы по карточкам</span>
+      </v-tooltip>
 
       <records-of-work-on-order
         ref="recordsOfWorkOnOrder"
@@ -712,7 +730,7 @@ export default {
       }
 
       if (this.orderForRecordsOfWorkOnOrder.tmkId1 > 0) {
-        this.$refs.recordsOfWorkOnOrder.openWithObject(this.orderForRecordsOfWorkOnOrder, this.variablesOfForm)
+        this.$refs.recordsOfWorkOnOrder.openWithObject(this.orderForRecordsOfWorkOnOrder, this.variablesOfForm, currentRecord)
       } else {
         this.$refs.userNotification.showUserNotification('success', 'Выбранная запись не подходит по условиям!')
       }

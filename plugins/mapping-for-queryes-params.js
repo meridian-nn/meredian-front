@@ -40,7 +40,7 @@ Vue.mixin({
         zaorgId: createdItem.forWhom && createdItem.forWhom.client_id ? createdItem.forWhom.client_id : 0,
         ispId: createdItem.ispId ? createdItem.ispId : 0,
         orgIsp: createdItem.payer && createdItem.payer.glbuch_id ? createdItem.payer.glbuch_id : 0,
-        zaorgIsp: createdItem.forWhom && createdItem.forWhom.glbuch_id ? createdItem.forWhom.glbuch_id : 0,
+        zaorgIsp: createdItem.zaorg_isp ? createdItem.zaorg_isp : 0,
         dispId: createdItem.dispId ? createdItem.dispId : 0,
         dsoispId: createdItem.dsoispId ? createdItem.dsoispId : 0,
         soispId: createdItem.collaborator && createdItem.collaborator.id ? createdItem.collaborator.id : 0,

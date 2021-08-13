@@ -242,6 +242,7 @@
     <create-or-edit-incoming-payment-document
       ref="createOrEditIncomingPaymentDocument"
       @save="saveIncomingDocument"
+      @cancel="closeIncomingDocument"
     />
 
     <filters-form-from-outgoing-and-incoming-document
@@ -440,6 +441,10 @@ export default {
       await this.init()
       this.updateIncomingDocuments()
       this.$refs.userNotification.showUserNotification('success', 'Новый входящий документ добавлен')
+    },
+
+    closeIncomingDocument() {
+      this.selectedIncomingDocuments = []
     },
 
     async initData() {

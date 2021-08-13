@@ -72,7 +72,8 @@
 
             <div class="records-of-work-on-order-indentation-for-inputs">
               <v-text-field
-                v-model.number="numberOfOrder"
+                v-model.number="chosenRecord.numZkzpsv"
+                readonly
                 hide-details="auto"
               />
             </div>
@@ -85,7 +86,8 @@
 
             <div class="records-of-work-on-order-indentation-for-inputs">
               <v-text-field
-                v-model.number="numberOfApplication"
+                v-model.number="chosenRecord.numZaivk"
+                readonly
                 hide-details="auto"
               />
             </div>
@@ -100,7 +102,8 @@
 
             <div class="records-of-work-on-order-indentation-for-inputs">
               <v-text-field
-                v-model.number="countOfProductions"
+                v-model.number="chosenRecord.colvoMc"
+                readonly
                 hide-details="auto"
               />
             </div>
@@ -113,7 +116,8 @@
 
             <div class="records-of-work-on-order-coefficient-input">
               <v-text-field
-                v-model.number="coefficient"
+                v-model.number="chosenRecord.coeff"
+                readonly
                 hide-details="auto"
               />
             </div>
@@ -144,7 +148,8 @@
 
             <div class="records-of-work-on-order-indentation-for-inputs">
               <v-text-field
-                v-model.number="codeOfProduction"
+                v-model.number="chosenRecord.coeff"
+                readonly
                 hide-details="auto"
                 outlined
               />
@@ -152,7 +157,8 @@
 
             <div class="records-of-work-on-order-descr-of-production-input">
               <v-text-field
-                v-model.number="descrOfProduction"
+                v-model.number="chosenRecord.nameMc"
+                readonly
                 hide-details="auto"
                 outlined
               />
@@ -217,7 +223,8 @@
 
             <div class="records-of-work-on-order-tpid-input">
               <v-text-field
-                v-model.number="TPid"
+                v-model.number="chosenRecord.posledCode"
+                readonly
                 hide-details="auto"
                 outlined
               />
@@ -225,7 +232,8 @@
 
             <div class="records-of-work-on-order-tpname-input">
               <v-text-field
-                v-model.number="TPname"
+                v-model.number="chosenRecord.modelName"
+                readonly
                 hide-details="auto"
                 outlined
               />
@@ -248,10 +256,12 @@
                 v-model="chosenSeparationScheme"
                 :loading="loadingType.separationScheme"
                 :items="separationScheme"
+                auto-select-first
                 item-value="id"
-                item-text="name"
+                item-text="nameScheme"
                 hide-details="auto"
                 outlined
+                @change="separationSchemeChange"
               />
             </div>
           </div>
@@ -274,7 +284,9 @@
               :single-select="false"
               disable-pagination
               hide-default-footer
+              no-data-text=""
               class="elevation-1"
+              @click:row="getDressMakersDataTable"
             />
           </div>
 
@@ -282,13 +294,14 @@
             <v-data-table
               id="records-of-work-on-order-operations"
               height="200"
-              :headers="operationsHeaders"
+              :headers="operationsSumsHeaders"
               fixed-header
-              :items="operationsData"
+              :items="operationsSumsData"
               :show-select="false"
               :single-select="false"
               disable-pagination
               hide-default-footer
+              no-data-text=""
               class="elevation-1"
             />
           </div>
@@ -361,13 +374,46 @@
                 disable-pagination
                 hide-default-footer
                 class="elevation-1"
-              />
+                @update:sort-by="updateSortListDressmaker('by', $event)"
+                @update:sort-desc="updateSortListDressmaker('desc', $event)"
+              >
+                <template #body="{ items }">
+                  <tbody>
+                    <tr
+                      v-for="item in items"
+                      :key="item.id"
+                      :value="item"
+                    >
+                      <td>
+                        {{ item.tabN }}
+                      </td>
+                      <td>
+                        {{ item.fio }}
+                      </td>
+                      <td>
+                        {{ item.ur2Name }}
+                      </td>
+                    </tr>
+                    <infinite-loading
+                      :key="keyLoading"
+                      spinner="spiral"
+                      :identifier="infiniteIdOfListOfDressmakersData"
+                      @infinite="getListOfDressmakersDataTable"
+                    >
+                      <div slot="no-more" />
+                      <div slot="no-results" />
+                    </infinite-loading>
+                  </tbody>
+                </template>
+              </v-data-table>
             </div>
           </div>
         </div>
       </div>
 
       <user-notification ref="userNotification" />
+
+      <loading-dialog ref="loadingDialog" />
 
       <div class="records-of-work-on-order-row">
         <v-spacer />
@@ -383,13 +429,17 @@
   </v-dialog>
 </template>
 <script>
+import InfiniteLoading from 'vue-infinite-loading'
 import UserNotification from '~/components/information_window/UserNotification'
+import LoadingDialog from '~/components/loading_dialog/LoadingDialog'
 
 export default {
   name: 'RecordsOfWorkOnOrder',
 
   components: {
-    UserNotification
+    UserNotification,
+    InfiniteLoading,
+    LoadingDialog
   },
 
   props: {
@@ -401,7 +451,17 @@ export default {
 
   data() {
     return {
-      loadingType: {},
+      loadingType: {
+        listOfDressmakersData: false
+      },
+
+      keyLoading: Math.random(),
+
+      infiniteIdOfListOfDressmakersData: 0,
+
+      pageOfRecordsListDressmaker: 0,
+
+      sortBy: [],
 
       months: [
         'Январь',
@@ -458,17 +518,17 @@ export default {
       orgOperationsHeaders: [
         {
           text: 'Цех',
-          value: 'ceh'
+          value: 'cehNum'
         },
         {
           text: 'Орг. операция',
-          value: 'orgOperation'
+          value: 'operName'
         }
       ],
 
       orgOperationsData: [],
 
-      operationsHeaders: [
+      operationsSumsHeaders: [
         {
           text: 'Операция',
           value: 'operation'
@@ -487,32 +547,32 @@ export default {
         }
       ],
 
-      operationsData: [],
+      operationsSumsData: [],
 
       dressmakersHeaders: [
         {
           text: 'Таб. номер',
-          value: 'tabNumber'
+          value: 'tabN'
         },
         {
           text: 'ФИО',
-          value: 'fullName'
+          value: 'fio'
         },
         {
           text: 'Код операции',
-          value: 'operationCode'
+          value: 'codOp'
         },
         {
           text: 'Кол-во',
-          value: 'count'
+          value: 'colvoOp'
         },
         {
           text: '+/-',
-          value: 'plusMinus'
+          value: 'colvoNew'
         },
         {
           text: 'Всего',
-          value: 'amount'
+          value: 'colvoOst' // нет в респонсе
         }
       ],
 
@@ -521,15 +581,15 @@ export default {
       listOfDressmakersHeaders: [
         {
           text: 'Таб. номер',
-          value: 'tabNumber'
+          value: 'tabN'
         },
         {
           text: 'ФИО',
-          value: 'fullName'
+          value: 'fio'
         },
         {
           text: 'Бригада',
-          value: 'brigade'
+          value: 'ur2Name'
         }
       ],
 
@@ -539,33 +599,259 @@ export default {
 
       orderFromRecordsOfWorkByCards: {},
 
+      chosenRecord: {},
+
       varsOfForm: {
         orgAnfb: null,
         orgName: null,
         proizvAnfb: null,
         mesAnfb: null,
         godAnfb: null
-      }
+      },
+
+      orgOperation: [],
+
+      recordedWork: [],
+
+      monthOfProizv: {},
+
+      selectedSeparationSchemeObj: {}
     }
   },
-
+  computed: {
+    handleSortData() {
+      const { sortDesc } = this
+      return this.sortBy.map((item, i) => {
+        return {
+          'direction': sortDesc[i] ? 'ASC' : 'DESC',
+          'property': item
+        }
+      })
+    }
+  },
   methods: {
-    openWithObject(order, varsOfForm) {
+    updateSortListDressmaker(byDesc, event) {
+      if (byDesc === 'by') {
+        this.sortBy = event
+      } else if (byDesc === 'desc') {
+        this.sortDesc = event
+      }
+      this.pageOfRecordsListDressmaker = 0
+      this.listOfDressmakersData = []
+      this.keyLoading = Math.random()
+    },
+
+    async openWithObject(order, varsOfForm, chosenRecord) {
       if (!order) {
         return
       }
 
+      this.chosenRecord = chosenRecord
       this.orderFromRecordsOfWorkByCards = order
       this.varsOfForm = varsOfForm
       this.chosenMonth = this.varsOfForm.mesAnfb
       this.chosenYear = this.varsOfForm.godAnfb
       this.chosenOrg = this.varsOfForm.orgName
       this.dialog = true
-    },
 
+      await this.initSeparationScheme()
+      await this.updateSeparationScheme()
+      this.selectSeparationSchemeOfChosenRecord()
+    },
     close() {
+      this.reset()
       this.dialog = false
       this.$emit('close')
+    },
+
+    async initOrgOperationData(selectedSeparationShemeObj) {
+      const paramsForRequest = {
+        proizvId: this.varsOfForm.proizvAnfb,
+        monthCurr: this.varsOfForm.mesAnfb,
+        yearCurr: this.varsOfForm.godAnfb,
+        firmaId: this.varsOfForm.orgAnfb,
+        priznak: 2,
+        tmkId: this.orderFromRecordsOfWorkByCards.tmkId1,
+        zkzpsvId: this.chosenRecord.zkzpsvId,
+        schemeCardsId: selectedSeparationShemeObj.schemeCardsId,
+        schemeId: selectedSeparationShemeObj.schemeId,
+        zarSchCardsId: selectedSeparationShemeObj.zarSchCardsId
+      }
+      const params = this.createStructureForManufacturingInitDataProcedure(paramsForRequest)
+      await this.$api.service.executeStashedFunction(params).catch((error) => {
+        alert(error)
+      })
+    },
+
+    async updateOrgOperationsData() {
+      const criterias = [
+        {
+          dataType: 'VARCHAR',
+          key: 'userId',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            this.getCurrentUser.id
+          ]
+        }
+      ]
+      this.orgOperationsData = await this.$api.manufacturing.findOrgOperationsBySearchCriterias(criterias)
+    },
+
+    async selectOrgOperationEvent(selectedRow) {
+      /* await this.initOperationsSumsData(selectedRow.orgOperId)
+      await this.updateOperationsSumsData() */
+    },
+
+    async initOperationsSumsData(orgOperId) {
+      const paramsForRequest = {
+        proizvId: this.varsOfForm.proizvAnfb,
+        monthCurr: this.varsOfForm.mesAnfb,
+        yearCurr: this.varsOfForm.godAnfb,
+        firmaId: this.varsOfForm.orgAnfb,
+        priznak: 7,
+        tmkId: this.orderFromRecordsOfWorkByCards.tmkId1,
+        orgOperId
+      }
+      const params = this.createStructureForManufacturingInitDataProcedure(paramsForRequest)
+      await this.$api.service.executeStashedFunction(params).catch((error) => {
+        alert(error)
+      })
+    },
+
+    async updateOperationsSumsData() {
+      const criterias = [
+        {
+          dataType: 'VARCHAR',
+          key: 'userId',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            this.getCurrentUser.id
+          ]
+        }
+      ]
+      this.operationsSumsData = await this.$api.manufacturing.findOperationsSumsBySearchCriterias(criterias)
+    },
+
+    async initSeparationScheme() {
+      const paramsForRequest = {
+        proizvId: this.varsOfForm.proizvAnfb,
+        monthCurr: this.varsOfForm.mesAnfb,
+        yearCurr: this.varsOfForm.godAnfb,
+        firmaId: this.varsOfForm.orgAnfb,
+        priznak: 6,
+        zkzpsvId: this.chosenRecord.zkzpsvId,
+        tmkId: this.orderFromRecordsOfWorkByCards.tmkId1
+      }
+      const params = this.createStructureForManufacturingInitDataProcedure(paramsForRequest)
+      await this.$api.service.executeStashedFunction(params).catch((error) => {
+        alert(error)
+      })
+    },
+
+    async updateSeparationScheme() {
+      const criterias = [
+        {
+          dataType: 'VARCHAR',
+          key: 'userId',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            this.getCurrentUser.id
+          ]
+        }
+      ]
+
+      this.separationScheme = await this.$api.manufacturing.findSeparationSchemeBySearchCriterias(criterias)
+    },
+
+    selectSeparationSchemeOfChosenRecord() {
+      if (!this.separationScheme) {
+        return
+      }
+
+      const chosenSeparationSchemeObj = this.separationScheme.find(separationScheme => separationScheme.schemeId === this.chosenRecord.schemeId)
+      this.chosenSeparationScheme = chosenSeparationSchemeObj.id
+      this.separationSchemeChange()
+    },
+
+    async separationSchemeChange() {
+      this.selectedSeparationSchemeObj = this.separationScheme.find(separationScheme => separationScheme.id === this.chosenSeparationScheme)
+      await this.initOrgOperationData(this.selectedSeparationSchemeObj)
+      await this.updateOrgOperationsData()
+    },
+
+    reset() {
+      this.chosenRecord = {}
+      this.orderFromRecordsOfWorkByCards = {}
+      this.varsOfForm = {
+        orgAnfb: null,
+        orgName: null,
+        proizvAnfb: null,
+        mesAnfb: null,
+        godAnfb: null
+      }
+      this.chosenMonth = {}
+      this.chosenYear = {}
+      this.chosenOrg = {}
+      this.orgOperationsData = []
+      this.operationsSumsData = []
+      this.separationScheme = []
+      this.chosenSeparationScheme = {}
+
+      // нужно сбросит таблицу список швей
+      this.dressmakersData = []
+    },
+
+    async getListOfDressmakersDataTable($state) {
+      const dataForGetParams = { ...this.orderFromRecordsOfWorkByCards, ...this.varsOfForm }
+      const paramsForInit = this.createStructureForListOfDressmakersInitDataProcedure(dataForGetParams)
+
+      await this.$api.service.executeStashedFunction(paramsForInit).catch((error) => {
+        alert(error)
+      })
+
+      const searchCriterias = this.createCriteriasToGetListOfDressmakers()
+
+      const params = {
+        searchCriterias,
+        page: this.pageOfRecordsListDressmaker,
+        orders: this.handleSortData,
+        size: 30
+      }
+      const { content } = await this.$api.manufacturing.recordingTheWorkOnTheOrder.findBySearchCriteriaForListOfDressmaker(params)
+
+      if (content.length > 0) {
+        this.listOfDressmakersData.push(...content)
+        this.pageOfRecordsListDressmaker += 1
+
+        $state.loaded()
+      } else {
+        $state.complete()
+      }
+    },
+
+    async getDressMakersDataTable(item) {
+      this.dressmakersData = []
+      const dataForParams = {
+        ...this.chosenRecord,
+        ...item,
+        ...this.varsOfForm,
+        ...this.orderFromRecordsOfWorkByCards,
+        ...this.selectedSeparationSchemeObj
+      }
+      const paramsForInit = this.createStructureForDressMakersInitDataProcedure(dataForParams)
+      await this.$api.service.executeStashedFunction(paramsForInit).catch((error) => {
+        alert(error)
+      })
+
+      const searchCriterias = this.createCriteriasToGetDressMakers()
+
+      const content = await this.$api.manufacturing.recordingTheWorkOnTheOrder.findBySearchCriteriaForGetDressmaker(searchCriterias)
+      if (content.length > 0) {
+        this.dressmakersData.push(...content)
+      }
     }
   }
 }
