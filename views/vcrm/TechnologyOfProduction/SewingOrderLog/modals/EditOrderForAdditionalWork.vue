@@ -15,7 +15,10 @@
           <div class="edit-order-for-additional-work-production">
             <form-control label="Производство">
               <v-autocomplete
-                v-model="editedItem.production"
+                v-model="editedItem.proizvId"
+                :items="proizvList"
+                item-value="id"
+                item-text="namePodr"
               />
             </form-control>
           </div>
@@ -30,7 +33,7 @@
           <div class="edit-order-for-additional-work-date-of-order-for-tailoring">
             <form-control label="Дата заказа на пошив">
               <v-text-field
-                v-model="editedItem.dateOfTheOrderForTailoring"
+                v-model="normalizeDataRaskroyPlan"
                 type="date"
               />
             </form-control>
@@ -39,7 +42,7 @@
           <div class="edit-order-for-additional-work-coefficient-for-tailoring">
             <form-control label="Коэффициент на пошив">
               <v-text-field
-                v-model="editedItem.coefficientForTailoring"
+                v-model="editedItem.coeffPoshiv"
                 outlined
                 dense
                 hide-details="auto"
@@ -50,7 +53,7 @@
           <div class="edit-order-for-tailoring-date-of-release">
             <form-control label="Дата выпуска">
               <v-text-field
-                v-model="editedItem.dateOfRelease"
+                v-model="normalizeDataGotovFabr"
                 type="date"
               />
             </form-control>
@@ -83,7 +86,7 @@
         <div class="edit-order-for-additional-work-row">
           <div class="edit-order-for-additional-work-textarea-note">
             <v-textarea
-              v-model="editedItem.note"
+              v-model="editedItem.prim"
               solo
               label="Примечание"
             />
@@ -151,31 +154,49 @@ export default {
       editedItem: {
         num_plan: '',
         num_zkz: '',
-        production: '',
-        allowedToPrintOnFactory: false,
-        dateOfTheOrderForTailoring: new Date().toISOString().substr(0, 10),
-        coefficientForTailoring: 0,
-        dateOfRelease: new Date().toISOString().substr(0, 10),
-        name: '',
-        count: 0,
-        note: ''
+        kroy: 0,
+        proizvId: null,
+        proizvRaskroy: null,
+        prim: '',
+        coeffPoshiv: 0,
+        coeffRaskroy: 0,
+        dataGotovFabr: null,
+        dataZkzpsv: null,
+        dataRaskroyPlan: null
       },
-      jsondata: [
-        {
-          mc_id: 22,
-          tovar: '',
-          colvo: 25,
-          num_zkzvsv: 22
-        },
-        {
-          mc_id: 22,
-          tovar: '',
-          colvo: 25,
-          num_zkzvsv: 22
-        }
-      ],
+      displaytable: false,
+      jsondata: [],
       formOpened: this.value,
-      productionList: []
+      proizvList: []
+    }
+  },
+
+  computed: {
+    normalizeDataGotovFabr: {
+      get() {
+        return this.formatDate(this.editedItem.dataGotovFabr)
+      },
+      set(value) {
+        this.editedItem.dataGotovFabr = value
+      }
+    },
+
+    normalizeDataZkzpsv: {
+      get() {
+        return this.formatDate(this.editedItem.dataZkzpsv)
+      },
+      set(value) {
+        this.editedItem.dataZkzpsv = value
+      }
+    },
+
+    normalizeDataRaskroyPlan: {
+      get() {
+        return this.formatDate(this.editedItem.dataRaskroyPlan)
+      },
+      set(value) {
+        this.editedItem.dataRaskroyPlan = value
+      }
     }
   },
 
@@ -189,13 +210,55 @@ export default {
       this.$emit('close')
     },
 
-    init() {
-      this.jsondata = this.$api.service.executeStashedFunctionWithReturnedDataSet({
-        'params': { 'zkzpsv_id': this.edit.zkzpsvId },
-        'procName': 'dbo.zn_sel_zkzpsv'
-      })
+    async init() {
+      const [jsondata, vZkzpsv, proizvList] = await Promise.all([
+        this.$api.service.executeStashedFunctionWithReturnedDataSet({
+          'params': { 'zkzpsv_id': this.edit.zkzpsvId },
+          'procName': 'dbo.zn_sel_zkzpsv'
+        }),
+        this.$api.manufacturing.getManufacturingVZkzpsv([
+          {
+            'dataType': 'VARCHAR',
+            'key': 'id',
+            'operation': 'EQUALS',
+            'type': 'AND',
+            'values': [
+              this.edit.zkzpsvId
+            ]
+          }
+        ]),
+        this.$api.productionDepartments.findBySearchCriteriaList([
+          {
+            'dataType': 'VARCHAR',
+            'key': 'tipotdId',
+            'operation': 'EQUALS',
+            'type': 'OR',
+            'values': [
+              '2'
+            ]
+          },
+          {
+            'dataType': 'VARCHAR',
+            'key': 'id',
+            'operation': 'EQUALS',
+            'type': 'OR',
+            'values': [
+              '296'
+            ]
+          }
+        ])
+      ])
 
-      this.productionList = this.$api.productionDepartments.findBySearchCriteriaList(this.creatCriteriaEqualList('tipotdId', [2]))
+      this.jsondata = jsondata
+      this.editedItem = vZkzpsv[0]
+      this.proizvList = proizvList
+
+      this.displaytable = true
+    },
+    formatDate(date) {
+      if (!date) { return null }
+
+      return date.split('.').reverse().join('-')
     }
   }
 }

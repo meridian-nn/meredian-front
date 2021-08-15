@@ -753,12 +753,6 @@ export default {
     },
 
     openEditModal() {
-      if (!this.sewingOrderTableSelectedRecords ||
-        !this.sewingOrderTableSelectedRecords.length) {
-        this.$refs.userNotification.showUserNotification('warning', 'Выберите запись для редактирования!')
-        return
-      }
-
       const editingRecord = this.sewingOrderTableSelectedRecords[0]
 
       if (editingRecord.dopWork === 0) {

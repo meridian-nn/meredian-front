@@ -1504,17 +1504,9 @@ Vue.mixin({
         dataType: "VARCHAR",
         key,
         operation: "EQUALS",
-        type: "OR",
+        type: "AND",
         values
-    },
-    {
-      dataType: "VARCHAR",
-      key: "id",
-      operation: "EQUALS",
-      type: "OR",
-      values: [296]
-  }
-  ]
+    }]
     }
   }
 })

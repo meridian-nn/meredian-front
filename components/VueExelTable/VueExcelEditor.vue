@@ -771,12 +771,9 @@ export default {
   watch: {
     value() {
       this.lazy(() => {
+        this.refresh()
         if (this.pageTop > this.table.length) { this.lastPage() }
       })
-
-      setTimeout(() => {
-        this.refresh()
-      }, 100)
     },
     columnFilterString() {
       this.lastFilterTime = String(new Date().getTime() % 1e8)

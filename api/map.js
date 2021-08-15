@@ -702,6 +702,14 @@ export const factory = send => ({
             return 'dbo.manufacturing_request_init_data'
         },
 
+        getManufacturingVZkzpsv(params) {
+          return send('POST', '/oper/manufacturing/vrZkzpsv/findBySearchCriteriaList', params)
+        },
+
+        getManufacturingvZkzpsvDopwork(params) {
+          return send('POST', '/oper/manufacturing/vrZkzpsvDopwork/findBySearchCriteriaList', params)
+        },
+
         getTechTmkUpdDataProcedureName() {
             return 'dbo.tech_tmk_upd_data'
         },
