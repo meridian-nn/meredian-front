@@ -15,14 +15,17 @@
           <div class="edit-order-for-tailoring-cut">
             <form-control label="Раскрой">
               <v-autocomplete
-                v-model="editedItem.raskroy"
+                v-model="editedItem.proizvRaskroy"
+                :items="raskroylist"
+                item-value="id"
+                item-text="namePodr"
               />
             </form-control>
           </div>
 
           <form-control label="Плановая дата раскроя">
             <v-text-field
-              v-model="editedItem.planingDateOfRaskroy"
+              v-model="normalizeDataRaskroyPlan"
               type="date"
             />
           </form-control>
@@ -56,6 +59,9 @@
               <form-control label="Договор №">
                 <v-autocomplete
                   v-model="editedItem.contract"
+                  :items="contractList"
+                  item-value="dog_id"
+                  item-text="name_kontr"
                 />
               </form-control>
             </div>
@@ -64,14 +70,14 @@
               <div class="edit-order-for-tailoring-date-of-order-for-tailoring">
                 <form-control label="Дата заказа на пошив">
                   <v-text-field
-                    v-model="editedItem.dateOfTheOrderForTailoring"
+                    v-model="normalizeDataZkzpsv"
                     type="date"
                   />
                 </form-control>
               </div>
 
               <v-simple-checkbox
-                v-model="editedItem.kroyOnPaper"
+                v-model="kroyOnPaper"
               />
 
               <div
@@ -83,7 +89,7 @@
 
             <div class="edit-order-for-tailoring-textarea-note">
               <v-textarea
-                v-model="editedItem.note"
+                v-model="editedItem.prim"
                 solo
                 label="Примечание"
               />
@@ -96,7 +102,7 @@
             <div class="edit-order-for-tailoring-coefficient-for-tailoring">
               <form-control label="Коэффициент на пошив">
                 <v-text-field
-                  v-model="editedItem.coefficientForTailoring"
+                  v-model="editedItem.coeffPoshiv"
                   outlined
                   dense
                   hide-details="auto"
@@ -107,7 +113,7 @@
             <div class="edit-order-for-tailoring-coefficient-for-raskroy">
               <form-control label="Коэффициент на раской">
                 <v-text-field
-                  v-model="editedItem.coefficientForRaskroy"
+                  v-model="editedItem.coeffRaskroy"
                   outlined
                   dense
                   hide-details="auto"
@@ -118,14 +124,14 @@
             <div class="edit-order-for-tailoring-date-of-release">
               <form-control label="Дата выпуска">
                 <v-text-field
-                  v-model="editedItem.dateOfRelease"
+                  v-model="normalizeDataGotovFabr"
                   type="date"
                 />
               </form-control>
             </div>
 
             <v-checkbox
-              v-model="editedItem.allowedToPrintOnFactory"
+              v-model="allowedToPrintOnFactory"
               label="Разрешено печатать на фабриках"
             />
           </div>
@@ -142,31 +148,33 @@
 
         <div class="edit-order-for-tailoring-row">
           <vue-excel-editor
+            v-if="displaytable"
+            ref="table"
             v-model="jsondata"
           >
             <vue-excel-column
-              field="kod"
+              field="mc_id"
               label="Код"
-              type="string"
+              type="number"
               width="200px"
             />
             <vue-excel-column
-              field="name"
+              field="tovar"
               label="Наименование"
               type="string"
               width="1200px"
             />
             <vue-excel-column
-              field="quantity"
+              field="colvo"
               label="Количество"
-              type="string"
-              width="200px"
+              type="number"
+              width="100px"
             />
             <vue-excel-column
-              field="order"
+              field="num_zkzvsv"
               label="№ Заказа"
-              type="string"
-              width="200px"
+              type="number"
+              width="100px"
             />
           </vue-excel-editor>
         </div>
@@ -208,46 +216,117 @@ export default {
         num_plan: '',
         num_zkz: '',
         kroy: 0,
-        descr: '',
-        raskroy: '',
-        planingDateOfRaskroy: new Date().toISOString().substr(0, 10),
-        contract: '',
-        kroyOnPaper: false,
-        dateOfTheOrderForTailoring: new Date().toISOString().substr(0, 10),
-        note: '',
-        coefficientForTailoring: 0,
-        coefficientForRaskroy: 0,
-        dateOfRelease: new Date().toISOString().substr(0, 10),
-        allowedToPrintOnFactory: false
+        proizvRaskroy: null,
+        prim: '',
+        coeffPoshiv: 0,
+        coeffRaskroy: 0,
+        dataGotovFabr: null,
+        dataZkzpsv: null,
+        dataRaskroyPlan: null
       },
-      jsondata: [
-        {
-          kod: '',
-          name: '',
-          quantity: 25,
-          order: ''
-        },
-        {
-          kod: '',
-          name: '',
-          quantity: 20,
-          order: ''
-        },
-        {
-          kod: '',
-          name: '',
-          quantity: 19,
-          order: ''
-        }
-      ],
-      formOpened: this.value
+      displaytable: false,
+      jsondata: [],
+      formOpened: this.value,
+      contractList: [],
+      raskroyList: []
     }
+  },
+
+  computed: {
+    normalizeDataGotovFabr: {
+      get() {
+        return this.formatDate(this.editedItem.dataGotovFabr)
+      },
+      set(value) {
+        this.editedItem.dataGotovFabr = value
+      }
+    },
+
+    normalizeDataZkzpsv: {
+      get() {
+        return this.formatDate(this.editedItem.dataZkzpsv)
+      },
+      set(value) {
+        this.editedItem.dataZkzpsv = value
+      }
+    },
+
+    normalizeDataRaskroyPlan: {
+      get() {
+        return this.formatDate(this.editedItem.dataRaskroyPlan)
+      },
+      set(value) {
+        this.editedItem.dataRaskroyPlan = value
+      }
+    },
+
+    kroyOnPaper: {
+      get() {
+        return !!this.editedItem.raskroyPaper
+      },
+
+      set(value) {
+        this.editedItem.raskroyPaper = value ? 1 : 0
+      }
+    },
+
+    allowedToPrintOnFactory: {
+      get() {
+        return !!this.editedItem.prGotov
+      },
+
+      set(value) {
+        this.editedItem.prGotov = value ? 1 : 0
+      }
+    }
+  },
+
+  mounted() {
+    this.init()
   },
 
   methods: {
     close() {
       this.formOpened = false
       this.$emit('close')
+    },
+
+    async init() {
+      const [jsondata, vZkzpsv, raskroy, contractList] = await Promise.all([
+        this.$api.service.executeStashedFunctionWithReturnedDataSet({
+          'params': { 'zkzpsv_id': this.edit.zkzpsvId },
+          'procName': 'dbo.zn_sel_zkzpsv'
+        }),
+        this.$api.manufacturing.getManufacturingVZkzpsv([
+          {
+            'dataType': 'VARCHAR',
+            'key': 'id',
+            'operation': 'EQUALS',
+            'type': 'AND',
+            'values': [
+              this.edit.zkzpsvId
+            ]
+          }
+        ]),
+        this.$api.productionDepartments.findBySearchCriteriaList(this.creatCriteriaEqualList('id', [this.edit.proizvRaskroy])),
+        this.$api.service.executeStashedFunctionWithReturnedDataSet({
+          'params': { 'data1': '2020-06-01', 'data2': '2020-06-30' },
+          'procName': 'dbo.dog_sel_spis'
+        })
+      ])
+
+      this.jsondata = jsondata
+      this.editedItem = vZkzpsv[0]
+      this.raskroylist = raskroy
+      this.contractList = contractList
+
+      this.displaytable = true
+    },
+
+    formatDate(date) {
+      if (!date) { return null }
+
+      return date.split('.').reverse().join('-')
     }
   }
 }

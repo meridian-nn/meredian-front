@@ -365,6 +365,18 @@ Vue.mixin({
         params.firma_id_1 = paramsForRequest.orgAnfb
       }
       return params
+    },
+    createStructureForInitDataInViewOrderBySizeTable(params) {
+      return {
+        params: { zkzpsv_id1: params },
+        procName: this.$api.manufacturing.getViewOrderBySizeProcedureName()
+      }
+    },
+    createStructureUpdateTableInViewOrderBySizeTable(params) {
+      return {
+        params: { zkzpsv_id: params },
+        procName: this.$api.manufacturing.getUpdateTableInViewOrderBySizeProcedureName()
+      }
     }
   }
 
