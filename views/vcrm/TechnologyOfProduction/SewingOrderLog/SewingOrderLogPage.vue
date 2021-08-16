@@ -443,6 +443,8 @@
     />
 
     <modal-size
+      v-if="modals.size"
+      :data-for-modal="currentRowOfTableForContextMenu"
       :value="modals.size"
       @close="closeModal('size')"
     />
@@ -766,7 +768,7 @@ export default {
       this.updateSewingOrderTableRecords()
     },
 
-    rightClickHandler(event, { item }) {
+    rightClickHandler(event, item) {
       event.preventDefault()
 
       this.contextMenu = false
