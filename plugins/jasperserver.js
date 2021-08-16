@@ -98,6 +98,94 @@ Vue.mixin({
       this.forceJasperReportDownload(report, format, 'Накладная_на_отпуск_готовой_продукции_' + zkzpsvId)
     },
 
+    async downloadCustomCuttingCardFromJasperserver(format, zkzpsvId) {
+      if (!zkzpsvId) {
+        return
+      }
+
+      if (!format) {
+        format = 'HTML'
+      }
+
+      const link = this.getJasperRootUrl() +
+        'psv_karta_kroi.' +
+        format + '?' + 'zkzpsv_id=' + zkzpsvId
+
+      const config = {
+        headers: this.getJasperLoginAndPasswordForHeaders(),
+        responseType: 'blob'
+      }
+
+      const report = await this.$axios.$get(link, config)
+      this.forceJasperReportDownload(report, format, 'Карта_раскроя_на_заказ_' + zkzpsvId)
+    },
+
+    async downloadRawMaterialConsumptionMapFromJasperserver(format, zkzpsvId) {
+      if (!zkzpsvId) {
+        return
+      }
+
+      if (!format) {
+        format = 'HTML'
+      }
+
+      const link = this.getJasperRootUrl() +
+        'rasx_tkan.' +
+        format + '?' + 'zkzpsv_id=' + zkzpsvId
+
+      const config = {
+        headers: this.getJasperLoginAndPasswordForHeaders(),
+        responseType: 'blob'
+      }
+
+      const report = await this.$axios.$get(link, config)
+      this.forceJasperReportDownload(report, format, 'Карта_расхода_сырья_' + zkzpsvId)
+    },
+
+    async downloadAccessoriesConsumptionMapFromJasperserver(format, zkzpsvId) {
+      if (!zkzpsvId) {
+        return
+      }
+
+      if (!format) {
+        format = 'HTML'
+      }
+
+      const link = this.getJasperRootUrl() +
+        'rasx_furn.' +
+        format + '?' + 'zkzpsv_id=' + zkzpsvId
+
+      const config = {
+        headers: this.getJasperLoginAndPasswordForHeaders(),
+        responseType: 'blob'
+      }
+
+      const report = await this.$axios.$get(link, config)
+      this.forceJasperReportDownload(report, format, 'Карта_расхода_фурнитуры_' + zkzpsvId)
+    },
+
+    async downloadLocationOfLogosInOrderFromJasperserver(format, zkzpsvId) {
+      if (!zkzpsvId) {
+        return
+      }
+
+      if (!format) {
+        format = 'HTML'
+      }
+
+      const link = this.getJasperRootUrl() +
+        'mclog_new.' +
+        format + '?' + 'zkzpsv_id=' + zkzpsvId
+
+      const config = {
+        headers: this.getJasperLoginAndPasswordForHeaders(),
+        responseType: 'blob'
+      }
+
+      const report = await this.$axios.$get(link, config)
+      this.forceJasperReportDownload(report, format, 'Месторасположение_логотипов_в_заказе_' + zkzpsvId)
+    },
+
     forceJasperReportDownload(report, format, fileName) {
       const url = window.URL.createObjectURL(new Blob([report]))
       const link = document.createElement('a')
