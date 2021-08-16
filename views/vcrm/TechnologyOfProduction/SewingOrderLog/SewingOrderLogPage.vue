@@ -797,7 +797,7 @@ export default {
     openEditModal() {
       const editingRecord = this.sewingOrderTableSelectedRecords[0]
 
-      if (editingRecord.dopWork === 0) {
+      if (editingRecord.dopWork !== 0) {
         this.modals.edit = true
       } else {
         this.modals.editAdd = true
@@ -839,10 +839,6 @@ export default {
       this.sewingOrderTableSelectedRecords = []
       this.keyLoading = Math.random()
     },
-
-    /* typeOrder(item) {
-      return item.gosKontrakt ? 'red' : 'blue'
-    }, */
 
     // Обновление таблицы "Заказы на пошив"
     updateSewingOrderTableRecords() {

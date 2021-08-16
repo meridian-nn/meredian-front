@@ -35,7 +35,7 @@
           <div class="edit-order-for-tailoring-kroy">
             <form-control label="Крой">
               <v-text-field
-                v-model="editedItem.kroy"
+                v-model="editedItem.mc_kroi"
                 outlined
                 dense
                 hide-details="auto"
@@ -47,7 +47,7 @@
 
           <div class="edit-order-for-tailoring-descr">
             <v-textarea
-              v-model="editedItem.descr"
+              v-model="editedItem.name_kroi"
               solo
             />
           </div>
@@ -215,7 +215,8 @@ export default {
       editedItem: {
         num_plan: '',
         num_zkz: '',
-        kroy: 0,
+        mc_kroi: 0,
+        name_kroi: '',
         proizvRaskroy: null,
         prim: '',
         coeffPoshiv: 0,
@@ -292,10 +293,18 @@ export default {
     },
 
     async init() {
-      const [jsondata, vZkzpsv, raskroy, contractList] = await Promise.all([
+      const [jsondata, provNewPfPsv, vZkzpsv, raskroy, contractList] = await Promise.all([
         this.$api.service.executeStashedFunctionWithReturnedDataSet({
           'params': { 'zkzpsv_id': this.edit.zkzpsvId },
           'procName': 'dbo.zn_sel_zkzpsv'
+        }),
+        this.$api.service.executeStashedFunctionWithReturnedDataSet({
+          'params': {
+            'priznak': '2',
+            'id': this.edit.zkzpsvId,
+            'descr': 'Larisa'
+          },
+          'procName': 'dbo.prov_new_pf_psv'
         }),
         this.$api.manufacturing.getManufacturingVZkzpsv([
           {
@@ -319,7 +328,8 @@ export default {
       this.editedItem = vZkzpsv[0]
       this.raskroylist = raskroy
       this.contractList = contractList
-
+      this.editedItem.mc_kroi = provNewPfPsv[0].mc_kroi
+      this.editedItem.name_kroi = provNewPfPsv[0].name_kroi
       this.displaytable = true
     },
 
