@@ -744,6 +744,14 @@ export const factory = send => ({
           return send('POST', '/oper/manufacturing/divisionScheme/findBySearchCriteriaList', params)
         },
 
+        getViewOrderBySizeProcedureName() {
+          return 'dbo.sel_zkzpsvrz'
+        },     
+        
+        getUpdateTableInViewOrderBySizeProcedureName() {
+          return 'dbo.ins_zkzrz_spplnrz'
+        },
+
         recordingTheWorkOnTheOrder: {
           findBySearchCriteriaForListOfDressmaker(params) {
             return send('POST', '/oper/manufacturing/seamstressesChoice/findBySearchCriteria', params)
