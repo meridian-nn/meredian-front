@@ -130,6 +130,8 @@
           hide-default-footer
           :headers="sewingOrderTableHeaders"
           :items="sewingOrderTableRecords"
+          calculate-widths
+          @contextmenu:row="rightClickHandler"
           @update:sort-by="updateSort('by', $event)"
           @update:sort-desc="updateSort('desc', $event)"
         >
@@ -402,6 +404,7 @@
     </div>
 
     <modal-edit-tailoring
+      v-if="modals.edit"
       :edit="sewingOrderTableSelectedRecords[0]"
       :value="modals.edit"
       @close="closeModal('edit')"
@@ -409,6 +412,7 @@
     />
 
     <modal-edit-work
+      v-if="modals.editAdd"
       :edit="sewingOrderTableSelectedRecords[0]"
       :value="modals.editAdd"
       @close="closeModal('editAdd')"
@@ -461,7 +465,7 @@
 
     <modal-raw-materials
       :data="currentRowOfTableForContextMenu"
-      :value="modals.rawMaterials"
+      :value="modals.tailoringOrder"
       @close="closeModal('rawMaterials')"
     />
 
@@ -539,8 +543,7 @@ export default {
         tailoringOrder: false,
         rawMaterials: false,
         actualConsumptionRawMaterials: false,
-        oldOrderCard: false,
-        fillingDefectOnOrderForTailoring: false
+        oldOrderCard: false
       },
       sewingOrderTableSelectedRecords: [],
       sewingOrderTableHeaders: [
@@ -753,16 +756,15 @@ export default {
     }
   },
 
-  /* async fetch() {
-    await this.init()
-  }, */
-
   mounted() {
     this.init()
   },
 
   methods: {
-    async init() {},
+    init() {
+      this.canUpdate = true
+      this.updateSewingOrderTableRecords()
+    },
 
     rightClickHandler(event, { item }) {
       event.preventDefault()
@@ -791,12 +793,6 @@ export default {
     },
 
     openEditModal() {
-      if (!this.sewingOrderTableSelectedRecords ||
-        !this.sewingOrderTableSelectedRecords.length) {
-        this.$refs.userNotification.showUserNotification('warning', 'Выберите запись для редактирования!')
-        return
-      }
-
       const editingRecord = this.sewingOrderTableSelectedRecords[0]
 
       if (editingRecord.dopWork === 0) {
@@ -809,11 +805,11 @@ export default {
     closeModal(name) {
       this.modals[name] = false
       this.sewingOrderTableSelectedRecords = []
-      if (name === 'edit' ||
-        name === 'editAdd') {
-        this.isNeedToInitDataForSewingOrderTable = true
-        this.updateSewingOrderTableRecords()
-      }
+      // if (name === 'edit' ||
+      //   name === 'editAdd') {
+      //   this.isNeedToInitDataForSewingOrderTable = true
+      //   this.updateSewingOrderTableRecords()
+      // }
     },
 
     async saveModalEditTailoring(params = this.sewingOrderTableSelectedRecords) {
@@ -905,9 +901,11 @@ export default {
     },
 
     async deleteRecord() {
-      if ((!this.sewingOrderTableSelectedRecords ||
+      if (
+        (!this.sewingOrderTableSelectedRecords ||
           !this.sewingOrderTableSelectedRecords.length) &&
-        !this.currentRowOfTableForContextMenu) {
+        !this.currentRowOfTableForContextMenu
+      ) {
         this.$refs.userNotification.showUserNotification('error', 'Выберите заказ для удаления!')
         return
       }
@@ -930,15 +928,15 @@ export default {
 
       if (response.flagRet === 0) {
         this.$refs.userNotification.showUserNotification('success', 'Заказ на пошив №' + currentOrder.numZkzpsv + ' удален!')
+
+        this.updateSewingOrderTableRecords()
       } else if (response.flagRet === 1) {
         this.$refs.userNotification.showUserNotification('warning', 'Заказ на пошив №' + currentOrder.numZkzpsv + ' помечен на удаление!')
+
+        this.updateSewingOrderTableRecords()
       } else {
         this.$refs.userNotification.showUserNotification('error', 'Заказ на пошив №' + currentOrder.numZkzpsv + ' не может быть удален! По нему сформированы накладные!')
       }
-
-      this.currentRowOfTableForContextMenu = null
-      this.isNeedToInitDataForSewingOrderTable = true
-      this.updateSewingOrderTableRecords()
     },
 
     getBackgroundAndFontClass(data) {
