@@ -564,14 +564,14 @@ export default {
         {
           text: 'План',
           value: 'numPlanpsv',
-          width: '35px',
-          sortable: false
+          width: '60px',
+          sort: () => false
         },
         {
           text: 'Заказ',
           value: 'numZkzpsv',
-          width: '40px',
-          sortable: false
+          width: '60px',
+          sort: () => false
         },
         {
           text: 'Дата',
@@ -583,13 +583,13 @@ export default {
           text: 'Производство',
           value: 'nameProizv',
           width: '150px',
-          sortable: false
+          sort: () => false
         },
         {
           text: 'Код',
           value: 'mcId',
           width: '60px',
-          sortable: false
+          sort: () => false
         },
         {
           text: 'Наименование МЦ',
