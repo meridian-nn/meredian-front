@@ -93,6 +93,26 @@
         <span>Фильтры для заказов на пошив</span>
       </v-tooltip>
 
+      <v-tooltip bottom>
+        <template #activator="{ on, attrs }">
+          <v-btn
+            class="mr-1"
+            style="border-radius:50%; width: 40px; height: 40px;"
+            min-width="40px"
+            small
+            color="blue"
+            v-bind="attrs"
+            @click="openModal('search')"
+            v-on="on"
+          >
+            <v-icon color="white">
+              mdi-magnify
+            </v-icon>
+          </v-btn>
+        </template>
+        <span>Поиск в журнале заказов на пошив</span>
+      </v-tooltip>
+
       <div class="sewing-order-log-page-checkbox mr-4">
         <v-checkbox
           v-model="govContract"
@@ -144,7 +164,7 @@
                 :class="getBackgroundAndFontClass(item)"
                 @contextmenu="rightClickHandler($event, item)"
                 @click="fillCustomerName(item)"
-                @dblclick="fillingBrackForOrder"
+                @dblclick="fillingDefectForOrder"
               >
                 <td>
                   <v-checkbox
@@ -295,7 +315,10 @@
               spinner="spiral"
               :identifier="infiniteIdData"
               @infinite="findSewingOrderTableRecords"
-            />
+            >
+              <div slot="no-more" />
+              <div slot="no-results" />
+            </infinite-loading>
           </template>
         </v-data-table>
 
@@ -432,8 +455,9 @@
     />
 
     <modal-filter
+      v-if="modals.filter"
       :value="modals.filter"
-      @save="updateSewingOrderTableRecords"
+      @save="saveFilter"
       @close="closeModal('filter')"
     />
 
@@ -471,8 +495,15 @@
       @close="closeModal('rawMaterials')"
     />
 
+    <modal-search
+      v-if="modals.search"
+      :value="modals.search"
+      @save="saveFilter"
+      @close="closeModal('search')"
+    />
+
     <filling-defect-on-order-for-tailoring
-      :data="currentRowOfTableForContextMenu"
+      v-if="modals.fillingDefectOnOrderForTailoring"
       :value="modals.fillingDefectOnOrderForTailoring"
       @close="closeModal('fillingDefectOnOrderForTailoring')"
     />
@@ -491,6 +522,7 @@ import ModalEditOrderForAdditionalWork from './modals/EditOrderForAdditionalWork
 import ModalConfirm from './modals/Confirm'
 import ModalPrint from './modals/Print'
 import ModalFilter from './modals/Filter'
+import ModalSearch from './modals/Search'
 import ModalSize from './modals/Size'
 import ModalPlanDate from './modals/PlanDate'
 import ModalTailoringOrder from './modals/TailoringOrder'
@@ -517,6 +549,7 @@ export default {
     UserNotification,
     ModalRawMaterials,
     FillingDefectOnOrderForTailoring,
+    ModalSearch,
     InfiniteLoading
   },
 
@@ -545,7 +578,9 @@ export default {
         tailoringOrder: false,
         rawMaterials: false,
         actualConsumptionRawMaterials: false,
-        oldOrderCard: false
+        oldOrderCard: false,
+        fillingDefectOnOrderForTailoring: false,
+        search: false
       },
       sewingOrderTableSelectedRecords: [],
       sewingOrderTableHeaders: [
@@ -761,7 +796,10 @@ export default {
   mounted() {
     this.init()
   },
-
+  created() {
+    // Инициализация данных для текущего пользователя
+    this.initDataForCurrentUser()
+  },
   methods: {
     init() {
       this.canUpdate = true
@@ -855,8 +893,6 @@ export default {
 
     async findSewingOrderTableRecords($state) {
       this.loadingType.sewingOrderTableRecords = true
-      // Инициализация данных для текущего пользователя
-      await this.initDataForCurrentUser()
 
       // Поиск пользовательских настроек фильтров
       const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
@@ -974,8 +1010,12 @@ export default {
       return classes
     },
 
-    fillingBrackForOrder() {
+    fillingDefectForOrder() {
       this.modals.fillingDefectOnOrderForTailoring = true
+    },
+    saveFilter() {
+      this.isNeedToInitDataForSewingOrderTable = false
+      this.updateSewingOrderTableRecords()
     }
   }
 }
