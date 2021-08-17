@@ -198,8 +198,16 @@
                 <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.dataZkzpsv }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
-                  {{ item.nameProizv }}
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract sewing-order-log-page-records-table-cell-truncate' : 'sewing-order-log-page-records-table-cell-truncate'">
+                  <v-tooltip bottom>
+                    <template #activator="{ on, attrs }">
+                      <span
+                        v-bind="attrs"
+                        v-on="on"
+                      >{{ item.nameProizv }}</span>
+                    </template>
+                    <span>{{ item.nameProizv }}</span>
+                  </v-tooltip>
                 </td>
                 <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.mcId }}
@@ -630,7 +638,6 @@ export default {
           text: 'Наименование МЦ',
           value: 'nameMc',
           width: '200px',
-          cellClass: 'sewing-order-log-page-records-table-cell-truncate',
           sortable: false
         },
         {
@@ -661,7 +668,6 @@ export default {
           text: 'Раскрой',
           value: 'nameRaskroy',
           width: '130px',
-          cellClass: 'sewing-order-log-page-records-table-cell-truncate',
           sort: () => false
         },
         {
@@ -698,14 +704,12 @@ export default {
           text: 'ГОСТ/ТУ',
           value: 'gostTu',
           width: '150px',
-          cellClass: 'sewing-order-log-page-records-table-cell-truncate',
           sort: () => false
         },
         {
           text: 'Код ЗП',
           value: 'codGra',
           width: '150px',
-          cellClass: 'sewing-order-log-page-records-table-cell-truncate',
           sort: () => false
         },
         {
