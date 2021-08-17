@@ -9,124 +9,69 @@
   >
     <v-card>
       <v-card-title>
-        <span class="headline">Фильтры для журнала заказов на пошив</span>
+        <span class="headline">Поиск в журнале заказов на пошив</span>
       </v-card-title>
 
       <v-card-text>
         <v-container class="container-data">
-          <v-row class="date-filter">
+          <v-row>
             <v-col cols="6">
               <v-text-field
-                v-model="form.dateFrom"
-                :clearable="true"
-                type="date"
+                v-model="form.mcId"
+                label="Код изделия"
+                clearable
                 outlined
-                label="Период с"
-                :hint="form.dateFrom > form.dateTo ? `'Период с' должен быть меньше 'Период заканчивая'` : ''"
-                persistent-hint
+                hide-details="auto"
               />
             </v-col>
-
             <v-col cols="6">
               <v-text-field
-                v-model="form.dateTo"
-                :clearable="true"
-                type="date"
-                outlined
-                label="Период заканчивая"
-              />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                v-model="form.fioIsp"
-                label="Исполнитель"
+                v-model="form.codGra"
+                label="Код зарплаты"
                 clearable
                 outlined
                 hide-details="auto"
               />
             </v-col>
           </v-row>
-
           <v-row>
             <v-col cols="12">
               <v-text-field
-                v-model="form.depOfIsp"
-                label="Отдел исполнителя"
-                :clearable="true"
-                disabled
-                outlined
-                hide-details="auto"
-              />
-            </v-col>
-          </v-row>
-
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                v-model="form.nameProizv"
-                label="Производство"
+                v-model="form.nameMc"
+                label="Наименование"
                 clearable
                 outlined
                 hide-details="auto"
               />
             </v-col>
           </v-row>
-
           <v-row>
-            <v-col cols="12">
+            <v-col cols="6">
               <v-text-field
-                v-model="form.planData"
-                label="Фабрика"
+                v-model="form.numZaivk"
+                label="Номер заявки"
+                clearable
+                outlined
+                hide-details="auto"
+              />
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                v-model="form.numZkzpsv"
+                label="Номер заказа"
                 clearable
                 outlined
                 hide-details="auto"
               />
             </v-col>
           </v-row>
-
           <v-row>
-            <v-col
-              cols="6"
-              class="pt-0"
-            >
-              <v-checkbox
-                class="mt-0"
-                label="Наше производство"
-                hide-details="auto"
-              />
-            </v-col>
-            <v-col
-              cols="6"
-              class="pt-0"
-            >
-              <v-checkbox
-                class="mt-0"
-                label="Давальческое производство"
-                hide-details="auto"
-              />
-            </v-col>
-          </v-row>
-
-          <v-row>
-            <v-col
-              cols="6"
-              class="pt-0"
-            >
-              <v-checkbox
-                class="mt-0"
-                label="Заказы на удаление"
-                hide-details="auto"
-              />
-            </v-col>
-            <v-col
-              cols="6"
-              class="pt-0"
-            >
-              <v-checkbox
-                class="mt-0"
-                label="Раскрой"
+            <v-col cols="6">
+              <v-text-field
+                v-model="form.numSvod"
+                label="Номер свод. заказа"
+                clearable
+                outlined
                 hide-details="auto"
               />
             </v-col>
@@ -140,7 +85,7 @@
             :disabled="form.dateFrom > form.dateTo"
             @click="saveFilters"
           >
-            Применить фильтры
+            Поиск
           </v-btn>
 
           <v-btn @click="$emit('close')">
@@ -166,11 +111,12 @@ export default {
   data() {
     return {
       form: {
-        from: null,
-        to: null,
-        otvIsp: '',
-        nameProizv: '',
-        planData: ''
+        numZaivk: '',
+        mcId: 0,
+        codGra: '',
+        nameMc: '',
+        numZkzpsv: 0,
+        numSvod: 0
       }
     }
   },

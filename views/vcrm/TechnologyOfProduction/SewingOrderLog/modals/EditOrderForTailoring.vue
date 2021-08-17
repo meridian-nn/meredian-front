@@ -101,23 +101,31 @@
           <div class="edit-order-for-tailoring-right-col">
             <div class="edit-order-for-tailoring-coefficient-for-tailoring">
               <form-control label="Коэффициент на пошив">
-                <v-text-field
-                  v-model="editedItem.coeffPoshiv"
+                <vue-numeric
+                  v-model.number="editedItem.coeffPoshiv"
                   outlined
-                  dense
-                  hide-details="auto"
+                  separator="space"
+                  :precision="1"
+                  decimal-separator="."
+                  output-type="number"
+                  :disabled="!isCanChangeRequisitesOnEditOrderForTailoring"
                 />
               </form-control>
             </div>
 
             <div class="edit-order-for-tailoring-coefficient-for-raskroy">
               <form-control label="Коэффициент на раской">
-                <v-text-field
-                  v-model="editedItem.coeffRaskroy"
-                  outlined
-                  dense
-                  hide-details="auto"
-                />
+                <div>
+                  <vue-numeric
+                    v-model.number="editedItem.coeffRaskroy"
+                    outlined
+                    separator="space"
+                    :precision="1"
+                    decimal-separator="."
+                    output-type="number"
+                    :disabled="!isCanChangeRequisitesOnEditOrderForTailoring"
+                  />
+                </div>
               </form-control>
             </div>
 
@@ -215,9 +223,9 @@ export default {
       editedItem: {
         num_plan: '',
         num_zkz: '',
-        mc_kroi: 0,
-        name_kroi: '',
+        kroy: 0,
         proizvRaskroy: null,
+        descr: '',
         prim: '',
         coeffPoshiv: 0,
         coeffRaskroy: 0,

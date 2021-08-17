@@ -314,6 +314,7 @@
             :headers="dressmakersHeaders"
             fixed-header
             :items="dressmakersData"
+            :item-key="'id' + 'codOp'"
             :show-select="false"
             :single-select="false"
             disable-pagination

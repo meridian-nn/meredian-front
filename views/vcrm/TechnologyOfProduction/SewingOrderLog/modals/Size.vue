@@ -17,14 +17,13 @@
           <v-col cols="1">
             <v-btn
               color="blue"
-              class="mr-3"
               fab
               dark
               small
               @click="updateTable()"
             >
               <v-icon>
-                mdi-plus
+                mdi-reload
               </v-icon>
             </v-btn>
           </v-col>
