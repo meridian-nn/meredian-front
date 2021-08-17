@@ -312,6 +312,26 @@ export default {
           text: 'Накладная на отпуск готовой продукции',
           value: 'InvoiceForReleaseOfFinishedProductions',
           marked: false
+        },
+        {
+          text: 'Карта раскроя на заказ',
+          value: 'CustomCuttingCard',
+          marked: false
+        },
+        {
+          text: 'Карта расхода сырья',
+          value: 'RawMaterialConsumptionMap',
+          marked: false
+        },
+        {
+          text: 'Карта расхода фурнитуры',
+          value: 'AccessoriesConsumptionMap',
+          marked: false
+        },
+        {
+          text: 'Месторасположение логотипов в заказе',
+          value: 'LocationOfLogosInOrder',
+          marked: false
         }
       ],
       userComplects: [],
@@ -353,6 +373,14 @@ export default {
           this.downloadOrderOnGiversRawMaterials() // Требуется доработка sql запроса
         } else if (report.value === 'InvoiceForReleaseOfFinishedProductions') {
           this.downloadInvoiceForReleaseOfFinishedProductions() // Требуется доработка sql запроса
+        } else if (report.value === 'CustomCuttingCard') {
+          this.downloadCustomCuttingCard()
+        } else if (report.value === 'RawMaterialConsumptionMap') {
+          this.downloadRawMaterialConsumptionMap()
+        } else if (report.value === 'AccessoriesConsumptionMap') {
+          this.downloadAccessoriesConsumptionMap()
+        } else if (report.value === 'LocationOfLogosInOrder') {
+          this.downloadLocationOfLogosInOrder()
         }
       }
     },
@@ -396,6 +424,50 @@ export default {
         }
 
         await this.downloadInvoiceForReleaseOfFinishedProductionsFromJasperserver(params.format, params.zkzpsvId)
+      }
+    },
+
+    async downloadCustomCuttingCard() {
+      for (const selectedRecord of this.selectedRecords) {
+        const params = {
+          format: 'HTML',
+          zkzpsvId: selectedRecord.zkzpsvId
+        }
+
+        await this.downloadCustomCuttingCardFromJasperserver(params.format, params.zkzpsvId)
+      }
+    },
+
+    async downloadRawMaterialConsumptionMap() {
+      for (const selectedRecord of this.selectedRecords) {
+        const params = {
+          format: 'HTML',
+          zkzpsvId: selectedRecord.zkzpsvId
+        }
+
+        await this.downloadRawMaterialConsumptionMapFromJasperserver(params.format, params.zkzpsvId)
+      }
+    },
+
+    async downloadAccessoriesConsumptionMap() {
+      for (const selectedRecord of this.selectedRecords) {
+        const params = {
+          format: 'HTML',
+          zkzpsvId: selectedRecord.zkzpsvId
+        }
+
+        await this.downloadAccessoriesConsumptionMapFromJasperserver(params.format, params.zkzpsvId)
+      }
+    },
+
+    async downloadLocationOfLogosInOrder() {
+      for (const selectedRecord of this.selectedRecords) {
+        const params = {
+          format: 'HTML',
+          zkzpsvId: selectedRecord.zkzpsvId
+        }
+
+        await this.downloadLocationOfLogosInOrderFromJasperserver(params.format, params.zkzpsvId)
       }
     },
 

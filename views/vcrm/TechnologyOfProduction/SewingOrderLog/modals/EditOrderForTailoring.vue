@@ -78,6 +78,7 @@
 
               <v-simple-checkbox
                 v-model="kroyOnPaper"
+                :disabled="!isCanChangeRequisitesOnEditOrderForTailoring"
               />
 
               <div
@@ -101,23 +102,31 @@
           <div class="edit-order-for-tailoring-right-col">
             <div class="edit-order-for-tailoring-coefficient-for-tailoring">
               <form-control label="Коэффициент на пошив">
-                <v-text-field
-                  v-model="editedItem.coeffPoshiv"
+                <vue-numeric
+                  v-model.number="editedItem.coeffPoshiv"
                   outlined
-                  dense
-                  hide-details="auto"
+                  separator="space"
+                  :precision="1"
+                  decimal-separator="."
+                  output-type="number"
+                  :disabled="!isCanChangeRequisitesOnEditOrderForTailoring"
                 />
               </form-control>
             </div>
 
             <div class="edit-order-for-tailoring-coefficient-for-raskroy">
               <form-control label="Коэффициент на раской">
-                <v-text-field
-                  v-model="editedItem.coeffRaskroy"
-                  outlined
-                  dense
-                  hide-details="auto"
-                />
+                <div>
+                  <vue-numeric
+                    v-model.number="editedItem.coeffRaskroy"
+                    outlined
+                    separator="space"
+                    :precision="1"
+                    decimal-separator="."
+                    output-type="number"
+                    :disabled="!isCanChangeRequisitesOnEditOrderForTailoring"
+                  />
+                </div>
               </form-control>
             </div>
 
@@ -217,6 +226,7 @@ export default {
         num_zkz: '',
         kroy: 0,
         proizvRaskroy: null,
+        descr: '',
         prim: '',
         coeffPoshiv: 0,
         coeffRaskroy: 0,
@@ -292,7 +302,7 @@ export default {
     },
 
     async init() {
-      const [jsondata, vZkzpsv, raskroy, contractList] = await Promise.all([
+      const [jsondata, vZkzpsv, raskroy, contractList, kroyAndDescr] = await Promise.all([
         this.$api.service.executeStashedFunctionWithReturnedDataSet({
           'params': { 'zkzpsv_id': this.edit.zkzpsvId },
           'procName': 'dbo.zn_sel_zkzpsv'
@@ -312,6 +322,10 @@ export default {
         this.$api.service.executeStashedFunctionWithReturnedDataSet({
           'params': { 'data1': '2020-06-01', 'data2': '2020-06-30' },
           'procName': 'dbo.dog_sel_spis'
+        }),
+        this.$api.service.executeStashedFunctionWithReturnedDataSet({
+          'params': { 'priznak': '2', 'id': this.edit.zkzpsvId, 'descr': this.getCurrentUser.login },
+          'procName': 'dbo.prov_new_pf_psv'
         })
       ])
 
@@ -319,6 +333,10 @@ export default {
       this.editedItem = vZkzpsv[0]
       this.raskroylist = raskroy
       this.contractList = contractList
+      if (kroyAndDescr) {
+        this.editedItem.kroy = kroyAndDescr[0].mc_kroi
+        this.editedItem.descr = kroyAndDescr[0].name_kroi
+      }
 
       this.displaytable = true
     },

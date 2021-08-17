@@ -53,6 +53,11 @@ Vue.mixin({
     // 11 - id роли "Производство - полный доступ"
     isHaveTechnologyOfProductionRole() {
       return this.getCurrentUser.roles.includes(11)
+    },
+
+    // По идее функция должна проверять, если у пользователя привилегия "canChangeRequisitesOnEditOrderForTailoring", но пока так
+    isCanChangeRequisitesOnEditOrderForTailoring() {
+      return this.isHaveTechnologyOfProductionRole
     }
   },
   methods: {
