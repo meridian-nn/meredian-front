@@ -316,37 +316,44 @@ const createRouterConst = new Router({
       path: 'technology_of_production_menu',
       name: 'TechnologyOfProductionMenu',
       component: TechnologyOfProductionMenuPage,
-      meta: { breadcrumb: { text: 'Меню технологий производства' } },
-      children: [
-        {
-          path: 'records_of_work_by_cards',
-          name: 'RecordsOfWorkByCards',
-          component: RecordsOfWorkByCardsPage,
-          meta: {
-            breadcrumb: { text: 'Запись работы по карточкам' }
-          },
-          children: [
-            {
-              path: 'records_of_work_on_order',
-              name: 'RecordsOfWorkOnOrder',
-              component: RecordsOfWorkOnOrderPage,
-              meta: {
-                breadcrumb: { text: 'Запись работы по заказу' }
-              }
-            },
-            {
-              path: 'sewing_order_log',
-              name: 'SewingOrderLog',
-              component: SewingOrderLog,
-              meta: {
-                breadcrumb: { text: 'Журнал заказов на пошив' }
-              }
-            }
-          ]
-        }
-      ]
+      meta: { breadcrumb: { text: 'Меню технологий производства' } }
     },
 
+    {
+      path: 'sewing_order_log',
+      name: 'SewingOrderLog',
+      component: SewingOrderLog,
+      meta: {
+        breadcrumb: [
+          { text: 'Меню технологий производства', name: 'TechnologyOfProductionMenu' },
+          { text: 'Запись работы по карточкам', name: 'RecordsOfWorkByCards' },
+          { text: 'Журнал заказов на пошив' }
+        ]
+      }
+    },
+    {
+      path: 'records_of_work_by_cards',
+      name: 'RecordsOfWorkByCards',
+      component: RecordsOfWorkByCardsPage,
+      meta: {
+        breadcrumb: [
+          { text: 'Меню технологий производства', name: 'TechnologyOfProductionMenu' },
+          { text: 'Запись работы по карточкам' }
+        ]
+      }
+    },
+    {
+      path: 'records_of_work_on_order',
+      name: 'RecordsOfWorkOnOrder',
+      component: RecordsOfWorkOnOrderPage,
+      meta: {
+        breadcrumb: [
+          { text: 'Меню технологий производства', name: 'TechnologyOfProductionMenu' },
+          { text: 'Запись работы по карточкам', name: 'RecordsOfWorkByCards' },
+          { text: 'Запись работы по заказу' }
+        ]
+      }
+    },
     {
       path: 'supply_menu',
       name: 'SupplyMenu',

@@ -162,7 +162,7 @@
               field="tovar"
               label="Наименование"
               type="string"
-              width="1200px"
+              width="1250px"
             />
             <vue-excel-column
               field="colvo"

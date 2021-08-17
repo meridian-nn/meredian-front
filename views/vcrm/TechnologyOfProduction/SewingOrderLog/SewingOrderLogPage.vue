@@ -319,6 +319,12 @@
               </v-list-item-title>
             </v-list-item>
 
+            <v-list-item @click="openModal('logosOrder')">
+              <v-list-item-title>
+                Рисунки логотипов/вышивок
+              </v-list-item-title>
+            </v-list-item>
+
             <v-list-item @click="openModal('planDate')">
               <v-list-item-title>
                 Отметка о выполнении раскроя
@@ -402,6 +408,11 @@
         Красным цветом подсвечены позиции, где есть замечания базы по браку
       </div>
     </div>
+
+    <modal-logos-order
+      :value="modals.logosOrder"
+      @close="closeModal('logosOrder')"
+    />
 
     <modal-edit-tailoring
       v-if="modals.edit"
@@ -498,6 +509,7 @@ import ModalRawMaterials from './modals/RawMaterials'
 import ModalActualConsumptionRawMaterials from './modals/ActualConsumptionRawMaterials'
 import ModalOldOrderCard from './modals/OldOrderCard'
 import FillingDefectOnOrderForTailoring from './modals/FillingDefectOnOrderForTailoring'
+import ModalLogosOrder from './modals/LogosOrder'
 
 export default {
   name: 'SewingOrderLogPage',
@@ -514,6 +526,7 @@ export default {
     ModalTailoringOrder,
     ModalActualConsumptionRawMaterials,
     ModalOldOrderCard,
+    ModalLogosOrder,
     UserNotification,
     ModalRawMaterials,
     FillingDefectOnOrderForTailoring,
@@ -536,6 +549,7 @@ export default {
       currentRowOfTableForContextMenu: null,
       modals: {
         edit: false,
+        logosOrder: false,
         editAdd: false,
         confirm: false,
         print: false,

@@ -308,7 +308,7 @@ export default {
         if (route?.meta?.breadcrumb) {
           if (Array.isArray(route?.meta?.breadcrumb)) {
             const tmpArray = route.meta.breadcrumb.map((item) => {
-              return { ...item, href: item.path, disabled: i === arr.length - 1, link: false }
+              return { ...item, href: item.path, name: item.name, disabled: i === arr.length - 1, link: false }
             })
 
             crumbs.push(...tmpArray)
