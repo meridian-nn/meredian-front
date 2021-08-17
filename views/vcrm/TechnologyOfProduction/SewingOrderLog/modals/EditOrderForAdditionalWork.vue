@@ -41,11 +41,14 @@
 
           <div class="edit-order-for-additional-work-coefficient-for-tailoring">
             <form-control label="Коэффициент на пошив">
-              <v-text-field
-                v-model="editedItem.coeffPoshiv"
+              <vue-numeric
+                v-model.number="editedItem.coeffPoshiv"
                 outlined
-                dense
-                hide-details="auto"
+                separator="space"
+                :precision="1"
+                decimal-separator="."
+                output-type="number"
+                :disabled="!isCanChangeRequisitesOnEditOrderForAdditionalWork"
               />
             </form-control>
           </div>
@@ -95,16 +98,16 @@
 
         <div class="edit-order-for-additional-work-row">
           <vue-excel-editor
-            v-model="jsondata"
+            v-model="VZkzpsvDopwork"
           >
             <vue-excel-column
-              field="num_zkzvsv"
+              field="posledCode"
               label="Код"
               type="number"
               width="200px"
             />
             <vue-excel-column
-              field="tovar"
+              field="modelName"
               label="Наименование"
               type="string"
               width="1200px"
@@ -165,7 +168,7 @@ export default {
         dataRaskroyPlan: null
       },
       displaytable: false,
-      jsondata: [],
+      VZkzpsvDopwork: [],
       formOpened: this.value,
       proizvList: []
     }
@@ -211,11 +214,7 @@ export default {
     },
 
     async init() {
-      const [jsondata, vZkzpsv, proizvList] = await Promise.all([
-        this.$api.service.executeStashedFunctionWithReturnedDataSet({
-          'params': { 'zkzpsv_id': this.edit.zkzpsvId },
-          'procName': 'dbo.zn_sel_zkzpsv'
-        }),
+      const [vZkzpsv, proizvList, vZkzpsvDopwork] = await Promise.all([
         this.$api.manufacturing.getManufacturingVZkzpsv([
           {
             'dataType': 'VARCHAR',
@@ -246,11 +245,22 @@ export default {
               '296'
             ]
           }
-        ])
+        ]),
+        this.$api.manufacturing.getManufacturingvZkzpsvDopwork([{
+          'dataType': 'VARCHAR',
+          'key': 'zkzpsvId',
+          'operation': 'EQUALS',
+          'type': 'AND',
+          'values': [
+            this.edit.zkzpsvId
+          ]
+        }])
       ])
 
-      this.jsondata = jsondata
+      this.VZkzpsvDopwork = vZkzpsvDopwork
       this.editedItem = vZkzpsv[0]
+      this.editedItem.name = this.edit.nameMc
+      this.editedItem.count = this.edit.colvo
       this.proizvList = proizvList
 
       this.displaytable = true
@@ -285,7 +295,7 @@ export default {
 }
 
 .edit-order-for-additional-work-coefficient-for-tailoring {
-  padding-top: 15px;
+  padding-top: 24px;
   margin-right: 10px;
 }
 

@@ -58,6 +58,11 @@ Vue.mixin({
     // По идее функция должна проверять, если у пользователя привилегия "canChangeRequisitesOnEditOrderForTailoring", но пока так
     isCanChangeRequisitesOnEditOrderForTailoring() {
       return this.isHaveTechnologyOfProductionRole
+    },
+
+    // По идее функция должна проверять, если у пользователя привилегия "canChangeRequisitesOnEditOrderForAdditionalWork", но пока так
+    isCanChangeRequisitesOnEditOrderForAdditionalWork() {
+      return this.isHaveTechnologyOfProductionRole
     }
   },
   methods: {
