@@ -345,7 +345,7 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="openModal('planDate')">
+            <v-list-item @click="openModalPlanDate('tailoring')">
               <v-list-item-title>
                 Отметка о выполнении пошива
               </v-list-item-title>
@@ -357,7 +357,7 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="openModal('planDate')">
+            <v-list-item @click="openModalPlanDate('cutting')">
               <v-list-item-title>
                 Отметка о выполнении раскроя
               </v-list-item-title>
@@ -482,6 +482,9 @@
     />
 
     <modal-plan-date
+      v-if="modals.planDate"
+      :data-for-modal-from-context-menu="currentRowOfTableForContextMenu"
+      :data-for-modal-from-table="sewingOrderTableSelectedRecords"
       :value="modals.planDate"
       @close="closeModal('planDate')"
     />
@@ -861,6 +864,19 @@ export default {
       } else {
         this.modals.editAdd = true
       }
+    },
+
+    openModalPlanDate(type) {
+      if (this.sewingOrderTableSelectedRecords.length) {
+        for (const key in this.sewingOrderTableSelectedRecords) {
+          if (type === 'tailoring') { this.sewingOrderTableSelectedRecords[key].rejim = 1 }
+          if (type === 'cutting') { this.sewingOrderTableSelectedRecords[key].rejim = 2 }
+        }
+      } else {
+        if (type === 'tailoring') { this.currentRowOfTableForContextMenu.rejim = 1 }
+        if (type === 'cutting') { this.currentRowOfTableForContextMenu.rejim = 2 }
+      }
+      this.modals.planDate = true
     },
 
     closeModal(name) {
