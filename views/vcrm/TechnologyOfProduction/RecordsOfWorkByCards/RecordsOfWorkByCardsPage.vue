@@ -636,6 +636,7 @@ export default {
       }
 
       this.monthOfProizv = response[0]
+      this.monthOfProizv.priznak = 1
       this.chosenMonthId = this.months.find(elem => elem.id === this.monthOfProizv.monthCurr).id
       this.variablesOfForm.mesAnfb = this.monthOfProizv.monthCurr
       this.chosenYear = this.years.find(elem => elem === this.monthOfProizv.yearCurr)
@@ -669,7 +670,8 @@ export default {
         proizvId: org.proizv_id,
         firmaId: org.client_id,
         monthCurr: this.variablesOfForm.mesAnfb,
-        yearCurr: this.variablesOfForm.godAnfb
+        yearCurr: this.variablesOfForm.godAnfb,
+        priznak: 1
       }
 
       await this.initData(customParams)

@@ -351,12 +351,6 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="openModal('logosOrder')">
-              <v-list-item-title>
-                Рисунки логотипов/вышивок
-              </v-list-item-title>
-            </v-list-item>
-
             <v-list-item @click="openModal('planDate')">
               <v-list-item-title>
                 Отметка о выполнении раскроя
@@ -366,6 +360,12 @@
             <v-list-item @click="openModal('actualConsumptionRawMaterials')">
               <v-list-item-title>
                 Фактический расход сырья
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item @click="openModal('logosOrder')">
+              <v-list-item-title>
+                Рисунки логотипов/вышивок
               </v-list-item-title>
             </v-list-item>
 
