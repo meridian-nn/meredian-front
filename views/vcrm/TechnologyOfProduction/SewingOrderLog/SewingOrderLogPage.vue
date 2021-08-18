@@ -926,12 +926,34 @@ export default {
         size: 200
       }
 
-      const { content } = await this.$api.manufacturing.manufacturingRequestJournalFindPageBySearchCriteriaList(data)
+      let errorResponse = null
+      let responseData = null
 
-      if (content.length > 0) {
+      responseData = await this.$api.manufacturing.manufacturingRequestJournalFindPageBySearchCriteriaList(data).catch((err) => {
+        errorResponse = err
+      })
+
+      if (errorResponse) {
+        const filterEntityForSave = this.createFilterEntityForSave(this.getIdOfFilterSewingOrderLog(), this.$route.name, {},
+          this.getCurrentUser.id, this.getCurrentUser.id)
+        await this.$api.uiSettings.save(filterEntityForSave)
+
+        const searchCriterias = this.createCriteriasToSearchSewingOrderLogDataByPage({})
+        const data = {
+          searchCriterias,
+          page: this.page,
+          orders: this.handleSortData,
+          size: 200
+        }
+
+        responseData = await this.$api.manufacturing.manufacturingRequestJournalFindPageBySearchCriteriaList(data)
+        this.$refs.userNotification.showUserNotification('error', 'Параметры поиска были сброшены из-за ошибки введенных параметров')
+      }
+
+      if (responseData.content && responseData.content.length > 0) {
         this.page += 1
 
-        this.sewingOrderTableRecords.push(...content)
+        this.sewingOrderTableRecords.push(...responseData.content)
         $state.loaded()
       } else {
         $state.complete()
