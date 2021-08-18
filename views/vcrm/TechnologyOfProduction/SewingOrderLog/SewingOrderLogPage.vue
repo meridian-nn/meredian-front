@@ -62,6 +62,7 @@
             small
             color="red"
             v-bind="attrs"
+            :disabled="sewingOrderTableSelectedRecords.length === 0"
             @click="openModal('print')"
             v-on="on"
           >
@@ -362,7 +363,7 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="openModal('tailoringOrder')">
+            <v-list-item @click="openModal('providingOrderWithRawMaterials')">
               <v-list-item-title>
                 Обеспечение заказа сырьем
               </v-list-item-title>
@@ -374,7 +375,7 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="openModal('rawMaterials')">
+            <v-list-item @click="openModal('tailoringOrder')">
               <v-list-item-title>
                 Заказ на пошив
               </v-list-item-title>
@@ -499,7 +500,7 @@
 
     <modal-raw-materials
       :data="currentRowOfTableForContextMenu"
-      :value="modals.tailoringOrder"
+      :value="modals.rawMaterials"
       @close="closeModal('rawMaterials')"
     />
 
@@ -831,6 +832,8 @@ export default {
       if (name === 'edit' ||
         name === 'editAdd') {
         this.openEditModal()
+      } else if (name === 'providingOrderWithRawMaterials') {
+        this.$refs.userNotification.showUserNotification('warning', 'Форма в разработке')
       } else {
         this.modals[name] = true
       }
@@ -907,7 +910,11 @@ export default {
       let filtersParams
 
       if (response.length) {
-        filtersParams = JSON.parse(response[0].settingValue)
+        try {
+          filtersParams = JSON.parse(response[0].settingValue)
+        } catch (error) {
+          console.log(error)
+        }
       }
 
       // Поиск данных в таблице "manufacturing_request_journal"
