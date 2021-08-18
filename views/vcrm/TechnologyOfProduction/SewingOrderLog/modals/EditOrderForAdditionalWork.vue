@@ -155,9 +155,6 @@ export default {
   data() {
     return {
       editedItem: {
-        num_plan: '',
-        num_zkz: '',
-        kroy: 0,
         proizvId: null,
         proizvRaskroy: null,
         prim: '',

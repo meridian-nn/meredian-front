@@ -35,7 +35,7 @@
           <div class="edit-order-for-tailoring-kroy">
             <form-control label="Крой">
               <v-text-field
-                v-model="editedItem.kroy"
+                v-model="editedItem.mc_kroi"
                 outlined
                 dense
                 hide-details="auto"
@@ -47,7 +47,7 @@
 
           <div class="edit-order-for-tailoring-descr">
             <v-textarea
-              v-model="editedItem.descr"
+              v-model="editedItem.name_kroi"
               solo
             />
           </div>
@@ -78,7 +78,6 @@
 
               <v-simple-checkbox
                 v-model="kroyOnPaper"
-                :disabled="!isCanChangeRequisitesOnEditOrderForTailoring"
               />
 
               <div
@@ -171,7 +170,7 @@
               field="tovar"
               label="Наименование"
               type="string"
-              width="1200px"
+              width="1250px"
             />
             <vue-excel-column
               field="colvo"
@@ -302,10 +301,18 @@ export default {
     },
 
     async init() {
-      const [jsondata, vZkzpsv, raskroy, contractList, kroyAndDescr] = await Promise.all([
+      const [jsondata, provNewPfPsv, vZkzpsv, raskroy, contractList] = await Promise.all([
         this.$api.service.executeStashedFunctionWithReturnedDataSet({
           'params': { 'zkzpsv_id': this.edit.zkzpsvId },
           'procName': 'dbo.zn_sel_zkzpsv'
+        }),
+        this.$api.service.executeStashedFunctionWithReturnedDataSet({
+          'params': {
+            'priznak': '2',
+            'id': this.edit.zkzpsvId,
+            'descr': 'Larisa'
+          },
+          'procName': 'dbo.prov_new_pf_psv'
         }),
         this.$api.manufacturing.getManufacturingVZkzpsv([
           {
@@ -322,10 +329,6 @@ export default {
         this.$api.service.executeStashedFunctionWithReturnedDataSet({
           'params': { 'data1': '2020-06-01', 'data2': '2020-06-30' },
           'procName': 'dbo.dog_sel_spis'
-        }),
-        this.$api.service.executeStashedFunctionWithReturnedDataSet({
-          'params': { 'priznak': '2', 'id': this.edit.zkzpsvId, 'descr': this.getCurrentUser.login },
-          'procName': 'dbo.prov_new_pf_psv'
         })
       ])
 
@@ -333,11 +336,8 @@ export default {
       this.editedItem = vZkzpsv[0]
       this.raskroylist = raskroy
       this.contractList = contractList
-      if (kroyAndDescr) {
-        this.editedItem.kroy = kroyAndDescr[0].mc_kroi
-        this.editedItem.descr = kroyAndDescr[0].name_kroi
-      }
-
+      this.editedItem.mc_kroi = provNewPfPsv[0].mc_kroi
+      this.editedItem.name_kroi = provNewPfPsv[0].name_kroi
       this.displaytable = true
     },
 
