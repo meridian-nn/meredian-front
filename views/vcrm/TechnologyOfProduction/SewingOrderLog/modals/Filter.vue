@@ -18,7 +18,7 @@
             <v-col cols="6">
               <v-text-field
                 v-model="form.dateFrom"
-                :clearable="true"
+                clearable
                 type="date"
                 outlined
                 label="Период с"
@@ -30,7 +30,7 @@
             <v-col cols="6">
               <v-text-field
                 v-model="form.dateTo"
-                :clearable="true"
+                clearable
                 type="date"
                 outlined
                 label="Период заканчивая"
@@ -54,7 +54,7 @@
               <v-text-field
                 v-model="form.depOfIsp"
                 label="Отдел исполнителя"
-                :clearable="true"
+                clearable
                 disabled
                 outlined
                 hide-details="auto"
@@ -79,6 +79,7 @@
               <v-text-field
                 v-model="form.planData"
                 label="Фабрика"
+                type="date"
                 clearable
                 outlined
                 hide-details="auto"
@@ -196,6 +197,7 @@ export default {
 
     async saveFilters() {
       try {
+        this.prepareFiltersValuesForSave()
         const filterEntityForSave = this.createFilterEntityForSave(this.getIdOfFilterSewingOrderLog(), this.$route.name, this.form,
           this.getCurrentUser.id, this.getCurrentUser.id)
 
@@ -205,6 +207,15 @@ export default {
         this.$emit('close')
       } catch (e) {
         this.$emit('close')
+      }
+    },
+
+    prepareFiltersValuesForSave() {
+      for (const keyOfFilter in this.form) {
+        const filterValue = this.form[keyOfFilter]
+        if (typeof filterValue === 'string') {
+          this.form[keyOfFilter] = filterValue.trim()
+        }
       }
     }
   }

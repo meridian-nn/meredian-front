@@ -40,6 +40,14 @@ Vue.mixin({
         params.god_1 = paramsForRequest.yearCurr
         params.firma_id_1 = paramsForRequest.firmaId
 
+        if (paramsForRequest.cehId) {
+          params.ceh_id_1 = paramsForRequest.cehId
+        }
+
+        if (paramsForRequest.prUpak || paramsForRequest.prUpak === 0) {
+          params.pr_upak_1 = paramsForRequest.prUpak
+        }
+
         if (paramsForRequest.zkzpsvId) {
           params.zkzpsv_id_1 = paramsForRequest.zkzpsvId
         }

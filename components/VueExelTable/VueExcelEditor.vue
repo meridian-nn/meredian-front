@@ -2904,6 +2904,7 @@ input:focus, input:active:focus, input.active:focus {
 }
 .table-content {
   flex: 1 1 auto;
+  table-layout: fixed;
   font-size: 1rem;
   text-shadow: 0.3px 0.3px 1px #ccc;
   overflow: scroll;

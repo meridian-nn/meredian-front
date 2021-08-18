@@ -165,6 +165,10 @@ Vue.mixin({
       await this.$api.payment.balanceOfPaymentAccount.saveAll(arrayOfPaymentAccountsForSave)
     },
 
+    isDateValue(value) {
+      return new Date(value) !== 'Invalid Date'
+    },
+
     getConfigForDeleteMethods() {
       return {
         headers: {

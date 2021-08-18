@@ -62,6 +62,7 @@
             small
             color="red"
             v-bind="attrs"
+            :disabled="sewingOrderTableSelectedRecords.length === 0"
             @click="openModal('print')"
             v-on="on"
           >
@@ -198,8 +199,16 @@
                 <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.dataZkzpsv }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
-                  {{ item.nameProizv }}
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract sewing-order-log-page-records-table-cell-truncate' : 'sewing-order-log-page-records-table-cell-truncate'">
+                  <v-tooltip bottom>
+                    <template #activator="{ on, attrs }">
+                      <span
+                        v-bind="attrs"
+                        v-on="on"
+                      >{{ item.nameProizv }}</span>
+                    </template>
+                    <span>{{ item.nameProizv }}</span>
+                  </v-tooltip>
                 </td>
                 <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.mcId }}
@@ -342,6 +351,12 @@
               </v-list-item-title>
             </v-list-item>
 
+            <v-list-item @click="openModal('logosOrder')">
+              <v-list-item-title>
+                Рисунки логотипов/вышивок
+              </v-list-item-title>
+            </v-list-item>
+
             <v-list-item @click="openModal('planDate')">
               <v-list-item-title>
                 Отметка о выполнении раскроя
@@ -354,7 +369,7 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="openModal('tailoringOrder')">
+            <v-list-item @click="openModal('providingOrderWithRawMaterials')">
               <v-list-item-title>
                 Обеспечение заказа сырьем
               </v-list-item-title>
@@ -366,7 +381,7 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="openModal('rawMaterials')">
+            <v-list-item @click="openModal('tailoringOrder')">
               <v-list-item-title>
                 Заказ на пошив
               </v-list-item-title>
@@ -425,6 +440,11 @@
         Красным цветом подсвечены позиции, где есть замечания базы по браку
       </div>
     </div>
+
+    <modal-logos-order
+      :value="modals.logosOrder"
+      @close="closeModal('logosOrder')"
+    />
 
     <modal-edit-tailoring
       v-if="modals.edit"
@@ -491,7 +511,7 @@
 
     <modal-raw-materials
       :data="currentRowOfTableForContextMenu"
-      :value="modals.tailoringOrder"
+      :value="modals.rawMaterials"
       @close="closeModal('rawMaterials')"
     />
 
@@ -530,6 +550,7 @@ import ModalRawMaterials from './modals/RawMaterials'
 import ModalActualConsumptionRawMaterials from './modals/ActualConsumptionRawMaterials'
 import ModalOldOrderCard from './modals/OldOrderCard'
 import FillingDefectOnOrderForTailoring from './modals/FillingDefectOnOrderForTailoring'
+import ModalLogosOrder from './modals/LogosOrder'
 
 export default {
   name: 'SewingOrderLogPage',
@@ -546,6 +567,7 @@ export default {
     ModalTailoringOrder,
     ModalActualConsumptionRawMaterials,
     ModalOldOrderCard,
+    ModalLogosOrder,
     UserNotification,
     ModalRawMaterials,
     FillingDefectOnOrderForTailoring,
@@ -569,6 +591,7 @@ export default {
       currentRowOfTableForContextMenu: null,
       modals: {
         edit: false,
+        logosOrder: false,
         editAdd: false,
         confirm: false,
         print: false,
@@ -630,7 +653,6 @@ export default {
           text: 'Наименование МЦ',
           value: 'nameMc',
           width: '200px',
-          cellClass: 'sewing-order-log-page-records-table-cell-truncate',
           sortable: false
         },
         {
@@ -661,7 +683,6 @@ export default {
           text: 'Раскрой',
           value: 'nameRaskroy',
           width: '130px',
-          cellClass: 'sewing-order-log-page-records-table-cell-truncate',
           sort: () => false
         },
         {
@@ -698,14 +719,12 @@ export default {
           text: 'ГОСТ/ТУ',
           value: 'gostTu',
           width: '150px',
-          cellClass: 'sewing-order-log-page-records-table-cell-truncate',
           sort: () => false
         },
         {
           text: 'Код ЗП',
           value: 'codGra',
           width: '150px',
-          cellClass: 'sewing-order-log-page-records-table-cell-truncate',
           sort: () => false
         },
         {
@@ -827,6 +846,8 @@ export default {
       if (name === 'edit' ||
         name === 'editAdd') {
         this.openEditModal()
+      } else if (name === 'providingOrderWithRawMaterials') {
+        this.$refs.userNotification.showUserNotification('warning', 'Форма в разработке')
       } else {
         this.modals[name] = true
       }
@@ -835,7 +856,7 @@ export default {
     openEditModal() {
       const editingRecord = this.sewingOrderTableSelectedRecords[0]
 
-      if (editingRecord.dopWork === 0) {
+      if (editingRecord.dopWork !== 0) {
         this.modals.edit = true
       } else {
         this.modals.editAdd = true
@@ -878,10 +899,6 @@ export default {
       this.keyLoading = Math.random()
     },
 
-    /* typeOrder(item) {
-      return item.gosKontrakt ? 'red' : 'blue'
-    }, */
-
     // Обновление таблицы "Заказы на пошив"
     updateSewingOrderTableRecords() {
       this.page = 0
@@ -903,7 +920,11 @@ export default {
       let filtersParams
 
       if (response.length) {
-        filtersParams = JSON.parse(response[0].settingValue)
+        try {
+          filtersParams = JSON.parse(response[0].settingValue)
+        } catch (error) {
+          console.log(error)
+        }
       }
 
       // Поиск данных в таблице "manufacturing_request_journal"
@@ -915,12 +936,34 @@ export default {
         size: 200
       }
 
-      const { content } = await this.$api.manufacturing.manufacturingRequestJournalFindPageBySearchCriteriaList(data)
+      let errorResponse = null
+      let responseData = null
 
-      if (content.length > 0) {
+      responseData = await this.$api.manufacturing.manufacturingRequestJournalFindPageBySearchCriteriaList(data).catch((err) => {
+        errorResponse = err
+      })
+
+      if (errorResponse) {
+        const filterEntityForSave = this.createFilterEntityForSave(this.getIdOfFilterSewingOrderLog(), this.$route.name, {},
+          this.getCurrentUser.id, this.getCurrentUser.id)
+        await this.$api.uiSettings.save(filterEntityForSave)
+
+        const searchCriterias = this.createCriteriasToSearchSewingOrderLogDataByPage({})
+        const data = {
+          searchCriterias,
+          page: this.page,
+          orders: this.handleSortData,
+          size: 200
+        }
+
+        responseData = await this.$api.manufacturing.manufacturingRequestJournalFindPageBySearchCriteriaList(data)
+        this.$refs.userNotification.showUserNotification('error', 'Параметры поиска были сброшены из-за ошибки введенных параметров')
+      }
+
+      if (responseData.content && responseData.content.length > 0) {
         this.page += 1
 
-        this.sewingOrderTableRecords.push(...content)
+        this.sewingOrderTableRecords.push(...responseData.content)
         $state.loaded()
       } else {
         $state.complete()

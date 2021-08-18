@@ -1387,6 +1387,10 @@ Vue.mixin({
 
                 const dataType = this.getDataTypeForSearchCriteria(elemParam)
 
+                if(dataType === 'DATE') {
+                  elemParam = new Date(elemParam).toLocaleDateString()
+                }
+
                 const operation = this.getOperationTypeForSearchCriteria(key, customOperations)
 
                 const dataElem = {
@@ -1403,7 +1407,13 @@ Vue.mixin({
         },
 
         getDataTypeForSearchCriteria(elemParam) {
-            return typeof elemParam === 'number' ? 'INTEGER' : 'VARCHAR'
+          if (typeof elemParam === 'number') {
+            return 'INTEGER'
+          } else if (this.isDateValue(elemParam)) {
+            return 'DATE'
+          } else {
+            return 'VARCHAR'
+          }
         },
 
         getOperationTypeForSearchCriteria(key, customOperations) {
