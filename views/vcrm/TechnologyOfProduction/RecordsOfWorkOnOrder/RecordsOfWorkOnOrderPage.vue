@@ -286,7 +286,7 @@
               hide-default-footer
               no-data-text=""
               class="elevation-1"
-              @click:row="getDressMakersDataTable"
+              @click:row="selectOrgOperationEvent"
             />
           </div>
 
@@ -319,6 +319,7 @@
             :single-select="false"
             disable-pagination
             hide-default-footer
+            no-data-text=""
             class="elevation-1"
           />
         </div>
@@ -497,19 +498,19 @@ export default {
       operationsSumsHeaders: [
         {
           text: 'Операция',
-          value: 'operation'
+          value: 'codOp'
         },
         {
           text: 'Кол-во',
-          value: 'count'
+          value: 'colvoOp'
         },
         {
           text: 'Всего',
-          value: 'amount'
+          value: 'colvoOpMes'
         },
         {
           text: 'Остаток',
-          value: 'balance'
+          value: 'colvoOst'
         }
       ],
 
@@ -664,20 +665,14 @@ export default {
       this.orgOperationsData = await this.$api.manufacturing.findOrgOperationsBySearchCriterias(criterias)
     },
 
-    async selectOrgOperationEvent(selectedRow) {
-      /* await this.initOperationsSumsData(selectedRow.orgOperId)
-      await this.updateOperationsSumsData() */
-    },
-
-    async initOperationsSumsData(orgOperId) {
+    async initOperationsSumsData(item) {
       const paramsForRequest = {
-        proizvId: this.varsOfForm.proizvAnfb,
-        monthCurr: this.varsOfForm.mesAnfb,
-        yearCurr: this.varsOfForm.godAnfb,
-        firmaId: this.varsOfForm.orgAnfb,
-        priznak: 7,
-        tmkId: this.orderFromRecordsOfWorkByCards.tmkId1,
-        orgOperId
+        ...this.chosenRecord,
+        ...item,
+        ...this.varsOfForm,
+        ...this.orderFromRecordsOfWorkByCards,
+        ...this.selectedSeparationSchemeObj,
+        ...{ priznak: 3, yearCurr: this.varsOfForm.godAnfb, monthCurr: this.varsOfForm.mesAnfb, proizvId: this.varsOfForm.proizvAnfb }
       }
       const params = this.createStructureForManufacturingInitDataProcedure(paramsForRequest)
       await this.$api.service.executeStashedFunction(params).catch((error) => {
@@ -746,6 +741,8 @@ export default {
       this.selectedSeparationSchemeObj = this.separationScheme.find(separationScheme => separationScheme.id === this.chosenSeparationScheme)
       await this.initOrgOperationData(this.selectedSeparationSchemeObj)
       await this.updateOrgOperationsData()
+      this.operationsSumsData = []
+      this.dressmakersData = []
     },
 
     reset() {
@@ -786,6 +783,12 @@ export default {
       if (content.length > 0) {
         this.listOfDressmakersData.push(...content)
       }
+    },
+
+    async selectOrgOperationEvent(selectedRow) {
+      await this.getDressMakersDataTable(selectedRow)
+      await this.initOperationsSumsData(selectedRow)
+      await this.updateOperationsSumsData()
     },
 
     async initDataMakers(item) {
