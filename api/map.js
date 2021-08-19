@@ -781,6 +781,18 @@ export const factory = send => ({
         getProcedureNameForProcedureExecutionClearTempTable() {
           return 'dbo.del_temp_form'
         },
+        getProcedureNameForProcedureExecutionClearTempTableForNewСonsolidatedOrder() {
+          return 'dbo.del_temp_prn'
+        },
+        getProcedureNameForProcedureExecutionCreateСonsolidatedOrderTempTable() {
+          return 'dbo.ins_temp_prn'
+        },
+        getProcedureNameForProcedureExecutionLoadTableForNewСonsolidatedOrder() { 
+          return 'dbo.ins_zakaz_svod'
+        },
+        getProcedureNameForProcedureExecutionLoadTableForEditСonsolidatedOrder() {
+          return 'dbo.update_zakaz_svod'
+        },
 
         recordingTheWorkOnTheOrder: {
           findBySearchCriteriaForListOfDressmaker(params) {
