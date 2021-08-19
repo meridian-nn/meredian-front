@@ -766,6 +766,34 @@ export const factory = send => ({
           return 'dbo.ins_zkzrz_spplnrz'
         },
 
+        getProcedureNameForProcedureExecutionBeforeSaveDateTailoring() {
+          return 'dbo.ins_temp_form'
+        },
+
+        getProcedureNameForProcedureExecutionSaveDateTailoring() {
+          return 'dbo.update_zkzpsv_fact_data'
+        },
+
+        getProcedureNameForProcedureExecutionInitDataOnPrint() {
+          return 'dbo.print_zkzpsv'
+        },
+        
+        getProcedureNameForProcedureExecutionClearTempTable() {
+          return 'dbo.del_temp_form'
+        },
+        getProcedureNameForProcedureExecutionClearTempTableForNewСonsolidatedOrder() {
+          return 'dbo.del_temp_prn'
+        },
+        getProcedureNameForProcedureExecutionCreateСonsolidatedOrderTempTable() {
+          return 'dbo.ins_temp_prn'
+        },
+        getProcedureNameForProcedureExecutionLoadTableForNewСonsolidatedOrder() { 
+          return 'dbo.ins_zakaz_svod'
+        },
+        getProcedureNameForProcedureExecutionLoadTableForEditСonsolidatedOrder() {
+          return 'dbo.update_zakaz_svod'
+        },
+
         recordingTheWorkOnTheOrder: {
           findBySearchCriteriaForListOfDressmaker(params) {
             return send('POST', '/oper/manufacturing/seamstressesChoice/findBySearchCriteria', params)

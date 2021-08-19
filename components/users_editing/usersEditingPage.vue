@@ -251,8 +251,10 @@ export default {
       if (response.length) {
         filtersParams = JSON.parse(response[0].settingValue)
         this.selectedOrganization = filtersParams.orgId
-        this.selectedAccount = filtersParams.accId
-        await this.findPaymentAccounts(this.selectedOrganization)
+        if (this.selectedOrganization) {
+          await this.findPaymentAccounts(this.selectedOrganization)
+          this.selectedAccount = filtersParams.accId
+        }
       }
     },
 
