@@ -80,21 +80,34 @@ Vue.mixin({
       return params
     },
 
-    createStructureForTechTmkUpdData(chosenRecord, variablesOfForm) {
+    createStructureForTechTmkUpdData(chosenRecord, variablesOfForm, selectedOrgOperation) {
       if (!chosenRecord ||
         !variablesOfForm) {
         return false
       }
 
       return {
-        params: this.createParamsForTechTmkUpdData(chosenRecord, variablesOfForm),
+        params: this.createParamsForTechTmkUpdData(chosenRecord, variablesOfForm, selectedOrgOperation),
         procName: this.$api.manufacturing.getTechTmkUpdDataProcedureName()
       }
     },
 
-    createParamsForTechTmkUpdData(chosenRecord, variablesOfForm) {
+    createParamsForTechTmkUpdData(chosenRecord, variablesOfForm, selectedOrgOperation) {
+      let prUpak = 0
+      let obraz = 0
+      let coeffPart = 0
+
+      if (variablesOfForm.priznak1) {
+        if (variablesOfForm.priznak1 === 8) {
+          prUpak = selectedOrgOperation && selectedOrgOperation.prUpak ? selectedOrgOperation.prUpak : 0
+        }
+
+        obraz = variablesOfForm.obraz ? variablesOfForm.obraz : 0
+        coeffPart = variablesOfForm.coefficient ? variablesOfForm.coefficient : 0
+      }
+
       return {
-        priznak1: '1',
+        priznak1: variablesOfForm.priznak1 ? variablesOfForm.priznak1 : '1',
         proizv_id1: variablesOfForm.proizvAnfb,
         firma_id1: variablesOfForm.orgAnfb,
         mes1: variablesOfForm.mesAnfb,
@@ -113,13 +126,13 @@ Vue.mixin({
         data_work1: '01.01.1900',
         cod_op1: '',
         colvo_zkzpsv1: chosenRecord.colvoMc,
-        pr_upak1: 0,
-        obraz1: 0,
-        coeff_part1: 0,
+        pr_upak1: prUpak,
+        obraz1: obraz,
+        coeff_part1: coeffPart,
         mc_zkzpsv1: chosenRecord.mcId,
-        zar_sch_cards_id1: 0,
-        scheme_cards_id1: 0,
-        scheme_id1: 0,
+        zar_sch_cards_id1: chosenRecord.zarSchCardsId ? chosenRecord.zarSchCardsId : 0,
+        scheme_cards_id1: chosenRecord.schemeCardsId ? chosenRecord.schemeCardsId : 0,
+        scheme_id1: chosenRecord.schemeId ? chosenRecord.schemeId : 0,
         pr_otladka1: 0
       }
     },

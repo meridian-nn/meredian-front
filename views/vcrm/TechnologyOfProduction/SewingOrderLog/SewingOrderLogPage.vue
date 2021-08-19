@@ -856,7 +856,7 @@ export default {
     openEditModal() {
       const editingRecord = this.sewingOrderTableSelectedRecords[0]
 
-      if (editingRecord.dopWork !== 0) {
+      if (editingRecord.dopWork === 0) {
         this.modals.edit = true
       } else {
         this.modals.editAdd = true
