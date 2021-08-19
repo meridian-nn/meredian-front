@@ -47,6 +47,7 @@ export default {
         '~/plugins/global-variables',
         '~/plugins/system-methods',
         '~/plugins/user-access',
+        '~/plugins/toastification',
         { src: '~/plugins/api', mode: 'client' },
         { src: '~/plugins/format-date' },
         { src: '~plugins/vue-tables-2.js', ssr: false },

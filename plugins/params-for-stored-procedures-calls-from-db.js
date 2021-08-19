@@ -225,7 +225,7 @@ Vue.mixin({
     createParamsForSewingOrderLogPageInitDataProcedure() {
       return {
         data1: '2021-06-01',
-        data2: '2021-06-30',
+        data2: new Date().toISOString().slice(0, 10),
         my_descr: 'Larisa',
         user_id: this.getCurrentUser.id
       }
@@ -397,6 +397,141 @@ Vue.mixin({
       return {
         params: { zkzpsv_id: params },
         procName: this.$api.manufacturing.getUpdateTableInViewOrderBySizeProcedureName()
+      }
+    },
+
+    createStructureForProcedureExecutionBeforeSaveDateTailoring(params) {
+      return {
+        params: this.createParamsForProcedureExecutionBeforeSaveDateTailoring(params),
+        procName: this.$api.manufacturing.getProcedureNameForProcedureExecutionBeforeSaveDateTailoring()
+      }
+    },
+    createParamsForProcedureExecutionBeforeSaveDateTailoring(params) {
+      return {
+        descr: this.getCurrentUser.login,
+        viddoc: '910',
+        doc_id: params,
+        docrz_id: 0
+      }
+    },
+
+    createStructureForSaveDateTailoring(params) {
+      return {
+        params: this.createParamsForProcedureExecutionSaveDateTailoring(params),
+        procName: this.$api.manufacturing.getProcedureNameForProcedureExecutionSaveDateTailoring()
+      }
+    },
+    createParamsForProcedureExecutionSaveDateTailoring(params) {
+      return {
+        zkzpsv_id: 0,
+        data_zkzpsv: new Date(params.date).toLocaleString().slice(0, 10) + ' 12:00:00AM',
+        pr_or: 0,
+        descr: this.getCurrentUser.login,
+        rejim: params.rejim
+      }
+    },
+
+    createStructureForInitDataOnPrint(params) {
+      return {
+        params: this.createParamsForProcedureExecutionInitDataOnPrint(params),
+        procName: this.$api.manufacturing.getProcedureNameForProcedureExecutionInitDataOnPrint()
+      }
+    },
+    createParamsForProcedureExecutionInitDataOnPrint(params) {
+      return {
+        viddoc: 910,
+        tip: params,
+        descr: this.getCurrentUser.login
+      }
+    },
+    createStructureForClearTempTable() {
+      return {
+        params: this.createParamsForClearTempTable(),
+        procName: this.$api.manufacturing.getProcedureNameForProcedureExecutionClearTempTable()
+      }
+    },
+    createParamsForClearTempTable() {
+      return {
+        viddoc: 910,
+        descr: this.getCurrentUser.login
+      }
+    },
+    createStructureForClearTempTableForСonsolidatedOrder() {
+      return {
+        params: this.createParamsForClearTempTableForNewСonsolidatedOrder(),
+        procName: this.$api.manufacturing.getProcedureNameForProcedureExecutionClearTempTableForNewСonsolidatedOrder()
+      }
+    },
+    createParamsForClearTempTableForNewСonsolidatedOrder() {
+      return {
+        descr: this.getCurrentUser.login,
+        viddoc: 1
+      }
+    },
+
+    createStructureForCreateСonsolidatedOrderTempTable(params) {
+      return {
+        params: this.createParamsForCreateСonsolidatedOrderTempTable(params),
+        procName: this.$api.manufacturing.getProcedureNameForProcedureExecutionCreateСonsolidatedOrderTempTable()
+      }
+    },
+    createParamsForCreateСonsolidatedOrderTempTable(params) {
+      return {
+        descr: this.getCurrentUser.login,
+        viddoc: 910,
+        doc_id: params
+      }
+    },
+
+    createStructureForLoadTableForNewСonsolidatedOrder() {
+      return {
+        params: this.createParamsForLoadTableForNewСonsolidatedOrder(),
+        procName: this.$api.manufacturing.getProcedureNameForProcedureExecutionLoadTableForNewСonsolidatedOrder()
+      }
+    },
+    createParamsForLoadTableForNewСonsolidatedOrder() {
+      return {
+        descr: this.getCurrentUser.login,
+        priznak: 1
+      }
+    },
+
+    createStructureForClearTempTableForEditСonsolidatedOrder() {
+      return {
+        params: this.createParamsForClearTableForEditСonsolidatedOrder(),
+        procName: this.$api.manufacturing.getProcedureNameForProcedureExecutionClearTempTableForNewСonsolidatedOrder()
+      }
+    },
+    createParamsForClearTableForEditСonsolidatedOrder() {
+      return {
+        descr: this.getCurrentUser.login,
+        viddoc: 910
+      }
+    },
+
+    createStructureForCreateTempTableForEditСonsolidatedOrder(params) {
+      return {
+        params: this.createParamsForCreateTempTableForEditСonsolidatedOrder(params),
+        procName: this.$api.manufacturing.getProcedureNameForProcedureExecutionCreateСonsolidatedOrderTempTable()
+      }
+    },
+    createParamsForCreateTempTableForEditСonsolidatedOrder(params) {
+      return {
+        descr: this.getCurrentUser.login,
+        viddoc: 910,
+        doc_id: params
+      }
+    },
+    createStructureForLoadTableForEditСonsolidatedOrder(params) {
+      return {
+        params: this.createParamsForLoadTableForEditСonsolidatedOrder(params),
+        procName: this.$api.manufacturing.getProcedureNameForProcedureExecutionLoadTableForEditСonsolidatedOrder()
+      }
+    },
+    createParamsForLoadTableForEditСonsolidatedOrder(params) {
+      return {
+        descr: this.getCurrentUser.login,
+        parent_id: params
       }
     }
   }
