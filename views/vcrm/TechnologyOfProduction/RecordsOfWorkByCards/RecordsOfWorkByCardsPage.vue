@@ -636,6 +636,7 @@ export default {
       }
 
       this.monthOfProizv = response[0]
+      this.monthOfProizv.priznak = 1
       this.chosenMonthId = this.months.find(elem => elem.id === this.monthOfProizv.monthCurr).id
       this.variablesOfForm.mesAnfb = this.monthOfProizv.monthCurr
       this.chosenYear = this.years.find(elem => elem === this.monthOfProizv.yearCurr)
@@ -663,13 +664,15 @@ export default {
       }
 
       this.variablesOfForm.orgAnfb = org.client_id
+      this.variablesOfForm.orgName = org.name_podr
       this.variablesOfForm.proizvAnfb = org.proizv_id
 
       const customParams = {
         proizvId: org.proizv_id,
         firmaId: org.client_id,
         monthCurr: this.variablesOfForm.mesAnfb,
-        yearCurr: this.variablesOfForm.godAnfb
+        yearCurr: this.variablesOfForm.godAnfb,
+        priznak: 1
       }
 
       await this.initData(customParams)
@@ -730,7 +733,7 @@ export default {
       }
 
       if (this.orderForRecordsOfWorkOnOrder.tmkId1 > 0) {
-        this.$refs.recordsOfWorkOnOrder.openWithObject(this.orderForRecordsOfWorkOnOrder, this.variablesOfForm, currentRecord)
+        await this.$refs.recordsOfWorkOnOrder.openWithObject(this.orderForRecordsOfWorkOnOrder, this.variablesOfForm, currentRecord)
       } else {
         this.$refs.userNotification.showUserNotification('success', 'Выбранная запись не подходит по условиям!')
       }

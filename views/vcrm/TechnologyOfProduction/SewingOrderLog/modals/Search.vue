@@ -82,7 +82,6 @@
       <v-card-actions>
         <v-container>
           <v-btn
-            :disabled="form.dateFrom > form.dateTo"
             @click="saveFilters"
           >
             Поиск
@@ -142,6 +141,7 @@ export default {
 
     async saveFilters() {
       try {
+        this.prepareFiltersValuesForSave()
         const filterEntityForSave = this.createFilterEntityForSave(this.getIdOfFilterSewingOrderLog(), this.$route.name, this.form,
           this.getCurrentUser.id, this.getCurrentUser.id)
 
@@ -151,6 +151,14 @@ export default {
         this.$emit('close')
       } catch (e) {
         this.$emit('close')
+      }
+    },
+    prepareFiltersValuesForSave() {
+      for (const keyOfFilter in this.form) {
+        const filterValue = this.form[keyOfFilter]
+        if (typeof filterValue === 'string') {
+          this.form[keyOfFilter] = filterValue.trim()
+        }
       }
     }
   }

@@ -11,7 +11,29 @@
   >
     <v-card>
       <v-card-title>
-        Запись работы по заказу
+        <div class="records-of-work-on-order-row">
+          Запись работы по заказу
+
+          <v-tooltip bottom>
+            <template #activator="{ on, attrs }">
+              <v-btn
+                style="margin-left: 7px"
+                color="blue"
+                fab
+                dark
+                x-small
+                v-bind="attrs"
+                v-on="on"
+                @click="updateRecordsOfWorkOnOrder()"
+              >
+                <v-icon>
+                  mdi-reload
+                </v-icon>
+              </v-btn>
+            </template>
+            <span>Обновить данные</span>
+          </v-tooltip>
+        </div>
       </v-card-title>
 
       <div class="records-of-work-on-order-row">
@@ -114,24 +136,43 @@
               </v-subheader>
             </div>
 
-            <div class="records-of-work-on-order-coefficient-input">
-              <v-text-field
-                v-model.number="chosenRecord.coeff"
-                readonly
-                hide-details="auto"
-              />
-            </div>
+            <v-tooltip bottom>
+              <template #activator="{ on, attrs }">
+                <div
+                  class="records-of-work-on-order-coefficient-input"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <div class="records-of-work-on-order-coefficient-brise-input">
+                    <vue-numeric
+                      v-model.number="coefficient"
+                      separator="space"
+                      :precision="2"
+                      decimal-separator="."
+                      output-type="number"
+                      @change="coefficientChange"
+                    />
+                    <span class="line" />
+                  </div>
+                </div>
+              </template>
+              <span>Изменить во всех операциях у выбранной швеи</span>
+            </v-tooltip>
           </div>
 
           <div class="records-of-work-on-order-btn-row">
             <div class="records-of-work-on-order-btn">
-              <v-btn>
+              <v-btn
+                @click="createCards"
+              >
                 Сформировать карточки
               </v-btn>
             </div>
 
             <div class="records-of-work-on-order-btn">
-              <v-btn>
+              <v-btn
+                @click="deleteCards"
+              >
                 Удалить карточки
               </v-btn>
             </div>
@@ -148,7 +189,7 @@
 
             <div class="records-of-work-on-order-indentation-for-inputs">
               <v-text-field
-                v-model.number="chosenRecord.coeff"
+                v-model.number="chosenRecord.mcId"
                 readonly
                 hide-details="auto"
                 outlined
@@ -156,26 +197,43 @@
             </div>
 
             <div class="records-of-work-on-order-descr-of-production-input">
-              <v-text-field
-                v-model.number="chosenRecord.nameMc"
-                readonly
-                hide-details="auto"
-                outlined
-              />
+              <v-tooltip bottom>
+                <template #activator="{ on, attrs }">
+                  <v-text-field
+                    v-model.number="chosenRecord.nameMc"
+                    readonly
+                    hide-details="auto"
+                    outlined
+                    v-bind="attrs"
+                    v-on="on"
+                  />
+                </template>
+                <span>{{ chosenRecord.nameMc }}</span>
+              </v-tooltip>
             </div>
           </div>
 
           <div class="records-of-work-on-order-row">
-            <v-simple-checkbox
-              v-model="example"
-            />
+            <v-tooltip bottom>
+              <template #activator="{ on, attrs }">
+                <v-simple-checkbox
+                  v-model="example"
+                  v-bind="attrs"
+                  @change="exampleChange"
+                  v-on="on"
+                />
 
-            <v-subheader
-              class="font-weight-medium text-subtitle-1"
-              style="margin-top: 10px"
-            >
-              Образец
-            </v-subheader>
+                <v-subheader
+                  v-bind="attrs"
+                  class="font-weight-medium text-subtitle-1"
+                  style="margin-top: 10px"
+                  v-on="on"
+                >
+                  Образец
+                </v-subheader>
+              </template>
+              <span>Изменить во всех операциях у выбранной швеи</span>
+            </v-tooltip>
 
             <v-subheader
               class="font-weight-medium text-subtitle-1"
@@ -201,15 +259,44 @@
               </v-subheader>
             </div>
 
-            <div
-              class="records-of-work-on-order-amount-of-change-input"
-            >
-              <v-text-field
-                v-model.number="amountOfChange"
-                hide-details="auto"
-                outlined
-              />
-            </div>
+            <v-tooltip bottom>
+              <template #activator="{ on, attrs }">
+                <div
+                  class="records-of-work-on-order-amount-of-change-input"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-text-field
+                    v-model.number="amountOfChange"
+                    hide-details="auto"
+                    outlined
+                  />
+                </div>
+              </template>
+              <span>Изменить во всех операциях у выбранной швеи</span>
+            </v-tooltip>
+          </div>
+
+          <div class="records-of-work-on-order-row">
+            <v-tooltip bottom>
+              <template #activator="{ on, attrs }">
+                <v-btn
+                  style="margin-left: 7px"
+                  color="blue"
+                  fab
+                  dark
+                  x-small
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="deleteFio()"
+                >
+                  <v-icon>
+                    mdi-close-octagon
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Удалить ФИО</span>
+            </v-tooltip>
           </div>
         </div>
 
@@ -231,12 +318,19 @@
             </div>
 
             <div class="records-of-work-on-order-tpname-input">
-              <v-text-field
-                v-model.number="chosenRecord.modelName"
-                readonly
-                hide-details="auto"
-                outlined
-              />
+              <v-tooltip bottom>
+                <template #activator="{ on, attrs }">
+                  <v-text-field
+                    v-model.number="chosenRecord.modelName"
+                    readonly
+                    hide-details="auto"
+                    outlined
+                    v-bind="attrs"
+                    v-on="on"
+                  />
+                </template>
+                <span>{{ chosenRecord.modelName }}</span>
+              </v-tooltip>
             </div>
           </div>
 
@@ -276,17 +370,18 @@
           >
             <v-data-table
               id="records-of-work-on-order-org-operations"
+              v-model="selectedOrgOperations"
               height="400"
               :headers="orgOperationsHeaders"
               fixed-header
               :items="orgOperationsData"
               :show-select="false"
-              :single-select="false"
+              :single-select="true"
               disable-pagination
               hide-default-footer
               no-data-text=""
               class="elevation-1"
-              @click:row="getDressMakersDataTable"
+              @click:row="selectOrgOperationEvent"
             />
           </div>
 
@@ -314,11 +409,11 @@
             :headers="dressmakersHeaders"
             fixed-header
             :items="dressmakersData"
-            :item-key="'id' + 'codOp'"
-            :show-select="false"
-            :single-select="false"
+            show-select
+            :single-select="true"
             disable-pagination
             hide-default-footer
+            no-data-text=""
             class="elevation-1"
           />
         </div>
@@ -328,21 +423,6 @@
             <div class="records-of-work-on-order-list-of-dressmakers-headers-spacer" />
             <div class="records-of-work-on-order-list-of-dressmakers-headers">
               <div class="records-of-work-on-order-row">
-                <div
-                  style="margin-top:5px"
-                >
-                  <v-btn
-                    color="blue"
-                    class="mx-2"
-                    fab
-                    dark
-                    x-small
-                  >
-                    <v-icon dark>
-                      mdi-minus
-                    </v-icon>
-                  </v-btn>
-                </div>
                 <v-subheader
                   class="font-weight-medium text-subtitle-1"
                 >
@@ -370,7 +450,7 @@
                 :headers="listOfDressmakersHeaders"
                 fixed-header
                 :items="listOfDressmakersData"
-                :show-select="false"
+                show-select
                 :single-select="false"
                 disable-pagination
                 hide-default-footer
@@ -461,8 +541,6 @@ export default {
 
       countOfProductions: 0,
 
-      coefficient: 0,
-
       TPid: null,
 
       TPname: '',
@@ -476,6 +554,8 @@ export default {
       descrOfProduction: null,
 
       example: false,
+
+      coefficient: 0,
 
       dateOfOperation: new Date().toISOString().substr(0, 10),
 
@@ -492,24 +572,26 @@ export default {
         }
       ],
 
+      selectedOrgOperations: [],
+
       orgOperationsData: [],
 
       operationsSumsHeaders: [
         {
           text: 'Операция',
-          value: 'operation'
+          value: 'codOp'
         },
         {
           text: 'Кол-во',
-          value: 'count'
+          value: 'colvoOp'
         },
         {
           text: 'Всего',
-          value: 'amount'
+          value: 'colvoOpMes'
         },
         {
           text: 'Остаток',
-          value: 'balance'
+          value: 'colvoOst'
         }
       ],
 
@@ -604,11 +686,117 @@ export default {
       }
     },
 
+    async updateRecordsOfWorkOnOrder(dontShowNotification) {
+      await this.initSeparationScheme()
+      await this.updateSeparationScheme()
+      await this.selectSeparationSchemeOfChosenRecord()
+
+      if (this.orgOperationsData.length > 0) {
+        await this.selectOrgOperationEvent(this.orgOperationsData[0])
+      }
+
+      await this.initDataForListOfDressmakersData()
+      await this.getListOfDressmakersDataTable()
+
+      if (dontShowNotification) {
+        return
+      }
+
+      this.$refs.userNotification.showUserNotification('success', 'Данные обновлены!')
+    },
+
+    async initCoefficientAndExample() {
+      // TODO реализовать метод по выбору данных из таблицы "zar_tmk_op", как только будет реализована задача MERIDIAN-67
+    },
+
+    async coefficientChange() {
+      this.varsOfForm.priznak1 = 6
+      this.varsOfForm.coefficient = this.coefficient
+      this.varsOfForm.obraz = this.example === true ? 1 : 0
+      const params = this.createStructureForTechTmkUpdData(this.chosenRecord, this.varsOfForm)
+
+      let response
+      try {
+        response = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params)
+      } catch (error) {
+        console.log(error)
+        console.log(response)
+        this.$refs.userNotification.showUserNotification('error', 'Произошла ошибка в бд при изменении коэффициента!')
+        return
+      }
+
+      await this.updateRecordsOfWorkOnOrder()
+      this.$refs.userNotification.showUserNotification('success', 'Коэффициент изменен!')
+    },
+
+    async exampleChange() {
+      this.varsOfForm.priznak1 = 5
+      this.varsOfForm.coefficient = this.coefficient
+      this.varsOfForm.obraz = this.example === true ? 1 : 0
+      const params = this.createStructureForTechTmkUpdData(this.chosenRecord, this.varsOfForm)
+
+      let response
+      try {
+        response = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params)
+      } catch (error) {
+        console.log(error)
+        console.log(response)
+        this.$refs.userNotification.showUserNotification('error', 'Произошла ошибка в бд при изменении образца!')
+        return
+      }
+
+      await this.updateRecordsOfWorkOnOrder()
+      this.$refs.userNotification.showUserNotification('success', 'Образец изменен!')
+    },
+
+    async createCards() {
+      this.varsOfForm.priznak1 = 7
+      const params = this.createStructureForTechTmkUpdData(this.chosenRecord, this.varsOfForm)
+      let response
+      try {
+        response = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params)
+      } catch (error) {
+        console.log(error)
+        console.log(response)
+        this.$refs.userNotification.showUserNotification('error', 'Произошла ошибка в бд при формировании карточек!')
+        return
+      }
+
+      await this.updateRecordsOfWorkOnOrder()
+      this.$refs.userNotification.showUserNotification('success', 'Карточки сформированы!')
+    },
+
+    async deleteCards() {
+      this.varsOfForm.priznak1 = 8
+      this.varsOfForm.coefficient = this.coefficient
+      this.varsOfForm.obraz = this.example === true ? 1 : 0
+      const params = this.createStructureForTechTmkUpdData(this.chosenRecord, this.varsOfForm, this.selectedOrgOperations[0])
+
+      let response
+      try {
+        response = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params)
+      } catch (error) {
+        console.log(error)
+        console.log(response)
+        this.$refs.userNotification.showUserNotification('error', 'Произошла ошибка в бд при удалении карточек!')
+        return
+      }
+
+      await this.updateRecordsOfWorkOnOrder()
+      this.$refs.userNotification.showUserNotification('warning', 'Карточки удалены!')
+    },
+
+    deleteFio() {
+      this.$refs.userNotification.showUserNotification('warning', 'Функционал в разработке!')
+    },
+
     async openWithObject(order, varsOfForm, chosenRecord) {
       if (!order) {
         return
       }
 
+      const currDate = new Date()
+      this.dateOfOperation = new Date(currDate.getFullYear(), currDate.getMonth(), currDate.getDay() - 1).toISOString().substr(0, 10)
       this.chosenRecord = chosenRecord
       this.orderFromRecordsOfWorkByCards = order
       this.varsOfForm = varsOfForm
@@ -617,13 +805,9 @@ export default {
       this.chosenOrg = this.varsOfForm.orgName
       this.dialog = true
 
-      await this.initSeparationScheme()
-      await this.updateSeparationScheme()
-      this.selectSeparationSchemeOfChosenRecord()
-
-      await this.initDataForListOfDressmakersData()
-      await this.getListOfDressmakersDataTable()
+      await this.updateRecordsOfWorkOnOrder(true)
     },
+
     close() {
       this.reset()
       this.dialog = false
@@ -664,20 +848,14 @@ export default {
       this.orgOperationsData = await this.$api.manufacturing.findOrgOperationsBySearchCriterias(criterias)
     },
 
-    async selectOrgOperationEvent(selectedRow) {
-      /* await this.initOperationsSumsData(selectedRow.orgOperId)
-      await this.updateOperationsSumsData() */
-    },
-
-    async initOperationsSumsData(orgOperId) {
+    async initOperationsSumsData(item) {
       const paramsForRequest = {
-        proizvId: this.varsOfForm.proizvAnfb,
-        monthCurr: this.varsOfForm.mesAnfb,
-        yearCurr: this.varsOfForm.godAnfb,
-        firmaId: this.varsOfForm.orgAnfb,
-        priznak: 7,
-        tmkId: this.orderFromRecordsOfWorkByCards.tmkId1,
-        orgOperId
+        ...this.chosenRecord,
+        ...item,
+        ...this.varsOfForm,
+        ...this.orderFromRecordsOfWorkByCards,
+        ...this.selectedSeparationSchemeObj,
+        ...{ priznak: 3, yearCurr: this.varsOfForm.godAnfb, monthCurr: this.varsOfForm.mesAnfb, proizvId: this.varsOfForm.proizvAnfb }
       }
       const params = this.createStructureForManufacturingInitDataProcedure(paramsForRequest)
       await this.$api.service.executeStashedFunction(params).catch((error) => {
@@ -732,20 +910,22 @@ export default {
       this.separationScheme = await this.$api.manufacturing.findSeparationSchemeBySearchCriterias(criterias)
     },
 
-    selectSeparationSchemeOfChosenRecord() {
+    async selectSeparationSchemeOfChosenRecord() {
       if (!this.separationScheme) {
         return
       }
 
       const chosenSeparationSchemeObj = this.separationScheme.find(separationScheme => separationScheme.schemeId === this.chosenRecord.schemeId)
       this.chosenSeparationScheme = chosenSeparationSchemeObj.id
-      this.separationSchemeChange()
+      await this.separationSchemeChange()
     },
 
     async separationSchemeChange() {
       this.selectedSeparationSchemeObj = this.separationScheme.find(separationScheme => separationScheme.id === this.chosenSeparationScheme)
       await this.initOrgOperationData(this.selectedSeparationSchemeObj)
       await this.updateOrgOperationsData()
+      this.operationsSumsData = []
+      this.dressmakersData = []
     },
 
     reset() {
@@ -786,6 +966,13 @@ export default {
       if (content.length > 0) {
         this.listOfDressmakersData.push(...content)
       }
+    },
+
+    async selectOrgOperationEvent(selectedRow) {
+      this.selectedOrgOperations = [selectedRow]
+      await this.getDressMakersDataTable(selectedRow)
+      await this.initOperationsSumsData(selectedRow)
+      await this.updateOperationsSumsData()
     },
 
     async initDataMakers(item) {
@@ -874,7 +1061,7 @@ export default {
 }
 
 .records-of-work-on-order-autocomplete-separation-scheme {
-  width: 268px;
+  width: 379px;
   margin-right: 10px;
   margin-top: 5px
 }
@@ -895,6 +1082,56 @@ export default {
   width: 88px;
 }
 
+.records-of-work-on-order-coefficient-brise-input {
+  position: relative;
+  margin: 5px;
+  overflow: hidden;
+}
+
+.records-of-work-on-order-coefficient-brise-input input {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  outline: none;
+  border-bottom: 1px solid #999;
+  box-sizing: border-box;
+  font-size: 16px;
+  position: relative;
+  z-index: 5;
+  background: none;
+}
+
+.records-of-work-on-order-coefficient-brise-input label {
+  position: absolute;
+  left: 10px;
+  top: 45%;
+  transition: ease-out .15s;
+  color: #999;
+}
+
+.records-of-work-on-order-coefficient-brise-input input:valid ~ label, input:focus ~ label  {
+  top: 0;
+  transform: scale(0.94) translateX(-2px);
+  color: #639db1;
+}
+
+.records-of-work-on-order-coefficient-brise-input .line {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background: #639db1;
+  transition: .25s;
+  opacity: 0;
+  z-index: 6;
+}
+
+.records-of-work-on-order-coefficient-brise-input input:focus ~ .line {
+  left: 0;
+  opacity: 1;
+}
+
 .records-of-work-on-order-descr-of-production-input {
   margin-right: 10px;
   width: 410px;
@@ -913,7 +1150,7 @@ export default {
 
 .records-of-work-on-order-tpname-input {
   margin-right: 10px;
-  width: 210px;
+  width: 325px;
 }
 
 #records-of-work-on-order-org-operations {
@@ -1044,8 +1281,8 @@ export default {
 }
 
 .records-of-work-on-order-col-5 {
-  flex: 0 0 42%;
-  max-width: 42%;
+  flex: 0 0 40%;
+  max-width: 40%;
   margin-top: 5px
 }
 
@@ -1057,15 +1294,15 @@ export default {
 }
 
 .records-of-work-on-order-dressmakers-and-operations-col-5 {
-  flex: 0 0 42%;
-  max-width: 42%;
+  flex: 0 0 40%;
+  max-width: 40%;
   margin-top: 5px;
   padding-right: 10px;
 }
 
 .records-of-work-on-order-col-3 {
-  flex: 0 0 25%;
-  max-width: 25%;
+  flex: 0 0 27%;
+  max-width: 27%;
   margin-top: 5px
 }
 </style>

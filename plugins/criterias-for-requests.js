@@ -939,8 +939,13 @@ Vue.mixin({
                 }
             ]
 
+           const customDataTypes = [{
+              key: 'planData',
+              nameOfDataType: 'DATE'
+           }]
+
             if (usersFiltersParams) {
-                this.addUsersFiltersParamsToSearchCriterias(searchCriterias, usersFiltersParams, customOperations)
+                this.addUsersFiltersParamsToSearchCriterias(searchCriterias, usersFiltersParams, customOperations, customDataTypes)
             }
 
             return searchCriterias
@@ -1377,7 +1382,7 @@ Vue.mixin({
             }
         },
 
-        addUsersFiltersParamsToSearchCriterias(searchCriterias, usersFiltersParams, customOperations) {
+        addUsersFiltersParamsToSearchCriterias(searchCriterias, usersFiltersParams, customOperations, customDataTypes) {
             for (const key in usersFiltersParams) {
                 let elemParam = usersFiltersParams[key]
 
@@ -1385,7 +1390,11 @@ Vue.mixin({
                     continue
                 }
 
-                const dataType = this.getDataTypeForSearchCriteria(elemParam)
+                const dataType = this.getDataTypeForSearchCriteria(key, elemParam, customDataTypes)
+
+                if (dataType === 'DATE') {
+                  elemParam = new Date(elemParam).toLocaleDateString()
+                }
 
                 const operation = this.getOperationTypeForSearchCriteria(key, customOperations)
 
@@ -1402,8 +1411,22 @@ Vue.mixin({
             }
         },
 
-        getDataTypeForSearchCriteria(elemParam) {
-            return typeof elemParam === 'number' ? 'INTEGER' : 'VARCHAR'
+        getDataTypeForSearchCriteria(key, elemParam, customDataTypes) {
+          let dataType = null
+
+          if (customDataTypes) {
+            dataType = customDataTypes.find(elem => elem.key === key)
+          }
+
+          if (dataType) {
+            return dataType.nameOfDataType
+          }
+
+          if (typeof elemParam === 'number') {
+            return 'INTEGER'
+          } else {
+            return 'VARCHAR'
+          }
         },
 
         getOperationTypeForSearchCriteria(key, customOperations) {

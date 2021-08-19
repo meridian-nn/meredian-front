@@ -62,6 +62,7 @@
             small
             color="red"
             v-bind="attrs"
+            :disabled="sewingOrderTableSelectedRecords.length === 0"
             @click="openModal('print')"
             v-on="on"
           >
@@ -198,8 +199,16 @@
                 <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.dataZkzpsv }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
-                  {{ item.nameProizv }}
+                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract sewing-order-log-page-records-table-cell-truncate' : 'sewing-order-log-page-records-table-cell-truncate'">
+                  <v-tooltip bottom>
+                    <template #activator="{ on, attrs }">
+                      <span
+                        v-bind="attrs"
+                        v-on="on"
+                      >{{ item.nameProizv }}</span>
+                    </template>
+                    <span>{{ item.nameProizv }}</span>
+                  </v-tooltip>
                 </td>
                 <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.mcId }}
@@ -342,9 +351,35 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="openModal('planDate')">
+            <v-list-item @click="openModalPlanDate('tailoring')">
               <v-list-item-title>
                 Отметка о выполнении пошива
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item @click="openModalPlanDate('cutting')">
+              <v-list-item-title>
+                Отметка о выполнении раскроя
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item
+              @click="sewingOrderTableSelectedRecords.length ?
+                openModalСonsolidatedOrder('new') :
+                $refs.userNotification.showUserNotification('error', 'Сначала выберите записи для формирования сводного заказа')"
+            >
+              <v-list-item-title>
+                Новый сводный заказ
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item
+              @click="sewingOrderTableSelectedRecords.length && currentRowOfTableForContextMenu.parent !== 0 ?
+                openModalСonsolidatedOrder('edit') :
+                errorEditСonsolidatedOrder()"
+            >
+              <v-list-item-title>
+                Коррекция сводного заказа
               </v-list-item-title>
             </v-list-item>
 
@@ -354,19 +389,19 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="openModal('planDate')">
-              <v-list-item-title>
-                Отметка о выполнении раскроя
-              </v-list-item-title>
-            </v-list-item>
-
             <v-list-item @click="openModal('actualConsumptionRawMaterials')">
               <v-list-item-title>
                 Фактический расход сырья
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="openModal('tailoringOrder')">
+            <v-list-item @click="openModal('logosOrder')">
+              <v-list-item-title>
+                Рисунки логотипов/вышивок
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item @click="openModal('providingOrderWithRawMaterials')">
               <v-list-item-title>
                 Обеспечение заказа сырьем
               </v-list-item-title>
@@ -378,7 +413,7 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="openModal('rawMaterials')">
+            <v-list-item @click="openModal('tailoringOrder')">
               <v-list-item-title>
                 Заказ на пошив
               </v-list-item-title>
@@ -490,10 +525,20 @@
 
     <modal-plan-date
       v-if="modals.planDate"
+      :data-for-modal-from-context-menu="currentRowOfTableForContextMenu"
+      :data-for-modal-from-table="sewingOrderTableSelectedRecords"
       :value="modals.planDate"
       @close="closeModal('planDate')"
     />
-
+    <modal-new-or-edit-consolidated-order
+      v-if="modals.consolidatedOrder"
+      :type-operation="typeOperationConsolidatedOrder"
+      :data-for-modal-from-context-menu="currentRowOfTableForContextMenu"
+      :data-for-modal-from-table="sewingOrderTableSelectedRecords"
+      :value="modals.consolidatedOrder"
+      @close="closeModal('consolidatedOrder')"
+      @successfully="init()"
+    />
     <modal-size
       v-if="modals.size"
       :data-for-modal="currentRowOfTableForContextMenu"
@@ -563,6 +608,7 @@ import ModalActualConsumptionRawMaterials from './modals/ActualConsumptionRawMat
 import ModalOldOrderCard from './modals/OldOrderCard'
 import FillingDefectOnOrderForTailoring from './modals/FillingDefectOnOrderForTailoring'
 import ModalLogosOrder from './modals/LogosOrder'
+import ModalNewOrEditConsolidatedOrder from './modals/NewOrEditСonsolidatedOrder'
 import ModalListResources from './modals/ListResources'
 
 export default {
@@ -586,6 +632,7 @@ export default {
     FillingDefectOnOrderForTailoring,
     ModalSearch,
     ModalListResources,
+    ModalNewOrEditConsolidatedOrder,
     InfiniteLoading
   },
 
@@ -618,6 +665,7 @@ export default {
         oldOrderCard: false,
         fillingDefectOnOrderForTailoring: false,
         search: false,
+        consolidatedOrder: false,
         listResources: false
       },
       sewingOrderTableSelectedRecords: [],
@@ -668,7 +716,6 @@ export default {
           text: 'Наименование МЦ',
           value: 'nameMc',
           width: '200px',
-          cellClass: 'sewing-order-log-page-records-table-cell-truncate',
           sortable: false
         },
         {
@@ -699,7 +746,6 @@ export default {
           text: 'Раскрой',
           value: 'nameRaskroy',
           width: '130px',
-          cellClass: 'sewing-order-log-page-records-table-cell-truncate',
           sort: () => false
         },
         {
@@ -736,14 +782,12 @@ export default {
           text: 'ГОСТ/ТУ',
           value: 'gostTu',
           width: '150px',
-          cellClass: 'sewing-order-log-page-records-table-cell-truncate',
           sort: () => false
         },
         {
           text: 'Код ЗП',
           value: 'codGra',
           width: '150px',
-          cellClass: 'sewing-order-log-page-records-table-cell-truncate',
           sort: () => false
         },
         {
@@ -811,7 +855,9 @@ export default {
 
       noOTK: false,
 
-      customerName: ''
+      customerName: '',
+
+      typeOperationConsolidatedOrder: null
     }
   },
   computed: {
@@ -866,6 +912,8 @@ export default {
       if (name === 'edit' ||
         name === 'editAdd') {
         this.openEditModal()
+      } else if (name === 'providingOrderWithRawMaterials') {
+        this.$refs.userNotification.showUserNotification('warning', 'Форма в разработке')
       } else {
         this.modals[name] = true
       }
@@ -879,6 +927,19 @@ export default {
       } else {
         this.modals.editAdd = true
       }
+    },
+
+    openModalPlanDate(type) {
+      if (this.sewingOrderTableSelectedRecords.length) {
+        for (const key in this.sewingOrderTableSelectedRecords) {
+          if (type === 'tailoring') { this.sewingOrderTableSelectedRecords[key].rejim = 1 }
+          if (type === 'cutting') { this.sewingOrderTableSelectedRecords[key].rejim = 2 }
+        }
+      } else {
+        if (type === 'tailoring') { this.currentRowOfTableForContextMenu.rejim = 1 }
+        if (type === 'cutting') { this.currentRowOfTableForContextMenu.rejim = 2 }
+      }
+      this.modals.planDate = true
     },
 
     closeModal(name) {
@@ -938,7 +999,11 @@ export default {
       let filtersParams
 
       if (response.length) {
-        filtersParams = JSON.parse(response[0].settingValue)
+        try {
+          filtersParams = JSON.parse(response[0].settingValue)
+        } catch (error) {
+          console.log(error)
+        }
       }
 
       // Поиск данных в таблице "manufacturing_request_journal"
@@ -950,12 +1015,34 @@ export default {
         size: 200
       }
 
-      const { content } = await this.$api.manufacturing.manufacturingRequestJournalFindPageBySearchCriteriaList(data)
+      let errorResponse = null
+      let responseData = null
 
-      if (content.length > 0) {
+      responseData = await this.$api.manufacturing.manufacturingRequestJournalFindPageBySearchCriteriaList(data).catch((err) => {
+        errorResponse = err
+      })
+
+      if (errorResponse) {
+        const filterEntityForSave = this.createFilterEntityForSave(this.getIdOfFilterSewingOrderLog(), this.$route.name, {},
+          this.getCurrentUser.id, this.getCurrentUser.id)
+        await this.$api.uiSettings.save(filterEntityForSave)
+
+        const searchCriterias = this.createCriteriasToSearchSewingOrderLogDataByPage({})
+        const data = {
+          searchCriterias,
+          page: this.page,
+          orders: this.handleSortData,
+          size: 200
+        }
+
+        responseData = await this.$api.manufacturing.manufacturingRequestJournalFindPageBySearchCriteriaList(data)
+        this.$refs.userNotification.showUserNotification('error', 'Параметры поиска были сброшены из-за ошибки введенных параметров')
+      }
+
+      if (responseData.content && responseData.content.length > 0) {
         this.page += 1
 
-        this.sewingOrderTableRecords.push(...content)
+        this.sewingOrderTableRecords.push(...responseData.content)
         $state.loaded()
       } else {
         $state.complete()
@@ -1051,6 +1138,16 @@ export default {
     saveFilter() {
       this.isNeedToInitDataForSewingOrderTable = false
       this.updateSewingOrderTableRecords()
+    },
+    openModalСonsolidatedOrder(typeOperation) {
+      this.typeOperationConsolidatedOrder = typeOperation
+      this.modals.consolidatedOrder = true
+    },
+    errorEditСonsolidatedOrder() {
+      let errorText = ''
+      if (this.currentRowOfTableForContextMenu.parent === 0) { errorText = 'Выберите сводный заказ!' }
+      if (this.sewingOrderTableSelectedRecords.length === 0) { errorText = 'Сначала выберите записи для коррекции сводного заказа' }
+      this.$refs.userNotification.showUserNotification('error', errorText)
     }
   }
 }
