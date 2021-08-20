@@ -521,7 +521,7 @@
       :data-for-modal-from-table="sewingOrderTableSelectedRecords"
       :value="modals.consolidatedOrder"
       @close="closeModal('consolidatedOrder')"
-      @successfully="init()"
+      @successfully="successFromModalConsolidatedOrder"
     />
     <modal-size
       v-if="modals.size"
@@ -567,6 +567,7 @@
 
     <user-notification ref="userNotification" />
     <message ref="message" />
+    <loading-dialog ref="loadingDialog" />
   </div>
 </template>
 
@@ -589,11 +590,13 @@ import ModalOldOrderCard from './modals/OldOrderCard'
 import FillingDefectOnOrderForTailoring from './modals/FillingDefectOnOrderForTailoring'
 import ModalLogosOrder from './modals/LogosOrder'
 import ModalNewOrEditConsolidatedOrder from './modals/NewOrEditСonsolidatedOrder'
+import LoadingDialog from '~/components/loading_dialog/LoadingDialog'
 
 export default {
   name: 'SewingOrderLogPage',
 
   components: {
+    LoadingDialog,
     ModalEditTailoring: ModalEditOrderForTailoring,
     ModalEditWork: ModalEditOrderForAdditionalWork,
     Message,
@@ -613,7 +616,6 @@ export default {
     ModalNewOrEditConsolidatedOrder,
     InfiniteLoading
   },
-
   data() {
     return {
       loadingType: {
@@ -853,20 +855,22 @@ export default {
       return this.$store.state.profile.user
     }
   },
-
+  async created() {
+    await this.initDataForCurrentUser()
+  },
   mounted() {
     this.init()
   },
-  created() {
-    // Инициализация данных для текущего пользователя
-    this.initDataForCurrentUser()
-  },
   methods: {
     init() {
-      this.canUpdate = true
       this.updateSewingOrderTableRecords()
     },
-
+    async successFromModalConsolidatedOrder() {
+      this.$refs.loadingDialog.showLoadingDialog('Коррекция сводного заказа, подождите...')
+      await this.initDataForCurrentUser()
+      this.updateSewingOrderTableRecords()
+      this.$refs.loadingDialog.closeLoadingDialog()
+    },
     rightClickHandler(event, item) {
       event.preventDefault()
 
@@ -1027,13 +1031,8 @@ export default {
     },
 
     async initDataForCurrentUser() {
-      if (!this.isNeedToInitDataForSewingOrderTable) {
-        return
-      }
-
       const params = this.createStructureForSewingOrderLogPageInitDataProcedure()
       await this.$api.service.executeStashedFunction(params)
-      this.isNeedToInitDataForSewingOrderTable = false
     },
 
     async deleteRecord() {
@@ -1112,7 +1111,6 @@ export default {
       this.modals.fillingDefectOnOrderForTailoring = true
     },
     saveFilter() {
-      this.isNeedToInitDataForSewingOrderTable = false
       this.updateSewingOrderTableRecords()
     },
     openModalСonsolidatedOrder(typeOperation) {
