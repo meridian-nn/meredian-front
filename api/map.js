@@ -710,6 +710,10 @@ export const factory = send => ({
           return send('POST', '/oper/manufacturing/vrZkzpsvDopwork/findBySearchCriteriaList', params)
         },
 
+        getManufacturingUpdateZkzpsvDopworkProcName() {
+          return 'dbo.update_zkzpsv_dopwork'
+        },
+
         getTechTmkUpdDataProcedureName() {
             return 'dbo.tech_tmk_upd_data'
         },

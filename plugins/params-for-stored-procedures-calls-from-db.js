@@ -533,6 +533,26 @@ Vue.mixin({
         descr: this.getCurrentUser.login,
         parent_id: params
       }
+    },
+
+    createStructureForUpdateZkzpsvDopwork(params) {
+      return {
+        params: this.createParamsForUpdateZkzpsvDopwork(params),
+        procName: this.$api.manufacturing.getManufacturingUpdateZkzpsvDopworkProcName()
+      }
+    },
+
+    createParamsForUpdateZkzpsvDopwork(params) {
+      return {
+        zkzpsv_id: params.id,
+        data: params.s1,
+        prim: params.prim,
+        coeff_poshiv: params.coeffPoshiv,
+        pr_gotov: params.prGotov,
+        data_gotov: params.s2,
+        proizv_id: params.prR,
+        colvo: params.count
+      }
     }
   }
 

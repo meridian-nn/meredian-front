@@ -487,7 +487,7 @@
       :edit="sewingOrderTableSelectedRecords[0]"
       :value="modals.editAdd"
       @close="closeModal('editAdd')"
-      @save="saveModalEditWork"
+      @save="saveModalEditWork('editAdd')"
     />
 
     <modal-confirm
@@ -910,7 +910,7 @@ export default {
     openEditModal() {
       const editingRecord = this.sewingOrderTableSelectedRecords[0]
 
-      if (editingRecord.dopWork !== 0) {
+      if (editingRecord.dopWork === 0) {
         this.modals.edit = true
       } else {
         this.modals.editAdd = true
@@ -950,8 +950,10 @@ export default {
       }
     },
 
-    saveModalEditWork() {
-      console.log('edit add save')
+    saveModalEditWork(name) {
+      this.closeModal(name)
+      this.isNeedToInitDataForSewingOrderTable = true
+      this.updateSewingOrderTableRecords()
     },
 
     updateSort(byDesc, event) {
