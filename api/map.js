@@ -760,8 +760,8 @@ export const factory = send => ({
 
         getViewOrderBySizeProcedureName() {
           return 'dbo.sel_zkzpsvrz'
-        },     
-        
+        },
+
         getUpdateTableInViewOrderBySizeProcedureName() {
           return 'dbo.ins_zkzrz_spplnrz'
         },
@@ -777,20 +777,20 @@ export const factory = send => ({
         getProcedureNameForProcedureExecutionInitDataOnPrint() {
           return 'dbo.print_zkzpsv'
         },
-        
+
         getProcedureNameForProcedureExecutionClearTempTable() {
           return 'dbo.del_temp_form'
         },
-        getProcedureNameForProcedureExecutionClearTempTableForNewСonsolidatedOrder() {
+        getProcedureNameForProcedureExecutionClearTempTableForNewConsolidatedOrder() {
           return 'dbo.del_temp_prn'
         },
-        getProcedureNameForProcedureExecutionCreateСonsolidatedOrderTempTable() {
+        getProcedureNameForProcedureExecutionCreateConsolidatedOrderTempTable() {
           return 'dbo.ins_temp_prn'
         },
-        getProcedureNameForProcedureExecutionLoadTableForNewСonsolidatedOrder() { 
+        getProcedureNameForProcedureExecutionLoadTableForNewConsolidatedOrder() {
           return 'dbo.ins_zakaz_svod'
         },
-        getProcedureNameForProcedureExecutionLoadTableForEditСonsolidatedOrder() {
+        getProcedureNameForProcedureExecutionLoadTableForEditConsolidatedOrder() {
           return 'dbo.update_zakaz_svod'
         },
 
