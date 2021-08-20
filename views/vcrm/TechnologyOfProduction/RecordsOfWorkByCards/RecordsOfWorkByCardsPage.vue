@@ -643,17 +643,9 @@ export default {
       this.variablesOfForm.godAnfb = this.monthOfProizv.yearCurr
     },
 
-    // Инициализация данных формы
-    async initData(customParams) {
-      const params = this.createStructureForManufacturingInitDataProcedure(customParams || this.monthOfProizv)
-      await this.$api.service.executeStashedFunction(params).catch((error) => {
-        alert(error)
-      })
-      this.canUpdate = true
-    },
-
     async organizationChange() {
       this.recordsData = []
+      this.recordsSelectedRows = []
       this.loadingType.recordsData = true
       const org = this.organizations.find(orgElem => orgElem.client_id === this.chosenOrgId)
 
@@ -667,15 +659,7 @@ export default {
       this.variablesOfForm.orgName = org.name_podr
       this.variablesOfForm.proizvAnfb = org.proizv_id
 
-      const customParams = {
-        proizvId: org.proizv_id,
-        firmaId: org.client_id,
-        monthCurr: this.variablesOfForm.mesAnfb,
-        yearCurr: this.variablesOfForm.godAnfb,
-        priznak: 1
-      }
-
-      await this.initData(customParams)
+      await this.initData()
       await this.updateRecordsData()
       this.loadingType.recordsData = false
     },
@@ -841,6 +825,23 @@ export default {
       this.pageOfRecords = 0
       this.recordsData = []
       this.infiniteIdOfRecordsData += 1
+    },
+
+    // Инициализация данных формы
+    async initData() {
+      const paramsOfForm = {
+        proizvId: this.variablesOfForm.proizvAnfb,
+        firmaId: this.variablesOfForm.orgAnfb,
+        monthCurr: this.variablesOfForm.mesAnfb,
+        yearCurr: this.variablesOfForm.godAnfb,
+        priznak: 1
+      }
+
+      const params = this.createStructureForManufacturingInitDataProcedure(paramsOfForm)
+      await this.$api.service.executeStashedFunction(params).catch((error) => {
+        alert(error)
+      })
+      this.canUpdate = true
     },
 
     // Поиск заказов на пошив

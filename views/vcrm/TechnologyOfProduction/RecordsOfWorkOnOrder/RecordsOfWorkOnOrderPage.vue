@@ -916,6 +916,9 @@ export default {
       }
 
       const chosenSeparationSchemeObj = this.separationScheme.find(separationScheme => separationScheme.schemeId === this.chosenRecord.schemeId)
+      if (!chosenSeparationSchemeObj) {
+        return
+      }
       this.chosenSeparationScheme = chosenSeparationSchemeObj.id
       await this.separationSchemeChange()
     },
