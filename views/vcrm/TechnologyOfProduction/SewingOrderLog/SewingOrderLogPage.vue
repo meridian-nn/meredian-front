@@ -359,7 +359,7 @@
 
             <v-list-item
               @click="sewingOrderTableSelectedRecords.length ?
-                openModalСonsolidatedOrder('new') :
+                openModalConsolidatedOrder('new') :
                 $refs.userNotification.showUserNotification('error', 'Сначала выберите записи для формирования сводного заказа')"
             >
               <v-list-item-title>
@@ -369,8 +369,8 @@
 
             <v-list-item
               @click="sewingOrderTableSelectedRecords.length && currentRowOfTableForContextMenu.parent !== 0 ?
-                openModalСonsolidatedOrder('edit') :
-                errorEditСonsolidatedOrder()"
+                openModalConsolidatedOrder('edit') :
+                errorEditConsolidatedOrder()"
             >
               <v-list-item-title>
                 Коррекция сводного заказа
@@ -856,20 +856,17 @@ export default {
     }
   },
   async created() {
-    await this.initDataForCurrentUser()
   },
   mounted() {
     this.init()
   },
   methods: {
     init() {
-      this.updateSewingOrderTableRecords()
+      // this.updateSewingOrderTableRecords()
     },
-    async successFromModalConsolidatedOrder() {
-      this.$refs.loadingDialog.showLoadingDialog('Коррекция сводного заказа, подождите...')
-      await this.initDataForCurrentUser()
+    successFromModalConsolidatedOrder() {
+      this.isNeedToInitDataForSewingOrderTable = true
       this.updateSewingOrderTableRecords()
-      this.$refs.loadingDialog.closeLoadingDialog()
     },
     rightClickHandler(event, item) {
       event.preventDefault()
@@ -970,6 +967,8 @@ export default {
     async findSewingOrderTableRecords($state) {
       this.loadingType.sewingOrderTableRecords = true
 
+      await this.initDataForCurrentUser()
+
       // Поиск пользовательских настроек фильтров
       const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
         this.getIdOfFilterSewingOrderLog(), this.getCurrentUser.id)
@@ -1031,8 +1030,15 @@ export default {
     },
 
     async initDataForCurrentUser() {
+      if (!this.isNeedToInitDataForSewingOrderTable) {
+        return
+      }
+
+      this.$refs.loadingDialog.showLoadingDialog('Получение данных о заказах на пошив, подождите...')
       const params = this.createStructureForSewingOrderLogPageInitDataProcedure()
       await this.$api.service.executeStashedFunction(params)
+      this.isNeedToInitDataForSewingOrderTable = false
+      this.$refs.loadingDialog.closeLoadingDialog()
     },
 
     async deleteRecord() {
@@ -1113,11 +1119,11 @@ export default {
     saveFilter() {
       this.updateSewingOrderTableRecords()
     },
-    openModalСonsolidatedOrder(typeOperation) {
+    openModalConsolidatedOrder(typeOperation) {
       this.typeOperationConsolidatedOrder = typeOperation
       this.modals.consolidatedOrder = true
     },
-    errorEditСonsolidatedOrder() {
+    errorEditConsolidatedOrder() {
       let errorText = ''
       if (this.currentRowOfTableForContextMenu.parent === 0) { errorText = 'Выберите сводный заказ!' }
       if (this.sewingOrderTableSelectedRecords.length === 0) { errorText = 'Сначала выберите записи для коррекции сводного заказа' }
