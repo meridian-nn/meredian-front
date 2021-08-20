@@ -357,9 +357,15 @@
               </v-list-item-title>
             </v-list-item>
 
+            <v-list-item @click="openModal('actualConsumptionRawMaterials')">
+              <v-list-item-title>
+                Фактический расход сырья
+              </v-list-item-title>
+            </v-list-item>
+
             <v-list-item
               @click="sewingOrderTableSelectedRecords.length ?
-                openModalСonsolidatedOrder('new') :
+                openModalConsolidatedOrder('new') :
                 $refs.userNotification.showUserNotification('error', 'Сначала выберите записи для формирования сводного заказа')"
             >
               <v-list-item-title>
@@ -369,8 +375,8 @@
 
             <v-list-item
               @click="sewingOrderTableSelectedRecords.length && currentRowOfTableForContextMenu.parent !== 0 ?
-                openModalСonsolidatedOrder('edit') :
-                errorEditСonsolidatedOrder()"
+                openModalConsolidatedOrder('edit') :
+                errorEditConsolidatedOrder()"
             >
               <v-list-item-title>
                 Коррекция сводного заказа
@@ -383,19 +389,7 @@
               </v-list-item-title>
             </v-list-item>
 
-            <v-list-item @click="openModal('actualConsumptionRawMaterials')">
-              <v-list-item-title>
-                Фактический расход сырья
-              </v-list-item-title>
-            </v-list-item>
-
-            <v-list-item @click="openModal('logosOrder')">
-              <v-list-item-title>
-                Рисунки логотипов/вышивок
-              </v-list-item-title>
-            </v-list-item>
-
-            <v-list-item @click="openModal('providingOrderWithRawMaterials')">
+            <v-list-item @click="openModal('listResources')">
               <v-list-item-title>
                 Обеспечение заказа сырьем
               </v-list-item-title>
@@ -467,7 +461,15 @@
       </div>
     </div>
 
+    <modal-list-resources
+      v-if="modals.listResources"
+      :value="modals.listResources"
+      @close="closeModal('listResources')"
+      @success="deleteRecord"
+    />
+
     <modal-logos-order
+      v-if="modals.logosOrder"
       :value="modals.logosOrder"
       @close="closeModal('logosOrder')"
     />
@@ -489,12 +491,14 @@
     />
 
     <modal-confirm
+      v-if="modals.confirm"
       :value="modals.confirm"
       @close="closeModal('confirm')"
       @success="deleteRecord"
     />
 
     <modal-print
+      v-if="modals.print"
       :value="modals.print"
       :selected-records="sewingOrderTableSelectedRecords"
       @close="closeModal('print')"
@@ -521,7 +525,7 @@
       :data-for-modal-from-table="sewingOrderTableSelectedRecords"
       :value="modals.consolidatedOrder"
       @close="closeModal('consolidatedOrder')"
-      @successfully="init()"
+      @successfully="successFromModalConsolidatedOrder"
     />
     <modal-size
       v-if="modals.size"
@@ -531,22 +535,26 @@
     />
 
     <modal-actual-consumption-raw-materials
+      v-if="modals.actualConsumptionRawMaterials"
       :value="modals.actualConsumptionRawMaterials"
       @close="closeModal('actualConsumptionRawMaterials')"
     />
 
     <modal-old-order-card
+      v-if="modals.oldOrderCard"
       :value="modals.oldOrderCard"
       @close="closeModal('oldOrderCard')"
     />
 
     <modal-tailoring-order
+      v-if="modals.tailoringOrder"
       :data="currentRowOfTableForContextMenu"
       :value="modals.tailoringOrder"
       @close="closeModal('tailoringOrder')"
     />
 
     <modal-raw-materials
+      v-if="modals.rawMaterials"
       :data="currentRowOfTableForContextMenu"
       :value="modals.rawMaterials"
       @close="closeModal('rawMaterials')"
@@ -567,6 +575,7 @@
 
     <user-notification ref="userNotification" />
     <message ref="message" />
+    <loading-dialog ref="loadingDialog" />
   </div>
 </template>
 
@@ -589,11 +598,14 @@ import ModalOldOrderCard from './modals/OldOrderCard'
 import FillingDefectOnOrderForTailoring from './modals/FillingDefectOnOrderForTailoring'
 import ModalLogosOrder from './modals/LogosOrder'
 import ModalNewOrEditConsolidatedOrder from './modals/NewOrEditСonsolidatedOrder'
+import ModalListResources from './modals/ListResources'
+import LoadingDialog from '~/components/loading_dialog/LoadingDialog'
 
 export default {
   name: 'SewingOrderLogPage',
 
   components: {
+    LoadingDialog,
     ModalEditTailoring: ModalEditOrderForTailoring,
     ModalEditWork: ModalEditOrderForAdditionalWork,
     Message,
@@ -610,10 +622,10 @@ export default {
     ModalRawMaterials,
     FillingDefectOnOrderForTailoring,
     ModalSearch,
+    ModalListResources,
     ModalNewOrEditConsolidatedOrder,
     InfiniteLoading
   },
-
   data() {
     return {
       loadingType: {
@@ -643,7 +655,8 @@ export default {
         oldOrderCard: false,
         fillingDefectOnOrderForTailoring: false,
         search: false,
-        consolidatedOrder: false
+        consolidatedOrder: false,
+        listResources: false
       },
       sewingOrderTableSelectedRecords: [],
       sewingOrderTableHeaders: [
@@ -853,20 +866,19 @@ export default {
       return this.$store.state.profile.user
     }
   },
-
+  async created() {
+  },
   mounted() {
     this.init()
   },
-  created() {
-    // Инициализация данных для текущего пользователя
-    this.initDataForCurrentUser()
-  },
   methods: {
     init() {
-      this.canUpdate = true
+      // this.updateSewingOrderTableRecords()
+    },
+    successFromModalConsolidatedOrder() {
+      this.isNeedToInitDataForSewingOrderTable = true
       this.updateSewingOrderTableRecords()
     },
-
     rightClickHandler(event, item) {
       event.preventDefault()
 
@@ -898,7 +910,7 @@ export default {
     openEditModal() {
       const editingRecord = this.sewingOrderTableSelectedRecords[0]
 
-      if (editingRecord.dopWork === 0) {
+      if (editingRecord.dopWork !== 0) {
         this.modals.edit = true
       } else {
         this.modals.editAdd = true
@@ -966,6 +978,8 @@ export default {
     async findSewingOrderTableRecords($state) {
       this.loadingType.sewingOrderTableRecords = true
 
+      await this.initDataForCurrentUser()
+
       // Поиск пользовательских настроек фильтров
       const dataForFiltersQuery = this.createCriteriasToSearchForFiltersValues(this.$route.name,
         this.getIdOfFilterSewingOrderLog(), this.getCurrentUser.id)
@@ -1031,9 +1045,11 @@ export default {
         return
       }
 
+      this.$refs.loadingDialog.showLoadingDialog('Получение данных о заказах на пошив, подождите...')
       const params = this.createStructureForSewingOrderLogPageInitDataProcedure()
       await this.$api.service.executeStashedFunction(params)
       this.isNeedToInitDataForSewingOrderTable = false
+      this.$refs.loadingDialog.closeLoadingDialog()
     },
 
     async deleteRecord() {
@@ -1112,14 +1128,13 @@ export default {
       this.modals.fillingDefectOnOrderForTailoring = true
     },
     saveFilter() {
-      this.isNeedToInitDataForSewingOrderTable = false
       this.updateSewingOrderTableRecords()
     },
-    openModalСonsolidatedOrder(typeOperation) {
+    openModalConsolidatedOrder(typeOperation) {
       this.typeOperationConsolidatedOrder = typeOperation
       this.modals.consolidatedOrder = true
     },
-    errorEditСonsolidatedOrder() {
+    errorEditConsolidatedOrder() {
       let errorText = ''
       if (this.currentRowOfTableForContextMenu.parent === 0) { errorText = 'Выберите сводный заказ!' }
       if (this.sewingOrderTableSelectedRecords.length === 0) { errorText = 'Сначала выберите записи для коррекции сводного заказа' }

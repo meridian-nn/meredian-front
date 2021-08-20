@@ -68,19 +68,19 @@ export default {
     },
 
     async newСonsolidatedOrder() {
-      const paramsForClearTempTable = this.createStructureForClearTempTableForСonsolidatedOrder()
+      const paramsForClearTempTable = this.createStructureForClearTempTableForConsolidatedOrder()
       await this.$api.service.executeStashedFunction(paramsForClearTempTable)
 
       for (const key in this.dataForModalFromTable) {
         if (this.dataForModalFromTable[key].dopWork !== 0) {
           continue
         }
-        const paramsForCreateTempTable = this.createStructureForCreateСonsolidatedOrderTempTable(this.dataForModalFromTable[key].zkzpsvId)
+        const paramsForCreateTempTable = this.createStructureForCreateConsolidatedOrderTempTable(this.dataForModalFromTable[key].zkzpsvId)
         await this.$api.service.executeStashedFunction(paramsForCreateTempTable)
       }
 
       let errorResponse = null
-      const paramsForLoadTempTable = this.createStructureForLoadTableForNewСonsolidatedOrder()
+      const paramsForLoadTempTable = this.createStructureForLoadTableForNewConsolidatedOrder()
       const result = await this.$api.service.executeStashedFunctionWithReturnedDataSet(paramsForLoadTempTable).catch((er) => {
         errorResponse = er
       })
@@ -99,19 +99,19 @@ export default {
     },
 
     async editСonsolidatedOrder() {
-      const paramsForClearTempTable = this.createStructureForClearTempTableForEditСonsolidatedOrder()
+      const paramsForClearTempTable = this.createStructureForClearTempTableForEditConsolidatedOrder()
       await this.$api.service.executeStashedFunction(paramsForClearTempTable)
 
       for (const key in this.dataForModalFromTable) {
         if (this.dataForModalFromTable[key].dopWork !== 0 || this.dataForModalFromTable[key].parent !== 0) {
           continue
         }
-        const paramsForCreateTempTable = this.createStructureForCreateTempTableForEditСonsolidatedOrder(this.dataForModalFromTable[key].zkzpsvId)
+        const paramsForCreateTempTable = this.createStructureForCreateTempTableForEditConsolidatedOrder(this.dataForModalFromTable[key].zkzpsvId)
         await this.$api.service.executeStashedFunction(paramsForCreateTempTable)
       }
 
       let errorResponse = null
-      const paramsForLoadTempTable = this.createStructureForLoadTableForEditСonsolidatedOrder(this.dataForModalFromContextMenu.zkzpsvId)
+      const paramsForLoadTempTable = this.createStructureForLoadTableForEditConsolidatedOrder(this.dataForModalFromContextMenu.zkzpsvId)
       const result = await this.$api.service.executeStashedFunctionWithReturnedDataSet(paramsForLoadTempTable).catch((er) => {
         errorResponse = er
       })
