@@ -479,7 +479,7 @@
       :edit="sewingOrderTableSelectedRecords[0]"
       :value="modals.edit"
       @close="closeModal('edit')"
-      @save="saveModalEditTailoring"
+      @save="successFromModal()"
     />
 
     <modal-edit-work
@@ -525,7 +525,7 @@
       :data-for-modal-from-table="sewingOrderTableSelectedRecords"
       :value="modals.consolidatedOrder"
       @close="closeModal('consolidatedOrder')"
-      @successfully="successFromModalConsolidatedOrder"
+      @successfully="successFromModal"
     />
     <modal-size
       v-if="modals.size"
@@ -875,7 +875,7 @@ export default {
     init() {
       // this.updateSewingOrderTableRecords()
     },
-    successFromModalConsolidatedOrder() {
+    successFromModal() {
       this.isNeedToInitDataForSewingOrderTable = true
       this.updateSewingOrderTableRecords()
     },
