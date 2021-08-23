@@ -82,7 +82,7 @@ Vue.mixin({
 
     createStructureForTechTmkUpdData(chosenRecord, variablesOfForm, selectedOrgOperation) {
       if (!chosenRecord ||
-        !variablesOfForm) {
+                !variablesOfForm) {
         return false
       }
 
@@ -139,7 +139,7 @@ Vue.mixin({
 
     createStructureForTechZarplSetPeriod(variablesOfForm, paramsForProcedure) {
       if (!variablesOfForm ||
-        !paramsForProcedure) {
+                !paramsForProcedure) {
         return false
       }
 
@@ -532,6 +532,69 @@ Vue.mixin({
       return {
         descr: this.getCurrentUser.login,
         parent_id: params
+      }
+    },
+
+    createStructureForUpdateZkzpsvDopwork(params) {
+      return {
+        params: this.createParamsForUpdateZkzpsvDopwork(params),
+        procName: this.$api.manufacturing.getManufacturingUpdateZkzpsvDopworkProcName()
+      }
+    },
+
+    createParamsForUpdateZkzpsvDopwork(params) {
+      return {
+        zkzpsv_id: params.id,
+        data: params.s1,
+        prim: params.prim,
+        coeff_poshiv: params.coeffPoshiv,
+        pr_gotov: params.prGotov,
+        data_gotov: params.s2,
+        proizv_id: params.prR,
+        colvo: params.count
+      }
+    },
+
+    createStructureForUpdateСontractOfOrderForTailoringInitDataProcedure(paramsForRequest) {
+      return {
+        params: paramsForRequest,
+        procName: this.$api.manufacturing.getProcedureNameForUpdateСontractOfOrderForTailoring()
+      }
+    },
+
+    createStructureForUpdateOrderForTailoringInitDataProcedure(paramsForRequest) {
+      return {
+        params: this.createParamsForUpdateOrderForTailoringInitDataProcedure(paramsForRequest),
+        procName: this.$api.manufacturing.getProcedureNameForUpdateOrderForTailoring()
+      }
+    },
+    createParamsForUpdateOrderForTailoringInitDataProcedure(paramsForRequest) {
+      return {
+        zkzpsv_id: paramsForRequest.id,
+        data: paramsForRequest.convertDateOfOrderForTailoring,
+        prim: paramsForRequest.prim,
+        priznak: 1,
+        paper: paramsForRequest.raskroyPaper,
+        poshiv: paramsForRequest.coeffPoshiv,
+        raskroy: paramsForRequest.coeffRaskroy,
+        pr_gotov: paramsForRequest.prGotov,
+        data_gotov: paramsForRequest.convertReleaseDate,
+        proizv_raskroy: paramsForRequest.prR,
+        data_raskroy_plan: paramsForRequest.convertCuttingDate
+      }
+    },
+
+    createStructureForCheckingForAddingCutInitDataProcedure(paramsForRequest) {
+      return {
+        params: this.createParamsForCheckingForAddingCutInitDataProcedure(paramsForRequest),
+        procName: this.$api.manufacturing.getProcedureNameForCheckingForAddingCut()
+      }
+    },
+    createParamsForCheckingForAddingCutInitDataProcedure(paramsForRequest) {
+      return {
+        priznak: 1,
+        id: paramsForRequest,
+        descr: 'Larisa'
       }
     }
   }

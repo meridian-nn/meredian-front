@@ -1,3 +1,4 @@
+// номер договора не Договор сохраняется
 <template>
   <v-dialog
     :value="value"
@@ -187,7 +188,7 @@
           </vue-excel-editor>
         </div>
 
-        <div class="edit-order-for-tailoring-row">
+        <div class="edit-order-for-tailoring-row mt-5">
           <v-spacer />
           <v-btn
             color="blue darken-1"
@@ -195,6 +196,13 @@
             @click="close"
           >
             Закрыть
+          </v-btn>
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="save"
+          >
+            Сохранить
           </v-btn>
         </div>
       </v-card-text>
@@ -204,7 +212,7 @@
 
 <script>
 export default {
-  name: 'ModalEdit',
+  name: 'ModalEditTailoring',
 
   props: {
     value: {
@@ -229,6 +237,7 @@ export default {
         prim: '',
         coeffPoshiv: 0,
         coeffRaskroy: 0,
+        contract: 0,
         dataGotovFabr: null,
         dataZkzpsv: null,
         dataRaskroyPlan: null
@@ -237,7 +246,8 @@ export default {
       jsondata: [],
       formOpened: this.value,
       contractList: [],
-      raskroyList: []
+      raskroyList: [],
+      vPodrPr: []
     }
   },
 
@@ -345,6 +355,67 @@ export default {
       if (!date) { return null }
 
       return date.split('.').reverse().join('-')
+    },
+
+    async save() {
+      if (this.editedItem.prim.length > 700) {
+        this.$toast.warning('Длина примечания превышает допустимый размер и будет обрезана!')
+      }
+      let prR = null
+      if (!this.editedItem.proizvRaskroy) {
+        if (this.edit.spplnId === 0) {
+          prR = this.edit.proizvSvod
+        } else {
+          prR = this.edit.proizvId
+        }
+      } else {
+        prR = this.editedItem.proizvRaskroy
+      }
+
+      if (!this.editedItem.dataGotovFabr) {
+        this.editedItem.dataGotovFabr = '01.01.1900'
+      }
+      if (!this.editedItem.dataRaskroyPlan) {
+        this.editedItem.dataRaskroyPlan = '01.01.1900'
+      }
+      let params = {}
+      if (!this.editedItem.contract) {
+        params = this.createStructureForUpdateСontractOfOrderForTailoringInitDataProcedure({
+          pr: 1,
+          zkzpsv_id: this.edit.zkzpsvId,
+          d_id: 0
+        })
+      } else {
+        params = this.createStructureForUpdateСontractOfOrderForTailoringInitDataProcedure({
+          pr: 2,
+          zkzpsv_id: this.edit.zkzpsvId,
+          d_id: this.editedItem.contract
+        })
+      }
+      await this.$api.service.executeStashedFunction(params)
+
+      const convertDateOfOrderForTailoring = this.convertDateToMounthDateYear(this.formatDate(this.editedItem.dataZkzpsv))
+      const convertReleaseDate = this.convertDateToMounthDateYear(this.formatDate(this.editedItem.dataGotovFabr))
+      const convertCuttingDate = this.convertDateToMounthDateYear(this.formatDate(this.editedItem.dataRaskroyPlan))
+
+      const paramsForUpdt = this.createStructureForUpdateOrderForTailoringInitDataProcedure({
+        ...this.editedItem,
+        convertDateOfOrderForTailoring,
+        convertReleaseDate,
+        prR,
+        convertCuttingDate
+      })
+      await this.$api.service.executeStashedFunction(paramsForUpdt)
+
+      const paramsForChecking = this.createStructureForCheckingForAddingCutInitDataProcedure(this.editedItem.id)
+      const responsCheckingForAddingCut = await this.$api.service.executeStashedFunctionWithReturnedDataSet(paramsForChecking)
+
+      if (!responsCheckingForAddingCut[0].empty_record) {
+        this.$toast.warning('Сформирован новый код п/ф кроя: ' + responsCheckingForAddingCut[0].mc_id + ' ' + responsCheckingForAddingCut[0].name_mc)
+      }
+
+      this.$emit('save')
+      this.close()
     }
   }
 }

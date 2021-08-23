@@ -103,6 +103,11 @@ Vue.mixin({
       let parts = date.split('.')
       return `${parts[2]}-${parts[1]}-${parts[0]}`
     },
+    // конвертирование даты из формата ГОД-МЕСЯЦ-ДАТА в формат МЕСЯЦ.ДАТА.ГОД
+    convertDateToMounthDateYear(date) {
+      let parts = date.split('-')
+      return `${parts[1]}.${parts[2]}.${parts[0]}`
+    },
 
     async changeSumToPayOfPaymentAccount(accId, sumOfPaymentDocs, operationType, date) {
       if (sumOfPaymentDocs === 0) {

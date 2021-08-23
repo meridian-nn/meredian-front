@@ -990,7 +990,7 @@ export default {
 }
 
 .records-of-work-by-cards-td-green-background-class {
-  background-color: green;
+  background-color: rgb(220, 250, 228);
 }
 
 .records-of-work-by-cards-table-of-records-cell-truncate {
