@@ -479,7 +479,7 @@
       :edit="sewingOrderTableSelectedRecords[0]"
       :value="modals.edit"
       @close="closeModal('edit')"
-      @save="saveModalEditTailoring"
+      @save="successFromModal()"
     />
 
     <modal-edit-work
@@ -525,7 +525,7 @@
       :data-for-modal-from-table="sewingOrderTableSelectedRecords"
       :value="modals.consolidatedOrder"
       @close="closeModal('consolidatedOrder')"
-      @successfully="successFromModalConsolidatedOrder"
+      @successfully="successFromModal"
     />
     <modal-size
       v-if="modals.size"
@@ -875,7 +875,7 @@ export default {
     init() {
       // this.updateSewingOrderTableRecords()
     },
-    successFromModalConsolidatedOrder() {
+    successFromModal() {
       this.isNeedToInitDataForSewingOrderTable = true
       this.updateSewingOrderTableRecords()
     },
@@ -910,7 +910,7 @@ export default {
     openEditModal() {
       const editingRecord = this.sewingOrderTableSelectedRecords[0]
 
-      if (editingRecord.dopWork !== 0) {
+      if (editingRecord.dopWork === 0) {
         this.modals.edit = true
       } else {
         this.modals.editAdd = true
@@ -938,16 +938,6 @@ export default {
       //   this.isNeedToInitDataForSewingOrderTable = true
       //   this.updateSewingOrderTableRecords()
       // }
-    },
-
-    async saveModalEditTailoring(params = this.sewingOrderTableSelectedRecords) {
-      try {
-        await this.$api.manufacturing.manufacturingRequestJournalSave(params)
-
-        await this.updateSewingOrderTableRecords()
-      } catch (e) {
-        this.$refs.userNotification.showUserNotification('warning', 'Ошибка сервера, попробуйте позже')
-      }
     },
 
     saveModalEditWork() {

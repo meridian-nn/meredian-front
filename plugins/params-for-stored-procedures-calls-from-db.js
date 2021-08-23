@@ -533,6 +533,49 @@ Vue.mixin({
         descr: this.getCurrentUser.login,
         parent_id: params
       }
+    },
+
+    createStructureForUpdateСontractOfOrderForTailoringInitDataProcedure(paramsForRequest) {
+      return {
+        params: paramsForRequest,
+        procName: this.$api.manufacturing.getProcedureNameForUpdateСontractOfOrderForTailoring()
+      }
+    },
+
+    createStructureForUpdateOrderForTailoringInitDataProcedure(paramsForRequest) {
+      return {
+        params: this.createParamsForUpdateOrderForTailoringInitDataProcedure(paramsForRequest),
+        procName: this.$api.manufacturing.getProcedureNameForUpdateOrderForTailoring()
+      }
+    },
+    createParamsForUpdateOrderForTailoringInitDataProcedure(paramsForRequest) {
+      return {
+        zkzpsv_id: paramsForRequest.id,
+        data: paramsForRequest.convertDateOfOrderForTailoring,
+        prim: paramsForRequest.prim,
+        priznak: 1,
+        paper: paramsForRequest.raskroyPaper,
+        poshiv: paramsForRequest.coeffPoshiv,
+        raskroy: paramsForRequest.coeffRaskroy,
+        pr_gotov: paramsForRequest.prGotov,
+        data_gotov: paramsForRequest.convertReleaseDate,
+        proizv_raskroy: paramsForRequest.prR,
+        data_raskroy_plan: paramsForRequest.convertCuttingDate
+      }
+    },
+
+    createStructureForCheckingForAddingCutInitDataProcedure(paramsForRequest) {
+      return {
+        params: this.createParamsForCheckingForAddingCutInitDataProcedure(paramsForRequest),
+        procName: this.$api.manufacturing.getProcedureNameForCheckingForAddingCut()
+      }
+    },
+    createParamsForCheckingForAddingCutInitDataProcedure(paramsForRequest) {
+      return {
+        priznak: 1,
+        id: paramsForRequest,
+        descr: 'Larisa'
+      }
     }
   }
 
