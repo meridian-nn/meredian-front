@@ -143,7 +143,7 @@ Vue.mixin({
                 'values': valuesDate
             }]
 
-            if (filtersParams) {
+            if (filtersParams) {                
                 for (const key in filtersParams) {
                     let elemParam = filtersParams[key]
 
@@ -161,20 +161,32 @@ Vue.mixin({
                         elemParam = elemParam.sumToPayValue
                     }
 
+
                     const dataType = this.getDataTypeForRequestToSearchDocsFromPay(elemParam, key)
 
                     const operation = this.getOperationTypeForRequestToSearchDocsFromPay(key)
-
-                    const dataElem = {
+                    
+                    if ((key === "departmentId" || key === 'myOrg.id')) {
+                      elemParam.forEach((it) => {
+                        const dataElem = {
+                          dataType,
+                          key,
+                          operation,
+                          'type': elemParam.length > 1 ? 'OR' : 'AND',
+                          'values': [it]
+                        }
+                        data.push(dataElem)
+                      })
+                    } else {
+                      const dataElem = {
                         dataType,
                         key,
                         operation,
                         'type': 'AND',
-                        'values': [
-                            elemParam
-                        ]
+                        'values': Array.isArray(elemParam) ? elemParam : [ elemParam ]
+                      }
+                      data.push(dataElem)
                     }
-                    data.push(dataElem)
                 }
             }
 
@@ -524,9 +536,7 @@ Vue.mixin({
                     key: 'otdId',
                     operation: 'EQUALS',
                     type: 'AND',
-                    values: [
-                        depId
-                    ]
+                    values: depId
                 },
                 {
                     dataType: 'DATE',
