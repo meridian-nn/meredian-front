@@ -710,6 +710,10 @@ export const factory = send => ({
           return send('POST', '/oper/manufacturing/vrZkzpsvDopwork/findBySearchCriteriaList', params)
         },
 
+        getManufacturingUpdateZkzpsvDopworkProcName() {
+          return 'dbo.update_zkzpsv_dopwork'
+        },
+
         getTechTmkUpdDataProcedureName() {
             return 'dbo.tech_tmk_upd_data'
         },
@@ -793,7 +797,15 @@ export const factory = send => ({
         getProcedureNameForProcedureExecutionLoadTableForEditConsolidatedOrder() {
           return 'dbo.update_zakaz_svod'
         },
-
+        getProcedureNameForUpdateСontractOfOrderForTailoring() {
+          return 'dbo.update_zkzpsv_dog'
+        },
+        getProcedureNameForUpdateOrderForTailoring() {
+          return 'dbo.update_zkzpsv'
+        },
+        getProcedureNameForCheckingForAddingCut() {
+          return 'dbo.prov_new_pf_psv'
+        },
         recordingTheWorkOnTheOrder: {
           findBySearchCriteriaForListOfDressmaker(params) {
             return send('POST', '/oper/manufacturing/seamstressesChoice/findBySearchCriteria', params)

@@ -479,7 +479,7 @@
       :edit="sewingOrderTableSelectedRecords[0]"
       :value="modals.edit"
       @close="closeModal('edit')"
-      @save="saveModalEditTailoring"
+      @save="successFromModal()"
     />
 
     <modal-edit-work
@@ -487,7 +487,7 @@
       :edit="sewingOrderTableSelectedRecords[0]"
       :value="modals.editAdd"
       @close="closeModal('editAdd')"
-      @save="saveModalEditWork"
+      @save="saveModalEditWork('editAdd')"
     />
 
     <modal-confirm
@@ -525,7 +525,7 @@
       :data-for-modal-from-table="sewingOrderTableSelectedRecords"
       :value="modals.consolidatedOrder"
       @close="closeModal('consolidatedOrder')"
-      @successfully="successFromModalConsolidatedOrder"
+      @successfully="successFromModal"
     />
     <modal-size
       v-if="modals.size"
@@ -875,7 +875,7 @@ export default {
     init() {
       // this.updateSewingOrderTableRecords()
     },
-    successFromModalConsolidatedOrder() {
+    successFromModal() {
       this.isNeedToInitDataForSewingOrderTable = true
       this.updateSewingOrderTableRecords()
     },
@@ -910,7 +910,7 @@ export default {
     openEditModal() {
       const editingRecord = this.sewingOrderTableSelectedRecords[0]
 
-      if (editingRecord.dopWork !== 0) {
+      if (editingRecord.dopWork === 0) {
         this.modals.edit = true
       } else {
         this.modals.editAdd = true
@@ -950,8 +950,10 @@ export default {
       }
     },
 
-    saveModalEditWork() {
-      console.log('edit add save')
+    saveModalEditWork(name) {
+      this.closeModal(name)
+      this.isNeedToInitDataForSewingOrderTable = true
+      this.updateSewingOrderTableRecords()
     },
 
     updateSort(byDesc, event) {

@@ -137,7 +137,7 @@
           <v-col cols="12">
             <vue-excel-editor
               v-model="material"
-              style="height: 527px"
+              style="height: 495px"
             >
               <vue-excel-column
                 field="mc_id"
@@ -286,7 +286,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scope>
+<style lang="scss" scoped>
 .v-input--selection-controls {
   margin-top: 0 !important;
 }

@@ -16,6 +16,7 @@
             <form-control label="Производство">
               <v-autocomplete
                 v-model="editedItem.proizvId"
+                clearable
                 :items="proizvList"
                 item-value="id"
                 item-text="namePodr"
@@ -33,7 +34,7 @@
           <div class="edit-order-for-additional-work-date-of-order-for-tailoring">
             <form-control label="Дата заказа на пошив">
               <v-text-field
-                v-model="normalizeDataRaskroyPlan"
+                v-model="normalizeDataZkzpsv"
                 type="date"
               />
             </form-control>
@@ -77,7 +78,8 @@
           <div class="edit-order-for-additional-work-count">
             <form-control label="Кол-во">
               <v-text-field
-                v-model="editedItem.count"
+                v-model.number="editedItem.count"
+                type="number"
                 outlined
                 dense
                 hide-details="auto"
@@ -110,7 +112,7 @@
               field="modelName"
               label="Наименование"
               type="string"
-              width="1200px"
+              width="1450px"
             />
             <vue-excel-column
               field="colvo"
@@ -130,15 +132,31 @@
           >
             Закрыть
           </v-btn>
+
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="save"
+          >
+            Сохранить
+          </v-btn>
         </div>
       </v-card-text>
     </v-card>
+
+    <user-notification ref="userNotification" />
   </v-dialog>
 </template>
 
 <script>
+import UserNotification from '@/components/information_window/UserNotification'
+
 export default {
   name: 'ModalEditAdd',
+
+  components: {
+    UserNotification
+  },
 
   props: {
     value: {
@@ -161,6 +179,7 @@ export default {
         coeffPoshiv: 0,
         coeffRaskroy: 0,
         dataGotovFabr: null,
+        oldDataZkzpsv: null,
         dataZkzpsv: null,
         dataRaskroyPlan: null
       },
@@ -256,12 +275,54 @@ export default {
 
       this.VZkzpsvDopwork = vZkzpsvDopwork
       this.editedItem = vZkzpsv[0]
+      this.editedItem.dataGotovFabr = this.formatDate(this.editedItem.dataGotovFabr)
+      this.editedItem.dataRaskroyPlan = this.formatDate(this.editedItem.dataRaskroyPlan)
+      this.editedItem.dataZkzpsv = this.formatDate(this.editedItem.dataZkzpsv)
+      this.editedItem.oldDataZkzpsv = this.editedItem.dataZkzpsv
+      this.editedItem.baseProizvId = this.editedItem.proizvId
       this.editedItem.name = this.edit.nameMc
       this.editedItem.count = this.edit.colvo
       this.proizvList = proizvList
 
       this.displaytable = true
     },
+
+    async save() {
+      if (this.editedItem.count === 0) {
+        this.$refs.userNotification.showUserNotification('error', 'Введите количество!')
+        return
+      }
+
+      if (this.editedItem.prim.trim() > 700) {
+        this.$refs.userNotification.showUserNotification('error', 'Длина примечания превышает допустимый размер и будет обрезана!')
+        this.editedItem.prim = this.editedItem.prim.substr(0, 700)
+      }
+
+      if (!this.editedItem.proizvId) {
+        if (this.editedItem.spplnId === 0) {
+          this.editedItem.prR = this.editedItem.proizvSvod
+        } else {
+          this.editedItem.prR = this.editedItem.baseProizvId
+        }
+      } else {
+        this.editedItem.prR = this.editedItem.proizvId
+      }
+
+      let oldDataZkzpsvMassive = this.editedItem.oldDataZkzpsv.split('-')
+      oldDataZkzpsvMassive = [oldDataZkzpsvMassive[1], oldDataZkzpsvMassive[2], oldDataZkzpsvMassive[0]]
+      this.editedItem.s1 = oldDataZkzpsvMassive.join('.')
+
+      let dataZkzpsvMassive = this.editedItem.dataGotovFabr.split('-')
+      dataZkzpsvMassive = [dataZkzpsvMassive[1], dataZkzpsvMassive[2], dataZkzpsvMassive[0]]
+      this.editedItem.s2 = dataZkzpsvMassive.join('.')
+
+      const params = this.createStructureForUpdateZkzpsvDopwork(this.editedItem)
+      await this.$api.service.executeStashedFunction(params)
+
+      this.formOpened = false
+      this.$emit('save')
+    },
+
     formatDate(date) {
       if (!date) { return null }
 
