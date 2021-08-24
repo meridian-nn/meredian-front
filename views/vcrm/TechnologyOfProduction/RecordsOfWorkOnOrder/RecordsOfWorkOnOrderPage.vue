@@ -219,7 +219,7 @@
                 <v-simple-checkbox
                   v-model="example"
                   v-bind="attrs"
-                  @change="exampleChange"
+                  @input="exampleChange"
                   v-on="on"
                 />
 
@@ -366,7 +366,6 @@
         <div class="records-of-work-on-order-org-operations-table-col-4">
           <div
             class="records-of-work-on-order-row"
-            style="margin-bottom: 20px"
           >
             <v-data-table
               id="records-of-work-on-order-org-operations"
@@ -385,10 +384,23 @@
             />
           </div>
 
+          <v-row class="mt-0; ml-0">
+            <v-simple-checkbox
+              v-model="officeNote"
+              @input="officeNoteChange"
+            />
+
+            <v-subheader
+              class="font-weight-medium text-subtitle-1"
+            >
+              По служебной записке
+            </v-subheader>
+          </v-row>
+
           <div class="records-of-work-on-order-row">
             <v-data-table
               id="records-of-work-on-order-operations"
-              height="200"
+              height="196"
               :headers="operationsSumsHeaders"
               fixed-header
               :items="operationsSumsData"
@@ -663,7 +675,9 @@ export default {
 
       monthOfProizv: {},
 
-      selectedSeparationSchemeObj: {}
+      selectedSeparationSchemeObj: {},
+
+      officeNote: false
     }
   },
   computed: {
@@ -707,6 +721,20 @@ export default {
 
     async initCoefficientAndExample() {
       // TODO реализовать метод по выбору данных из таблицы "zar_tmk_op", как только будет реализована задача MERIDIAN-67
+    },
+
+    async officeNoteChange() {
+      if (!this.selectedOrgOperations ||
+         this.selectedOrgOperations.length === 0) {
+        return
+      }
+
+      const currentRowOfOrgOperations = this.selectedOrgOperations[0]
+      if (this.officeNote === false) {
+        await this.selectOrgOperationEvent(currentRowOfOrgOperations)
+      } else {
+        await this.selectOrgOperationEventFromSzTables(currentRowOfOrgOperations)
+      }
     },
 
     async coefficientChange() {
@@ -848,15 +876,30 @@ export default {
       this.orgOperationsData = await this.$api.manufacturing.findOrgOperationsBySearchCriterias(criterias)
     },
 
-    async initOperationsSumsData(item) {
+    async initOperationsSumsData(item, priznak) {
+      if (!priznak ||
+      !item) {
+        return
+      }
+
       const paramsForRequest = {
         ...this.chosenRecord,
         ...item,
         ...this.varsOfForm,
         ...this.orderFromRecordsOfWorkByCards,
         ...this.selectedSeparationSchemeObj,
-        ...{ priznak: 3, yearCurr: this.varsOfForm.godAnfb, monthCurr: this.varsOfForm.mesAnfb, proizvId: this.varsOfForm.proizvAnfb }
+        ...{ priznak, yearCurr: this.varsOfForm.godAnfb, monthCurr: this.varsOfForm.mesAnfb, proizvId: this.varsOfForm.proizvAnfb }
       }
+
+      if (priznak === 7) {
+        paramsForRequest.orgOperId = 0
+        paramsForRequest.cehId = 0
+        paramsForRequest.prUpak = 0
+        paramsForRequest.zarSchCardsId = 0
+        paramsForRequest.schemeCardsId = 0
+        paramsForRequest.schemeId = 0
+      }
+
       const params = this.createStructureForManufacturingInitDataProcedure(paramsForRequest)
       await this.$api.service.executeStashedFunction(params).catch((error) => {
         alert(error)
@@ -876,6 +919,21 @@ export default {
         }
       ]
       this.operationsSumsData = await this.$api.manufacturing.findOperationsSumsBySearchCriterias(criterias)
+    },
+
+    async updateOperationsSumsDataFromSzTable() {
+      const criterias = [
+        {
+          dataType: 'VARCHAR',
+          key: 'userId',
+          operation: 'EQUALS',
+          type: 'AND',
+          values: [
+            this.getCurrentUser.id
+          ]
+        }
+      ]
+      this.operationsSumsData = await this.$api.manufacturing.findOperationsSumsFromSzTableBySearchCriterias(criterias)
     },
 
     async initSeparationScheme() {
@@ -951,6 +1009,8 @@ export default {
 
       this.listOfDressmakersData = []
       this.dressmakersData = []
+
+      this.officeNote = false
     },
 
     async initDataForListOfDressmakersData() {
@@ -972,20 +1032,37 @@ export default {
     },
 
     async selectOrgOperationEvent(selectedRow) {
+      if (this.officeNote) {
+        await this.selectOrgOperationEventFromSzTables(selectedRow)
+        return
+      }
+
       this.selectedOrgOperations = [selectedRow]
       await this.getDressMakersDataTable(selectedRow)
-      await this.initOperationsSumsData(selectedRow)
+      await this.initOperationsSumsData(selectedRow, 3)
       await this.updateOperationsSumsData()
     },
 
-    async initDataMakers(item) {
+    async selectOrgOperationEventFromSzTables(selectedRow) {
+      this.selectedOrgOperations = [selectedRow]
+      await this.getDressMakersDataTableFromSzTable(selectedRow)
+      await this.initOperationsSumsData(selectedRow, 7)
+      await this.updateOperationsSumsDataFromSzTable()
+    },
+
+    async initDataMakers(item, priznak) {
+      if (!priznak) {
+        return
+      }
+
       this.dressmakersData = []
       const dataForParams = {
         ...this.chosenRecord,
         ...item,
         ...this.varsOfForm,
         ...this.orderFromRecordsOfWorkByCards,
-        ...this.selectedSeparationSchemeObj
+        ...this.selectedSeparationSchemeObj,
+        priznak
       }
       const paramsForInit = this.createStructureForDressMakersInitDataProcedure(dataForParams)
       await this.$api.service.executeStashedFunction(paramsForInit).catch((error) => {
@@ -994,11 +1071,22 @@ export default {
     },
 
     async getDressMakersDataTable(item) {
-      await this.initDataMakers(item)
+      await this.initDataMakers(item, 4)
 
       const searchCriterias = this.createCriteriasToGetDressMakers()
 
       const content = await this.$api.manufacturing.recordingTheWorkOnTheOrder.findBySearchCriteriaForGetDressmaker(searchCriterias)
+      if (content.length > 0) {
+        this.dressmakersData.push(...content)
+      }
+    },
+
+    async getDressMakersDataTableFromSzTable(item) {
+      await this.initDataMakers(item, 8)
+
+      const searchCriterias = this.createCriteriasToGetDressMakers()
+
+      const content = await this.$api.manufacturing.recordingTheWorkOnTheOrder.findBySearchCriteriaForGetDressmakerFromSzTable(searchCriterias)
       if (content.length > 0) {
         this.dressmakersData.push(...content)
       }
@@ -1184,7 +1272,7 @@ export default {
 #records-of-work-on-order-operations {
   border-collapse: collapse;
   width: 100%;
-  height: 200px;
+  height: 196px;
 }
 
 #records-of-work-on-order-operations table {
