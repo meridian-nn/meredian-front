@@ -421,14 +421,52 @@
             :headers="dressmakersHeaders"
             fixed-header
             :items="dressmakersData"
-            show-select
-            :single-select="true"
+            :show-select="false"
+            :single-select="false"
             disable-pagination
             hide-default-footer
             no-data-text=""
             class="elevation-1"
-            @contextmenu:row="showDressmakersMenu"
-          />
+          >
+            <template #body="{ items }">
+              <tbody>
+                <tr
+                  v-for="item in items"
+                  :key="item.id"
+                  :value="item"
+                  :class="selectBackgroundForRowRecordsOfWorkOnOrderDressmakers(item)"
+                  @contextmenu:row="showDressmakersMenu"
+                >
+                  <td>
+                    {{ item.tabN }}
+                  </td>
+                  <td>
+                    {{ item.fio }}
+                  </td>
+                  <td>
+                    {{ item.codOp }}
+                  </td>
+                  <td>
+                    <vue-numeric
+                      v-model.number="item.colvoOp"
+                      separator="space"
+                      output-type="number"
+                    />
+                  </td>
+                  <td>
+                    <vue-numeric
+                      v-model.number="item.colvoNew"
+                      separator="space"
+                      output-type="number"
+                    />
+                  </td>
+                  <td>
+                    {{ item.colvoOst }}
+                  </td>
+                </tr>
+              </tbody>
+            </template>
+          </v-data-table>
         </div>
 
         <v-menu
@@ -1150,7 +1188,17 @@ export default {
       if (content.length > 0) {
         this.dressmakersData.push(...content)
       }
+    },
+
+    selectBackgroundForRowRecordsOfWorkOnOrderDressmakers(item) {
+      if (item.codOp.includes('удаление')) {
+        return 'records-of-work-on-order-dressmakers-row-gray'
+      }
+      if (item.rating % 2 !== 0) {
+        return 'records-of-work-on-order-dressmakers-row-green'
+      }
     }
+
   }
 }
 </script>
@@ -1455,5 +1503,11 @@ export default {
   flex: 0 0 27%;
   max-width: 27%;
   margin-top: 5px
+}
+.records-of-work-on-order-dressmakers-row-gray {
+  background-color: rgb(192,192,192);
+}
+.records-of-work-on-order-dressmakers-row-green {
+  background-color: rgb(239,254,235);
 }
 </style>
