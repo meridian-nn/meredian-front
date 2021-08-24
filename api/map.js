@@ -758,6 +758,10 @@ export const factory = send => ({
           return send('POST', '/oper/manufacturing/operationSum/findBySearchCriteriaList', params)
         },
 
+        findOperationsSumsFromSzTableBySearchCriterias(params) {
+          return send('POST', '/oper/manufacturing/operationSumSz/findBySearchCriteriaList', params)
+        },
+
         findSeparationSchemeBySearchCriterias(params) {
           return send('POST', '/oper/manufacturing/divisionScheme/findBySearchCriteriaList', params)
         },
@@ -813,6 +817,10 @@ export const factory = send => ({
 
           findBySearchCriteriaForGetDressmaker(params) {
             return send('POST', '/oper/manufacturing/recordedWork/findBySearchCriteria', params)
+          },
+
+          findBySearchCriteriaForGetDressmakerFromSzTable(params) {
+            return send('POST', '/oper/manufacturing/recordedWorkSz/findBySearchCriteria', params)
           },
         }
     },

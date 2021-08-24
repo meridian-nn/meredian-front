@@ -345,9 +345,10 @@ Vue.mixin({
         procName: this.$api.manufacturing.getManufacturingRequestInitDataProcedureName()
       }
     },
+
     createParamsForDressMakersInitDataProcedure(paramsForRequest) {
       const params = {
-        priznak_1: 4,
+        priznak_1: paramsForRequest.priznak,
         user_id: this.getCurrentUser.id
       }
       if (paramsForRequest) {

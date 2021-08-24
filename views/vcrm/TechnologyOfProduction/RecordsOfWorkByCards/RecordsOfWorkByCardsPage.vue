@@ -824,6 +824,7 @@ export default {
     updateRecordsData() {
       this.pageOfRecords = 0
       this.recordsData = []
+      this.recordsSelectedRows = []
       this.infiniteIdOfRecordsData += 1
     },
 
