@@ -1477,6 +1477,7 @@ export default {
     // Функция подсчета сумм всех документов на оплату, которые удовлетворяют критерии отбора (searchCriterias)
     async fillResultsOfDocumentsFromPay(searchCriterias) {
       const dataForResults = this.createCriteriasToGetResultsOfDocsFromPay(searchCriterias)
+      console.log('dataForResults ', dataForResults)
       const response = await this.$api.payment.docOplForPay.findDocumentsWithGroupBy(dataForResults)
 
       if (response.length > 0) {

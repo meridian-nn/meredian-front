@@ -37,6 +37,7 @@
                 item-text="namePodr"
                 outlined
                 hide-details="auto"
+                multiple
                 @change="departmentChange"
               />
             </v-col>
@@ -71,6 +72,7 @@
                 item-text="clName"
                 outlined
                 hide-details="auto"
+                multiple
               />
             </v-col>
           </v-row>
