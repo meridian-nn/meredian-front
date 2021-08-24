@@ -435,6 +435,7 @@
                   :key="item.id"
                   :value="item"
                   :class="selectBackgroundForRowRecordsOfWorkOnOrderDressmakers(item)"
+                  @contextmenu:row="showDressmakersMenu"
                 >
                   <td>
                     {{ item.tabN }}
@@ -467,6 +468,22 @@
             </template>
           </v-data-table>
         </div>
+
+        <v-menu
+          v-model="dressmakersMenu"
+          :position-x="xDressmakersMenu"
+          :position-y="yDressmakersMenu"
+          absolute
+          offset-y
+        >
+          <v-list>
+            <v-list-item @click="changeInAllDressmakerOperations">
+              <v-list-item-title>
+                Изменить во всех операциях по швее
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
 
         <div class="records-of-work-on-order-col-3">
           <div class="records-of-work-on-order-row">
@@ -525,17 +542,20 @@
           Закрыть
         </v-btn>
       </div>
+      <loading-dialog ref="loadingDialog" />
     </v-card>
   </v-dialog>
 </template>
 <script>
 import UserNotification from '~/components/information_window/UserNotification'
+import LoadingDialog from '~/components/loading_dialog/LoadingDialog'
 
 export default {
   name: 'RecordsOfWorkOnOrder',
 
   components: {
-    UserNotification
+    UserNotification,
+    LoadingDialog
   },
 
   props: {
@@ -715,7 +735,13 @@ export default {
 
       selectedSeparationSchemeObj: {},
 
-      officeNote: false
+      officeNote: false,
+
+      // Контекстное меню документов к оплате
+      dressmakersMenu: false,
+      xDressmakersMenu: 0,
+      yDressmakersMenu: 0,
+      currentRowForContextMenu: null
     }
   },
   computed: {
@@ -738,15 +764,44 @@ export default {
       }
     },
 
+    showDressmakersMenu(event, item) {
+      event.preventDefault()
+      this.dressmakersMenu = false
+      this.currentRowForContextMenu = null
+      this.xDressmakersMenu = event.clientX
+      this.yDressmakersMenu = event.clientY
+      this.$nextTick(() => {
+        this.dressmakersMenu = true
+        this.currentRowForContextMenu = item.item
+      })
+    },
+
+    async changeInAllDressmakerOperations() {
+      const recordsOfWorkOfCurrentDressmaker = this.dressmakersData.filter(record => record.tabN === this.currentRowForContextMenu.tabN)
+
+      this.$refs.loadingDialog.showLoadingDialog('Изменение данных о работе по выбранной швее, подождите...')
+      for (const recordsOfWorkOfCurrentDressmakerElement of recordsOfWorkOfCurrentDressmaker) {
+        this.varsOfForm.priznak1 = this.officeNote ? 2 : 10
+        this.varsOfForm.coefficient = this.coefficient
+        this.varsOfForm.obraz = this.example === true ? 1 : 0
+        this.varsOfForm.s1 = this.convertDateToMonthDateYear(this.dateOfOperation)
+        this.varsOfForm.recordOfWork = recordsOfWorkOfCurrentDressmakerElement
+        this.varsOfForm.orderFromRecordsOfWorkByCards = this.orderFromRecordsOfWorkByCards
+        this.varsOfForm.amountOfChange = this.amountOfChange
+        const params = this.createStructureForTechTmkUpdData(this.chosenRecord, this.varsOfForm, this.selectedOrgOperations[0])
+        await this.$api.service.executeStashedFunction(params).catch((error) => {
+          alert(error)
+        })
+      }
+      this.$refs.loadingDialog.closeLoadingDialog()
+
+      await this.updateRecordsOfWorkOnOrder
+    },
+
     async updateRecordsOfWorkOnOrder(dontShowNotification) {
       await this.initSeparationScheme()
       await this.updateSeparationScheme()
       await this.selectSeparationSchemeOfChosenRecord()
-
-      if (this.orgOperationsData.length > 0) {
-        await this.selectOrgOperationEvent(this.orgOperationsData[0])
-      }
-
       await this.initDataForListOfDressmakersData()
       await this.getListOfDressmakersDataTable()
 
@@ -912,6 +967,10 @@ export default {
         }
       ]
       this.orgOperationsData = await this.$api.manufacturing.findOrgOperationsBySearchCriterias(criterias)
+
+      if (this.orgOperationsData.length > 0) {
+        await this.selectOrgOperationEvent(this.orgOperationsData[0])
+      }
     },
 
     async initOperationsSumsData(item, priznak) {
@@ -1020,11 +1079,12 @@ export default {
     },
 
     async separationSchemeChange() {
+      this.operationsSumsData = []
+      this.dressmakersData = []
+
       this.selectedSeparationSchemeObj = this.separationScheme.find(separationScheme => separationScheme.id === this.chosenSeparationScheme)
       await this.initOrgOperationData(this.selectedSeparationSchemeObj)
       await this.updateOrgOperationsData()
-      this.operationsSumsData = []
-      this.dressmakersData = []
     },
 
     reset() {
