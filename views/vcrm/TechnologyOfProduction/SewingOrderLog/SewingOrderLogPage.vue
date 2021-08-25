@@ -531,6 +531,7 @@
 
     <modal-old-order-card
       v-if="modals.oldOrderCard"
+      :data-from-sewing-order-log="currentRowOfTableForContextMenu"
       :value="modals.oldOrderCard"
       @close="closeModal('oldOrderCard')"
     />
