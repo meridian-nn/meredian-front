@@ -435,7 +435,7 @@
                   :key="item.id"
                   :value="item"
                   :class="selectBackgroundForRowRecordsOfWorkOnOrderDressmakers(item)"
-                  @contextmenu:row="showDressmakersMenu"
+                  @contextmenu="showDressmakersMenu($event, item)"
                 >
                   <td>
                     {{ item.tabN }}
@@ -506,6 +506,7 @@
                 fab
                 dark
                 small
+                @click="replaceDressmakerToTableOfWorkRecords"
               >
                 <v-icon>mdi-arrow-left</v-icon>
               </v-btn>
@@ -513,6 +514,7 @@
             <div class="records-of-work-on-order-dressmakers-div">
               <v-data-table
                 id="records-of-work-on-order-dressmakers"
+                v-model="selectedDressmakers"
                 height="572"
                 :headers="listOfDressmakersHeaders"
                 fixed-header
@@ -713,6 +715,8 @@ export default {
 
       listOfDressmakersData: [],
 
+      selectedDressmakers: [],
+
       dialog: false,
 
       orderFromRecordsOfWorkByCards: {},
@@ -772,7 +776,7 @@ export default {
       this.yDressmakersMenu = event.clientY
       this.$nextTick(() => {
         this.dressmakersMenu = true
-        this.currentRowForContextMenu = item.item
+        this.currentRowForContextMenu = item
       })
     },
 
@@ -781,21 +785,47 @@ export default {
 
       this.$refs.loadingDialog.showLoadingDialog('Изменение данных о работе по выбранной швее, подождите...')
       for (const recordsOfWorkOfCurrentDressmakerElement of recordsOfWorkOfCurrentDressmaker) {
-        this.varsOfForm.priznak1 = this.officeNote ? 2 : 10
+        this.varsOfForm.priznak1 = this.officeNote ? 2 : 10 // Должно быть наоборот но правильно работает так, почему
         this.varsOfForm.coefficient = this.coefficient
         this.varsOfForm.obraz = this.example === true ? 1 : 0
         this.varsOfForm.s1 = this.convertDateToMonthDateYear(this.dateOfOperation)
         this.varsOfForm.recordOfWork = recordsOfWorkOfCurrentDressmakerElement
         this.varsOfForm.orderFromRecordsOfWorkByCards = this.orderFromRecordsOfWorkByCards
-        this.varsOfForm.amountOfChange = this.amountOfChange
+        this.varsOfForm.amountOfChange = this.amountOfChange + recordsOfWorkOfCurrentDressmakerElement.colvoOp
         const params = this.createStructureForTechTmkUpdData(this.chosenRecord, this.varsOfForm, this.selectedOrgOperations[0])
-        await this.$api.service.executeStashedFunction(params).catch((error) => {
-          alert(error)
+        const response = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params).catch((error) => {
+          console.log(error)
+          console.log(response)
         })
       }
+      await this.updateRecordsOfWorkOnOrder()
       this.$refs.loadingDialog.closeLoadingDialog()
+    },
 
-      await this.updateRecordsOfWorkOnOrder
+    async replaceDressmakerToTableOfWorkRecords() { // Вообще не работает
+      if (!this.selectedDressmakers ||
+         this.selectedDressmakers.length === 0) {
+        this.$refs.userNotification.showUserNotification('error', 'Выберите хотя бы одну швею для операции переноса!')
+        return
+      }
+
+      this.$refs.loadingDialog.showLoadingDialog('Перенос в таблицу работ выбранных швей, подождите...')
+      for (const selectedDressmaker of this.selectedDressmakers) {
+        this.varsOfForm.priznak1 = !this.officeNote ? 3 : 11
+        this.varsOfForm.coefficient = this.coefficient
+        this.varsOfForm.obraz = this.example === true ? 1 : 0
+        this.varsOfForm.dressmaker = selectedDressmaker
+        this.varsOfForm.orderFromRecordsOfWorkByCards = this.orderFromRecordsOfWorkByCards
+        this.varsOfForm.amountOfChange = 0
+        const params = this.createStructureForTechTmkUpdData(this.chosenRecord, this.varsOfForm, this.selectedOrgOperations[0])
+        const response = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params).catch((error) => {
+          console.log(error)
+          console.log(response)
+        })
+        console.log(response)
+      }
+      await this.updateRecordsOfWorkOnOrder()
+      this.$refs.loadingDialog.closeLoadingDialog()
     },
 
     async updateRecordsOfWorkOnOrder(dontShowNotification) {
@@ -1107,6 +1137,7 @@ export default {
 
       this.listOfDressmakersData = []
       this.dressmakersData = []
+      this.selectedDressmakers = []
 
       this.officeNote = false
     },
@@ -1121,6 +1152,7 @@ export default {
     },
 
     async getListOfDressmakersDataTable() {
+      this.selectedDressmakers = []
       const searchCriterias = this.createCriteriasToGetListOfDressmakers()
       const content = await this.$api.manufacturing.recordingTheWorkOnTheOrder.findBySearchCriteriaForListOfDressmaker(searchCriterias)
 
