@@ -254,17 +254,20 @@
       </v-card-text>
       <user-notification ref="userNotification" />
     </v-card>
+    <loading-dialog ref="loadingDialog" />
   </v-dialog>
 </template>
 
 <script>
 import UserNotification from '~/components/information_window/UserNotification'
+import LoadingDialog from '~/components/loading_dialog/LoadingDialog'
 
 export default {
   name: 'ModalPrint',
 
   components: {
-    UserNotification
+    UserNotification,
+    LoadingDialog
   },
 
   props: {
@@ -353,7 +356,12 @@ export default {
       await this.findUserComplects()
     },
 
-    downloadReport() {
+    async downloadReport() {
+      const downloadMessage = this.selectedRecords.length > 1
+        ? 'Загрузка отчётов, подождите...'
+        : 'Загрузка отчёта, подождите...'
+      this.$refs.loadingDialog.showLoadingDialog(downloadMessage)
+
       const markedReports = this.reports.filter(item => item.marked)
 
       if (!markedReports ||
@@ -364,25 +372,26 @@ export default {
 
       for (const report of markedReports) {
         if (report.value === 'OrderOnOurProduction') {
-          this.downloadOrderOnOurProduction() // Требуется доработка sql запроса
+          await this.downloadOrderOnOurProduction() // Требуется доработка sql запроса
         } else if (report.value === 'KonfectionCard') {
           // Отчет не реализован
         } else if (report.value === 'DefectiveReport') {
           // Отчет не реализован
         } else if (report.value === 'OrderOnGiversRawMaterials') {
-          this.downloadOrderOnGiversRawMaterials() // Требуется доработка sql запроса
+          await this.downloadOrderOnGiversRawMaterials() // Требуется доработка sql запроса
         } else if (report.value === 'InvoiceForReleaseOfFinishedProductions') {
-          this.downloadInvoiceForReleaseOfFinishedProductions() // Требуется доработка sql запроса
+          await this.downloadInvoiceForReleaseOfFinishedProductions() // Требуется доработка sql запроса
         } else if (report.value === 'CustomCuttingCard') {
-          this.downloadCustomCuttingCard()
+          await this.downloadCustomCuttingCard()
         } else if (report.value === 'RawMaterialConsumptionMap') {
-          this.downloadRawMaterialConsumptionMap()
+          await this.downloadRawMaterialConsumptionMap()
         } else if (report.value === 'AccessoriesConsumptionMap') {
-          this.downloadAccessoriesConsumptionMap()
+          await this.downloadAccessoriesConsumptionMap()
         } else if (report.value === 'LocationOfLogosInOrder') {
-          this.downloadLocationOfLogosInOrder()
+          await this.downloadLocationOfLogosInOrder()
         }
       }
+      this.$refs.loadingDialog.closeLoadingDialog()
     },
 
     downloadReestPays() {
