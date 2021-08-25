@@ -793,14 +793,13 @@ export default {
       this.varsOfForm.s1 = this.convertDateToMonthDateYear(this.dateOfOperation)
       this.varsOfForm.recordOfWork = item
       this.varsOfForm.orderFromRecordsOfWorkByCards = this.orderFromRecordsOfWorkByCards
-      this.varsOfForm.amountOfChange = item.colvoOp
+      this.varsOfForm.amountOfChange = item.colvoOp + item.colvoNew
       const params = this.createStructureForTechTmkUpdData(this.chosenRecord, this.varsOfForm, this.selectedOrgOperations[0])
       await this.$api.service.executeStashedFunctionWithReturnedDataSet(params).catch((error) => {
         alert(error)
       })
+      await this.selectOrgOperationEvent(this.selectedOrgOperations[0])
       this.$refs.loadingDialog.closeLoadingDialog()
-
-      await this.updateRecordsOfWorkOnOrder()
     },
 
     async changeInAllDressmakerOperations() {
@@ -821,7 +820,7 @@ export default {
           console.log(response)
         })
       }
-      await this.updateRecordsOfWorkOnOrder()
+      await this.selectOrgOperationEvent(this.selectedOrgOperations[0])
       this.$refs.loadingDialog.closeLoadingDialog()
     },
 
