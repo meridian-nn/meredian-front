@@ -435,7 +435,7 @@
                   :key="item.id"
                   :value="item"
                   :class="selectBackgroundForRowRecordsOfWorkOnOrderDressmakers(item)"
-                  @contextmenu:row="showDressmakersMenu"
+                  @contextmenu="showDressmakersMenu($event, item)"
                 >
                   <td>
                     {{ item.tabN }}
@@ -447,17 +447,19 @@
                     {{ item.codOp }}
                   </td>
                   <td>
-                    <vue-numeric
-                      v-model.number="item.colvoOp"
-                      separator="space"
-                      output-type="number"
-                    />
+                    {{ item.colvoOp }}
                   </td>
                   <td>
                     <vue-numeric
                       v-model.number="item.colvoNew"
                       separator="space"
                       output-type="number"
+                      @focus="previousColvoNew = item.colvoNew"
+                      @blur="
+                        item.colvoNew = previousColvoNew
+                        previousColvoNew = null
+                      "
+                      @keyup.enter.native="changeInDressmakerOperation(item)"
                     />
                   </td>
                   <td>
@@ -470,6 +472,7 @@
         </div>
 
         <v-menu
+          v-if="previousColvoNew === null"
           v-model="dressmakersMenu"
           :position-x="xDressmakersMenu"
           :position-y="yDressmakersMenu"
@@ -741,7 +744,9 @@ export default {
       dressmakersMenu: false,
       xDressmakersMenu: 0,
       yDressmakersMenu: 0,
-      currentRowForContextMenu: null
+      currentRowForContextMenu: null,
+
+      previousColvoNew: null
     }
   },
   computed: {
@@ -772,8 +777,26 @@ export default {
       this.yDressmakersMenu = event.clientY
       this.$nextTick(() => {
         this.dressmakersMenu = true
-        this.currentRowForContextMenu = item.item
+        this.currentRowForContextMenu = item
       })
+    },
+
+    async changeInDressmakerOperation(item) {
+      this.$refs.loadingDialog.showLoadingDialog('Изменение данных о работе по выбранной операции, подождите...')
+      this.varsOfForm.priznak1 = this.officeNote ? 2 : 10
+      this.varsOfForm.coefficient = this.coefficient
+      this.varsOfForm.obraz = this.example === true ? 1 : 0
+      this.varsOfForm.s1 = this.convertDateToMonthDateYear(this.dateOfOperation)
+      this.varsOfForm.recordOfWork = item
+      this.varsOfForm.orderFromRecordsOfWorkByCards = this.orderFromRecordsOfWorkByCards
+      this.varsOfForm.amountOfChange = item.colvoOp
+      const params = this.createStructureForTechTmkUpdData(this.chosenRecord, this.varsOfForm, this.selectedOrgOperations[0])
+      await this.$api.service.executeStashedFunctionWithReturnedDataSet(params).catch((error) => {
+        alert(error)
+      })
+      this.$refs.loadingDialog.closeLoadingDialog()
+
+      await this.updateRecordsOfWorkOnOrder()
     },
 
     async changeInAllDressmakerOperations() {
@@ -789,13 +812,13 @@ export default {
         this.varsOfForm.orderFromRecordsOfWorkByCards = this.orderFromRecordsOfWorkByCards
         this.varsOfForm.amountOfChange = this.amountOfChange
         const params = this.createStructureForTechTmkUpdData(this.chosenRecord, this.varsOfForm, this.selectedOrgOperations[0])
-        await this.$api.service.executeStashedFunction(params).catch((error) => {
+        await this.$api.service.executeStashedFunctionWithReturnedDataSet(params).catch((error) => {
           alert(error)
         })
       }
       this.$refs.loadingDialog.closeLoadingDialog()
 
-      await this.updateRecordsOfWorkOnOrder
+      await this.updateRecordsOfWorkOnOrder()
     },
 
     async updateRecordsOfWorkOnOrder(dontShowNotification) {
