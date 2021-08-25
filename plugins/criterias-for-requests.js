@@ -166,7 +166,7 @@ Vue.mixin({
 
                     const operation = this.getOperationTypeForRequestToSearchDocsFromPay(key)
                     
-                    if ((key === "departmentId" || key === 'myOrg.id')) {
+                    if (Array.isArray(elemParam)) {
                       elemParam.forEach((it) => {
                         const dataElem = {
                           dataType,
@@ -183,7 +183,7 @@ Vue.mixin({
                         key,
                         operation,
                         'type': 'AND',
-                        'values': Array.isArray(elemParam) ? elemParam : [ elemParam ]
+                        'values': [ elemParam ]
                       }
                       data.push(dataElem)
                     }

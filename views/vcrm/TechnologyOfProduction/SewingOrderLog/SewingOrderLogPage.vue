@@ -145,7 +145,6 @@
           :loading="loadingType.sewingOrderTableRecords"
           loading-text="Заказы загружаются, подождите"
           no-data-text="Заказы не найдены"
-          show-select
           :single-select="false"
           disable-pagination
           hide-default-footer
@@ -190,31 +189,26 @@
                     mdi-check
                   </v-icon>
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.numPlanpsv }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.numZkzpsv }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.dataZkzpsv }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract sewing-order-log-page-records-table-cell-truncate' : 'sewing-order-log-page-records-table-cell-truncate'">
-                  <v-tooltip bottom>
-                    <template #activator="{ on, attrs }">
-                      <span
-                        v-bind="attrs"
-                        v-on="on"
-                      >{{ item.nameProizv }}</span>
-                    </template>
-                    <span>{{ item.nameProizv }}</span>
-                  </v-tooltip>
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract sewing-order-log-page-records-table-cell-truncate' : 'sewing-order-log-page-records-table-cell-truncate'">
+                  <span>{{ item.nameProizv }}</span>
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.mcId }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract sewing-order-log-page-records-table-cell-truncate' : 'sewing-order-log-page-records-table-cell-truncate'">
-                  <v-tooltip bottom>
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract sewing-order-log-page-records-table-cell-truncate' : 'sewing-order-log-page-records-table-cell-truncate'">
+                  <v-tooltip
+                    v-if="item.nameMc.length > 29"
+                    bottom
+                  >
                     <template #activator="{ on, attrs }">
                       <span
                         v-bind="attrs"
@@ -223,47 +217,46 @@
                     </template>
                     <span>{{ item.nameMc }}</span>
                   </v-tooltip>
+
+                  <span
+                    v-else
+                  >{{ item.nameMc }}</span>
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.nameEd }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.colvo }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.planDataManager }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.factData }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract sewing-order-log-page-records-table-cell-truncate' : 'sewing-order-log-page-records-table-cell-truncate'">
-                  <v-tooltip bottom>
-                    <template #activator="{ on, attrs }">
-                      <span
-                        v-bind="attrs"
-                        v-on="on"
-                      >{{ item.nameRaskroy }}</span>
-                    </template>
-                    <span>{{ item.nameRaskroy }}</span>
-                  </v-tooltip>
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract sewing-order-log-page-records-table-cell-truncate' : 'sewing-order-log-page-records-table-cell-truncate'">
+                  <span>{{ item.nameRaskroy }}</span>
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.numZaivk }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.numSvod }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.dataRaskroyFact }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.fioIsp }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.otvIsp }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract sewing-order-log-page-records-table-cell-truncate' : 'sewing-order-log-page-records-table-cell-truncate'">
-                  <v-tooltip bottom>
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract sewing-order-log-page-records-table-cell-truncate' : 'sewing-order-log-page-records-table-cell-truncate'">
+                  <v-tooltip
+                    v-if="item.gostTu.length > 100"
+                    bottom
+                  >
                     <template #activator="{ on, attrs }">
                       <span
                         v-bind="attrs"
@@ -272,49 +265,45 @@
                     </template>
                     <span>{{ item.gostTu }}</span>
                   </v-tooltip>
+
+                  <span
+                    v-else
+                  >{{ item.gostTu }}</span>
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract sewing-order-log-page-records-table-cell-truncate' : 'sewing-order-log-page-records-table-cell-truncate'">
-                  <v-tooltip bottom>
-                    <template #activator="{ on, attrs }">
-                      <span
-                        v-bind="attrs"
-                        v-on="on"
-                      >{{ item.codGra }}</span>
-                    </template>
-                    <span>{{ item.codGra }}</span>
-                  </v-tooltip>
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract sewing-order-log-page-records-table-cell-truncate' : 'sewing-order-log-page-records-table-cell-truncate'">
+                  <span>{{ item.codGra }}</span>
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.planData }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.gotovKonfKarta }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.gotovTo }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.gotovMl }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.gotovTp }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.gotovOtk }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.print }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.kroy }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.nameKroy }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.govcontract }}
                 </td>
-                <td :class="item.gos_kontrakt > 0 ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
+                <td :class="hasGosKontrakt(item) ? 'font-size-for-govcontract font-bold-for-govcontract' : ''">
                   {{ item.contract }}
                 </td>
               </tr>
@@ -661,6 +650,12 @@ export default {
       sewingOrderTableSelectedRecords: [],
       sewingOrderTableHeaders: [
         {
+          text: '',
+          value: '',
+          width: '30px',
+          sortable: false
+        },
+        {
           text: 'Эт',
           value: 'prEt',
           width: '20px',
@@ -675,19 +670,19 @@ export default {
         {
           text: 'План',
           value: 'numPlanpsv',
-          width: '60px',
+          width: '50px',
           sort: () => false
         },
         {
           text: 'Заказ',
           value: 'numZkzpsv',
-          width: '60px',
+          width: '65px',
           sort: () => false
         },
         {
           text: 'Дата',
           value: 'dataZkzpsv',
-          width: '93px',
+          width: '80px',
           sort: () => false
         },
         {
@@ -717,31 +712,31 @@ export default {
         {
           text: 'Кол-во',
           value: 'colvo',
-          width: '60px',
+          width: '65px',
           sort: () => false
         },
         {
           text: 'План',
           value: 'planDataManager',
-          width: '125px',
+          width: '80px',
           sortable: false
         },
         {
           text: 'Факт',
           value: 'factData',
-          width: '95px',
+          width: '80px',
           sort: () => false
         },
         {
           text: 'Раскрой',
           value: 'nameRaskroy',
-          width: '130px',
+          width: '210px',
           sort: () => false
         },
         {
           text: 'Заявка',
           value: 'numZaivk',
-          width: '100px',
+          width: '75px',
           sort: () => false
         },
         {
@@ -777,13 +772,13 @@ export default {
         {
           text: 'Код ЗП',
           value: 'codGra',
-          width: '150px',
+          width: '180px',
           sort: () => false
         },
         {
           text: 'Фабрика',
           value: 'planData',
-          width: '125px',
+          width: '90px',
           sort: () => false
         },
         {
@@ -872,6 +867,9 @@ export default {
     this.init()
   },
   methods: {
+    hasGosKontrakt(item) {
+      return item.gos_kontrakt > 0
+    },
     init() {
       // this.updateSewingOrderTableRecords()
     },

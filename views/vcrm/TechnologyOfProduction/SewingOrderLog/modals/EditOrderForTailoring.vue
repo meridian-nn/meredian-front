@@ -394,9 +394,9 @@ export default {
       }
       await this.$api.service.executeStashedFunction(params)
 
-      const convertDateOfOrderForTailoring = this.convertDateToMounthDateYear(this.formatDate(this.editedItem.dataZkzpsv))
-      const convertReleaseDate = this.convertDateToMounthDateYear(this.formatDate(this.editedItem.dataGotovFabr))
-      const convertCuttingDate = this.convertDateToMounthDateYear(this.formatDate(this.editedItem.dataRaskroyPlan))
+      const convertDateOfOrderForTailoring = this.convertDateToMonthDateYear(this.formatDate(this.editedItem.dataZkzpsv))
+      const convertReleaseDate = this.convertDateToMonthDateYear(this.formatDate(this.editedItem.dataGotovFabr))
+      const convertCuttingDate = this.convertDateToMonthDateYear(this.formatDate(this.editedItem.dataRaskroyPlan))
 
       const paramsForUpdt = this.createStructureForUpdateOrderForTailoringInitDataProcedure({
         ...this.editedItem,

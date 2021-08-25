@@ -421,14 +421,72 @@
             :headers="dressmakersHeaders"
             fixed-header
             :items="dressmakersData"
-            show-select
-            :single-select="true"
+            :show-select="false"
+            :single-select="false"
             disable-pagination
             hide-default-footer
             no-data-text=""
             class="elevation-1"
-          />
+          >
+            <template #body="{ items }">
+              <tbody>
+                <tr
+                  v-for="item in items"
+                  :key="item.id"
+                  :value="item"
+                  :class="selectBackgroundForRowRecordsOfWorkOnOrderDressmakers(item)"
+                  @contextmenu="showDressmakersMenu($event, item)"
+                >
+                  <td>
+                    {{ item.tabN }}
+                  </td>
+                  <td>
+                    {{ item.fio }}
+                  </td>
+                  <td>
+                    {{ item.codOp }}
+                  </td>
+                  <td>
+                    {{ item.colvoOp }}
+                  </td>
+                  <td>
+                    <vue-numeric
+                      v-model.number="item.colvoNew"
+                      separator="space"
+                      output-type="number"
+                      @focus="previousColvoNew = item.colvoNew"
+                      @blur="
+                        item.colvoNew = previousColvoNew
+                        previousColvoNew = null
+                      "
+                      @keyup.enter.native="changeInDressmakerOperation(item)"
+                    />
+                  </td>
+                  <td>
+                    {{ item.colvoOst }}
+                  </td>
+                </tr>
+              </tbody>
+            </template>
+          </v-data-table>
         </div>
+
+        <v-menu
+          v-if="previousColvoNew === null"
+          v-model="dressmakersMenu"
+          :position-x="xDressmakersMenu"
+          :position-y="yDressmakersMenu"
+          absolute
+          offset-y
+        >
+          <v-list>
+            <v-list-item @click="changeInAllDressmakerOperations">
+              <v-list-item-title>
+                Изменить во всех операциях по швее
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
 
         <div class="records-of-work-on-order-col-3">
           <div class="records-of-work-on-order-row">
@@ -451,6 +509,7 @@
                 fab
                 dark
                 small
+                @click="replaceDressmakerToTableOfWorkRecords"
               >
                 <v-icon>mdi-arrow-left</v-icon>
               </v-btn>
@@ -458,6 +517,7 @@
             <div class="records-of-work-on-order-dressmakers-div">
               <v-data-table
                 id="records-of-work-on-order-dressmakers"
+                v-model="selectedDressmakers"
                 height="572"
                 :headers="listOfDressmakersHeaders"
                 fixed-header
@@ -487,17 +547,20 @@
           Закрыть
         </v-btn>
       </div>
+      <loading-dialog ref="loadingDialog" />
     </v-card>
   </v-dialog>
 </template>
 <script>
 import UserNotification from '~/components/information_window/UserNotification'
+import LoadingDialog from '~/components/loading_dialog/LoadingDialog'
 
 export default {
   name: 'RecordsOfWorkOnOrder',
 
   components: {
-    UserNotification
+    UserNotification,
+    LoadingDialog
   },
 
   props: {
@@ -655,6 +718,8 @@ export default {
 
       listOfDressmakersData: [],
 
+      selectedDressmakers: [],
+
       dialog: false,
 
       orderFromRecordsOfWorkByCards: {},
@@ -677,7 +742,15 @@ export default {
 
       selectedSeparationSchemeObj: {},
 
-      officeNote: false
+      officeNote: false,
+
+      // Контекстное меню документов к оплате
+      dressmakersMenu: false,
+      xDressmakersMenu: 0,
+      yDressmakersMenu: 0,
+      currentRowForContextMenu: null,
+
+      previousColvoNew: null
     }
   },
   computed: {
@@ -700,15 +773,88 @@ export default {
       }
     },
 
+    showDressmakersMenu(event, item) {
+      event.preventDefault()
+      this.dressmakersMenu = false
+      this.currentRowForContextMenu = null
+      this.xDressmakersMenu = event.clientX
+      this.yDressmakersMenu = event.clientY
+      this.$nextTick(() => {
+        this.dressmakersMenu = true
+        this.currentRowForContextMenu = item
+      })
+    },
+
+    async changeInDressmakerOperation(item) {
+      this.$refs.loadingDialog.showLoadingDialog('Изменение данных о работе по выбранной операции, подождите...')
+      this.varsOfForm.priznak1 = this.officeNote ? 2 : 10
+      this.varsOfForm.coefficient = this.coefficient
+      this.varsOfForm.obraz = this.example === true ? 1 : 0
+      this.varsOfForm.s1 = this.convertDateToMonthDateYear(this.dateOfOperation)
+      this.varsOfForm.recordOfWork = item
+      this.varsOfForm.orderFromRecordsOfWorkByCards = this.orderFromRecordsOfWorkByCards
+      this.varsOfForm.amountOfChange = item.colvoOp
+      const params = this.createStructureForTechTmkUpdData(this.chosenRecord, this.varsOfForm, this.selectedOrgOperations[0])
+      await this.$api.service.executeStashedFunctionWithReturnedDataSet(params).catch((error) => {
+        alert(error)
+      })
+      this.$refs.loadingDialog.closeLoadingDialog()
+
+      await this.updateRecordsOfWorkOnOrder()
+    },
+
+    async changeInAllDressmakerOperations() {
+      const recordsOfWorkOfCurrentDressmaker = this.dressmakersData.filter(record => record.tabN === this.currentRowForContextMenu.tabN)
+
+      this.$refs.loadingDialog.showLoadingDialog('Изменение данных о работе по выбранной швее, подождите...')
+      for (const recordsOfWorkOfCurrentDressmakerElement of recordsOfWorkOfCurrentDressmaker) {
+        this.varsOfForm.priznak1 = this.officeNote ? 2 : 10 // Должно быть наоборот но правильно работает так, почему
+        this.varsOfForm.coefficient = this.coefficient
+        this.varsOfForm.obraz = this.example === true ? 1 : 0
+        this.varsOfForm.s1 = this.convertDateToMonthDateYear(this.dateOfOperation)
+        this.varsOfForm.recordOfWork = recordsOfWorkOfCurrentDressmakerElement
+        this.varsOfForm.orderFromRecordsOfWorkByCards = this.orderFromRecordsOfWorkByCards
+        this.varsOfForm.amountOfChange = this.amountOfChange + recordsOfWorkOfCurrentDressmakerElement.colvoOp
+        const params = this.createStructureForTechTmkUpdData(this.chosenRecord, this.varsOfForm, this.selectedOrgOperations[0])
+        const response = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params).catch((error) => {
+          console.log(error)
+          console.log(response)
+        })
+      }
+      await this.updateRecordsOfWorkOnOrder()
+      this.$refs.loadingDialog.closeLoadingDialog()
+    },
+
+    async replaceDressmakerToTableOfWorkRecords() { // Вообще не работает
+      if (!this.selectedDressmakers ||
+         this.selectedDressmakers.length === 0) {
+        this.$refs.userNotification.showUserNotification('error', 'Выберите хотя бы одну швею для операции переноса!')
+        return
+      }
+
+      this.$refs.loadingDialog.showLoadingDialog('Перенос в таблицу работ выбранных швей, подождите...')
+      for (const selectedDressmaker of this.selectedDressmakers) {
+        this.varsOfForm.priznak1 = !this.officeNote ? 3 : 11
+        this.varsOfForm.coefficient = this.coefficient
+        this.varsOfForm.obraz = this.example === true ? 1 : 0
+        this.varsOfForm.dressmaker = selectedDressmaker
+        this.varsOfForm.orderFromRecordsOfWorkByCards = this.orderFromRecordsOfWorkByCards
+        this.varsOfForm.amountOfChange = 0
+        const params = this.createStructureForTechTmkUpdData(this.chosenRecord, this.varsOfForm, this.selectedOrgOperations[0])
+        const response = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params).catch((error) => {
+          console.log(error)
+          console.log(response)
+        })
+        console.log(response)
+      }
+      await this.updateRecordsOfWorkOnOrder()
+      this.$refs.loadingDialog.closeLoadingDialog()
+    },
+
     async updateRecordsOfWorkOnOrder(dontShowNotification) {
       await this.initSeparationScheme()
       await this.updateSeparationScheme()
       await this.selectSeparationSchemeOfChosenRecord()
-
-      if (this.orgOperationsData.length > 0) {
-        await this.selectOrgOperationEvent(this.orgOperationsData[0])
-      }
-
       await this.initDataForListOfDressmakersData()
       await this.getListOfDressmakersDataTable()
 
@@ -874,6 +1020,10 @@ export default {
         }
       ]
       this.orgOperationsData = await this.$api.manufacturing.findOrgOperationsBySearchCriterias(criterias)
+
+      if (this.orgOperationsData.length > 0) {
+        await this.selectOrgOperationEvent(this.orgOperationsData[0])
+      }
     },
 
     async initOperationsSumsData(item, priznak) {
@@ -982,11 +1132,12 @@ export default {
     },
 
     async separationSchemeChange() {
+      this.operationsSumsData = []
+      this.dressmakersData = []
+
       this.selectedSeparationSchemeObj = this.separationScheme.find(separationScheme => separationScheme.id === this.chosenSeparationScheme)
       await this.initOrgOperationData(this.selectedSeparationSchemeObj)
       await this.updateOrgOperationsData()
-      this.operationsSumsData = []
-      this.dressmakersData = []
     },
 
     reset() {
@@ -1009,6 +1160,7 @@ export default {
 
       this.listOfDressmakersData = []
       this.dressmakersData = []
+      this.selectedDressmakers = []
 
       this.officeNote = false
     },
@@ -1023,6 +1175,7 @@ export default {
     },
 
     async getListOfDressmakersDataTable() {
+      this.selectedDressmakers = []
       const searchCriterias = this.createCriteriasToGetListOfDressmakers()
       const content = await this.$api.manufacturing.recordingTheWorkOnTheOrder.findBySearchCriteriaForListOfDressmaker(searchCriterias)
 
@@ -1090,7 +1243,17 @@ export default {
       if (content.length > 0) {
         this.dressmakersData.push(...content)
       }
+    },
+
+    selectBackgroundForRowRecordsOfWorkOnOrderDressmakers(item) {
+      if (item.codOp.includes('удаление')) {
+        return 'records-of-work-on-order-dressmakers-row-gray'
+      }
+      if (item.rating % 2 !== 0) {
+        return 'records-of-work-on-order-dressmakers-row-green'
+      }
     }
+
   }
 }
 </script>
@@ -1395,5 +1558,11 @@ export default {
   flex: 0 0 27%;
   max-width: 27%;
   margin-top: 5px
+}
+.records-of-work-on-order-dressmakers-row-gray {
+  background-color: rgb(192,192,192);
+}
+.records-of-work-on-order-dressmakers-row-green {
+  background-color: rgb(239,254,235);
 }
 </style>

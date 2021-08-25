@@ -104,7 +104,7 @@ Vue.mixin({
       return `${parts[2]}-${parts[1]}-${parts[0]}`
     },
     // конвертирование даты из формата ГОД-МЕСЯЦ-ДАТА в формат МЕСЯЦ.ДАТА.ГОД
-    convertDateToMounthDateYear(date) {
+    convertDateToMonthDateYear(date) {
       let parts = date.split('-')
       return `${parts[1]}.${parts[2]}.${parts[0]}`
     },
