@@ -124,80 +124,94 @@
 
         <v-row>
           <v-col cols="12">
-            <vue-excel-editor v-model="data">
-              <vue-excel-column
-                field="number"
-                label="№"
-                type="string"
-                width="50px"
-              />
-              <vue-excel-column
-                field="date"
-                label="Дата"
-                type="date"
-                width="70px"
-              />
-              <vue-excel-column
-                field="name_ntd"
-                label="Наименование НТД"
-                type="string"
-                width="150px"
-              />
-              <vue-excel-column
-                field="net"
-                label="Замечаний нет"
-                type="check10"
-                width="50px"
-              />
-              <vue-excel-column
-                field="vid"
-                label="Вид"
-                type="string"
-                width="80px"
-              />
-              <vue-excel-column
-                field="opis"
-                label="Описание"
-                type="string"
-                width="150px"
-              />
-              <vue-excel-column
-                field="fio_fabr"
-                label="ФИО"
-                type="string"
-                width="120px"
-              />
-              <vue-excel-column
-                field="fio_vina"
-                label="ФИО"
-                type="string"
-                width="70px"
-              />
-              <vue-excel-column
-                field="prichina"
-                label="Причина"
-                type="string"
-                width="70px"
-              />
-              <vue-excel-column
-                field="data_ispr"
-                label="Дата"
-                type="string"
-                width="70px"
-              />
-              <vue-excel-column
-                field="fio_ispr"
-                label="ФИО"
-                type="string"
-                width="120px"
-              />
-              <vue-excel-column
-                field="comments"
-                label="Комментарий"
-                type="string"
-                width="150px"
-              />
-            </vue-excel-editor>
+            <div class="notes-on-ntd-table">
+              <div class="notes-on-ntd-type">
+                <div class="notes-on-ntd-type__item">
+                  Заполняет Фабрика
+                </div>
+
+                <div class="notes-on-ntd-type__item">
+                  Заполняет Офис
+                </div>
+              </div>
+              <div class="notes-on-ntd-discharge">
+                <div class="notes-on-ntd-discharge__item" />
+              </div>
+              <vue-excel-editor v-model="data">
+                <vue-excel-column
+                  field="number"
+                  label="№"
+                  type="string"
+                  width="50px"
+                />
+                <vue-excel-column
+                  field="date"
+                  label="Дата"
+                  type="date"
+                  width="70px"
+                />
+                <vue-excel-column
+                  field="name_ntd"
+                  label="Наименование НТД"
+                  type="string"
+                  width="150px"
+                />
+                <vue-excel-column
+                  field="net"
+                  label="Замечаний нет"
+                  type="check10"
+                  width="50px"
+                />
+                <vue-excel-column
+                  field="vid"
+                  label="Вид"
+                  type="string"
+                  width="80px"
+                />
+                <vue-excel-column
+                  field="opis"
+                  label="Описание"
+                  type="string"
+                  width="150px"
+                />
+                <vue-excel-column
+                  field="fio_fabr"
+                  label="ФИО"
+                  type="string"
+                  width="120px"
+                />
+                <vue-excel-column
+                  field="fio_vina"
+                  label="ФИО"
+                  type="string"
+                  width="70px"
+                />
+                <vue-excel-column
+                  field="prichina"
+                  label="Причина"
+                  type="string"
+                  width="70px"
+                />
+                <vue-excel-column
+                  field="data_ispr"
+                  label="Дата"
+                  type="string"
+                  width="70px"
+                />
+                <vue-excel-column
+                  field="fio_ispr"
+                  label="ФИО"
+                  type="string"
+                  width="120px"
+                />
+                <vue-excel-column
+                  field="comments"
+                  label="Комментарий"
+                  type="string"
+                  width="150px"
+                />
+              </vue-excel-editor>
+            </div>
           </v-col>
         </v-row>
       </v-card-text>
@@ -267,5 +281,22 @@ export default {
 </script>
 
 <style lang="scss">
-
+.notes-on-ntd-type {
+  display: flex;
+  min-width: 1500px;
+  &__item {
+    border-top: 1px solid red;
+    border-left: 1px solid red;
+    padding: 2px 5px;
+    &:first-of-type {
+      flex-basis: 710px;
+    }
+    &:last-of-type {
+      flex: 1;
+    }
+  }
+}
+.notes-on-ntd-table {
+  overflow: auto;
+}
 </style>

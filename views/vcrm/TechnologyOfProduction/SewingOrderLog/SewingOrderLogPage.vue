@@ -1,139 +1,12 @@
 <template>
   <div class="sewing-order-log-page">
-    <div class="sewing-order-log-page-row">
-      <v-tooltip bottom>
-        <template #activator="{ on, attrs }">
-          <div
-            class="mr-1"
-            v-bind="attrs"
-            v-on="on"
-          >
-            <v-btn
-              style="border-radius:50%; width: 40px; height: 40px;"
-              min-width="40px"
-              small
-              color="blue"
-              :disabled="sewingOrderTableSelectedRecords.length === 0 || sewingOrderTableSelectedRecords.length > 1"
-            >
-              <v-icon
-                color="white"
-                @click="openEditModal()"
-              >
-                mdi-pencil
-              </v-icon>
-            </v-btn>
-          </div>
-        </template>
-        <span>Редактирование выбранного заказа на пошив</span>
-      </v-tooltip>
-
-      <v-tooltip bottom>
-        <template #activator="{ on, attrs }">
-          <div
-            class="mr-1"
-            v-bind="attrs"
-            v-on="on"
-          >
-            <v-btn
-              style="border-radius:50%; width: 40px; height: 40px;"
-              min-width="40px"
-              small
-              color="red"
-              :disabled="sewingOrderTableSelectedRecords.length === 0"
-            >
-              <v-icon
-                color="white"
-                @click="deleteRecord"
-              >
-                mdi-delete
-              </v-icon>
-            </v-btn>
-          </div>
-        </template>
-        <span>Удаление выбранных заказов на пошив</span>
-      </v-tooltip>
-
-      <v-tooltip bottom>
-        <template #activator="{ on, attrs }">
-          <v-btn
-            class="mr-1"
-            style="border-radius:50%; width: 40px; height: 40px;"
-            min-width="40px"
-            small
-            color="red"
-            v-bind="attrs"
-            :disabled="sewingOrderTableSelectedRecords.length === 0"
-            @click="openModal('print')"
-            v-on="on"
-          >
-            <v-icon color="white">
-              mdi-printer
-            </v-icon>
-          </v-btn>
-        </template>
-        <span>Открытие формы печати</span>
-      </v-tooltip>
-
-      <v-tooltip bottom>
-        <template #activator="{ on, attrs }">
-          <v-btn
-            class="mr-1"
-            style="border-radius:50%; width: 40px; height: 40px;"
-            min-width="40px"
-            small
-            color="blue"
-            v-bind="attrs"
-            @click="openModal('filter')"
-            v-on="on"
-          >
-            <v-icon color="white">
-              mdi-filter
-            </v-icon>
-          </v-btn>
-        </template>
-        <span>Фильтры для заказов на пошив</span>
-      </v-tooltip>
-
-      <v-tooltip bottom>
-        <template #activator="{ on, attrs }">
-          <v-btn
-            class="mr-1"
-            style="border-radius:50%; width: 40px; height: 40px;"
-            min-width="40px"
-            small
-            color="blue"
-            v-bind="attrs"
-            @click="openModal('search')"
-            v-on="on"
-          >
-            <v-icon color="white">
-              mdi-magnify
-            </v-icon>
-          </v-btn>
-        </template>
-        <span>Поиск в журнале заказов на пошив</span>
-      </v-tooltip>
-
-      <div class="sewing-order-log-page-checkbox mr-4">
-        <v-checkbox
-          v-model="govContract"
-          disabled
-          class="mr-2"
-          label="ГОСКОНТРАКТ"
-        />
-
-        <v-checkbox
-          v-model="noOTK"
-          label="Нет проверки ОТК"
-        />
-      </div>
-
-      <div class="sewing-order-log-page-btn">
-        <v-btn small>
-          Формирование уведомления о приемке для склада
-        </v-btn>
-      </div>
-    </div>
+    <actions-panel
+      :sewing-order-table-selected-records="sewingOrderTableSelectedRecords"
+      :gov-contract.sync="govContract"
+      :no-otk.sync="noOTK"
+      @openModal="openModal"
+      @deleteRecord="deleteRecord"
+    />
 
     <div class="sewing-order-log-page-row">
       <div class="sewing-order-log-page__table">
@@ -517,6 +390,7 @@ import ModalNewOrEditConsolidatedOrder from './modals/NewOrEditСonsolidatedOrde
 import ModalListResources from './modals/ListResources'
 import ModalNotesOnNtd from './modals/NotesOnNTD'
 import ContextMenu from './compose/ContextMenu'
+import ActionsPanel from './compose/ActionsPanel.vue'
 import LoadingDialog from '~/components/loading_dialog/LoadingDialog'
 
 export default {
@@ -544,6 +418,7 @@ export default {
     ModalSearch,
     ModalListResources,
     ModalNewOrEditConsolidatedOrder,
+    ActionsPanel,
     InfiniteLoading
   },
   data() {
@@ -842,8 +717,8 @@ export default {
           if (type === 'cutting') { this.sewingOrderTableSelectedRecords[key].rejim = 2 }
         }
       } else {
-        if (type === 'tailoring') { this.currentRowOfTableForContextMenu.rejim = 1 }
-        if (type === 'cutting') { this.currentRowOfTableForContextMenu.rejim = 2 }
+        if (type === 'tailoring') { this.$refs.menu.currentRowOfTableForContextMenu.rejim = 1 }
+        if (type === 'cutting') { this.$refs.menu.currentRowOfTableForContextMenu.rejim = 2 }
       }
     },
 
