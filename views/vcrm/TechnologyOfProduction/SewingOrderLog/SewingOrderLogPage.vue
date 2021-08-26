@@ -396,6 +396,12 @@
               </v-list-item-title>
             </v-list-item>
 
+            <v-list-item @click="openModal('formationDual')">
+              <v-list-item-title>
+                Формирование спарок
+              </v-list-item-title>
+            </v-list-item>
+
             <!--v-list-item @click="deleteRecord">
               <v-list-item-title>
                 Удалить
@@ -563,6 +569,13 @@
       @close="closeModal('fillingDefectOnOrderForTailoring')"
     />
 
+    <modal-formation-dual
+      v-if="modals.formationDual"
+      :data="currentRowOfTableForContextMenu"
+      :value="modals.formationDual"
+      @close="closeModal('formationDual')"
+    />
+
     <user-notification ref="userNotification" />
     <message ref="message" />
     <loading-dialog ref="loadingDialog" />
@@ -589,6 +602,7 @@ import FillingDefectOnOrderForTailoring from './modals/FillingDefectOnOrderForTa
 import ModalLogosOrder from './modals/LogosOrder'
 import ModalNewOrEditConsolidatedOrder from './modals/NewOrEditСonsolidatedOrder'
 import ModalListResources from './modals/ListResources'
+import ModalFormationDual from './modals/ModalFormationDual'
 import LoadingDialog from '~/components/loading_dialog/LoadingDialog'
 
 export default {
@@ -614,6 +628,7 @@ export default {
     ModalSearch,
     ModalListResources,
     ModalNewOrEditConsolidatedOrder,
+    ModalFormationDual,
     InfiniteLoading
   },
   data() {
@@ -646,7 +661,8 @@ export default {
         fillingDefectOnOrderForTailoring: false,
         search: false,
         consolidatedOrder: false,
-        listResources: false
+        listResources: false,
+        formationDual: false
       },
       sewingOrderTableSelectedRecords: [],
       sewingOrderTableHeaders: [
