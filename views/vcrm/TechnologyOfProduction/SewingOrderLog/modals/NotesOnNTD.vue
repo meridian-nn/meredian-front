@@ -267,6 +267,76 @@ export default {
           data_ispr: '',
           fio_ispr: '',
           comments: ''
+        },
+        {
+          number: '',
+          date: '',
+          name_ntd: '',
+          net: false,
+          vid: '',
+          opis: '',
+          fio_fabr: '',
+          fio_vina: '',
+          prichina: '',
+          data_ispr: '',
+          fio_ispr: '',
+          comments: ''
+        },
+        {
+          number: '',
+          date: '',
+          name_ntd: '',
+          net: false,
+          vid: '',
+          opis: '',
+          fio_fabr: '',
+          fio_vina: '',
+          prichina: '',
+          data_ispr: '',
+          fio_ispr: '',
+          comments: ''
+        },
+        {
+          number: '',
+          date: '',
+          name_ntd: '',
+          net: false,
+          vid: '',
+          opis: '',
+          fio_fabr: '',
+          fio_vina: '',
+          prichina: '',
+          data_ispr: '',
+          fio_ispr: '',
+          comments: ''
+        },
+        {
+          number: '',
+          date: '',
+          name_ntd: '',
+          net: false,
+          vid: '',
+          opis: '',
+          fio_fabr: '',
+          fio_vina: '',
+          prichina: '',
+          data_ispr: '',
+          fio_ispr: '',
+          comments: ''
+        },
+        {
+          number: '',
+          date: '',
+          name_ntd: '',
+          net: false,
+          vid: '',
+          opis: '',
+          fio_fabr: '',
+          fio_vina: '',
+          prichina: '',
+          data_ispr: '',
+          fio_ispr: '',
+          comments: ''
         }
       ]
     }
