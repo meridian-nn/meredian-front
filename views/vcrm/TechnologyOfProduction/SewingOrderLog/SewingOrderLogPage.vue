@@ -395,17 +395,17 @@
                 Заказ на пошив
               </v-list-item-title>
             </v-list-item>
-                
+
             <v-list-item @click="openModal('createOrderForAdditionalWork')">
               <v-list-item-title>
                 Сформировать заказ на доп. работу
               </v-list-item-title>
             </v-list-item>
-            
+
             <v-list-item @click="openModal('formationDual')">
               <v-list-item-title>
-                Hfc
-               </v-list-item-title>
+                Раскладки
+              </v-list-item-title>
             </v-list-item>
 
             <!--v-list-item @click="deleteRecord">
