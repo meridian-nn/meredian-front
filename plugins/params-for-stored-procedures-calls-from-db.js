@@ -315,6 +315,20 @@ Vue.mixin({
       }
     },
 
+    createStructureForFormZkzpsvDopworkProcedure(zkzpsvId) {
+      return {
+        params: this.createParamsForFormZkzpsvDopworkProcedure(zkzpsvId),
+        procName: this.$api.manufacturing.getFormZkzpsvDopworkProcedureName()
+      }
+    },
+
+    createParamsForFormZkzpsvDopworkProcedure(zkzpsvId) {
+      return {
+        zkzpsv_osn: zkzpsvId,
+        descr: this.getCurrentUser.login
+      }
+    },
+
     createStructureForDelZkzpsvProcedure(idOfRecordForDelete) {
       return {
         params: this.createParamsForDelZkzpsvProcedure(idOfRecordForDelete),
