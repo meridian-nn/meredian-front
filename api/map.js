@@ -746,6 +746,10 @@ export const factory = send => ({
           return 'dbo.manufacturing_request_journal_init_data'
         },
 
+        getFormZkzpsvDopworkProcedureName() {
+          return 'dbo.form_zkzpsv_dopwork'
+        },
+
         getDelZkzpsvProcedureName() {
           return 'dbo.del_zkzpsv'
         },

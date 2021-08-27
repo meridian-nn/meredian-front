@@ -807,9 +807,8 @@ export default {
       await this.$api.service.executeStashedFunctionWithReturnedDataSet(params).catch((error) => {
         alert(error)
       })
+      await this.selectOrgOperationEvent(this.selectedOrgOperations[0])
       this.$refs.loadingDialog.closeLoadingDialog()
-
-      await this.updateRecordsOfWorkOnOrder()
     },
 
     async changeInAllDressmakerOperations() {
@@ -830,7 +829,7 @@ export default {
           console.log(response)
         })
       }
-      await this.updateRecordsOfWorkOnOrder()
+      await this.selectOrgOperationEvent(this.selectedOrgOperations[0])
       this.$refs.loadingDialog.closeLoadingDialog()
     },
 

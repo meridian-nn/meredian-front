@@ -395,11 +395,17 @@
                 Заказ на пошив
               </v-list-item-title>
             </v-list-item>
-
+                
+            <v-list-item @click="openModal('createOrderForAdditionalWork')">
+              <v-list-item-title>
+                Сформировать заказ на доп. работу
+              </v-list-item-title>
+            </v-list-item>
+            
             <v-list-item @click="openModal('formationDual')">
               <v-list-item-title>
-                Формирование спарок
-              </v-list-item-title>
+                Hfc
+               </v-list-item-title>
             </v-list-item>
 
             <!--v-list-item @click="deleteRecord">
@@ -513,6 +519,7 @@
       :value="modals.planDate"
       @close="closeModal('planDate')"
     />
+
     <modal-new-or-edit-consolidated-order
       v-if="modals.consolidatedOrder"
       :type-operation="typeOperationConsolidatedOrder"
@@ -522,6 +529,15 @@
       @close="closeModal('consolidatedOrder')"
       @successfully="successFromModal"
     />
+
+    <modal-create-order-for-additional-work
+      v-if="modals.createOrderForAdditionalWork"
+      :zkzpsv="currentRowOfTableForContextMenu"
+      :value="modals.createOrderForAdditionalWork"
+      @close="closeModal('createOrderForAdditionalWork')"
+      @successfully="successfullyCreateOrderForAdditionalWork"
+    />
+
     <modal-size
       v-if="modals.size"
       :data-for-modal="currentRowOfTableForContextMenu"
@@ -601,6 +617,7 @@ import ModalOldOrderCard from './modals/OldOrderCard'
 import FillingDefectOnOrderForTailoring from './modals/FillingDefectOnOrderForTailoring'
 import ModalLogosOrder from './modals/LogosOrder'
 import ModalNewOrEditConsolidatedOrder from './modals/NewOrEditСonsolidatedOrder'
+import ModalCreateOrderForAdditionalWork from './modals/CreateOrderForAdditionalWork'
 import ModalListResources from './modals/ListResources'
 import ModalFormationDual from './modals/ModalFormationDual'
 import LoadingDialog from '~/components/loading_dialog/LoadingDialog'
@@ -629,6 +646,7 @@ export default {
     ModalListResources,
     ModalNewOrEditConsolidatedOrder,
     ModalFormationDual,
+    ModalCreateOrderForAdditionalWork,
     InfiniteLoading
   },
   data() {
@@ -662,7 +680,8 @@ export default {
         search: false,
         consolidatedOrder: false,
         listResources: false,
-        formationDual: false
+        formationDual: false,
+        createOrderForAdditionalWork: false
       },
       sewingOrderTableSelectedRecords: [],
       sewingOrderTableHeaders: [
@@ -1156,6 +1175,11 @@ export default {
       if (this.currentRowOfTableForContextMenu.parent === 0) { errorText = 'Выберите сводный заказ!' }
       if (this.sewingOrderTableSelectedRecords.length === 0) { errorText = 'Сначала выберите записи для коррекции сводного заказа' }
       this.$refs.userNotification.showUserNotification('error', errorText)
+    },
+
+    successfullyCreateOrderForAdditionalWork(additionalWork) {
+      console.log(additionalWork) // Возвращает FINDZ_id1, непонятно что с этим делать и зачем это
+      console.log('create order for additional work')
     }
   }
 }
