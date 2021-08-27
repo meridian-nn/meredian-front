@@ -395,11 +395,17 @@
                 Заказ на пошив
               </v-list-item-title>
             </v-list-item>
-
+                
             <v-list-item @click="openModal('createOrderForAdditionalWork')">
               <v-list-item-title>
                 Сформировать заказ на доп. работу
               </v-list-item-title>
+            </v-list-item>
+            
+            <v-list-item @click="openModal('formationDual')">
+              <v-list-item-title>
+                Hfc
+               </v-list-item-title>
             </v-list-item>
 
             <!--v-list-item @click="deleteRecord">
@@ -547,6 +553,7 @@
 
     <modal-old-order-card
       v-if="modals.oldOrderCard"
+      :data-from-sewing-order-log="currentRowOfTableForContextMenu"
       :value="modals.oldOrderCard"
       @close="closeModal('oldOrderCard')"
     />
@@ -578,6 +585,13 @@
       @close="closeModal('fillingDefectOnOrderForTailoring')"
     />
 
+    <modal-formation-dual
+      v-if="modals.formationDual"
+      :data="currentRowOfTableForContextMenu"
+      :value="modals.formationDual"
+      @close="closeModal('formationDual')"
+    />
+
     <user-notification ref="userNotification" />
     <message ref="message" />
     <loading-dialog ref="loadingDialog" />
@@ -605,6 +619,7 @@ import ModalLogosOrder from './modals/LogosOrder'
 import ModalNewOrEditConsolidatedOrder from './modals/NewOrEditСonsolidatedOrder'
 import ModalCreateOrderForAdditionalWork from './modals/CreateOrderForAdditionalWork'
 import ModalListResources from './modals/ListResources'
+import ModalFormationDual from './modals/ModalFormationDual'
 import LoadingDialog from '~/components/loading_dialog/LoadingDialog'
 
 export default {
@@ -630,6 +645,7 @@ export default {
     ModalSearch,
     ModalListResources,
     ModalNewOrEditConsolidatedOrder,
+    ModalFormationDual,
     ModalCreateOrderForAdditionalWork,
     InfiniteLoading
   },
@@ -664,6 +680,7 @@ export default {
         search: false,
         consolidatedOrder: false,
         listResources: false,
+        formationDual: false,
         createOrderForAdditionalWork: false
       },
       sewingOrderTableSelectedRecords: [],

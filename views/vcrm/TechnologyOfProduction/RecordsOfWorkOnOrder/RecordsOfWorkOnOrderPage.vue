@@ -410,7 +410,16 @@
               hide-default-footer
               no-data-text=""
               class="elevation-1"
-            />
+            >
+              <template #item="{ item }">
+                <tr :class="selectBackgroundForRowOperation(item)">
+                  <td>{{ item.codOp }}</td>
+                  <td>{{ item.colvoOp }}</td>
+                  <td>{{ item.colvoOpMes }}</td>
+                  <td>{{ item.colvoOst }}</td>
+                </tr>
+              </template>
+            </v-data-table>
           </div>
         </div>
 
@@ -1246,10 +1255,19 @@ export default {
 
     selectBackgroundForRowRecordsOfWorkOnOrderDressmakers(item) {
       if (item.codOp.includes('удаление')) {
-        return 'records-of-work-on-order-dressmakers-row-gray'
+        return 'record-of-work-on-order-row-gray'
       }
       if (item.rating % 2 !== 0) {
-        return 'records-of-work-on-order-dressmakers-row-green'
+        return 'record-of-work-on-order-row-green'
+      }
+    },
+
+    selectBackgroundForRowOperation(item) {
+      if (item.codOp.includes('удаление')) {
+        return 'record-of-work-on-order-row-gray'
+      }
+      if (item.colvoOpMes === this.orderFromRecordsOfWorkByCards.colvoTmk) {
+        return 'record-of-work-on-order-row-pink'
       }
     }
 
@@ -1558,10 +1576,13 @@ export default {
   max-width: 27%;
   margin-top: 5px
 }
-.records-of-work-on-order-dressmakers-row-gray {
+.record-of-work-on-order-row-gray {
   background-color: rgb(192,192,192);
 }
-.records-of-work-on-order-dressmakers-row-green {
+.record-of-work-on-order-row-green {
   background-color: rgb(239,254,235);
+}
+.record-of-work-on-order-row-pink {
+  background-color: rgb(239,192,199);
 }
 </style>
