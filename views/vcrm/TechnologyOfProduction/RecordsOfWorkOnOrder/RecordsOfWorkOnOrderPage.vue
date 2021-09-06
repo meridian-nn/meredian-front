@@ -426,12 +426,13 @@
         <div class="records-of-work-on-order-dressmakers-and-operations-col-5">
           <v-data-table
             id="records-of-work-on-order-dressmakers-and-operations"
+            v-model="selectedRecordsOfWorkOnOrder"
             height="620"
             :headers="dressmakersHeaders"
             fixed-header
             :items="dressmakersData"
-            :show-select="false"
-            :single-select="false"
+            :show-select="true"
+            :single-select="true"
             disable-pagination
             hide-default-footer
             no-data-text=""
@@ -445,7 +446,16 @@
                   :value="item"
                   :class="selectBackgroundForRowRecordsOfWorkOnOrderDressmakers(item)"
                   @contextmenu="showDressmakersMenu($event, item)"
+                  @click="selectRecordOfWorkEvent(item)"
                 >
+                  <td>
+                    <v-checkbox
+                      v-model="selectedRecordsOfWorkOnOrder"
+                      style="margin: 0; padding: 0;"
+                      :value="item"
+                      hide-details
+                    />
+                  </td>
                   <td>
                     {{ item.tabN }}
                   </td>
@@ -759,7 +769,8 @@ export default {
       yDressmakersMenu: 0,
       currentRowForContextMenu: null,
 
-      previousColvoNew: null
+      previousColvoNew: null,
+      selectedRecordsOfWorkOnOrder: []
     }
   },
   computed: {
@@ -855,7 +866,8 @@ export default {
         })
         console.log(response)
       }
-      await this.updateRecordsOfWorkOnOrder()
+      this.selectedDressmakers = []
+      await this.selectOrgOperationEvent(this.selectedOrgOperations[0])
       this.$refs.loadingDialog.closeLoadingDialog()
     },
 
@@ -968,8 +980,30 @@ export default {
       this.$refs.userNotification.showUserNotification('warning', 'Карточки удалены!')
     },
 
-    deleteFio() {
-      this.$refs.userNotification.showUserNotification('warning', 'Функционал в разработке!')
+    async deleteFio() {
+      if (!this.selectedRecordsOfWorkOnOrder ||
+          this.selectedRecordsOfWorkOnOrder.length === 0) {
+        return
+      }
+
+      const recordsOfWorkOfSelectedDressmaker = this.dressmakersData.filter(record => record.tabN === this.selectedRecordsOfWorkOnOrder[0].tabN)
+      this.$refs.loadingDialog.showLoadingDialog('Удаление записей о работе, подождите...')
+      for (const record of recordsOfWorkOfSelectedDressmaker) {
+        this.varsOfForm.priznak1 = !this.officeNote ? 4 : 12
+        this.varsOfForm.coefficient = this.coefficient
+        this.varsOfForm.obraz = this.example === true ? 1 : 0
+        this.varsOfForm.record = record
+        this.varsOfForm.orderFromRecordsOfWorkByCards = this.orderFromRecordsOfWorkByCards
+        this.varsOfForm.amountOfChange = 0
+        const params = this.createStructureForTechTmkUpdData(this.chosenRecord, this.varsOfForm, this.selectedOrgOperations[0])
+        const response = await this.$api.service.executeStashedFunctionWithReturnedDataSet(params).catch((error) => {
+          console.log(error)
+          console.log(response)
+        })
+        console.log(response)
+      }
+      await this.selectOrgOperationEvent(this.selectedOrgOperations[0])
+      this.$refs.loadingDialog.closeLoadingDialog()
     },
 
     async openWithObject(order, varsOfForm, chosenRecord) {
@@ -1236,9 +1270,11 @@ export default {
 
       const searchCriterias = this.createCriteriasToGetDressMakers()
 
+      this.selectedRecordsOfWorkOnOrder = []
       const content = await this.$api.manufacturing.recordingTheWorkOnTheOrder.findBySearchCriteriaForGetDressmaker(searchCriterias)
       if (content.length > 0) {
         this.dressmakersData.push(...content)
+        this.selectedRecordsOfWorkOnOrder = [this.dressmakersData[0]]
       }
     },
 
@@ -1247,9 +1283,11 @@ export default {
 
       const searchCriterias = this.createCriteriasToGetDressMakers()
 
+      this.selectedRecordsOfWorkOnOrder = []
       const content = await this.$api.manufacturing.recordingTheWorkOnTheOrder.findBySearchCriteriaForGetDressmakerFromSzTable(searchCriterias)
       if (content.length > 0) {
         this.dressmakersData.push(...content)
+        this.selectedRecordsOfWorkOnOrder = [this.dressmakersData[0]]
       }
     },
 
@@ -1269,6 +1307,10 @@ export default {
       if (item.colvoOpMes === this.orderFromRecordsOfWorkByCards.colvoTmk) {
         return 'record-of-work-on-order-row-pink'
       }
+    },
+
+    selectRecordOfWorkEvent(item) {
+      this.selectedRecordsOfWorkOnOrder = [item]
     }
 
   }

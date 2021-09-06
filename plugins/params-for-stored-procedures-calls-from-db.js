@@ -94,6 +94,8 @@ Vue.mixin({
           params = this.createParamsForTechTmkUpdDataForChangeRecordsOfWorkOfDressmakers(chosenRecord, variablesOfForm, selectedOrgOperation)
         } else if (variablesOfForm.priznak1 === 3 || variablesOfForm.priznak1 === 11) {
           params = this.createParamsForTechTmkUpdDataForReplaceDressmaker(chosenRecord, variablesOfForm, selectedOrgOperation)
+        } else if (variablesOfForm.priznak1 === 4 || variablesOfForm.priznak1 === 12) {
+          params = this.createParamsForTechTmkUpdDataForDeleteRecordsOfWorkOfDressmaker(chosenRecord, variablesOfForm, selectedOrgOperation)
         }
       } else {
         params = this.createParamsForTechTmkUpdData(chosenRecord, variablesOfForm, selectedOrgOperation)
@@ -209,6 +211,42 @@ Vue.mixin({
         ceh_id1: selectedOrgOperation ? selectedOrgOperation.cehId : 0,
         data_work1: '01.01.1900',
         cod_op1: '',
+        colvo_zkzpsv1: chosenRecord.colvoMc,
+        pr_upak1: prUpak,
+        obraz1: obraz,
+        coeff_part1: coeffPart,
+        mc_zkzpsv1: chosenRecord.mcId,
+        zar_sch_cards_id1: chosenRecord.zarSchCardsId ? chosenRecord.zarSchCardsId : 0,
+        scheme_cards_id1: chosenRecord.schemeCardsId ? chosenRecord.schemeCardsId : 0,
+        scheme_id1: chosenRecord.schemeId ? chosenRecord.schemeId : 0,
+        pr_otladka1: 0
+      }
+    },
+
+    createParamsForTechTmkUpdDataForDeleteRecordsOfWorkOfDressmaker(chosenRecord, variablesOfForm, selectedOrgOperation) {
+      const prUpak = selectedOrgOperation && selectedOrgOperation.prUpak ? selectedOrgOperation.prUpak : 0
+      const obraz = variablesOfForm.obraz ? variablesOfForm.obraz : 0
+      const coeffPart = variablesOfForm.coefficient ? variablesOfForm.coefficient : 0
+
+      return {
+        priznak1: variablesOfForm.priznak1 ? variablesOfForm.priznak1 : '4',
+        proizv_id1: variablesOfForm.proizvAnfb,
+        firma_id1: variablesOfForm.orgAnfb,
+        mes1: variablesOfForm.mesAnfb,
+        god1: variablesOfForm.godAnfb,
+        zkzpsv_id1: chosenRecord.zkzpsvId,
+        posled_code1: chosenRecord.posledCode,
+        tmk_id1: variablesOfForm.orderFromRecordsOfWorkByCards ? variablesOfForm.orderFromRecordsOfWorkByCards.tmkId1 : 0,
+        tab_n1: variablesOfForm.record ? Number(variablesOfForm.dressmaker.tabN) : 0,
+        colvo1: variablesOfForm.amountOfChange ? variablesOfForm.amountOfChange : 0,
+        org_oper_id1: selectedOrgOperation ? selectedOrgOperation.id : 0,
+        simple_oper_id1: variablesOfForm.record ? variablesOfForm.record.simpleOperId : 0,
+        virab_id1: variablesOfForm.record ? variablesOfForm.record.virabId : 0,
+        opvir_id1: variablesOfForm.record ? variablesOfForm.record.opvirId : 0,
+        schr_id1: variablesOfForm.record ? variablesOfForm.record.schrId : 0,
+        ceh_id1: selectedOrgOperation ? selectedOrgOperation.cehId : 0,
+        data_work1: '01.01.1900',
+        cod_op1: variablesOfForm.record ? variablesOfForm.record.codOp : 0,
         colvo_zkzpsv1: chosenRecord.colvoMc,
         pr_upak1: prUpak,
         obraz1: obraz,
