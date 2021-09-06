@@ -408,6 +408,12 @@
               </v-list-item-title>
             </v-list-item>
 
+            <v-list-item @click="openModal('notesOnNtd')">
+              <v-list-item-title>
+                Замечания по НТД
+              </v-list-item-title>
+            </v-list-item>
+
             <!--v-list-item @click="deleteRecord">
               <v-list-item-title>
                 Удалить
@@ -592,6 +598,13 @@
       @close="closeModal('formationDual')"
     />
 
+    <modal-notes-on-ntd
+      v-if="modals.notesOnNtd"
+      :data="currentRowOfTableForContextMenu"
+      :value="modals.notesOnNtd"
+      @close="closeModal('notesOnNtd')"
+    />
+
     <user-notification ref="userNotification" />
     <message ref="message" />
     <loading-dialog ref="loadingDialog" />
@@ -620,6 +633,7 @@ import ModalNewOrEditConsolidatedOrder from './modals/NewOrEditСonsolidatedOrde
 import ModalCreateOrderForAdditionalWork from './modals/CreateOrderForAdditionalWork'
 import ModalListResources from './modals/ListResources'
 import ModalFormationDual from './modals/ModalFormationDual'
+import ModalNotesOnNtd from './modals/NotesOnNTD'
 import LoadingDialog from '~/components/loading_dialog/LoadingDialog'
 
 export default {
@@ -647,6 +661,7 @@ export default {
     ModalNewOrEditConsolidatedOrder,
     ModalFormationDual,
     ModalCreateOrderForAdditionalWork,
+    ModalNotesOnNtd,
     InfiniteLoading
   },
   data() {
@@ -681,7 +696,8 @@ export default {
         consolidatedOrder: false,
         listResources: false,
         formationDual: false,
-        createOrderForAdditionalWork: false
+        createOrderForAdditionalWork: false,
+        notesOnNtd: false
       },
       sewingOrderTableSelectedRecords: [],
       sewingOrderTableHeaders: [
