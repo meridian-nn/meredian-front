@@ -973,8 +973,8 @@ export default {
     const gtinRequest = this.fullDesserts.map((item) => {
       return { code: item.code, ...item.gtinRequest }
     })
-
-    this.desserts = gtinRequest.map(item => omit(item, ['id', 'publicationDate', 'trademark', 'manufacturerCode', 'country', 'apiExtension']))
+    this.desserts = gtinRequest.map(item => omit(item, ['id', 'categoryId', 'quantity', 'publicationDate', 'trademark', 'tnved', 'manufacturerCode', 'measure', 'gcpclBrick', 'inn', 'country', 'apiExtension', 'rawMaterial', 'companyName']))
+    // this.desserts = gtinRequest.map(item => omit(item, ['id', 'publicationDate', 'trademark', 'manufacturerCode', 'country', 'apiExtension']))
   },
 
   computed: {
@@ -1135,7 +1135,7 @@ export default {
 
     editItem(item) {
       this.editedIndex = this.desserts.indexOf(item)
-      this.editedItem = Object.assign({}, item)
+      this.editedItem = Object.assign({}, this.fullDesserts[this.editedIndex].gtinRequest)
       this.dialog = true
     },
 
