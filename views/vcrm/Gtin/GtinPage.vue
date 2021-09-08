@@ -287,238 +287,271 @@
       </template>
 
       <v-card>
-        <v-card-title>
-          <span class="headline">{{ title }}</span>
-        </v-card-title>
+        <v-form
+          ref="form"
+          lazy-validation
+        >
+          <v-card-title>
+            <span class="headline">{{ title }}</span>
+          </v-card-title>
 
-        <v-card-text>
-          <v-container>
-            <v-row>
-              <v-col cols="12">
-                <v-tabs v-model="activeTab">
-                  <v-tab>Одежда</v-tab>
-                  <v-tab>Обувь</v-tab>
-                </v-tabs>
-              </v-col>
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+                  <v-tabs v-model="activeTab">
+                    <v-tab>Одежда</v-tab>
+                    <v-tab>Обувь</v-tab>
+                  </v-tabs>
+                </v-col>
 
-              <v-col cols="8">
-                <v-text-field
-                  v-model="editedItem.prodName"
-                  label="Название"
-                />
-              </v-col>
+                <v-col cols="8">
+                  <v-text-field
+                    v-model="editedItem.prodName"
+                    label="Название"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-menu
-                  ref="menu"
-                  v-model="menu"
-                  :close-on-content-click="false"
-                  :return-value.sync="date"
-                  transition="scale-transition"
-                  offset-y
-                  min-width="auto"
-                >
-                  <template #activator="{ on, attrs }">
-                    <v-text-field
-                      v-model="date"
-                      label="Picker in menu"
-                      prepend-icon="mdi-calendar"
-                      readonly
-                      v-bind="attrs"
-                      v-on="on"
-                    />
-                  </template>
-                  <v-date-picker
-                    v-model="date"
-                    no-title
-                    scrollable
+                <v-col cols="4">
+                  <v-menu
+                    ref="menu"
+                    v-model="menu"
+                    :close-on-content-click="false"
+                    :return-value.sync="date"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
                   >
-                    <v-spacer />
-                    <v-btn
-                      text
-                      color="primary"
-                      @click="menu = false"
+                    <template #activator="{ on, attrs }">
+                      <v-text-field
+                        v-model="date"
+                        label="Picker in menu"
+                        prepend-icon="mdi-calendar"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                      />
+                    </template>
+                    <v-date-picker
+                      v-model="date"
+                      no-title
+                      scrollable
                     >
-                      Cancel
-                    </v-btn>
-                    <v-btn
-                      text
-                      color="primary"
-                      @click="$refs.menu.save(date)"
-                    >
-                      OK
-                    </v-btn>
-                  </v-date-picker>
-                </v-menu>
-              </v-col>
+                      <v-spacer />
+                      <v-btn
+                        text
+                        color="primary"
+                        @click="menu = false"
+                      >
+                        Cancel
+                      </v-btn>
+                      <v-btn
+                        text
+                        color="primary"
+                        @click="$refs.menu.save(date)"
+                      >
+                        OK
+                      </v-btn>
+                    </v-date-picker>
+                  </v-menu>
+                </v-col>
 
-              <v-col cols="4">
-                <v-text-field
-                  v-model="editedItem.categoryId"
-                  label="id категории"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="editedItem.categoryId"
+                    label="id категории"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-text-field
-                  v-model="editedItem.brand"
-                  label="Брэнд"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="editedItem.brand"
+                    label="Брэнд"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-autocomplete
-                  v-model="editedItem.packType"
-                  :items="packTypeList"
-                  label="Тип упаковки"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-autocomplete
+                    v-model="editedItem.packType"
+                    :items="packTypeList"
+                    label="Тип упаковки"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-autocomplete
-                  v-model="editedItem.packMaterial"
-                  :items="materialList"
-                  label="Материал упаковки"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-autocomplete
+                    v-model="editedItem.packMaterial"
+                    :items="materialList"
+                    label="Материал упаковки"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-text-field
-                  v-model="editedItem.quantity"
-                  type="number"
-                  label="Количество"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="editedItem.quantity"
+                    type="number"
+                    label="Количество"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-text-field
-                  v-model="editedItem.companyName"
-                  label="Название компании"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="editedItem.companyName"
+                    label="Название компании"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-text-field
-                  v-model="editedItem.inn"
-                  label="Инн"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="editedItem.inn"
+                    label="Инн"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-text-field
-                  v-model="editedItem.tnved"
-                  label="Tnved"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="editedItem.tnved"
+                    label="Tnved"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-text-field
-                  v-model="editedItem.measure"
-                  label="Название количества"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="editedItem.measure"
+                    label="Название количества"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-text-field
-                  v-model="editedItem.gcpclBrick"
-                  label="Категория по классификации GS1 GPC"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="editedItem.gcpclBrick"
+                    label="Категория по классификации GS1 GPC"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-autocomplete
-                  v-model="editedItem.kind"
-                  :items="typesList"
-                  label="Тип"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-autocomplete
+                    v-model="editedItem.kind"
+                    :items="typesList"
+                    label="Тип"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-text-field
-                  v-model="editedItem.sizeName"
-                  label="Название размера"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="editedItem.sizeName"
+                    label="Название размера"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-text-field
-                  v-model="editedItem.sizeValue"
-                  label="Размер значения"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="editedItem.sizeValue"
+                    label="Размер значения"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-autocomplete
-                  v-model="editedItem.color"
-                  :items="colorList"
-                  label="Цвет"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-autocomplete
+                    v-model="editedItem.color"
+                    :items="colorList"
+                    label="Цвет"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-text-field
-                  v-model="editedItem.model"
-                  label="Модель"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="editedItem.model"
+                    label="Модель"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-select
-                  v-model="editedItem.gender"
-                  :items="genderList"
-                  label="Пол"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-select
+                    v-model="editedItem.gender"
+                    :items="genderList"
+                    label="Пол"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-text-field
-                  v-model="editedItem.standartNumber"
-                  label="Технический стандарт"
-                />
-              </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="editedItem.standartNumber"
+                    label="Технический стандарт"
+                    :rules="fieldRules"
+                  />
+                </v-col>
 
-              <v-col cols="4">
-                <v-text-field
-                  v-model="editedItem.rawMaterial"
-                  label="Материал"
-                />
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-card-text>
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="editedItem.rawMaterial"
+                    label="Материал"
+                    :rules="fieldRules"
+                  />
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
 
-        <v-card-actions>
-          <v-spacer />
+          <v-card-actions>
+            <v-spacer />
 
-          <v-btn
-            color="blue darken-1"
-            text
-            @click="close"
-          >
-            Отмена
-          </v-btn>
+            <v-btn
+              color="blue darken-1"
+              text
+              @click="close"
+            >
+              Отмена
+            </v-btn>
 
-          <v-btn
-            color="blue darken-1"
-            text
-            :loading="loading"
-            @click="save"
-          >
-            Сохранить
-          </v-btn>
-        </v-card-actions>
+            <v-btn
+              color="blue darken-1"
+              text
+              :loading="loading"
+              @click="save"
+            >
+              Сохранить
+            </v-btn>
+          </v-card-actions>
+        </v-form>
       </v-card>
     </v-dialog>
+    <user-notification ref="userNotification" />
   </v-container>
 </template>
 
 <script>
+import UserNotification from '@/components/information_window/UserNotification'
 import omit from 'lodash/omit'
 export default {
   name: 'GtinPage',
 
+  components: {
+    UserNotification
+  },
+
   data() {
     return {
+      fieldRules: [
+        v => !!v || 'Поле не заполнено'
+      ],
       activeTab: 0,
       date: new Date().toISOString().substr(0, 10),
       loading: false,
@@ -890,7 +923,7 @@ export default {
         kind: '',
         gcpclBrick: '',
         measure: '',
-        inn: '5259003336 (Меридиан)',
+        inn: '5259003336',
         model: '',
         gender: '',
         standartNumber: '',
@@ -918,7 +951,7 @@ export default {
         kind: '',
         gcpclBrick: '',
         measure: '',
-        inn: '5259003336 (Меридиан)',
+        inn: '5259003336',
         model: '',
         gender: '',
         standartNumber: '',
@@ -932,7 +965,6 @@ export default {
       }
     }
   },
-
   async fetch() {
     const { content } = await this.$api.code.gtinCodeList()
 
@@ -942,7 +974,7 @@ export default {
       return { code: item.code, ...item.gtinRequest }
     })
 
-    this.desserts = gtinRequest.map(item => omit(item, ['id', 'categoryId', 'quantity', 'publicationDate', 'trademark', 'tnved', 'manufacturerCode', 'measure', 'gcpclBrick', 'inn', 'country', 'apiExtension', 'rawMaterial', 'companyName']))
+    this.desserts = gtinRequest.map(item => omit(item, ['id', 'publicationDate', 'trademark', 'manufacturerCode', 'country', 'apiExtension']))
   },
 
   computed: {
@@ -1125,6 +1157,7 @@ export default {
     },
 
     close() {
+      this.$refs.form.resetValidation()
       this.dialog = false
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem)
@@ -1141,6 +1174,11 @@ export default {
     },
 
     async save() {
+      if (!this.$refs.form.validate()) {
+        this.$refs.userNotification.showUserNotification('error', 'Не все поля заполнены!')
+        return
+      }
+
       this.loading = true
 
       try {
@@ -1158,6 +1196,7 @@ export default {
       } finally {
         this.loading = false
       }
+      this.$refs.form.resetValidation()
     },
 
     async addMarkCode() {
