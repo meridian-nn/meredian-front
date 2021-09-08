@@ -229,7 +229,7 @@ export default {
         kind: '',
         gcpclBrick: '',
         measure: '',
-        inn: '5259003336 (Меридиан)',
+        inn: '5259003336',
         model: '',
         gender: '',
         standartNumber: '',
